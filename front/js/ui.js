@@ -792,13 +792,7 @@ class UIManager {
                     </div>
                     <div class="folder-info flex items-center justify-center space-x-2 mb-4">
                         <i class="fa fa-calendar text-xs text-gray-400"></i>
-                        <span class="text-xs text-gray-400">创建于 ${(() => {
-                            const date = new Date(folder.created_at);
-                            const year = date.getFullYear();
-                            const month = String(date.getMonth() + 1).padStart(2, '0');
-                            const day = String(date.getDate()).padStart(2, '0');
-                            return `${year}-${month}-${day}`;
-                        })()}</span>
+                        <span class="text-xs text-gray-400">创建于 ${this.formatDate(folder.created_at)}</span>
                     </div>
                 </div>
                 <div class="flex items-center justify-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-2 w-full">
@@ -846,13 +840,7 @@ class UIManager {
                 <!-- 中间：创建时间 -->
                 <div class="folder-info flex items-center justify-center space-x-2 mb-4">
                     <i class="fa fa-calendar text-xs text-gray-400"></i>
-                    <span class="text-xs text-gray-400">创建于 ${(() => {
-                        const date = new Date(folder.created_at);
-                        const year = date.getFullYear();
-                        const month = String(date.getMonth() + 1).padStart(2, '0');
-                        const day = String(date.getDate()).padStart(2, '0');
-                        return `${year}-${month}-${day}`;
-                    })()}</span>
+                    <span class="text-xs text-gray-400">创建于 ${this.formatDate(folder.created_at)}</span>
                 </div>
                 
                 <!-- 底部：操作按钮区域 -->
@@ -1824,6 +1812,15 @@ class UIManager {
         }
         
         dropAreaFileTypes.textContent = `支持的格式: ${supportedFormats}`;
+    }
+
+    // 格式化日期为 yyyy-mm-dd 格式
+    formatDate(dateString) {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
     // 隐藏上传区域
