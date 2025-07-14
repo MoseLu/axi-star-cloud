@@ -60,12 +60,34 @@ func GetUploadDir() string {
 		return "../uploads"
 	}
 
+	log.Printf("当前工作目录: %s", currentDir)
+
+	// 在云端服务器上，优先使用绝对路径
+	// 尝试多个可能的绝对路径
+	absolutePaths := []string{
+		"/www/wwwroot/axi-star-cloud/uploads",
+		"/www/wwwroot/redamancy.com.cn/uploads",
+		"/www/wwwroot/axi-star-cloud/front/uploads",
+		"/www/wwwroot/redamancy.com.cn/front/uploads",
+	}
+
+	for _, absPath := range absolutePaths {
+		if _, err := os.Stat(absPath); err == nil {
+			log.Printf("找到绝对路径: %s", absPath)
+			return absPath
+		}
+	}
+
+	// 如果绝对路径都找不到，尝试相对路径
 	// 检查是否在backend目录中
 	if strings.HasSuffix(currentDir, "backend") {
-		return filepath.Join(currentDir, "../uploads")
+		relativePath := filepath.Join(currentDir, "../uploads")
+		log.Printf("使用相对路径: %s", relativePath)
+		return relativePath
 	}
 
 	// 如果在项目根目录，直接使用相对路径
+	log.Printf("使用默认相对路径: uploads")
 	return "uploads"
 }
 

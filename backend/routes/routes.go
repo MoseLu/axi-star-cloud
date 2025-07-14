@@ -124,13 +124,18 @@ func (r *Router) registerStaticRoutes() {
 	}
 
 	uploadsPaths := []string{
+		// 优先使用绝对路径（云端服务器）
+		"/www/wwwroot/axi-star-cloud/uploads",
+		"/www/wwwroot/redamancy.com.cn/uploads",
+		"/www/wwwroot/axi-star-cloud/front/uploads",
+		"/www/wwwroot/redamancy.com.cn/front/uploads",
+		// 相对路径（本地开发）
 		"../uploads",
 		"uploads",
 		"./uploads",
 		"../front/uploads",
 		"front/uploads",
 		"./front/uploads",
-		"/www/wwwroot/axi-star-cloud/uploads", // 添加绝对路径
 	}
 
 	// 设置静态文件路由
