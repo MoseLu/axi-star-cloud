@@ -93,17 +93,40 @@ jobs:
           # 启动新服务
           echo "启动新服务..."
           mkdir -p logs
+          
+          # 先尝试直接运行看是否有错误
+          echo "测试程序启动..."
+          timeout 10s ./star-cloud > logs/test.log 2>&1 &
+          test_pid=$!
+          sleep 3
+          
+          # 检查测试进程是否还在运行
+          if kill -0 $test_pid 2>/dev/null; then
+            echo "程序启动测试成功，停止测试进程"
+            kill $test_pid
+            sleep 2
+          else
+            echo "❌ 程序启动测试失败"
+            echo "查看测试日志:"
+            cat logs/test.log
+            exit 1
+          fi
+          
+          # 正式启动服务
+          echo "正式启动服务..."
           nohup ./star-cloud > logs/app.log 2>&1 &
           echo $! > pid.txt
           
           echo "等待服务启动..."
-          sleep 10
+          sleep 15
           
           # 检查进程是否运行
           if ! pgrep -f "star-cloud" > /dev/null; then
             echo "❌ 服务启动失败"
-            echo "查看日志文件:"
-            tail -20 logs/app.log || echo "日志文件不存在"
+            echo "查看服务日志:"
+            tail -50 logs/app.log || echo "日志文件不存在"
+            echo "查看进程状态:"
+            ps aux | grep star-cloud || echo "没有找到相关进程"
             exit 1
           fi
           
@@ -117,13 +140,15 @@ jobs:
               exit 0
             else
               echo "健康检查失败，等待重试..."
-              sleep 3
+              sleep 5
             fi
           done
           
           echo "❌ 部署失败，服务无法正常响应"
           echo "查看服务日志:"
-          tail -20 logs/app.log || echo "日志文件不存在"
+          tail -50 logs/app.log || echo "日志文件不存在"
+          echo "查看进程状态:"
+          ps aux | grep star-cloud || echo "没有找到相关进程"
           
           # 回滚到备份版本
           echo "尝试回滚到备份版本..."
@@ -134,7 +159,7 @@ jobs:
             chmod +x star-cloud
             nohup ./star-cloud > logs/app.log 2>&1 &
             echo $! > pid.txt
-            sleep 5
+            sleep 10
             if curl -f http://localhost:8080/health > /dev/null 2>&1; then
               echo "✅ 回滚成功，服务已恢复"
             else
