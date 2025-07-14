@@ -2191,22 +2191,57 @@ class UIManager {
         // 验证文件类型
         const allowedTypes = [
             // 图片
-            'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp',
+            'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/webp',
             // 视频
-            'video/mp4', 'video/avi', 'video/mov', 'video/mkv',
+            'video/mp4', 'video/avi', 'video/mov', 'video/mkv', 'video/webm', 'video/wmv', 'video/flv',
             // 音频
-            'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/flac',
+            'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/wma',
             // 文档
             'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            'text/plain', 'text/markdown'
+            'text/plain', 'text/markdown', 'text/x-markdown', 'application/x-markdown'
         ];
 
         const invalidFiles = [];
         for (let i = 0; i < files.length; i++) {
-            if (!allowedTypes.includes(files[i].type)) {
-                invalidFiles.push(files[i].name);
+            const file = files[i];
+            const fileName = file.name.toLowerCase();
+            
+            // 检查文件类型
+            const isValidType = allowedTypes.includes(file.type) || 
+                               fileName.endsWith('.md') || 
+                               fileName.endsWith('.markdown') ||
+                               fileName.endsWith('.txt') ||
+                               fileName.endsWith('.pdf') ||
+                               fileName.endsWith('.doc') ||
+                               fileName.endsWith('.docx') ||
+                               fileName.endsWith('.xls') ||
+                               fileName.endsWith('.xlsx') ||
+                               fileName.endsWith('.ppt') ||
+                               fileName.endsWith('.pptx') ||
+                               fileName.endsWith('.jpg') ||
+                               fileName.endsWith('.jpeg') ||
+                               fileName.endsWith('.png') ||
+                               fileName.endsWith('.gif') ||
+                               fileName.endsWith('.bmp') ||
+                               fileName.endsWith('.webp') ||
+                               fileName.endsWith('.mp4') ||
+                               fileName.endsWith('.avi') ||
+                               fileName.endsWith('.mov') ||
+                               fileName.endsWith('.mkv') ||
+                               fileName.endsWith('.webm') ||
+                               fileName.endsWith('.wmv') ||
+                               fileName.endsWith('.flv') ||
+                               fileName.endsWith('.mp3') ||
+                               fileName.endsWith('.wav') ||
+                               fileName.endsWith('.ogg') ||
+                               fileName.endsWith('.flac') ||
+                               fileName.endsWith('.aac') ||
+                               fileName.endsWith('.wma');
+            
+            if (!isValidType) {
+                invalidFiles.push(file.name);
             }
         }
 

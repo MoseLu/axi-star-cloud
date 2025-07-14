@@ -1,170 +1,314 @@
-# 宝塔面板Go项目部署指南
+# 星际云盘 - Go项目部署指南
 
-## 🚀 快速部署步骤
+## 📋 部署前准备
 
-### 1. 安装Go环境
+### 1. 宝塔面板环境要求
+- 宝塔面板 7.0 或更高版本
+- 已安装 Nginx
+- 已安装 Go 环境（推荐 Go 1.23.4+）
 
-1. **登录宝塔面板**
-2. **进入"软件商店"**
-3. **搜索"Go"并安装**
-4. **等待安装完成**
+### 2. 安装Go环境
+在宝塔面板中：
+1. 进入 **软件商店**
+2. 搜索 **Go**
+3. 点击安装
+4. 等待安装完成
 
-### 2. 创建网站
+## 🚀 快速部署
 
-1. **进入"网站" → "添加站点"**
-2. **填写信息**：
-   - 域名：`your-domain.com`（替换为您的域名）
-   - PHP版本：纯静态
-   - 点击"提交"
+### 方法一：使用部署脚本（推荐）
 
-### 3. 运行一键部署脚本
+1. **创建网站**
+   - 在宝塔面板中创建网站
+   - 域名：你的域名
+   - 根目录：`/www/wwwroot/axi-star-cloud`
 
-在宝塔面板终端中执行：
+2. **下载项目代码**
+   ```bash
+   cd /www/wwwroot/axi-star-cloud
+   git clone https://github.com/MoseLu/axi-star-cloud.git .
+   ```
 
-```bash
-# 下载部署脚本
-wget https://raw.githubusercontent.com/MoseLu/axi-star-cloud/main/bt-go-deploy.sh
+3. **运行部署脚本**
+   ```bash
+   chmod +x bt-go-deploy.sh
+   ./bt-go-deploy.sh
+   ```
 
-# 给脚本执行权限
-chmod +x bt-go-deploy.sh
+4. **启动服务**
+   ```bash
+   ./start.sh
+   ```
 
-# 运行部署脚本
-./bt-go-deploy.sh
+### 方法二：手动部署
+
+1. **编译Go程序**
+   ```bash
+   cd /www/wwwroot/axi-star-cloud/backend
+   go mod download
+   go build -o main main.go
+   ```
+
+2. **修复权限**
+   ```bash
+   chmod +x main
+   chmod -R 755 ../front/uploads
+   chown -R www:www ../front/uploads
+   ```
+
+3. **启动服务**
+   ```bash
+   nohup ./main > ../logs/app.log 2>&1 &
+   ```
+
+## ⚙️ Nginx配置
+
+### 1. 配置反向代理
+
+在宝塔面板中：
+1. 进入 **网站** → 你的网站 → **设置**
+2. 点击 **反向代理**
+3. 添加反向代理：
+   - **代理名称**：`api`
+   - **目标URL**：`http://127.0.0.1:8080`
+   - **发送域名**：`$host`
+
+### 2. 配置静态文件
+
+在 **配置文件** 中添加：
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+    
+    # 静态文件
+    location /static/ {
+        alias /www/wwwroot/axi-star-cloud/front/;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+    
+    # 上传文件
+    location /uploads/ {
+        alias /www/wwwroot/axi-star-cloud/front/uploads/;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+    
+    # API代理
+    location /api/ {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    # 主页面
+    location / {
+        try_files $uri $uri/ /index.html;
+        root /www/wwwroot/axi-star-cloud;
+        index index.html;
+    }
+}
 ```
 
-### 4. 配置Nginx反向代理
+## 🔧 常见问题解决
 
-1. **进入网站设置**
-   - 找到您的站点 → 点击"设置"
+### 1. 编译失败
 
-2. **配置反向代理**
-   - 点击"反向代理"
-   - 点击"添加反向代理"
-   - 填写信息：
-     - 代理名称：`axi-star-cloud`
-     - 目标URL：`http://127.0.0.1:8080`
-     - 发送域名：`$host`
-
-3. **或者直接修改配置文件**
-   - 点击"配置文件"
-   - 将`nginx-go.conf`的内容复制到配置文件中
-   - 修改域名：将`your-domain.com`替换为您的实际域名
-   - 保存配置
-
-### 5. 配置SSL证书
-
-1. **在网站设置中点击"SSL"**
-2. **申请Let's Encrypt免费证书**
-3. **开启"强制HTTPS"**
-
-## 📋 服务管理命令
-
-### 查看服务状态
+**问题**：`go build` 失败
+**解决**：
 ```bash
-systemctl status axi-star-cloud
+# 设置Go代理
+export GOPROXY=https://goproxy.cn,direct
+export GOSUMDB=sum.golang.google.cn
+
+# 清理并重新下载依赖
+go clean -modcache
+go mod download
+go build -o main main.go
 ```
 
-### 查看实时日志
+### 2. 权限问题
+
+**问题**：头像上传失败，返回500错误
+**解决**：
 ```bash
-journalctl -u axi-star-cloud -f
+# 运行权限修复脚本
+chmod +x fix-permissions.sh
+./fix-permissions.sh
 ```
 
-### 重启服务
+### 3. 端口被占用
+
+**问题**：`address already in use`
+**解决**：
 ```bash
-systemctl restart axi-star-cloud
+# 查找占用端口的进程
+lsof -i :8080
+
+# 停止进程
+kill -9 <PID>
+
+# 或者使用停止脚本
+./stop.sh
+```
+
+### 4. 数据库问题
+
+**问题**：数据库连接失败
+**解决**：
+```bash
+# 检查数据库文件权限
+ls -la /www/wwwroot/axi-star-cloud/backend/cloud.db
+
+# 修复权限
+chmod 644 /www/wwwroot/axi-star-cloud/backend/cloud.db
+chown www:www /www/wwwroot/axi-star-cloud/backend/cloud.db
+```
+
+## 📊 服务管理
+
+### 启动服务
+```bash
+./start.sh
 ```
 
 ### 停止服务
 ```bash
-systemctl stop axi-star-cloud
+./stop.sh
 ```
 
-### 启动服务
+### 重启服务
 ```bash
-systemctl start axi-star-cloud
+./restart.sh
 ```
 
-## 🔧 故障排除
-
-### 1. 服务启动失败
-
-检查日志：
+### 查看状态
 ```bash
-journalctl -u axi-star-cloud --no-pager -l
+./status.sh
 ```
 
-常见问题：
-- Go环境未安装：在宝塔面板中安装Go
-- 端口被占用：检查8080端口是否被占用
-- 权限问题：确保脚本以root用户运行
-
-### 2. 网络连接问题
-
-检查防火墙：
+### 查看日志
 ```bash
-# 检查8080端口是否开放
-netstat -tlnp | grep 8080
+tail -f logs/app.log
+```
 
-# 开放端口（如果需要）
+## 🔒 安全配置
+
+### 1. 防火墙设置
+```bash
+# 开放8080端口（如果需要直接访问）
 firewall-cmd --permanent --add-port=8080/tcp
 firewall-cmd --reload
 ```
 
-### 3. 文件权限问题
+### 2. SSL证书
+在宝塔面板中：
+1. 进入 **网站** → 你的网站 → **SSL**
+2. 申请或上传SSL证书
+3. 开启 **强制HTTPS**
 
-```bash
-# 确保项目目录权限正确
-chown -R root:root /www/wwwroot/axi-star-cloud
-chmod -R 755 /www/wwwroot/axi-star-cloud
-```
+### 3. 安全组设置
+如果使用云服务器，确保安全组开放了80和443端口。
 
-## 📊 性能优化
+## 📈 性能优化
 
-### 1. 系统优化
-
-```bash
-# 增加文件描述符限制
-echo "* soft nofile 65536" >> /etc/security/limits.conf
-echo "* hard nofile 65536" >> /etc/security/limits.conf
-
-# 优化内核参数
-echo "net.core.somaxconn = 65535" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_max_syn_backlog = 65535" >> /etc/sysctl.conf
-sysctl -p
-```
-
-### 2. Nginx优化
-
-在nginx配置中添加：
+### 1. Nginx优化
 ```nginx
-# 启用gzip压缩
-gzip on;
-gzip_vary on;
-gzip_min_length 1024;
-gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
+# 在nginx.conf中添加
+worker_processes auto;
+worker_connections 1024;
 
-# 静态文件缓存
-location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg)$ {
-    expires 1y;
-    add_header Cache-Control "public, immutable";
-}
+# 开启gzip压缩
+gzip on;
+gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
 ```
 
-## 🔒 安全建议
+### 2. Go程序优化
+```bash
+# 编译时优化
+go build -ldflags="-s -w" -o main main.go
+```
 
-1. **定期更新系统**
-2. **配置防火墙规则**
-3. **使用强密码**
-4. **定期备份数据**
-5. **监控系统资源**
+### 3. 数据库优化
+```sql
+-- 在SQLite中创建索引
+CREATE INDEX IF NOT EXISTS idx_files_user_id ON files(user_id);
+CREATE INDEX IF NOT EXISTS idx_folders_user_id ON folders(user_id);
+```
+
+## 🐛 故障排除
+
+### 1. 服务无法启动
+```bash
+# 检查Go程序是否存在
+ls -la /www/wwwroot/axi-star-cloud/backend/main
+
+# 检查端口是否被占用
+netstat -tlnp | grep :8080
+
+# 查看详细错误日志
+cd /www/wwwroot/axi-star-cloud/backend
+./main
+```
+
+### 2. 头像上传失败
+```bash
+# 检查上传目录权限
+ls -la /www/wwwroot/axi-star-cloud/front/uploads/avatars/
+
+# 检查磁盘空间
+df -h
+
+# 检查SELinux状态
+sestatus
+```
+
+### 3. 静态文件无法访问
+```bash
+# 检查Nginx配置
+nginx -t
+
+# 检查文件权限
+ls -la /www/wwwroot/axi-star-cloud/front/
+
+# 重启Nginx
+systemctl restart nginx
+```
 
 ## 📞 技术支持
 
-如果遇到问题，请检查：
-1. 服务状态：`systemctl status axi-star-cloud`
-2. 系统日志：`journalctl -u axi-star-cloud -f`
-3. 网络连接：`curl http://localhost:8080/health`
+如果遇到问题，请：
+
+1. **查看日志**：
+   ```bash
+   tail -f /www/wwwroot/axi-star-cloud/logs/app.log
+   ```
+
+2. **检查状态**：
+   ```bash
+   ./status.sh
+   ```
+
+3. **提交Issue**：
+   - 在GitHub上提交Issue
+   - 附上详细的错误日志
+   - 说明操作系统和版本信息
+
+## 🎉 部署完成
+
+部署成功后，你可以：
+
+1. **访问网站**：`http://你的域名`
+2. **默认登录**：
+   - 用户名：`admin`
+   - 密码：`admin123`
+3. **上传文件**：支持拖拽上传
+4. **管理文件**：创建文件夹、移动文件等
 
 ---
 
-**Go项目部署** - 简单、高效、稳定！ 
+**星际云盘** - 让文件管理更简单、更安全、更高效！ 
