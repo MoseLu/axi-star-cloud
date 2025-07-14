@@ -34,6 +34,12 @@ class UIManager {
             
             // 初始化上传区域提示信息
             this.updateUploadAreaHint();
+            
+            // 绑定管理员功能事件
+            this.bindAdminEvents();
+            
+            // 检查并显示管理员菜单
+            this.checkAndShowAdminMenu();
     
         }, 100);
     }
@@ -2942,6 +2948,221 @@ class UIManager {
                 // 如果没有头像，使用默认头像
                 headerAvatar.src = 'https://picsum.photos/200/200?random=1';
             }
+        }
+    }
+
+    // 显示管理员用户管理界面
+    showAdminUsersModal() {
+        if (!this.api.isAdmin()) {
+            this.showMessage('权限不足，需要管理员权限', 'error');
+            return;
+        }
+
+        // 创建模态框
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/60';
+        modal.innerHTML = `
+            <div class="bg-dark-light rounded-xl p-8 w-full max-w-4xl max-h-[80vh] shadow-2xl border border-blue-400/30 overflow-hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-blue-300">用户管理</h3>
+                    <button class="text-gray-400 hover:text-white transition-colors" onclick="this.closest('.fixed').remove()">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="overflow-y-auto max-h-[60vh]">
+                    <div id="users-list" class="space-y-4">
+                        <div class="flex items-center justify-center py-8">
+                            <i class="fa fa-spinner fa-spin text-blue-400 text-2xl"></i>
+                            <span class="ml-2 text-gray-300">加载中...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // 加载用户列表
+        this.loadUsersList();
+    }
+
+    // 加载用户列表
+    async loadUsersList() {
+        try {
+            const result = await this.api.getAllUsers();
+            
+            if (result.success) {
+                this.renderUsersList(result.users);
+            } else {
+                this.showMessage(result.error || '获取用户列表失败', 'error');
+            }
+        } catch (error) {
+            console.error('加载用户列表失败:', error);
+            this.showMessage('加载用户列表失败', 'error');
+        }
+    }
+
+    // 渲染用户列表
+    renderUsersList(users) {
+        const usersList = document.getElementById('users-list');
+        if (!usersList) return;
+
+        if (users.length === 0) {
+            usersList.innerHTML = `
+                <div class="text-center py-8 text-gray-400">
+                    <i class="fa fa-users text-4xl mb-4"></i>
+                    <p>暂无用户</p>
+                </div>
+            `;
+            return;
+        }
+
+        usersList.innerHTML = users.map(user => `
+            <div class="bg-dark border border-gray-700 rounded-lg p-4 hover:border-blue-400/50 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center">
+                            <i class="fa fa-user text-blue-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h4 class="text-white font-semibold">${user.username}</h4>
+                                ${user.is_admin ? '<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded-full text-xs">管理员</span>' : ''}
+                            </div>
+                            <p class="text-gray-400 text-sm">${user.email || '未设置邮箱'}</p>
+                            <p class="text-gray-500 text-xs">创建于 ${this.formatDate(user.created_at)}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right">
+                            <p class="text-sm text-gray-400">存储空间</p>
+                            <p class="text-white font-semibold">${this.formatStorageSize(user.storage_limit)}</p>
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <button class="storage-edit-btn bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-3 py-1 rounded-lg text-sm transition-colors" 
+                                    data-uuid="${user.uuid}" data-current="${user.storage_limit}">
+                                <i class="fa fa-edit mr-1"></i>编辑存储
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        // 绑定编辑存储按钮事件
+        usersList.querySelectorAll('.storage-edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const uuid = e.target.closest('button').dataset.uuid;
+                const currentLimit = parseInt(e.target.closest('button').dataset.current);
+                this.showStorageEditDialog(uuid, currentLimit);
+            });
+        });
+    }
+
+    // 显示存储编辑对话框
+    showStorageEditDialog(uuid, currentLimit) {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/60';
+        modal.innerHTML = `
+            <div class="bg-dark-light rounded-xl p-6 w-full max-w-md shadow-2xl border border-blue-400/30">
+                <h3 class="text-lg font-bold text-blue-300 mb-4">编辑存储限制</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">当前限制</label>
+                        <p class="text-white font-semibold">${this.formatStorageSize(currentLimit)}</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">新限制 (GB)</label>
+                        <input type="number" id="new-storage-limit" min="1" max="1000" 
+                               class="w-full p-3 bg-dark border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                               value="${Math.round(currentLimit / (1024 * 1024 * 1024))}" />
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors" 
+                            onclick="this.closest('.fixed').remove()">取消</button>
+                    <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                            onclick="window.uiManager.updateUserStorage('${uuid}')">保存</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+
+    // 更新用户存储限制
+    async updateUserStorage(uuid) {
+        const newLimitInput = document.getElementById('new-storage-limit');
+        if (!newLimitInput) return;
+
+        const newLimitGB = parseInt(newLimitInput.value);
+        if (!newLimitGB || newLimitGB < 1 || newLimitGB > 1000) {
+            this.showMessage('请输入有效的存储限制 (1-1000 GB)', 'error');
+            return;
+        }
+
+        const newLimitBytes = newLimitGB * 1024 * 1024 * 1024;
+
+        try {
+            const result = await this.api.updateUserStorage(uuid, newLimitBytes);
+            
+            if (result.success) {
+                this.showMessage('存储限制更新成功', 'success');
+                // 关闭对话框
+                document.querySelector('.fixed').remove();
+                // 重新加载用户列表
+                this.loadUsersList();
+            } else {
+                this.showMessage(result.error || '更新失败', 'error');
+            }
+        } catch (error) {
+            console.error('更新存储限制失败:', error);
+            this.showMessage('更新失败', 'error');
+        }
+    }
+
+    // 显示管理员存储管理界面
+    showAdminStorageModal() {
+        if (!this.api.isAdmin()) {
+            this.showMessage('权限不足，需要管理员权限', 'error');
+            return;
+        }
+
+        this.showMessage('存储管理功能开发中...', 'info');
+    }
+
+    // 检查并显示管理员菜单
+    checkAndShowAdminMenu() {
+        const adminMenu = document.getElementById('admin-menu');
+        if (adminMenu && this.api.isAdmin()) {
+            adminMenu.classList.remove('hidden');
+        }
+    }
+
+    // 绑定管理员功能事件
+    bindAdminEvents() {
+        // 用户管理按钮
+        const adminUsersBtn = document.getElementById('admin-users-btn');
+        if (adminUsersBtn) {
+            adminUsersBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showAdminUsersModal();
+            });
+        }
+
+        // 存储管理按钮
+        const adminStorageBtn = document.getElementById('admin-storage-btn');
+        if (adminStorageBtn) {
+            adminStorageBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showAdminStorageModal();
+            });
         }
     }
 }

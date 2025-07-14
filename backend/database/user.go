@@ -17,17 +17,26 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
+// CreateUser 创建新用户
+func (r *UserRepository) CreateUser(user *models.User) error {
+	query := `INSERT INTO user (uuid, username, password, email, storage_limit, is_admin, created_at, updated_at) 
+			  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+
+	_, err := r.db.Exec(query, user.UUID, user.Username, user.Password, user.Email, user.StorageLimit, user.IsAdmin, user.CreatedAt, user.UpdatedAt)
+	return err
+}
+
 // GetUserByUsername 根据用户名获取用户
 func (r *UserRepository) GetUserByUsername(username string) (*models.User, error) {
 	var user models.User
 	var email, bio, avatar sql.NullString
-	query := `SELECT uuid, username, password, email, bio, avatar, storage_limit, created_at, updated_at 
+	query := `SELECT uuid, username, password, email, bio, avatar, storage_limit, is_admin, created_at, updated_at 
 			  FROM user WHERE username = ?`
 
 	err := r.db.QueryRow(query, username).Scan(
 		&user.UUID, &user.Username, &user.Password,
 		&email, &bio, &avatar,
-		&user.StorageLimit, &user.CreatedAt, &user.UpdatedAt)
+		&user.StorageLimit, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -49,13 +58,13 @@ func (r *UserRepository) GetUserByUsername(username string) (*models.User, error
 func (r *UserRepository) GetUserByUUID(uuid string) (*models.User, error) {
 	var user models.User
 	var email, bio, avatar sql.NullString
-	query := `SELECT uuid, username, password, email, bio, avatar, storage_limit, created_at, updated_at 
+	query := `SELECT uuid, username, password, email, bio, avatar, storage_limit, is_admin, created_at, updated_at 
 			  FROM user WHERE uuid = ?`
 
 	err := r.db.QueryRow(query, uuid).Scan(
 		&user.UUID, &user.Username, &user.Password,
 		&email, &bio, &avatar,
-		&user.StorageLimit, &user.CreatedAt, &user.UpdatedAt)
+		&user.StorageLimit, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt)
 
 	if err != nil {
 		return nil, err
@@ -72,6 +81,44 @@ func (r *UserRepository) GetUserByUUID(uuid string) (*models.User, error) {
 // GetUserByID 根据ID获取用户（别名方法）
 func (r *UserRepository) GetUserByID(id string) (*models.User, error) {
 	return r.GetUserByUUID(id)
+}
+
+// GetAllUsers 获取所有用户（管理员功能）
+func (r *UserRepository) GetAllUsers() ([]models.User, error) {
+	query := `SELECT uuid, username, email, bio, avatar, storage_limit, is_admin, created_at, updated_at FROM user ORDER BY created_at DESC`
+
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		var email, bio, avatar sql.NullString
+
+		err := rows.Scan(
+			&user.UUID, &user.Username,
+			&email, &bio, &avatar,
+			&user.StorageLimit, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt)
+
+		if err != nil {
+			return nil, err
+		}
+
+		// 处理NULL值
+		user.Email = email.String
+		user.Bio = bio.String
+		user.Avatar = avatar.String
+
+		// 不返回密码
+		user.Password = ""
+
+		users = append(users, user)
+	}
+
+	return users, nil
 }
 
 // UpdateUser 更新用户信息
@@ -134,4 +181,17 @@ func (r *UserRepository) GetUserStorageInfo(uuid string) (*models.StorageInfo, e
 	}
 
 	return storageInfo, nil
+}
+
+// CheckUsernameExists 检查用户名是否已存在
+func (r *UserRepository) CheckUsernameExists(username string) (bool, error) {
+	var exists int
+	query := `SELECT COUNT(*) FROM user WHERE username = ?`
+
+	err := r.db.QueryRow(query, username).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+
+	return exists > 0, nil
 }

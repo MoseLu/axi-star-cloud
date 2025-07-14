@@ -1,38 +1,123 @@
 // API模块 - 处理所有后端接口调用
 class ApiManager {
     constructor() {
-        this.baseUrl = '/api';
+        this.baseUrl = window.location.origin;
+        this.currentUser = this.getCurrentUser();
     }
 
-    // 获取当前用户ID
-    getCurrentUserId() {
-        const loginData = localStorage.getItem('loginData');
-        if (!loginData) return null;
-        
-        try {
-            const userData = JSON.parse(loginData);
-            return userData.uuid || '550e8400-e29b-41d4-a716-446655440000';
-        } catch (e) {
-            return null;
+    // 获取当前用户信息
+    getCurrentUser() {
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            try {
+                return JSON.parse(savedUser);
+            } catch (error) {
+                console.error('解析用户信息失败:', error);
+                localStorage.removeItem('currentUser');
+                return null;
+            }
         }
+        return null;
+    }
+
+    // 获取当前用户UUID
+    getCurrentUserId() {
+        return this.currentUser?.uuid;
+    }
+
+    // 检查是否为管理员
+    isAdmin() {
+        return this.currentUser?.isAdmin === true;
     }
 
     // 登录
     async login(username, password) {
-        const response = await fetch(`${this.baseUrl}/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username, password })
-        });
+        try {
+            const response = await fetch(`${this.baseUrl}/api/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password })
+            });
 
-        if (!response.ok) {
             const data = await response.json();
-            throw new Error(data.error || '登录失败');
+            if (data.success) {
+                this.currentUser = {
+                    uuid: data.user.uuid,
+                    username: data.user.username,
+                    isAdmin: data.user.is_admin
+                };
+                localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+            }
+            return data;
+        } catch (error) {
+            console.error('登录失败:', error);
+            return { success: false, error: '网络错误' };
+        }
+    }
+
+    // 注册
+    async register(username, password, email = '') {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password, email })
+            });
+
+            return await response.json();
+        } catch (error) {
+            console.error('注册失败:', error);
+            return { success: false, error: '网络错误' };
+        }
+    }
+
+    // 获取所有用户（管理员功能）
+    async getAllUsers() {
+        if (!this.isAdmin()) {
+            return { success: false, error: '权限不足' };
         }
 
-        return await response.json();
+        try {
+            const response = await fetch(`${this.baseUrl}/api/admin/users`, {
+                method: 'GET',
+                headers: {
+                    'User-UUID': this.getCurrentUserId(),
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            return await response.json();
+        } catch (error) {
+            console.error('获取用户列表失败:', error);
+            return { success: false, error: '网络错误' };
+        }
+    }
+
+    // 更新用户存储限制（管理员功能）
+    async updateUserStorage(uuid, storageLimit) {
+        if (!this.isAdmin()) {
+            return { success: false, error: '权限不足' };
+        }
+
+        try {
+            const response = await fetch(`${this.baseUrl}/api/admin/users/storage`, {
+                method: 'PUT',
+                headers: {
+                    'User-UUID': this.getCurrentUserId(),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ uuid, storage_limit: storageLimit })
+            });
+
+            return await response.json();
+        } catch (error) {
+            console.error('更新用户存储限制失败:', error);
+            return { success: false, error: '网络错误' };
+        }
     }
 
     // 获取文件列表
@@ -40,7 +125,7 @@ class ApiManager {
         const userId = this.getCurrentUserId();
         if (!userId) return [];
 
-        let url = `${this.baseUrl}/files?user_id=${userId}`;
+        let url = `${this.baseUrl}/api/files?user_id=${userId}`;
         if (folderId) {
             url += `&folder_id=${folderId}`;
         }
@@ -84,7 +169,7 @@ class ApiManager {
         if (!userId) throw new Error('请先登录');
 
         try {
-            const response = await fetch(`${this.baseUrl}/files/${fileId}?user_id=${userId}`);
+            const response = await fetch(`${this.baseUrl}/api/files/${fileId}?user_id=${userId}`);
             const data = await response.json();
             
             if (data.success) {
@@ -102,7 +187,7 @@ class ApiManager {
         const userId = this.getCurrentUserId();
         if (!userId) return [];
 
-        let url = `${this.baseUrl}/folders?user_id=${userId}`;
+        let url = `${this.baseUrl}/api/folders?user_id=${userId}`;
         if (category && category !== 'all') {
             url += `&category=${category}`;
         }
@@ -127,7 +212,7 @@ class ApiManager {
         if (!userId) return null;
 
         try {
-            const response = await fetch(`${this.baseUrl}/storage?user_id=${userId}`);
+            const response = await fetch(`${this.baseUrl}/api/storage?user_id=${userId}`);
             const data = await response.json();
             
             if (data.success) {
@@ -145,7 +230,7 @@ class ApiManager {
         const userId = this.getCurrentUserId();
         if (!userId) throw new Error('请先登录');
 
-        const response = await fetch(`${this.baseUrl}/storage?user_id=${userId}`, {
+        const response = await fetch(`${this.baseUrl}/api/storage?user_id=${userId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -164,7 +249,7 @@ class ApiManager {
     // 上传文件
     async uploadFile(file, folderId = null) {
         const userId = this.getCurrentUserId();
-        if (!userId) throw new Error('请先登录');
+        if (!userId) return { success: false, error: '未登录' };
 
         const formData = new FormData();
         formData.append('file', file);
@@ -173,17 +258,17 @@ class ApiManager {
             formData.append('folder_id', folderId);
         }
 
-        const response = await fetch(`${this.baseUrl}/upload`, {
-            method: 'POST',
-            body: formData
-        });
+        try {
+            const response = await fetch(`${this.baseUrl}/api/upload`, {
+                method: 'POST',
+                body: formData
+            });
 
-        const data = await response.json();
-        if (!data.success) {
-            throw new Error(data.error || '文件上传失败');
+            return await response.json();
+        } catch (error) {
+            console.error('上传文件失败:', error);
+            return { success: false, error: '上传失败' };
         }
-
-        return data;
     }
 
     // 批量上传文件
@@ -208,7 +293,7 @@ class ApiManager {
                     formData.append('folder_id', folderId);
                 }
 
-                const response = await fetch(`${this.baseUrl}/upload`, {
+                const response = await fetch(`${this.baseUrl}/api/upload`, {
                     method: 'POST',
                     body: formData
                 });
@@ -255,136 +340,131 @@ class ApiManager {
         const userId = this.getCurrentUserId();
         if (!userId) throw new Error('请先登录');
 
-        const response = await fetch(`${this.baseUrl}/files/${fileId}?user_id=${userId}`, {
-            method: 'DELETE'
-        });
+        try {
+            const response = await fetch(`${this.baseUrl}/api/files/${fileId}`, {
+                method: 'DELETE'
+            });
 
-        const data = await response.json();
-        if (!data.success) {
-            throw new Error(data.error || '删除文件失败');
+            return await response.json();
+        } catch (error) {
+            console.error('删除文件失败:', error);
+            return { success: false, error: '删除失败' };
         }
-
-        return data;
     }
 
     // 下载文件
     async downloadFile(fileId) {
-        const userId = this.getCurrentUserId();
-        if (!userId) throw new Error('请先登录');
-
-        const response = await fetch(`${this.baseUrl}/files/${fileId}/download?user_id=${userId}`);
-        
-        if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.error || '下载文件失败');
+        try {
+            const response = await fetch(`${this.baseUrl}/api/files/${fileId}/download`);
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = ''; // 使用服务器返回的文件名
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                return { success: true };
+            } else {
+                return { success: false, error: '下载失败' };
+            }
+        } catch (error) {
+            console.error('下载文件失败:', error);
+            return { success: false, error: '下载失败' };
         }
-
-        return response;
     }
 
     // 创建文件夹
     async createFolder(name, category) {
         const userId = this.getCurrentUserId();
-        if (!userId) throw new Error('请先登录');
+        if (!userId) return { success: false, error: '未登录' };
 
-        const response = await fetch(`${this.baseUrl}/folders?user_id=${userId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ name, category })
-        });
+        try {
+            const response = await fetch(`${this.baseUrl}/api/folders`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name,
+                    category: category,
+                    user_id: userId
+                })
+            });
 
-        const data = await response.json();
-        if (!data.success) {
-            throw new Error(data.error || '创建文件夹失败');
+            return await response.json();
+        } catch (error) {
+            console.error('创建文件夹失败:', error);
+            return { success: false, error: '创建失败' };
         }
-
-        return data;
     }
 
     // 更新文件夹
     async updateFolder(folderId, name) {
-        const userId = this.getCurrentUserId();
-        if (!userId) throw new Error('请先登录');
+        try {
+            const response = await fetch(`${this.baseUrl}/api/folders/${folderId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: name })
+            });
 
-        const response = await fetch(`${this.baseUrl}/folders/${folderId}?user_id=${userId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ name })
-        });
-
-        const data = await response.json();
-        if (!data.success) {
-            throw new Error(data.error || '更新文件夹失败');
+            return await response.json();
+        } catch (error) {
+            console.error('更新文件夹失败:', error);
+            return { success: false, error: '更新失败' };
         }
-
-        return data;
     }
 
     // 删除文件夹
     async deleteFolder(folderId) {
-        const userId = this.getCurrentUserId();
-        if (!userId) throw new Error('请先登录');
+        try {
+            const response = await fetch(`${this.baseUrl}/api/folders/${folderId}`, {
+                method: 'DELETE'
+            });
 
-        const response = await fetch(`${this.baseUrl}/folders/${folderId}?user_id=${userId}`, {
-            method: 'DELETE'
-        });
-
-        const data = await response.json();
-        if (!data.success) {
-            throw new Error(data.error || '删除文件夹失败');
+            return await response.json();
+        } catch (error) {
+            console.error('删除文件夹失败:', error);
+            return { success: false, error: '删除失败' };
         }
-
-        return data;
     }
 
     // 获取文件夹文件数量
     async getFolderFileCount(folderId) {
-        const userId = this.getCurrentUserId();
-        if (!userId) throw new Error('请先登录');
-
-        const response = await fetch(`${this.baseUrl}/folders/${folderId}/count?user_id=${userId}`);
-        const data = await response.json();
-        
-        if (!data.success) {
-            throw new Error(data.error || '获取文件夹文件数量失败');
+        try {
+            const response = await fetch(`${this.baseUrl}/api/folders/${folderId}/count`);
+            const data = await response.json();
+            
+            if (data.success) {
+                return data.count;
+            } else {
+                return 0;
+            }
+        } catch (error) {
+            return 0;
         }
-
-        return data.count;
     }
 
     // 移动文件
     async moveFile(fileId, folderId) {
-        const userId = this.getCurrentUserId();
-        if (!userId) throw new Error('请先登录');
+        try {
+            const response = await fetch(`${this.baseUrl}/api/files/${fileId}/move`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ folder_id: folderId })
+            });
 
-
-
-        const requestBody = {
-            folder_id: folderId === null ? null : parseInt(folderId)
-        };
-
-
-
-        const response = await fetch(`${this.baseUrl}/files/${fileId}/move?user_id=${userId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody)
-        });
-
-        const data = await response.json();
-
-        
-        if (!data.success) {
-            throw new Error(data.error || '移动文件失败');
+            return await response.json();
+        } catch (error) {
+            console.error('移动文件失败:', error);
+            return { success: false, error: '移动失败' };
         }
-
-        return data;
     }
 
     // 工具方法：格式化文件大小
@@ -396,86 +476,94 @@ class ApiManager {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
-    // 工具方法：获取文件图标
+    // 文件类型图标映射
     getFileIcon(type) {
-        const icons = {
+        const iconMap = {
             'image': 'fa-file-image-o',
             'video': 'fa-file-video-o',
             'audio': 'fa-file-audio-o',
             'document': 'fa-file-text-o',
             'other': 'fa-file-o'
         };
-        return icons[type] || 'fa-file-o';
+        return iconMap[type] || 'fa-file-o';
     }
 
-    // 工具方法：获取文件图标颜色
+    // 文件类型颜色映射
     getFileIconColor(type) {
-        const colors = {
-            'image': 'text-emerald-400',
-            'video': 'text-pink-400',
-            'audio': 'text-cyan-400',
-            'document': 'text-orange-400',
-            'other': 'text-slate-400'
+        const colorMap = {
+            'image': 'text-green-400',
+            'video': 'text-red-400',
+            'audio': 'text-purple-400',
+            'document': 'text-blue-400',
+            'other': 'text-gray-400'
         };
-        return colors[type] || 'text-slate-400';
+        return colorMap[type] || 'text-gray-400';
     }
 
-    // 获取用户个人资料
+    // 获取个人资料
     async getProfile() {
         const userId = this.getCurrentUserId();
-        if (!userId) throw new Error('请先登录');
+        if (!userId) return null;
 
-        const response = await fetch(`${this.baseUrl}/profile?user_id=${userId}`);
-        const data = await response.json();
-        
-        if (!data.success) {
-            throw new Error(data.error || '获取个人资料失败');
+        try {
+            const response = await fetch(`${this.baseUrl}/api/profile?user_id=${userId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                return data.profile;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('获取个人资料失败:', error);
+            return null;
         }
-
-        return data.profile;
     }
 
-    // 更新用户个人资料
+    // 更新个人资料
     async updateProfile(profileData) {
         const userId = this.getCurrentUserId();
-        if (!userId) throw new Error('请先登录');
+        if (!userId) return { success: false, error: '未登录' };
 
-        const response = await fetch(`${this.baseUrl}/profile?user_id=${userId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(profileData)
-        });
+        try {
+            const response = await fetch(`${this.baseUrl}/api/profile`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ...profileData,
+                    user_id: userId
+                })
+            });
 
-        const data = await response.json();
-        if (!data.success) {
-            throw new Error(data.error || '更新个人资料失败');
+            return await response.json();
+        } catch (error) {
+            console.error('更新个人资料失败:', error);
+            return { success: false, error: '更新失败' };
         }
-
-        return data;
     }
 
     // 上传头像
     async uploadAvatar(file) {
         const userId = this.getCurrentUserId();
-        if (!userId) throw new Error('请先登录');
+        if (!userId) return { success: false, error: '未登录' };
 
         const formData = new FormData();
         formData.append('avatar', file);
         formData.append('user_id', userId);
 
-        const response = await fetch(`${this.baseUrl}/profile/avatar?user_id=${userId}`, {
-            method: 'POST',
-            body: formData
-        });
+        try {
+            const response = await fetch(`${this.baseUrl}/api/profile/avatar`, {
+                method: 'POST',
+                body: formData
+            });
 
-        const data = await response.json();
-        if (!data.success) {
-            throw new Error(data.error || '头像上传失败');
+            return await response.json();
+        } catch (error) {
+            console.error('上传头像失败:', error);
+            return { success: false, error: '上传失败' };
         }
-
-        return data;
     }
 }
 

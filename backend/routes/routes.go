@@ -74,6 +74,12 @@ func (r *Router) SetupRoutes(
 
 	// 认证相关路由
 	apiGroup.AddRoute("POST", "/login", authHandler.Login, "用户登录")
+	apiGroup.AddRoute("POST", "/register", authHandler.Register, "用户注册")
+
+	// 管理员相关路由（需要管理员权限）
+	adminGroup := r.RegisterGroup("admin", "/api/admin", authHandler.CheckAdminPermission())
+	adminGroup.AddRoute("GET", "/users", authHandler.GetAllUsers, "获取所有用户列表")
+	adminGroup.AddRoute("PUT", "/users/storage", authHandler.UpdateUserStorage, "更新用户存储限制")
 
 	// 文件相关路由
 	apiGroup.AddRoute("GET", "/files", fileHandler.GetFiles, "获取文件列表")

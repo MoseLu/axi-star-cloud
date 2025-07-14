@@ -9,8 +9,6 @@ class App {
 
     async init() {
         try {
-    
-            
             // 初始化各个模块
             this.authManager = new AuthManager();
             this.apiManager = new ApiManager();
@@ -30,9 +28,58 @@ class App {
             // 设置其他事件监听器
             this.setupEventListeners();
 
-    
+            // 检查登录状态
+            this.checkLoginStatus();
+
         } catch (error) {
-            // 应用初始化失败
+            console.error('应用初始化失败:', error);
+        }
+    }
+
+    // 检查登录状态
+    checkLoginStatus() {
+        const currentUser = this.apiManager.getCurrentUser();
+        if (currentUser) {
+            // 用户已登录，显示主界面
+            this.showMainInterface();
+            this.updateUserDisplay(currentUser);
+        } else {
+            // 用户未登录，显示登录页面
+            this.showLoginInterface();
+        }
+    }
+
+    // 显示主界面
+    showMainInterface() {
+        const loginPage = document.getElementById('login-page');
+        const app = document.getElementById('app');
+        
+        if (loginPage) loginPage.classList.add('hidden');
+        if (app) app.classList.remove('hidden');
+    }
+
+    // 显示登录界面
+    showLoginInterface() {
+        const loginPage = document.getElementById('login-page');
+        const app = document.getElementById('app');
+        
+        if (loginPage) loginPage.classList.remove('hidden');
+        if (app) app.classList.add('hidden');
+    }
+
+    // 更新用户显示
+    updateUserDisplay(user) {
+        const userName = document.getElementById('user-name');
+        const userAvatar = document.getElementById('user-avatar');
+        
+        if (userName) {
+            userName.textContent = user.username;
+            // 确保金色渐变样式保持
+            userName.className = 'text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500';
+        }
+        
+        if (userAvatar && user.avatar) {
+            userAvatar.src = user.avatar;
         }
     }
 
@@ -53,30 +100,64 @@ class App {
 
     // 设置事件监听器
     setupEventListeners() {
-        // 登录成功事件监听 - 由UIManager处理，避免重复
-        // window.addEventListener('loginSuccess', async (event) => {
-        //     await this.onLoginSuccess(event.detail);
-        // });
+        // 登录成功事件监听
+        window.addEventListener('loginSuccess', async (event) => {
+            await this.onLoginSuccess(event.detail);
+        });
 
-        // 上传按钮事件 - 由 UIManager 处理
-        // 避免重复绑定事件监听器
+        // 退出登录事件
+        document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.logout();
+        });
 
-        // 设置按钮和退出登录按钮 - 由 UIManager 处理
-        // 避免重复绑定事件监听器
+        // 设置按钮事件
+        document.getElementById('settings-btn')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (this.uiManager) {
+                this.uiManager.showSettingsModal();
+            }
+        });
+    }
 
-        // 搜索功能 - 由 UIManager 处理
-        // 避免重复绑定事件监听器
-
-        // 文件类型标签点击事件 - 由 UIManager 处理
-        // 避免重复绑定事件监听器
+    // 登录成功处理
+    async onLoginSuccess(userData) {
+        // 更新用户显示
+        this.updateUserDisplay(userData);
+        
+        // 显示主界面
+        this.showMainInterface();
+        
+        // 更新API管理器的用户信息
+        this.apiManager.currentUser = userData;
+        
+        // 检查并显示管理员菜单
+        if (this.uiManager) {
+            this.uiManager.checkAndShowAdminMenu();
+        }
+        
+        // 显示登录成功通知
+        if (window.Notify) {
+            window.Notify.show({ message: '登录成功', type: 'success' });
+        }
     }
 
     // 退出登录
     logout() {
-        this.authManager.clearLoginData();
-        this.authManager.showLoginPage();
-        Notify.show({ message: '已退出登录', type: 'info' });
+        // 清除本地存储
+        localStorage.removeItem('currentUser');
+        
+        // 重置API管理器的用户信息
+        this.apiManager.currentUser = null;
+        
+        // 显示登录界面
+        this.showLoginInterface();
+        
+        // 显示退出通知
+        if (window.Notify) {
+            window.Notify.show({ message: '已退出登录', type: 'info' });
+        }
     }
 }
 
-// 应用初始化由index-new.html中的模板加载完成后调用 
+// 应用初始化由index.html中的模板加载完成后调用 
