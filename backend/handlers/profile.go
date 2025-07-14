@@ -239,8 +239,9 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 	}
 
 	// 创建上传目录
-	uploadDir := "../front/uploads/avatars"
+	uploadDir := "/www/wwwroot/axi-star-cloud/front/uploads/avatars"
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		log.Printf("创建上传目录失败: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"error":   "创建上传目录失败",
