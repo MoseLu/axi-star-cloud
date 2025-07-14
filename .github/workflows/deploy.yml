@@ -52,8 +52,8 @@ jobs:
           # 如果Go不存在，尝试安装
           if ! command -v go &> /dev/null; then
             echo "Go环境未安装，正在安装..."
-            # 下载并安装Go
-            wget https://go.dev/dl/go1.23.4.linux-amd64.tar.gz
+            # 使用国内镜像下载Go
+            wget https://golang.google.cn/dl/go1.23.4.linux-amd64.tar.gz || wget https://mirrors.aliyun.com/golang/go1.23.4.linux-amd64.tar.gz || wget https://dl.google.com/go/go1.23.4.linux-amd64.tar.gz
             tar -C /usr/local -xzf go1.23.4.linux-amd64.tar.gz
             export PATH=$PATH:/usr/local/go/bin
             echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
