@@ -1182,10 +1182,36 @@ class UIManager {
             }
             
             console.log('Loading text file from:', fileUrl);
-            const response = await fetch(fileUrl);
+            console.log('File object:', file);
             
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            // 尝试多种路径格式
+            const possibleUrls = [
+                fileUrl,
+                file.path,
+                `/uploads/${file.type}/${file.name}`,
+                `/static/uploads/${file.type}/${file.name}`
+            ];
+            
+            let response = null;
+            let successfulUrl = null;
+            
+            for (const url of possibleUrls) {
+                if (!url) continue;
+                
+                try {
+                    console.log('Trying URL:', url);
+                    response = await fetch(url);
+                    if (response.ok) {
+                        successfulUrl = url;
+                        break;
+                    }
+                } catch (e) {
+                    console.log('Failed to fetch:', url, e);
+                }
+            }
+            
+            if (!response || !response.ok) {
+                throw new Error(`HTTP ${response?.status || 'unknown'}: ${response?.statusText || 'Failed to fetch'}`);
             }
             
             const textContent = await response.text();
@@ -1272,10 +1298,36 @@ class UIManager {
             }
             
             console.log('Loading markdown from:', fileUrl);
-            const response = await fetch(fileUrl);
+            console.log('File object:', file);
             
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            // 尝试多种路径格式
+            const possibleUrls = [
+                fileUrl,
+                file.path,
+                `/uploads/${file.type}/${file.name}`,
+                `/static/uploads/${file.type}/${file.name}`
+            ];
+            
+            let response = null;
+            let successfulUrl = null;
+            
+            for (const url of possibleUrls) {
+                if (!url) continue;
+                
+                try {
+                    console.log('Trying URL:', url);
+                    response = await fetch(url);
+                    if (response.ok) {
+                        successfulUrl = url;
+                        break;
+                    }
+                } catch (e) {
+                    console.log('Failed to fetch:', url, e);
+                }
+            }
+            
+            if (!response || !response.ok) {
+                throw new Error(`HTTP ${response?.status || 'unknown'}: ${response?.statusText || 'Failed to fetch'}`);
             }
             
             const markdownText = await response.text();
