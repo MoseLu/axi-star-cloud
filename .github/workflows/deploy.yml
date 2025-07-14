@@ -33,9 +33,13 @@ jobs:
         key: ${{ secrets.SERVER_KEY }}
         port: 22
         script: |
-          cd /www/wwwroot/axi-star-cloud
-          
           echo "=== 开始部署流程 ==="
+          date
+          
+          # 进入项目目录
+          cd /www/wwwroot/axi-star-cloud
+          pwd
+          ls -la
           
           # 备份当前版本
           if [ -f star-cloud ]; then
@@ -43,12 +47,38 @@ jobs:
             cp star-cloud star-cloud.backup.$(date +%Y%m%d_%H%M%S)
           fi
           
+          # 停止当前服务
+          echo "停止当前服务..."
+          if [ -f pid.txt ]; then
+            pid=$(cat pid.txt)
+            if kill -0 $pid 2>/dev/null; then
+              kill $pid
+              echo "已停止进程 $pid"
+            fi
+          fi
+          pkill -f "star-cloud" || echo "没有找到运行中的服务"
+          sleep 3
+          
+          # 拉取最新代码（带重试）
+          echo "拉取最新代码..."
+          for i in {1..3}; do
+            echo "第 $i 次尝试拉取代码..."
+            if git pull origin main; then
+              echo "✅ 代码拉取成功"
+              break
+            else
+              echo "❌ 代码拉取失败，等待重试..."
+              sleep 10
+            fi
+          done
+          
           # 设置Go环境
           export PATH=$PATH:/usr/local/btgo/bin
+          echo "Go环境路径: $PATH"
           
           # 验证Go环境
           echo "验证Go环境..."
-          /usr/local/btgo/bin/go version
+          /usr/local/btgo/bin/go version || echo "Go环境验证失败"
           
           # 重新编译程序
           echo "开始编译程序..."
@@ -58,19 +88,27 @@ jobs:
           /usr/local/btgo/bin/go build -o ../star-cloud main.go
           cd ..
           
+          # 检查编译结果
+          if [ -f star-cloud ]; then
+            echo "✅ 编译成功"
+            ls -la star-cloud
+          else
+            echo "❌ 编译失败"
+            exit 1
+          fi
+          
           # 设置执行权限
           chmod +x star-cloud
           
-          # 停止当前服务
-          echo "停止当前服务..."
-          pkill -f "star-cloud" || true
-          sleep 5
+          # 创建必要的目录
+          mkdir -p logs uploads
+          mkdir -p uploads/{image,document,audio,video,other,avatars}
           
           # 启动新服务
           echo "启动新服务..."
-          mkdir -p logs
           nohup ./star-cloud > logs/app.log 2>&1 &
           echo $! > pid.txt
+          echo "服务PID: $!"
           
           # 等待服务启动
           echo "等待服务启动..."
@@ -82,10 +120,12 @@ jobs:
             echo "✅ 服务已启动"
             
             # 健康检查
-            for i in {1..3}; do
+            for i in {1..5}; do
               echo "第 $i 次健康检查..."
-              if curl -f http://localhost:8080/health > /dev/null 2>&1; then
+              if curl -f -s http://localhost:8080/health > /dev/null 2>&1; then
                 echo "✅ 部署成功！服务正常运行"
+                echo "服务日志:"
+                tail -10 logs/app.log
                 exit 0
               else
                 echo "健康检查失败，等待重试..."
@@ -96,6 +136,9 @@ jobs:
             echo "❌ 健康检查失败，但服务正在运行"
             echo "查看服务日志:"
             tail -20 logs/app.log || echo "日志文件不存在"
+            
+            # 显示进程信息
+            ps aux | grep star-cloud
           else
             echo "❌ 服务启动失败"
             echo "查看服务日志:"
