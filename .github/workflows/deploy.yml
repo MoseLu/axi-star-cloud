@@ -43,39 +43,33 @@ jobs:
           # 拉取最新代码
           git pull origin main
           
-          # 检查并设置Go环境
-          echo "检查Go环境..."
-          
-          # 尝试多个可能的Go路径
-          export PATH=$PATH:/usr/local/go/bin:/usr/local/bin:/usr/bin
-          
-          # 如果Go不存在，尝试安装
-          if ! command -v go &> /dev/null; then
-            echo "Go环境未安装，正在安装..."
-            # 使用国内镜像下载Go
-            wget https://golang.google.cn/dl/go1.23.4.linux-amd64.tar.gz || wget https://mirrors.aliyun.com/golang/go1.23.4.linux-amd64.tar.gz || wget https://dl.google.com/go/go1.23.4.linux-amd64.tar.gz
-            tar -C /usr/local -xzf go1.23.4.linux-amd64.tar.gz
-            export PATH=$PATH:/usr/local/go/bin
-            echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
-            source ~/.bashrc
-          fi
+          # 设置Go环境路径
+          echo "设置Go环境路径..."
+          export PATH=$PATH:/usr/local/btgo/bin
           
           # 验证Go环境
-          go version || echo "Go环境设置失败"
+          echo "验证Go环境..."
+          /usr/local/btgo/bin/go version || {
+            echo "❌ Go环境验证失败"
+            exit 1
+          }
           
           # 重新编译程序
+          echo "开始编译程序..."
           cd backend
-          go mod download
-          go mod tidy
-          go build -o ../star-cloud main.go
+          /usr/local/btgo/bin/go mod download
+          /usr/local/btgo/bin/go mod tidy
+          /usr/local/btgo/bin/go build -o ../star-cloud main.go
           cd ..
           chmod +x star-cloud
           
           # 停止当前服务
+          echo "停止当前服务..."
           pkill -f "star-cloud" || true
           sleep 2
           
           # 启动新服务
+          echo "启动新服务..."
           nohup ./star-cloud > logs/app.log 2>&1 &
           echo $! > pid.txt
           
