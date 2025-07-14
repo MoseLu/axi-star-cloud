@@ -135,12 +135,13 @@ class UIManager {
                 this.handleFileUpload(files);
             });
 
-            dropArea.addEventListener('click', () => {
-                const fileInput = document.getElementById('file-input');
-                if (fileInput) {
-                    fileInput.click();
-                }
-            });
+            // 移除拖拽区域的点击事件，避免重复触发文件选择
+            // dropArea.addEventListener('click', () => {
+            //     const fileInput = document.getElementById('file-input');
+            //     if (fileInput) {
+            //         fileInput.click();
+            //     }
+            // });
         }
 
         // 文件类型标签点击事件
@@ -1170,7 +1171,23 @@ class UIManager {
     // 预览文本文件
     async previewTextFile(file) {
         try {
-            const response = await fetch(file.path || `/static/uploads/${file.type}/${file.name}`);
+            // 构建正确的文件URL
+            let fileUrl;
+            if (file.path && file.path.startsWith('/uploads/')) {
+                // 如果路径已经是正确的格式
+                fileUrl = file.path;
+            } else {
+                // 根据文件类型构建路径
+                fileUrl = `/uploads/${file.type}/${file.name}`;
+            }
+            
+            console.log('Loading text file from:', fileUrl);
+            const response = await fetch(fileUrl);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
             const textContent = await response.text();
             
             // 给body添加类防止滚动
@@ -1244,67 +1261,88 @@ class UIManager {
     // 加载并渲染Markdown内容
     async loadAndRenderMarkdown(file) {
         try {
-            const response = await fetch(file.path || `/static/uploads/${file.type}/${file.name}`);
+            // 构建正确的文件URL
+            let fileUrl;
+            if (file.path && file.path.startsWith('/uploads/')) {
+                // 如果路径已经是正确的格式
+                fileUrl = file.path;
+            } else {
+                // 根据文件类型构建路径
+                fileUrl = `/uploads/${file.type}/${file.name}`;
+            }
+            
+            console.log('Loading markdown from:', fileUrl);
+            const response = await fetch(fileUrl);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
             const markdownText = await response.text();
             
             // 配置marked选项
-            marked.setOptions({
-                breaks: true,
-                gfm: true,
-                sanitize: false
-            });
-            
-            // 渲染Markdown
-            const htmlContent = marked.parse(markdownText);
-            
-            // 给body添加类防止滚动
-            document.body.classList.add('modal-open');
-            
-            // 创建预览模态框
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
-            modal.style.overflow = 'hidden';
-            modal.innerHTML = `
-                <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
-                    <!-- 关闭按钮 - 使用深色背景确保对比度 -->
-                    <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
-                        <i class="fa fa-times"></i>
-                    </button>
-                    
-                    <!-- 文件信息 - 显示在顶部 -->
-                    <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
-                        <h3 class="text-xl font-semibold">${file.name}</h3>
-                        <p class="text-gray-300 text-sm">${file.size} • Markdown文档</p>
-                    </div>
-                    
-                    <!-- Markdown内容容器 - 只有这个容器可以滚动 -->
-                    <div class="bg-white rounded-lg w-full h-full max-w-6xl max-h-[90vh] preview-content modal-scrollbar" style="overflow: auto;">
-                        <div class="p-8 prose prose-xl max-w-none">
-                            ${htmlContent}
+            if (typeof marked !== 'undefined') {
+                marked.setOptions({
+                    breaks: true,
+                    gfm: true,
+                    sanitize: false
+                });
+                
+                // 渲染Markdown
+                const htmlContent = marked.parse(markdownText);
+                
+                // 给body添加类防止滚动
+                document.body.classList.add('modal-open');
+                
+                // 创建预览模态框
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
+                modal.style.overflow = 'hidden';
+                modal.innerHTML = `
+                    <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
+                        <!-- 关闭按钮 - 使用深色背景确保对比度 -->
+                        <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
+                            <i class="fa fa-times"></i>
+                        </button>
+                        
+                        <!-- 文件信息 - 显示在顶部 -->
+                        <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
+                            <h3 class="text-xl font-semibold">${file.name}</h3>
+                            <p class="text-gray-300 text-sm">${file.size} • Markdown文档</p>
+                        </div>
+                        
+                        <!-- Markdown内容容器 - 只有这个容器可以滚动 -->
+                        <div class="bg-white rounded-lg w-full h-full max-w-6xl max-h-[90vh] preview-content modal-scrollbar" style="overflow: auto;">
+                            <div class="p-8 prose prose-xl max-w-none">
+                                ${htmlContent}
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            // 点击背景关闭
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.remove();
-                    document.body.classList.remove('modal-open');
-                }
-            });
-            
-            // ESC键关闭
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    modal.remove();
-                    document.body.classList.remove('modal-open');
-                }
-            });
+                `;
+                document.body.appendChild(modal);
+                
+                // 点击背景关闭
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                        document.body.classList.remove('modal-open');
+                    }
+                });
+                
+                // ESC键关闭
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        modal.remove();
+                        document.body.classList.remove('modal-open');
+                    }
+                });
+            } else {
+                throw new Error('Marked.js library not loaded');
+            }
             
         } catch (error) {
-            this.showMessage('无法加载Markdown文件内容', 'error');
+            console.error('Markdown preview error:', error);
+            this.showMessage(`无法加载Markdown文件内容: ${error.message}`, 'error');
         }
     }
 
