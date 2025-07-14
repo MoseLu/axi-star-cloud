@@ -785,14 +785,14 @@ class UIManager {
                 <div class="flex flex-col items-center justify-center w-full mb-2 space-y-1">
                     <div class="flex items-center justify-center">
                         <div class="w-8 h-8 bg-gradient-to-br from-blue-500/30 to-blue-600/30 rounded-lg flex items-center justify-center mr-2">
-                            <i class="fa fa-folder text-xl text-blue-300"></i>
+                            <i class="fa fa-folder text-lg text-blue-300"></i>
                         </div>
                         <span class="text-xs font-medium text-blue-200 drop-shadow-sm">文件数：</span>
                         <span class="text-xs font-bold text-cyan-400 ml-1">${fileCount}</span>
                     </div>
                     <div class="flex items-center justify-center">
                         <div class="w-8 h-8 bg-gradient-to-br from-blue-500/30 to-blue-600/30 rounded-lg flex items-center justify-center mr-2">
-                            <i class="fa fa-calendar text-xs text-blue-300"></i>
+                            <i class="fa fa-calendar text-lg text-blue-300"></i>
                         </div>
                         <span class="text-xs font-medium text-blue-200 drop-shadow-sm">创建于</span>
                         <span class="text-xs font-bold text-cyan-400 ml-1">${this.formatDate(folder.created_at)}</span>
