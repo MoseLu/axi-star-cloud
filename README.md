@@ -226,6 +226,28 @@ project/
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 打开 Pull Request
 
+## 🚀 宝塔面板部署
+
+### 快速部署
+
+1. **安装Go环境**
+   - 在宝塔面板中安装Go环境
+
+2. **创建网站**
+   - 在宝塔面板中创建网站
+
+3. **运行部署脚本**
+   ```bash
+   wget https://raw.githubusercontent.com/MoseLu/axi-star-cloud/main/bt-go-deploy.sh
+   chmod +x bt-go-deploy.sh
+   ./bt-go-deploy.sh
+   ```
+
+4. **配置Nginx反向代理**
+   - 目标URL: `http://127.0.0.1:8080`
+
+详细部署说明请查看 [GO-DEPLOY.md](GO-DEPLOY.md)
+
 ## 📄 许可证
 
 本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
