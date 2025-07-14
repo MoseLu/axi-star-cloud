@@ -41,32 +41,41 @@ jobs:
             cp backend/main backend/main.backup.$(date +%Y%m%d_%H%M%S)
           fi
           
-          # 拉取最新代码
-          echo "🔄 拉取最新代码..."
-          git pull origin main
+          # 尝试拉取最新代码（如果网络可用）
+          echo "🔄 尝试拉取最新代码..."
+          if git pull origin main 2>/dev/null; then
+            echo "✅ 代码更新成功"
+          else
+            echo "⚠️  网络连接失败，使用离线部署模式"
+            # 运行离线部署脚本
+            if [ -f "offline-deploy.sh" ]; then
+              chmod +x offline-deploy.sh
+              ./offline-deploy.sh
+              exit 0
+            fi
+          fi
           
           # 运行权限修复脚本
           echo "🔧 修复权限..."
           chmod +x fix-permissions.sh
           ./fix-permissions.sh
           
-          # 复制新构建的程序
-          echo "📋 更新程序文件..."
-          cp backend/main backend/main.new
-          chmod +x backend/main.new
+          # 重新编译程序
+          echo "🔨 重新编译程序..."
+          cd backend
+          export GOPROXY=https://goproxy.cn,direct
+          go mod download
+          go build -o main main.go
+          chmod +x main
           
           # 停止当前服务
           echo "⏹️  停止当前服务..."
           pkill -f "backend/main" || true
           sleep 2
           
-          # 替换程序文件
-          echo "🔄 替换程序文件..."
-          mv backend/main.new backend/main
-          
           # 启动新服务
           echo "▶️  启动新服务..."
-          cd backend
+          cd /www/wwwroot/axi-star-cloud/backend
           nohup ./main > ../logs/app.log 2>&1 &
           echo $! > ../pid.txt
           
