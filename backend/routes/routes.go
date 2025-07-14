@@ -129,6 +129,7 @@ func (r *Router) registerStaticRoutes() {
 		"./front/uploads",
 		"uploads",
 		"./uploads",
+		"/www/wwwroot/axi-star-cloud/front/uploads", // 添加绝对路径
 	}
 
 	// 设置静态文件路由
@@ -147,6 +148,12 @@ func (r *Router) registerStaticRoutes() {
 			log.Printf("上传文件路径设置为: %s", path)
 			break
 		}
+	}
+
+	// 如果所有相对路径都失败，尝试绝对路径
+	if _, err := os.Stat("/www/wwwroot/axi-star-cloud/front/uploads"); err == nil {
+		r.engine.Static("/uploads", "/www/wwwroot/axi-star-cloud/front/uploads")
+		log.Printf("使用绝对路径设置上传文件路径: /www/wwwroot/axi-star-cloud/front/uploads")
 	}
 }
 
