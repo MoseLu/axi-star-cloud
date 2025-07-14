@@ -7,8 +7,12 @@ Type=simple
 WorkingDirectory=/www/wwwroot/axi-star-cloud
 ExecStart=/www/wwwroot/axi-star-cloud/star-cloud-linux
 Restart=on-failure
+RestartSec=5
 User=www
 Group=www
+StandardOutput=journal
+StandardError=journal
+Environment=GIN_MODE=release
 
 [Install]
 WantedBy=multi-user.target 

@@ -114,11 +114,25 @@ jobs:
 
             # 5. 等待服务启动
             echo "等待服务启动..."
-            sleep 5
+            sleep 10
 
             # 6. 输出状态和日志，确认已重启
             echo "检查服务状态..."
-            sudo systemctl status star-cloud.service --no-pager --lines 10
+            sudo systemctl status star-cloud.service --no-pager --lines 15
+            
+            # 检查服务是否真的在运行
+            if sudo systemctl is-active --quiet star-cloud.service; then
+                echo "✅ 服务启动成功"
+            else
+                echo "❌ 服务启动失败"
+                echo "查看详细日志:"
+                sudo journalctl -u star-cloud.service -n 20 --no-pager
+                echo "检查二进制文件:"
+                ls -la /www/wwwroot/axi-star-cloud/star-cloud-linux
+                echo "检查工作目录:"
+                ls -la /www/wwwroot/axi-star-cloud/
+                exit 1
+            fi
             
             # 7. 健康检查
             echo "执行健康检查..."
