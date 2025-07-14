@@ -250,6 +250,8 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 		return
 	}
 
+	log.Printf("头像上传目录: %s", uploadDir)
+
 	// 生成唯一文件名
 	fileExt := filepath.Ext(file.Filename)
 	fileName := fmt.Sprintf("%s_%s%s", userID, uuid.New().String(), fileExt)

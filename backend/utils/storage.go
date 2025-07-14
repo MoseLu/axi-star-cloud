@@ -69,6 +69,32 @@ func GetUploadDir() string {
 	return "uploads"
 }
 
+// GetAbsoluteUploadDir 获取绝对路径的上传目录
+func GetAbsoluteUploadDir() string {
+	// 尝试多个可能的路径
+	possiblePaths := []string{
+		"uploads",
+		"../uploads",
+		"front/uploads",
+		"../front/uploads",
+		"./uploads",
+		"./front/uploads",
+		"/www/wwwroot/axi-star-cloud/uploads", // 宝塔面板路径
+	}
+
+	for _, path := range possiblePaths {
+		if _, err := os.Stat(path); err == nil {
+			absPath, err := filepath.Abs(path)
+			if err == nil {
+				return absPath
+			}
+		}
+	}
+
+	// 如果都找不到，返回默认路径
+	return "uploads"
+}
+
 // GetAvatarUploadDir 获取头像上传目录的绝对路径
 func GetAvatarUploadDir() string {
 	uploadDir := GetUploadDir()
