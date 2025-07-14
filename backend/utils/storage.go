@@ -97,8 +97,32 @@ func GetAbsoluteUploadDir() string {
 
 // GetAvatarUploadDir 获取头像上传目录的绝对路径
 func GetAvatarUploadDir() string {
-	uploadDir := GetUploadDir()
-	return filepath.Join(uploadDir, "avatars")
+	// 在云端服务器上，头像应该存储在网站根目录下
+	// 尝试多个可能的路径
+	possiblePaths := []string{
+		"uploads/avatars",
+		"../uploads/avatars",
+		"front/uploads/avatars",
+		"../front/uploads/avatars",
+		"./uploads/avatars",
+		"./front/uploads/avatars",
+		"/www/wwwroot/axi-star-cloud/uploads/avatars",   // 宝塔面板路径
+		"/www/wwwroot/redamancy.com.cn/uploads/avatars", // 宝塔面板网站路径
+	}
+
+	for _, path := range possiblePaths {
+		if _, err := os.Stat(path); err == nil {
+			absPath, err := filepath.Abs(path)
+			if err == nil {
+				return absPath
+			}
+		}
+	}
+
+	// 如果都找不到，创建默认路径
+	defaultPath := "uploads/avatars"
+	os.MkdirAll(defaultPath, 0755)
+	return defaultPath
 }
 
 // GetFileUploadDir 获取文件上传目录的绝对路径

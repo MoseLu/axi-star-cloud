@@ -155,9 +155,20 @@ func (r *Router) registerStaticRoutes() {
 
 	// 如果相对路径都失败，尝试绝对路径
 	if !uploadsFound {
-		if _, err := os.Stat("/www/wwwroot/axi-star-cloud/uploads"); err == nil {
-			r.engine.Static("/uploads", "/www/wwwroot/axi-star-cloud/uploads")
-			log.Printf("使用绝对路径设置上传文件路径: /www/wwwroot/axi-star-cloud/uploads")
+		absolutePaths := []string{
+			"/www/wwwroot/axi-star-cloud/uploads",
+			"/www/wwwroot/redamancy.com.cn/uploads",
+			"/www/wwwroot/axi-star-cloud/front/uploads",
+			"/www/wwwroot/redamancy.com.cn/front/uploads",
+		}
+		
+		for _, absPath := range absolutePaths {
+			if _, err := os.Stat(absPath); err == nil {
+				r.engine.Static("/uploads", absPath)
+				log.Printf("使用绝对路径设置上传文件路径: %s", absPath)
+				uploadsFound = true
+				break
+			}
 		}
 	}
 }
