@@ -110,6 +110,12 @@ jobs:
             echo "重载并重启服务..."
             sudo systemctl daemon-reload
             sudo systemctl enable star-cloud.service
+            
+            # 先手动测试程序
+            echo "手动测试程序..."
+            cd /www/wwwroot/axi-star-cloud
+            timeout 10s ./star-cloud-linux || echo "程序测试完成（可能正常退出）"
+            
             sudo systemctl restart star-cloud.service
 
             # 5. 等待服务启动
@@ -131,6 +137,8 @@ jobs:
                 ls -la /www/wwwroot/axi-star-cloud/star-cloud-linux
                 echo "检查工作目录:"
                 ls -la /www/wwwroot/axi-star-cloud/
+                echo "检查数据库文件:"
+                ls -la /www/wwwroot/axi-star-cloud/*.db || echo "没有找到数据库文件"
                 exit 1
             fi
             
