@@ -1501,8 +1501,16 @@ class UIManager {
             // 更新缓存
             this.allFiles = files;
             
-            this.updateFileCount(files.length);
-            this.renderFileList(files);
+            // 根据当前类别过滤文件
+            if (this.currentCategory && this.currentCategory !== 'all') {
+                const filteredFiles = files.filter(file => file.type === this.currentCategory);
+                this.updateFileCount(filteredFiles.length);
+                this.renderFileList(filteredFiles);
+            } else {
+                // 全部文件类别，显示所有文件
+                this.updateFileCount(files.length);
+                this.renderFileList(files);
+            }
         } catch (error) {
             this.showMessage(error.message, 'error');
         }
@@ -2419,8 +2427,16 @@ class UIManager {
                 // 更新缓存
                 this.allFiles = files;
                 
-                this.updateFileCount(files.length);
-                this.renderFileList(files);
+                // 根据当前类别过滤文件
+                if (this.currentCategory && this.currentCategory !== 'all') {
+                    const filteredFiles = files.filter(file => file.type === this.currentCategory);
+                    this.updateFileCount(filteredFiles.length);
+                    this.renderFileList(filteredFiles);
+                } else {
+                    // 全部文件类别，显示所有文件
+                    this.updateFileCount(files.length);
+                    this.renderFileList(files);
+                }
                 
                 // 更新存储信息
                 const storageInfo = await this.api.getStorageInfo();
