@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"backend/database"
+	"backend/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -239,7 +240,7 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 	}
 
 	// 创建上传目录
-	uploadDir := "/www/wwwroot/axi-star-cloud/front/uploads/avatars"
+	uploadDir := utils.GetAvatarUploadDir()
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
 		log.Printf("创建上传目录失败: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
