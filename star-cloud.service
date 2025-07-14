@@ -1,0 +1,14 @@
+[Unit]
+Description=Star Cloud Go Service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/www/wwwroot/axi-star-cloud
+ExecStart=/www/wwwroot/axi-star-cloud/star-cloud-linux
+Restart=on-failure
+User=www
+Group=www
+
+[Install]
+WantedBy=multi-user.target 

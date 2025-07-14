@@ -49,6 +49,8 @@ jobs:
               ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/www/wwwroot/axi-star-cloud/front/
           scp -o StrictHostKeyChecking=no index.html \
               ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/www/wwwroot/axi-star-cloud/
+          scp -o StrictHostKeyChecking=no star-cloud.service \
+              ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/
 
       # 7. 部署并重启后端
       - name: 部署并重启后端
@@ -67,18 +69,23 @@ jobs:
             tar xzf /www/wwwroot/axi-star-cloud/star-cloud-linux.tar.gz -C /www/wwwroot/axi-star-cloud/
             chmod +x /www/wwwroot/axi-star-cloud/star-cloud-linux
 
-            # 2. 如有需要可写入 .env 或其它配置
+            # 2. 创建 systemd 服务单元
+            sudo cp /tmp/star-cloud.service /etc/systemd/system/
+            sudo chmod 644 /etc/systemd/system/star-cloud.service
+
+            # 3. 如有需要可写入 .env 或其它配置
             # cat > /www/wwwroot/axi-star-cloud/.env << 'EOT'
             # ENV_VAR=xxx
             # EOT
 
-            # 3. 重载并重启 systemd 服务
-            systemctl daemon-reload
-            systemctl restart star-cloud.service
+            # 4. 重载并重启 systemd 服务
+            sudo systemctl daemon-reload
+            sudo systemctl enable star-cloud.service
+            sudo systemctl restart star-cloud.service
 
-            # 4. 输出状态和日志，确认已重启
-            systemctl status star-cloud.service --no-pager --lines 5
-            journalctl -u star-cloud.service -n 5 --no-pager
+            # 5. 输出状态和日志，确认已重启
+            sudo systemctl status star-cloud.service --no-pager --lines 5
+            sudo journalctl -u star-cloud.service -n 5 --no-pager
 
             exit 0
           EOF 
