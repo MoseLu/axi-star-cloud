@@ -62,14 +62,37 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
             set -e
 
-            # 0. 杀掉所有遗留的 star-cloud-linux 进程，确保端口 8080 回收
-            pkill -f /www/wwwroot/axi-star-cloud/star-cloud-linux || true
+            # 0. 彻底清理端口占用
+            echo "清理端口8080占用..."
+            sudo systemctl stop star-cloud.service || true
+            sudo pkill -f star-cloud-linux || true
+            sudo pkill -f "8080" || true
+            
+            # 查找并杀死占用8080端口的进程
+            PORT_PID=$(sudo lsof -ti:8080 2>/dev/null || echo "")
+            if [ -n "$PORT_PID" ]; then
+              echo "发现占用8080端口的进程: $PORT_PID"
+              sudo kill -9 $PORT_PID || true
+            fi
+            
+            # 等待端口释放
+            sleep 3
+            
+            # 确认端口已释放
+            if sudo lsof -ti:8080 >/dev/null 2>&1; then
+              echo "警告: 8080端口仍被占用"
+              sudo lsof -i:8080
+            else
+              echo "✅ 8080端口已释放"
+            fi
 
             # 1. 解包并替换二进制
+            echo "解包并替换二进制..."
             tar xzf /www/wwwroot/axi-star-cloud/star-cloud-linux.tar.gz -C /www/wwwroot/axi-star-cloud/
             chmod +x /www/wwwroot/axi-star-cloud/star-cloud-linux
 
             # 2. 创建 systemd 服务单元
+            echo "创建systemd服务单元..."
             sudo cp /tmp/star-cloud.service /etc/systemd/system/
             sudo chmod 644 /etc/systemd/system/star-cloud.service
 
@@ -79,13 +102,30 @@ jobs:
             # EOT
 
             # 4. 重载并重启 systemd 服务
+            echo "重载并重启服务..."
             sudo systemctl daemon-reload
             sudo systemctl enable star-cloud.service
             sudo systemctl restart star-cloud.service
 
-            # 5. 输出状态和日志，确认已重启
-            sudo systemctl status star-cloud.service --no-pager --lines 5
-            sudo journalctl -u star-cloud.service -n 5 --no-pager
+            # 5. 等待服务启动
+            echo "等待服务启动..."
+            sleep 5
+
+            # 6. 输出状态和日志，确认已重启
+            echo "检查服务状态..."
+            sudo systemctl status star-cloud.service --no-pager --lines 10
+            
+            # 7. 健康检查
+            echo "执行健康检查..."
+            for i in {1..3}; do
+              if curl -f -s http://127.0.0.1:8080/health > /dev/null 2>&1; then
+                echo "✅ 服务启动成功！"
+                break
+              else
+                echo "第 $i 次健康检查失败，等待重试..."
+                sleep 3
+              fi
+            done
 
             exit 0
           EOF 
