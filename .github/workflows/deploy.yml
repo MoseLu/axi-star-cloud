@@ -18,16 +18,6 @@ jobs:
       with:
         go-version: '1.23.4'
         
-    - name: 缓存Go模块
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/go/pkg/mod
-          backend/go.sum
-        key: ${{ runner.os }}-go-${{ hashFiles('backend/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-          
     - name: 构建Go程序
       run: |
         cd backend
