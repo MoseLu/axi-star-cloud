@@ -18,66 +18,62 @@ jobs:
       with:
         go-version: '1.23.4'
         
+    - name: 缓存Go模块
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/go/pkg/mod
+          backend/go.sum
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+          
     - name: 构建Go程序
       run: |
         cd backend
         go mod download
-        go build -o main main.go
+        go mod tidy
+        go build -o star-cloud main.go
         
     - name: 部署到服务器
       uses: appleboy/ssh-action@v1.0.3
       with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSH_KEY }}
-        port: ${{ secrets.PORT }}
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_KEY }}
+        port: 22
         script: |
           # 进入项目目录
           cd /www/wwwroot/axi-star-cloud
           
           # 备份当前版本
           echo "📦 备份当前版本..."
-          if [ -f backend/main ]; then
-            cp backend/main backend/main.backup.$(date +%Y%m%d_%H%M%S)
+          if [ -f star-cloud ]; then
+            cp star-cloud star-cloud.backup.$(date +%Y%m%d_%H%M%S)
           fi
           
-          # 尝试拉取最新代码（如果网络可用）
-          echo "🔄 尝试拉取最新代码..."
-          if git pull origin main 2>/dev/null; then
-            echo "✅ 代码更新成功"
-          else
-            echo "⚠️  网络连接失败，使用离线部署模式"
-            # 运行离线部署脚本
-            if [ -f "offline-deploy.sh" ]; then
-              chmod +x offline-deploy.sh
-              ./offline-deploy.sh
-              exit 0
-            fi
-          fi
-          
-          # 运行权限修复脚本
-          echo "🔧 修复权限..."
-          chmod +x fix-permissions.sh
-          ./fix-permissions.sh
+          # 拉取最新代码
+          echo "🔄 拉取最新代码..."
+          git pull origin main
           
           # 重新编译程序
           echo "🔨 重新编译程序..."
           cd backend
-          export GOPROXY=https://goproxy.cn,direct
           go mod download
-          go build -o main main.go
-          chmod +x main
+          go mod tidy
+          go build -o ../star-cloud main.go
+          cd ..
+          chmod +x star-cloud
           
           # 停止当前服务
           echo "⏹️  停止当前服务..."
-          pkill -f "backend/main" || true
+          pkill -f "star-cloud" || true
           sleep 2
           
           # 启动新服务
           echo "▶️  启动新服务..."
-          cd /www/wwwroot/axi-star-cloud/backend
-          nohup ./main > ../logs/app.log 2>&1 &
-          echo $! > ../pid.txt
+          nohup ./star-cloud > logs/app.log 2>&1 &
+          echo $! > pid.txt
           
           # 等待服务启动
           echo "⏳ 等待服务启动..."
@@ -89,12 +85,11 @@ jobs:
             echo "✅ 部署成功！服务已启动"
           else
             echo "❌ 部署失败，回滚到备份版本"
-            if [ -f backend/main.backup.* ]; then
-              latest_backup=$(ls -t backend/main.backup.* | head -1)
-              mv "$latest_backup" backend/main
-              cd backend
-              nohup ./main > ../logs/app.log 2>&1 &
-              echo $! > ../pid.txt
+            if [ -f star-cloud.backup.* ]; then
+              latest_backup=$(ls -t star-cloud.backup.* | head -1)
+              mv "$latest_backup" star-cloud
+              nohup ./star-cloud > logs/app.log 2>&1 &
+              echo $! > pid.txt
             fi
           fi
           
