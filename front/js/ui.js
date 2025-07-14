@@ -32,6 +32,8 @@ class UIManager {
             // 初始化用户头像显示
             await this.initUserProfile();
             
+            // 初始化上传区域提示信息
+            this.updateUploadAreaHint();
     
         }, 100);
     }
@@ -207,11 +209,15 @@ class UIManager {
                         this.forceUpdateCreateFolderButton();
                         // 重新渲染文件夹列表（隐藏所有文件夹）
                         await this.renderFolderList(this.folders || []);
+                        // 更新上传区域提示信息
+                        this.updateUploadAreaHint();
                     } else {
                         this.currentCategory = type;
                         this.filterFiles(type);
                         // 重新渲染文件夹列表（只显示当前分类的文件夹）
                         await this.renderFolderList(this.folders || []);
+                        // 更新上传区域提示信息
+                        this.updateUploadAreaHint();
                     }
                         } catch (error) {
             // 切换文件类型时出错
@@ -1778,10 +1784,46 @@ class UIManager {
             fileGrid.classList.add('hidden');
         }
         
+        // 更新上传提示信息
+        this.updateUploadAreaHint();
+        
         // 滚动到上传区域
         if (uploadArea) {
             uploadArea.scrollIntoView({ behavior: 'smooth' });
         }
+    }
+
+    // 更新上传区域提示信息
+    updateUploadAreaHint() {
+        const dropAreaFileTypes = document.getElementById('drop-area-file-types');
+        if (!dropAreaFileTypes) return;
+
+        let supportedFormats = '';
+        
+        // 根据当前类别显示不同的支持格式
+        switch (this.currentCategory) {
+            case 'image':
+                supportedFormats = 'JPG, PNG, GIF, BMP, WEBP, SVG, ICO';
+                break;
+            case 'video':
+                supportedFormats = 'MP4, AVI, MOV, MKV, WEBM, WMV, FLV, 3GP';
+                break;
+            case 'audio':
+                supportedFormats = 'MP3, WAV, OGG, FLAC, AAC, WMA, M4A';
+                break;
+            case 'document':
+                supportedFormats = 'PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, MD, RTF';
+                break;
+            case 'other':
+                supportedFormats = 'ZIP, RAR, 7Z, TAR, GZ, ISO, EXE, APK';
+                break;
+            default:
+                // 全部文件类别显示所有格式
+                supportedFormats = 'JPG, PNG, GIF, MP4, AVI, MP3, WAV, PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, MD, ZIP, RAR 等';
+                break;
+        }
+        
+        dropAreaFileTypes.textContent = `支持的格式: ${supportedFormats}`;
     }
 
     // 隐藏上传区域
