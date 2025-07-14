@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星际云盘 - 文件存储与管理</title>
+    <link rel="icon" type="image/png" href="/static/public/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#7B61FF',
+                        dark: '#0F172A',
+                        'dark-light': '#1E293B',
+                        'purple-deep': '#4338CA',
+                        'purple-light': '#818CF8',
+                        'blue-light': '#3B82F6',
+                        'blue-deep': '#0A2463',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px rgba(123, 97, 255, 0.5)' },
+                            '100%': { boxShadow: '0 0 20px rgba(123, 97, 255, 0.8), 0 0 30px rgba(59, 130, 246, 0.6)' },
+                        }
+                    }
+                },
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 只保留 Notify，不再引入 MessageBox 以避免登录成功弹中央提示 -->
+    <script src="/static/js/notify.js"></script>
+    
+    <!-- 强制隐藏全局 MessageBox（双保险）-->
+    <style>
+        #global-message-box { display: none !important; }
+    </style>
+</head>
+<body class="bg-dark text-white font-inter">
+    <!-- 登录页面 -->
+    <div id="login-page" class="hidden">
+        <!-- 登录页面内容将通过JavaScript动态加载 -->
+    </div>
+
+    <!-- 主应用 -->
+    <div id="app" class="hidden">
+        <!-- 页面头部 -->
+        <header id="header"></header>
+        <!-- 主内容区域 -->
+        <main id="main-content" class="flex-1 px-4 py-8">
+            <!-- 主内容将通过JavaScript动态加载 -->
+        </main>
+    </div>
+
+    <!-- 模态框容器 -->
+    <div id="modals">
+        <!-- 各种模态框将在这里动态创建 -->
+    </div>
+
+    <!-- 加载JavaScript模块 -->
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/ui.js"></script>
+    <script src="/static/js/app.js"></script>
+
+    <script>
+        // 动态加载HTML模板
+        async function loadTemplate(templateName) {
+            try {
+                const response = await fetch(`/static/html/${templateName}.html`);
+                return await response.text();
+            } catch (error) {
+                console.error(`加载模板 ${templateName} 失败:`, error);
+                return '';
+            }
+        }
+
+        // 初始化页面模板
+        async function initializeTemplates() {
+            try {
+                // 加载登录页面
+                const loginTemplate = await loadTemplate('login');
+                document.getElementById('login-page').innerHTML = loginTemplate;
+
+                // 加载头部
+                const headerTemplate = await loadTemplate('header');
+                document.getElementById('header').innerHTML = headerTemplate;
+
+                // 加载主内容
+                const mainContentTemplate = await loadTemplate('main-content');
+                document.getElementById('main-content').innerHTML = mainContentTemplate;
+
+                // 模板加载完成后初始化应用
+                console.log('模板加载完成，初始化应用...');
+                window.app = new App();
+            } catch (error) {
+                console.error('模板加载失败:', error);
+            }
+        }
+
+        // 粒子效果配置
+        function initParticles() {
+            if (typeof particlesJS !== 'undefined') {
+                particlesJS("particles-js", {
+                    particles: {
+                        number: { value: 80, density: { enable: true, value_area: 800 } },
+                        color: { value: "#ffffff" },
+                        shape: {
+                            type: "circle",
+                            stroke: { width: 0, color: "#000000" },
+                            polygon: { nb_sides: 5 }
+                        },
+                        opacity: {
+                            value: 0.5,
+                            random: true,
+                            anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false }
+                        },
+                        size: {
+                            value: 3,
+                            random: true,
+                            anim: { enable: true, speed: 2, size_min: 0.1, sync: false }
+                        },
+                        line_linked: {
+                            enable: true,
+                            distance: 150,
+                            color: "#7B61FF",
+                            opacity: 0.2,
+                            width: 1
+                        },
+                        move: {
+                            enable: true,
+                            speed: 1,
+                            direction: "none",
+                            random: true,
+                            straight: false,
+                            out_mode: "out",
+                            bounce: false
+                        }
+                    },
+                    interactivity: {
+                        detect_on: "canvas",
+                        events: {
+                            onhover: { enable: true, mode: "grab" },
+                            onclick: { enable: true, mode: "push" },
+                            resize: true
+                        },
+                        modes: {
+                            grab: { distance: 140, line_linked: { opacity: 0.5 } },
+                            push: { particles_nb: 4 }
+                        }
+                    },
+                    retina_detect: true
+                });
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initializeTemplates();
+            // 初始化粒子效果
+            setTimeout(initParticles, 100);
+        });
+    </script>
+</body>
+</html> 
