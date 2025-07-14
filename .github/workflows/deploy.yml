@@ -57,6 +57,8 @@ jobs:
               ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/www/wwwroot/axi-star-cloud/
           scp -o StrictHostKeyChecking=no star-cloud.service \
               ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/
+          scp -r -o StrictHostKeyChecking=no backend/config \
+              ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/www/wwwroot/axi-star-cloud/
 
       # 7. 部署并重启后端
       - name: 部署并重启后端
