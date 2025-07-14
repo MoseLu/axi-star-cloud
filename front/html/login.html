@@ -1,166 +1,148 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>星际云盘 - 登录</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/custom.css">
-</head>
-<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen flex items-center justify-center p-4">
-    <!-- 粒子背景 -->
-    <div id="particles-js" class="absolute inset-0"></div>
+<!-- 登录页面 -->
+<div class="min-h-screen relative z-50">
+    <!-- 星空背景 -->
+    <div class="fixed inset-0 bg-stars z-0 opacity-30"></div>
+    <div class="fixed inset-0 bg-gradient-to-br from-blue-deep via-dark to-purple-deep z-[-1]"></div>
+    
+    <!-- 粒子效果容器 -->
+    <div id="particles-js" class="fixed inset-0 pointer-events-none z-10"></div>
     
     <!-- 登录/注册卡片 -->
-    <div class="relative z-10 w-full max-w-md">
-        <!-- 登录表单 -->
-        <div id="login-form" class="glass-effect rounded-2xl p-8 border border-purple-light/20 shadow-2xl">
-            <div class="text-center mb-8">
-                <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fa fa-cloud text-3xl text-white"></i>
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="relative z-10 w-full max-w-md">
+            <!-- 登录表单 -->
+            <div id="login-form" class="glass-effect rounded-2xl p-8 border border-purple-light/20 shadow-2xl">
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa fa-cloud text-3xl text-white"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-light to-blue-light mb-2">星际云盘</h1>
+                    <p class="text-gray-300 text-sm">登录您的账户</p>
                 </div>
-                <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-light to-blue-light mb-2">星际云盘</h1>
-                <p class="text-gray-300 text-sm">登录您的账户</p>
+
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">用户名</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa fa-user text-gray-400"></i>
+                            </div>
+                            <input type="text" id="loginUsername" name="username" required
+                                   class="w-full pl-10 pr-4 py-3 bg-dark-light border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-light focus:border-transparent transition-all duration-300"
+                                   placeholder="请输入用户名">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">密码</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa fa-lock text-gray-400"></i>
+                            </div>
+                            <input type="password" id="loginPassword" name="password" required
+                                   class="w-full pl-10 pr-4 py-3 bg-dark-light border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-light focus:border-transparent transition-all duration-300"
+                                   placeholder="请输入密码">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="loginBtn"
+                            class="w-full bg-gradient-to-r from-purple-light to-blue-light text-white font-semibold py-3 px-6 rounded-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        <i class="fa fa-sign-in mr-2"></i>登录
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <p class="text-gray-400 text-sm">还没有账户？</p>
+                    <button id="showRegisterBtn" class="text-purple-light hover:text-purple-300 font-medium transition-colors duration-300">
+                        立即注册
+                    </button>
+                </div>
             </div>
 
-            <form id="loginForm" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">用户名</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fa fa-user text-gray-400"></i>
-                        </div>
-                        <input type="text" id="loginUsername" name="username" required
-                               class="w-full pl-10 pr-4 py-3 bg-dark-light border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-light focus:border-transparent transition-all duration-300"
-                               placeholder="请输入用户名">
+            <!-- 注册表单 -->
+            <div id="register-form" class="glass-effect rounded-2xl p-8 border border-purple-light/20 shadow-2xl hidden">
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa fa-user-plus text-3xl text-white"></i>
                     </div>
+                    <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-light to-blue-light mb-2">星际云盘</h1>
+                    <p class="text-gray-300 text-sm">创建新账户</p>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">密码</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fa fa-lock text-gray-400"></i>
-                        </div>
-                        <input type="password" id="loginPassword" name="password" required
-                               class="w-full pl-10 pr-4 py-3 bg-dark-light border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-light focus:border-transparent transition-all duration-300"
-                               placeholder="请输入密码">
-                    </div>
-                </div>
-
-                <button type="submit" id="loginBtn"
-                        class="w-full bg-gradient-to-r from-purple-light to-blue-light text-white font-semibold py-3 px-6 rounded-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
-                    <i class="fa fa-sign-in mr-2"></i>登录
-                </button>
-            </form>
-
-            <div class="mt-6 text-center">
-                <p class="text-gray-400 text-sm">还没有账户？</p>
-                <button id="showRegisterBtn" class="text-purple-light hover:text-purple-300 font-medium transition-colors duration-300">
-                    立即注册
-                </button>
-            </div>
-        </div>
-
-        <!-- 注册表单 -->
-        <div id="register-form" class="glass-effect rounded-2xl p-8 border border-purple-light/20 shadow-2xl hidden">
-            <div class="text-center mb-8">
-                <div class="w-20 h-20 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fa fa-user-plus text-3xl text-white"></i>
-                </div>
-                <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-light to-blue-light mb-2">星际云盘</h1>
-                <p class="text-gray-300 text-sm">创建新账户</p>
-            </div>
-
-            <form id="registerForm" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">用户名</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fa fa-user text-gray-400"></i>
-                        </div>
-                        <input type="text" id="registerUsername" name="username" required
-                               class="w-full pl-10 pr-4 py-3 bg-dark-light border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-light focus:border-transparent transition-all duration-300"
-                               placeholder="请输入用户名">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">密码</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fa fa-lock text-gray-400"></i>
-                        </div>
-                        <input type="password" id="registerPassword" name="password" required
-                               class="w-full pl-10 pr-4 py-3 bg-dark-light border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-light focus:border-transparent transition-all duration-300"
-                               placeholder="请输入密码">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">确认密码</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fa fa-lock text-gray-400"></i>
-                        </div>
-                        <input type="password" id="confirmPassword" name="confirmPassword" required
-                               class="w-full pl-10 pr-4 py-3 bg-dark-light border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-light focus:border-transparent transition-all duration-300"
-                               placeholder="请再次输入密码">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">邮箱（可选）</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fa fa-envelope text-gray-400"></i>
-                        </div>
-                        <input type="email" id="registerEmail" name="email"
-                               class="w-full pl-10 pr-4 py-3 bg-dark-light border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-light focus:border-transparent transition-all duration-300"
-                               placeholder="请输入邮箱地址">
-                    </div>
-                </div>
-
-                <div class="bg-blue-900/20 border border-blue-400/30 rounded-lg p-4">
-                    <div class="flex items-start space-x-3">
-                        <i class="fa fa-info-circle text-blue-400 mt-1"></i>
-                        <div class="text-sm text-gray-300">
-                            <p class="font-medium text-blue-300 mb-1">注册说明</p>
-                            <p>• 新用户默认获得 1GB 存储空间</p>
-                            <p>• 用户名不能重复</p>
-                            <p>• 管理员可以调整存储空间限制</p>
+                <form id="registerForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">用户名</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa fa-user text-gray-400"></i>
+                            </div>
+                            <input type="text" id="registerUsername" name="username" required
+                                   class="w-full pl-10 pr-4 py-3 bg-dark-light border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-light focus:border-transparent transition-all duration-300"
+                                   placeholder="请输入用户名">
                         </div>
                     </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">密码</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa fa-lock text-gray-400"></i>
+                            </div>
+                            <input type="password" id="registerPassword" name="password" required
+                                   class="w-full pl-10 pr-4 py-3 bg-dark-light border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-light focus:border-transparent transition-all duration-300"
+                                   placeholder="请输入密码">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">确认密码</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa fa-lock text-gray-400"></i>
+                            </div>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required
+                                   class="w-full pl-10 pr-4 py-3 bg-dark-light border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-light focus:border-transparent transition-all duration-300"
+                                   placeholder="请再次输入密码">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">邮箱（可选）</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa fa-envelope text-gray-400"></i>
+                            </div>
+                            <input type="email" id="registerEmail" name="email"
+                                   class="w-full pl-10 pr-4 py-3 bg-dark-light border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-light focus:border-transparent transition-all duration-300"
+                                   placeholder="请输入邮箱地址">
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-900/20 border border-blue-400/30 rounded-lg p-4">
+                        <div class="flex items-start space-x-3">
+                            <i class="fa fa-info-circle text-blue-400 mt-1"></i>
+                            <div class="text-sm text-gray-300">
+                                <p class="font-medium text-blue-300 mb-1">注册说明</p>
+                                <p>• 新用户默认获得 1GB 存储空间</p>
+                                <p>• 用户名不能重复</p>
+                                <p>• 管理员可以调整存储空间限制</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="registerBtn"
+                            class="w-full bg-gradient-to-r from-green-light to-blue-light text-white font-semibold py-3 px-6 rounded-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        <i class="fa fa-user-plus mr-2"></i>注册
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <p class="text-gray-400 text-sm">已有账户？</p>
+                    <button id="showLoginBtn" class="text-green-light hover:text-green-300 font-medium transition-colors duration-300">
+                        立即登录
+                    </button>
                 </div>
-
-                <button type="submit" id="registerBtn"
-                        class="w-full bg-gradient-to-r from-green-light to-blue-light text-white font-semibold py-3 px-6 rounded-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
-                    <i class="fa fa-user-plus mr-2"></i>注册
-                </button>
-            </form>
-
-            <div class="mt-6 text-center">
-                <p class="text-gray-400 text-sm">已有账户？</p>
-                <button id="showLoginBtn" class="text-green-light hover:text-green-300 font-medium transition-colors duration-300">
-                    立即登录
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 全局消息框 -->
-    <div id="global-message-box" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 hidden">
-        <div class="bg-dark-light border border-gray-600 rounded-lg px-6 py-4 shadow-2xl backdrop-blur-sm">
-            <div class="flex items-center space-x-3">
-                <i id="message-icon" class="text-lg"></i>
-                <span id="message-text" class="text-white font-medium"></span>
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script src="js/auth.js"></script>
-</body>
-</html> 
+</div> 

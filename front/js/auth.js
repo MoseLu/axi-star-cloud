@@ -122,39 +122,42 @@ class AuthManager {
 
     // 设置事件监听器
     setupEventListeners() {
-        // 登录表单提交
-        const loginForm = document.getElementById('loginForm');
-        if (loginForm) {
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleLogin();
-            });
-        }
+        // 延迟设置事件监听器，确保DOM元素已加载
+        setTimeout(() => {
+            // 登录表单提交
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleLogin();
+                });
+            }
 
-        // 注册表单提交
-        const registerForm = document.getElementById('registerForm');
-        if (registerForm) {
-            registerForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleRegister();
-            });
-        }
+            // 注册表单提交
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleRegister();
+                });
+            }
 
-        // 切换表单按钮
-        const showRegisterBtn = document.getElementById('showRegisterBtn');
-        const showLoginBtn = document.getElementById('showLoginBtn');
-        
-        if (showRegisterBtn) {
-            showRegisterBtn.addEventListener('click', () => {
-                this.showRegisterForm();
-            });
-        }
-        
-        if (showLoginBtn) {
-            showLoginBtn.addEventListener('click', () => {
-                this.showLoginForm();
-            });
-        }
+            // 切换表单按钮
+            const showRegisterBtn = document.getElementById('showRegisterBtn');
+            const showLoginBtn = document.getElementById('showLoginBtn');
+            
+            if (showRegisterBtn) {
+                showRegisterBtn.addEventListener('click', () => {
+                    this.showRegisterForm();
+                });
+            }
+            
+            if (showLoginBtn) {
+                showLoginBtn.addEventListener('click', () => {
+                    this.showLoginForm();
+                });
+            }
+        }, 100);
     }
 
     // 显示注册表单
@@ -219,6 +222,9 @@ class AuthManager {
                 };
                 
                 localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                
+                // 触发登录成功事件
+                window.dispatchEvent(new CustomEvent('loginSuccess', { detail: this.currentUser }));
                 
                 // 延迟跳转到主页面
                 setTimeout(() => {
@@ -319,45 +325,13 @@ class AuthManager {
 
     // 显示消息
     showMessage(message, type = 'info') {
-        const messageBox = document.getElementById('global-message-box');
-        const messageText = document.getElementById('message-text');
-        const messageIcon = document.getElementById('message-icon');
-
-        if (!messageBox || !messageText || !messageIcon) return;
-
-        // 设置图标和样式
-        let iconClass = '';
-        let bgColor = '';
-
-        switch (type) {
-            case 'success':
-                iconClass = 'fa fa-check-circle text-green-400';
-                bgColor = 'border-green-500';
-                break;
-            case 'error':
-                iconClass = 'fa fa-exclamation-circle text-red-400';
-                bgColor = 'border-red-500';
-                break;
-            case 'warning':
-                iconClass = 'fa fa-exclamation-triangle text-yellow-400';
-                bgColor = 'border-yellow-500';
-                break;
-            default:
-                iconClass = 'fa fa-info-circle text-blue-400';
-                bgColor = 'border-blue-500';
+        // 使用全局的Notify系统
+        if (window.Notify) {
+            window.Notify.show({ message: message, type: type });
+        } else {
+            // 备用方案：使用alert
+            alert(message);
         }
-
-        messageIcon.className = iconClass;
-        messageText.textContent = message;
-        messageBox.querySelector('div').className = `bg-dark-light border ${bgColor} rounded-lg px-6 py-4 shadow-2xl backdrop-blur-sm`;
-
-        // 显示消息
-        messageBox.classList.remove('hidden');
-
-        // 3秒后自动隐藏
-        setTimeout(() => {
-            messageBox.classList.add('hidden');
-        }, 3000);
     }
 }
 
