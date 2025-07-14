@@ -1419,17 +1419,22 @@ class UIManager {
     // 下载文件
     async downloadFile(file) {
         try {
-            const response = await this.api.downloadFile(file.id);
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = file.name;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            this.showMessage('文件下载成功', 'success');
+            // 直接使用window.open进行下载，避免另存为对话框
+            const userId = this.api.getCurrentUserId();
+            const downloadUrl = `${this.api.baseUrl}/files/${file.id}/download?user_id=${userId}`;
+            
+            // 创建一个隐藏的iframe来触发下载
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = downloadUrl;
+            document.body.appendChild(iframe);
+            
+            // 延迟移除iframe
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 1000);
+            
+            this.showMessage('文件下载已开始', 'success');
         } catch (error) {
             this.showMessage(error.message, 'error');
         }

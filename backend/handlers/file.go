@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -160,8 +161,9 @@ func (h *FileHandler) DownloadFile(c *gin.Context) {
 		return
 	}
 
-	// 设置响应头
-	c.Header("Content-Disposition", "attachment; filename="+file.Name)
+	// 设置响应头 - 正确处理文件名编码
+	disposition := "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
+	c.Header("Content-Disposition", disposition)
 	c.Header("Content-Type", "application/octet-stream")
 	c.Header("Content-Length", strconv.FormatInt(fileInfo.Size(), 10))
 
