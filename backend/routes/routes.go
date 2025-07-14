@@ -155,13 +155,22 @@ func (r *Router) registerStaticRoutes() {
 			r.engine.Static("/uploads", path)
 			log.Printf("✅ 上传文件路径设置为: %s", path)
 			uploadsFound = true
+
+			// 测试路径是否可访问
+			testFile := filepath.Join(path, "test.txt")
+			if err := os.WriteFile(testFile, []byte("test"), 0644); err == nil {
+				log.Printf("✅ 路径可写: %s", path)
+				os.Remove(testFile) // 清理测试文件
+			} else {
+				log.Printf("❌ 路径不可写: %s, 错误: %v", path, err)
+			}
 			break
 		} else {
 			log.Printf("❌ 路径不存在: %s, 错误: %v", path, err)
 		}
 	}
 
-		// 如果相对路径都失败，尝试绝对路径
+	// 如果相对路径都失败，尝试绝对路径
 	if !uploadsFound {
 		log.Printf("相对路径都失败，尝试绝对路径...")
 		absolutePaths := []string{
@@ -170,7 +179,7 @@ func (r *Router) registerStaticRoutes() {
 			"/www/wwwroot/axi-star-cloud/front/uploads",
 			"/www/wwwroot/redamancy.com.cn/front/uploads",
 		}
-		
+
 		for _, absPath := range absolutePaths {
 			log.Printf("检查绝对路径: %s", absPath)
 			if _, err := os.Stat(absPath); err == nil {

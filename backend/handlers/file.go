@@ -230,6 +230,8 @@ func (h *FileHandler) UploadFile(c *gin.Context) {
 
 	// 创建上传目录 - 使用统一的路径处理
 	uploadDir := utils.GetFileUploadDir(fileType)
+	log.Printf("文件上传目录: %s", uploadDir)
+
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
 		log.Printf("创建上传目录错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建上传目录失败"})
@@ -238,6 +240,7 @@ func (h *FileHandler) UploadFile(c *gin.Context) {
 
 	// 保存文件
 	filePath := filepath.Join(uploadDir, header.Filename)
+	log.Printf("文件保存路径: %s", filePath)
 	dst, err := os.Create(filePath)
 	if err != nil {
 		log.Printf("创建文件错误: %v", err)
