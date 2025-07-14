@@ -40,12 +40,18 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
             "mkdir -p /www/wwwroot/axi-star-cloud/logs /www/wwwroot/axi-star-cloud/uploads /www/wwwroot/axi-star-cloud/config /www/wwwroot/axi-star-cloud/front"
 
-      # 6. 上传二进制包和前端文件
+      # 6. 上传二进制包和前端文件（排除uploads）
       - name: 上传文件
         run: |
           scp -o StrictHostKeyChecking=no star-cloud-linux.tar.gz \
               ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/www/wwwroot/axi-star-cloud/
-          scp -r -o StrictHostKeyChecking=no front/* \
+          scp -r -o StrictHostKeyChecking=no front/css \
+              ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/www/wwwroot/axi-star-cloud/front/
+          scp -r -o StrictHostKeyChecking=no front/html \
+              ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/www/wwwroot/axi-star-cloud/front/
+          scp -r -o StrictHostKeyChecking=no front/js \
+              ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/www/wwwroot/axi-star-cloud/front/
+          scp -r -o StrictHostKeyChecking=no front/public \
               ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/www/wwwroot/axi-star-cloud/front/
           scp -o StrictHostKeyChecking=no index.html \
               ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/www/wwwroot/axi-star-cloud/
@@ -96,10 +102,9 @@ jobs:
             sudo cp /tmp/star-cloud.service /etc/systemd/system/
             sudo chmod 644 /etc/systemd/system/star-cloud.service
 
-            # 3. 如有需要可写入 .env 或其它配置
-            # cat > /www/wwwroot/axi-star-cloud/.env << 'EOT'
-            # ENV_VAR=xxx
-            # EOT
+            # 3. 确保uploads目录存在
+            echo "确保uploads目录结构..."
+            mkdir -p /www/wwwroot/axi-star-cloud/front/uploads/{image,document,audio,video,other,avatars}
 
             # 4. 重载并重启 systemd 服务
             echo "重载并重启服务..."

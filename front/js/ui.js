@@ -1299,6 +1299,9 @@ class UIManager {
             
             console.log('Loading markdown from:', fileUrl);
             console.log('File object:', file);
+            console.log('File path:', file.path);
+            console.log('File type:', file.type);
+            console.log('File name:', file.name);
             
             // 尝试多种路径格式 - 优先使用/uploads路径
             const possibleUrls = [
@@ -1318,10 +1321,15 @@ class UIManager {
                 try {
                     console.log('Trying URL:', url);
                     response = await fetch(url);
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+                    
                     if (response.ok) {
                         successfulUrl = url;
                         console.log('Successfully loaded from:', url);
                         break;
+                    } else {
+                        console.log('Failed with status:', response.status, response.statusText);
                     }
                 } catch (e) {
                     console.log('Failed to fetch:', url, e);
