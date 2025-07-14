@@ -72,6 +72,25 @@ class ApiManager {
         }
     }
 
+    // 获取单个文件详细信息
+    async getFile(fileId) {
+        const userId = this.getCurrentUserId();
+        if (!userId) throw new Error('请先登录');
+
+        try {
+            const response = await fetch(`${this.baseUrl}/files/${fileId}?user_id=${userId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                return data.file;
+            } else {
+                throw new Error(data.error || '获取文件信息失败');
+            }
+        } catch (error) {
+            throw new Error('获取文件信息失败');
+        }
+    }
+
     // 获取文件夹列表
     async getFolders(category = null) {
         const userId = this.getCurrentUserId();

@@ -1270,28 +1270,16 @@ class UIManager {
     // 预览Markdown文档
     async previewMarkdown(file) {
         try {
-            // 加载marked.js库
-            if (typeof marked === 'undefined') {
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
-                script.onload = () => this.loadAndRenderMarkdown(file);
-                document.head.appendChild(script);
-            } else {
-                this.loadAndRenderMarkdown(file);
-            }
-        } catch (error) {
-            this.showMessage('无法加载Markdown预览功能', 'error');
-        }
-    }
-
-    // 加载并渲染Markdown内容
-    async loadAndRenderMarkdown(file) {
-        try {
+            // 先通过API获取文件的完整信息
+            console.log('Getting file details from API...');
+            const fileDetails = await this.api.getFile(file.id);
+            console.log('File details from API:', fileDetails);
+            
             // 构建正确的文件URL
             let fileUrl;
-            if (file.path && file.path.startsWith('/uploads/')) {
+            if (fileDetails.path && fileDetails.path.startsWith('/uploads/')) {
                 // 如果路径已经是正确的格式
-                fileUrl = file.path;
+                fileUrl = fileDetails.path;
             } else {
                 // 根据文件类型构建路径
                 fileUrl = `/uploads/${file.type}/${file.name}`;
@@ -1299,13 +1287,15 @@ class UIManager {
             
             console.log('Loading markdown from:', fileUrl);
             console.log('File object:', file);
-            console.log('File path:', file.path);
+            console.log('File details:', fileDetails);
+            console.log('File path:', fileDetails.path);
             console.log('File type:', file.type);
             console.log('File name:', file.name);
             
             // 尝试多种路径格式 - 优先使用/uploads路径
             const possibleUrls = [
                 fileUrl,
+                fileDetails.path,
                 file.path,
                 `/uploads/${file.type}/${file.name}`,
                 `/static/uploads/${file.type}/${file.name}`,
