@@ -13,28 +13,44 @@ jobs:
     - name: 检出代码
       uses: actions/checkout@v4
       
-    - name: 安装Go
-      run: |
-        wget https://go.dev/dl/go1.23.4.linux-amd64.tar.gz
-        sudo tar -C /usr/local -xzf go1.23.4.linux-amd64.tar.gz
-        echo "GOROOT=/usr/local/go" >> $GITHUB_ENV
-        echo "/usr/local/go/bin" >> $GITHUB_PATH
+    - name: 设置Go环境
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23.4'
         
-    - name: 构建Go程序
+    - name: 编译并打包
       run: |
         cd backend
-        go mod download
         go mod tidy
-        go build -o star-cloud main.go
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o star-cloud-linux main.go
+        tar czf ../star-cloud-linux.tar.gz star-cloud-linux
         
-    - name: 部署到服务器
-      uses: appleboy/ssh-action@v1.0.3
+    - name: 启动ssh-agent
+      uses: webfactory/ssh-agent@v0.5.4
       with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SERVER_KEY }}
-        port: 22
-        script: |
+        ssh-private-key: ${{ secrets.SERVER_KEY }}
+        
+    - name: 创建远程目录
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
+          "mkdir -p /www/wwwroot/axi-star-cloud/logs /www/wwwroot/axi-star-cloud/uploads"
+          
+    - name: 上传文件
+      run: |
+        scp -o StrictHostKeyChecking=no star-cloud-linux.tar.gz \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/www/wwwroot/axi-star-cloud/
+            
+    - name: 部署并重启服务
+      run: |
+        # 把私钥写到文件
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SERVER_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        
+        # SSH到服务器执行部署命令
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+          set -e
+          
           echo "=== 开始部署流程 ==="
           date
           
@@ -45,97 +61,13 @@ jobs:
           
           # 停止当前服务
           echo "停止当前服务..."
-          if [ -f pid.txt ]; then
-            pid=$(cat pid.txt)
-            echo "找到PID文件，PID: $pid"
-            if kill -0 $pid 2>/dev/null; then
-              echo "正在停止进程 $pid..."
-              kill $pid
-              sleep 5
-              if kill -0 $pid 2>/dev/null; then
-                echo "强制停止进程 $pid..."
-                kill -9 $pid
-              fi
-              echo "已停止进程 $pid"
-            else
-              echo "进程 $pid 不存在"
-            fi
-          else
-            echo "没有找到PID文件"
-          fi
-          
-          # 确保所有相关进程都已停止
-          echo "检查是否还有相关进程..."
-          pkill -f "star-cloud" && echo "已停止其他相关进程" || echo "没有其他相关进程"
+          pkill -f "star-cloud" || echo "没有找到运行中的服务"
           sleep 3
           
-          # 检查端口占用
-          echo "检查8080端口占用..."
-          if lsof -i :8080 > /dev/null 2>&1; then
-            echo "端口8080被占用，正在释放..."
-            lsof -ti :8080 | xargs kill -9
-            sleep 2
-          else
-            echo "端口8080空闲"
-          fi
-          
-          # 拉取最新代码（带重试）
-          echo "拉取最新代码..."
-          for i in {1..3}; do
-            echo "第 $i 次尝试拉取代码..."
-            if git pull origin main; then
-              echo "✅ 代码拉取成功"
-              break
-            else
-              echo "❌ 代码拉取失败，等待重试..."
-              sleep 10
-            fi
-          done
-          
-          # 设置Go环境
-          export PATH=$PATH:/usr/local/btgo/bin
-          echo "Go环境路径: $PATH"
-          
-          # 验证Go环境
-          echo "验证Go环境..."
-          if /usr/local/btgo/bin/go version; then
-            echo "✅ Go环境正常"
-          else
-            echo "❌ Go环境验证失败"
-            exit 1
-          fi
-          
-          # 重新编译程序
-          echo "开始编译程序..."
-          cd backend
-          echo "当前目录: $(pwd)"
-          echo "检查go.mod文件..."
-          ls -la go.mod go.sum
-          
-          echo "下载依赖..."
-          /usr/local/btgo/bin/go mod download
-          
-          echo "整理依赖..."
-          /usr/local/btgo/bin/go mod tidy
-          
-          echo "编译程序..."
-          /usr/local/btgo/bin/go build -o ../star-cloud main.go
-          cd ..
-          
-          # 检查编译结果
-          if [ -f star-cloud ]; then
-            echo "✅ 编译成功"
-            ls -la star-cloud
-            file star-cloud
-          else
-            echo "❌ 编译失败"
-            echo "检查backend目录内容:"
-            ls -la backend/
-            exit 1
-          fi
-          
-          # 设置执行权限
-          chmod +x star-cloud
+          # 解包并替换二进制
+          echo "解包并替换二进制..."
+          tar xzf star-cloud-linux.tar.gz
+          chmod +x star-cloud-linux
           
           # 创建必要的目录
           echo "创建必要的目录..."
@@ -144,7 +76,7 @@ jobs:
           
           # 启动新服务
           echo "启动新服务..."
-          nohup ./star-cloud > logs/app.log 2>&1 &
+          nohup ./star-cloud-linux > logs/app.log 2>&1 &
           echo $! > pid.txt
           echo "服务PID: $!"
           
@@ -158,7 +90,7 @@ jobs:
             echo "✅ 服务已启动"
             
             # 健康检查
-            for i in {1..5}; do
+            for i in {1..3}; do
               echo "第 $i 次健康检查..."
               if curl -f -s http://localhost:8080/health > /dev/null 2>&1; then
                 echo "✅ 部署成功！服务正常运行"
@@ -171,30 +103,13 @@ jobs:
               fi
             done
             
-            echo "❌ 健康检查失败，但服务正在运行"
+            echo "❌ 健康检查失败"
             echo "查看服务日志:"
             tail -20 logs/app.log || echo "日志文件不存在"
-            
-            # 显示进程信息
-            ps aux | grep star-cloud
           else
             echo "❌ 服务启动失败"
             echo "查看服务日志:"
             tail -50 logs/app.log || echo "日志文件不存在"
-            
-            # 尝试回滚
-            if [ -f star-cloud.backup.* ]; then
-              echo "尝试回滚..."
-              latest_backup=$(ls -t star-cloud.backup.* | head -1)
-              mv "$latest_backup" star-cloud
-              chmod +x star-cloud
-              nohup ./star-cloud > logs/app.log 2>&1 &
-              echo $! > pid.txt
-              sleep 10
-              if pgrep -f "star-cloud" > /dev/null; then
-                echo "✅ 回滚成功"
-              else
-                echo "❌ 回滚失败"
-              fi
-            fi
-          fi 
+            exit 1
+          fi
+        EOF 
