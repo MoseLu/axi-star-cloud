@@ -57,16 +57,16 @@ func GetUploadDir() string {
 	currentDir, err := os.Getwd()
 	if err != nil {
 		// 如果获取失败，使用默认路径
-		return "../front/uploads"
+		return "../uploads"
 	}
 
 	// 检查是否在backend目录中
 	if strings.HasSuffix(currentDir, "backend") {
-		return filepath.Join(currentDir, "../front/uploads")
+		return filepath.Join(currentDir, "../uploads")
 	}
 
 	// 如果在项目根目录，直接使用相对路径
-	return "front/uploads"
+	return "uploads"
 }
 
 // GetAvatarUploadDir 获取头像上传目录的绝对路径

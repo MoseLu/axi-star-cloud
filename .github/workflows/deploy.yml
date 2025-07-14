@@ -106,7 +106,7 @@ jobs:
 
             # 3. 确保uploads目录存在
             echo "确保uploads目录结构..."
-            mkdir -p /www/wwwroot/axi-star-cloud/front/uploads/{image,document,audio,video,other,avatars}
+            mkdir -p /www/wwwroot/axi-star-cloud/uploads/{image,document,audio,video,other,avatars}
 
             # 4. 重载并重启 systemd 服务
             echo "重载并重启服务..."
