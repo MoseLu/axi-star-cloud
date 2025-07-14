@@ -1,2 +1,2 @@
-driver: mysql
-dsn: root:123456@tcp(localhost:3306)/docs?charset=utf8mb4&parseTime=True&loc=Local 
+driver: sqlite3
+dsn: ./docs.db 
