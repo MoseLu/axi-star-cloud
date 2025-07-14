@@ -259,6 +259,7 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 
 	// 保存文件
 	if err := c.SaveUploadedFile(file, filePath); err != nil {
+		log.Printf("保存头像文件失败: %v, 路径: %s", err, filePath)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"error":   "保存头像文件失败",
@@ -266,8 +267,21 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 		return
 	}
 
+	// 验证文件是否保存成功
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		log.Printf("文件保存后不存在: %s", filePath)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "文件保存失败",
+		})
+		return
+	}
+
+	log.Printf("头像文件保存成功: %s", filePath)
+
 	// 生成访问URL
 	avatarURL := fmt.Sprintf("/uploads/avatars/%s", fileName)
+	log.Printf("生成头像URL: %s", avatarURL)
 
 	// 更新用户头像
 	user, err := h.userRepo.GetUserByID(userID)

@@ -145,16 +145,20 @@ func (r *Router) registerStaticRoutes() {
 	// 设置上传文件路由
 	uploadsFound := false
 	for _, path := range uploadsPaths {
+		log.Printf("检查上传路径: %s", path)
 		if _, err := os.Stat(path); err == nil {
 			r.engine.Static("/uploads", path)
-			log.Printf("上传文件路径设置为: %s", path)
+			log.Printf("✅ 上传文件路径设置为: %s", path)
 			uploadsFound = true
 			break
+		} else {
+			log.Printf("❌ 路径不存在: %s, 错误: %v", path, err)
 		}
 	}
 
-	// 如果相对路径都失败，尝试绝对路径
+		// 如果相对路径都失败，尝试绝对路径
 	if !uploadsFound {
+		log.Printf("相对路径都失败，尝试绝对路径...")
 		absolutePaths := []string{
 			"/www/wwwroot/axi-star-cloud/uploads",
 			"/www/wwwroot/redamancy.com.cn/uploads",
@@ -163,13 +167,20 @@ func (r *Router) registerStaticRoutes() {
 		}
 		
 		for _, absPath := range absolutePaths {
+			log.Printf("检查绝对路径: %s", absPath)
 			if _, err := os.Stat(absPath); err == nil {
 				r.engine.Static("/uploads", absPath)
-				log.Printf("使用绝对路径设置上传文件路径: %s", absPath)
+				log.Printf("✅ 使用绝对路径设置上传文件路径: %s", absPath)
 				uploadsFound = true
 				break
+			} else {
+				log.Printf("❌ 绝对路径不存在: %s, 错误: %v", absPath, err)
 			}
 		}
+	}
+
+	if !uploadsFound {
+		log.Printf("⚠️  警告: 未找到任何可用的上传目录")
 	}
 }
 
