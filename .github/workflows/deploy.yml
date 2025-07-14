@@ -43,9 +43,23 @@ jobs:
             cp star-cloud star-cloud.backup.$(date +%Y%m%d_%H%M%S)
           fi
           
-          # 拉取最新代码
+          # 拉取最新代码（带重试机制）
           echo "拉取最新代码..."
-          git pull origin main
+          for i in {1..3}; do
+            echo "第 $i 次尝试拉取代码..."
+            if git pull origin main; then
+              echo "代码拉取成功"
+              break
+            else
+              echo "第 $i 次拉取失败"
+              if [ $i -eq 3 ]; then
+                echo "❌ 代码拉取失败，使用本地代码继续部署"
+              else
+                echo "等待5秒后重试..."
+                sleep 5
+              fi
+            fi
+          done
           
           # 设置Go环境路径
           echo "设置Go环境路径..."
@@ -62,11 +76,20 @@ jobs:
           echo "开始编译程序..."
           cd backend
           echo "下载依赖..."
-          /usr/local/btgo/bin/go mod download
+          /usr/local/btgo/bin/go mod download || {
+            echo "❌ 依赖下载失败"
+            exit 1
+          }
           echo "整理依赖..."
-          /usr/local/btgo/bin/go mod tidy
+          /usr/local/btgo/bin/go mod tidy || {
+            echo "❌ 依赖整理失败"
+            exit 1
+          }
           echo "编译程序..."
-          /usr/local/btgo/bin/go build -o ../star-cloud main.go
+          /usr/local/btgo/bin/go build -o ../star-cloud main.go || {
+            echo "❌ 编译失败"
+            exit 1
+          }
           cd ..
           
           # 检查编译结果
@@ -96,9 +119,9 @@ jobs:
           
           # 先尝试直接运行看是否有错误
           echo "测试程序启动..."
-          timeout 10s ./star-cloud > logs/test.log 2>&1 &
+          timeout 15s ./star-cloud > logs/test.log 2>&1 &
           test_pid=$!
-          sleep 3
+          sleep 5
           
           # 检查测试进程是否还在运行
           if kill -0 $test_pid 2>/dev/null; then
@@ -108,7 +131,8 @@ jobs:
           else
             echo "❌ 程序启动测试失败"
             echo "查看测试日志:"
-            cat logs/test.log
+            cat logs/test.log || echo "测试日志文件不存在"
+            echo "检查是否有其他错误..."
             exit 1
           fi
           
@@ -118,15 +142,17 @@ jobs:
           echo $! > pid.txt
           
           echo "等待服务启动..."
-          sleep 15
+          sleep 20
           
           # 检查进程是否运行
           if ! pgrep -f "star-cloud" > /dev/null; then
             echo "❌ 服务启动失败"
             echo "查看服务日志:"
-            tail -50 logs/app.log || echo "日志文件不存在"
+            tail -100 logs/app.log || echo "日志文件不存在"
             echo "查看进程状态:"
             ps aux | grep star-cloud || echo "没有找到相关进程"
+            echo "检查端口占用:"
+            netstat -tlnp | grep 8080 || echo "8080端口未被占用"
             exit 1
           fi
           
@@ -146,9 +172,11 @@ jobs:
           
           echo "❌ 部署失败，服务无法正常响应"
           echo "查看服务日志:"
-          tail -50 logs/app.log || echo "日志文件不存在"
+          tail -100 logs/app.log || echo "日志文件不存在"
           echo "查看进程状态:"
           ps aux | grep star-cloud || echo "没有找到相关进程"
+          echo "检查端口占用:"
+          netstat -tlnp | grep 8080 || echo "8080端口未被占用"
           
           # 回滚到备份版本
           echo "尝试回滚到备份版本..."
@@ -159,7 +187,7 @@ jobs:
             chmod +x star-cloud
             nohup ./star-cloud > logs/app.log 2>&1 &
             echo $! > pid.txt
-            sleep 10
+            sleep 15
             if curl -f http://localhost:8080/health > /dev/null 2>&1; then
               echo "✅ 回滚成功，服务已恢复"
             else
