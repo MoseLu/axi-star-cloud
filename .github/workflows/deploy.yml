@@ -43,6 +43,17 @@ jobs:
           # 拉取最新代码
           git pull origin main
           
+          # 检查并安装Go环境
+          if ! command -v go &> /dev/null; then
+            echo "Go环境未安装，正在安装..."
+            # 下载并安装Go
+            wget https://go.dev/dl/go1.23.4.linux-amd64.tar.gz
+            tar -C /usr/local -xzf go1.23.4.linux-amd64.tar.gz
+            export PATH=$PATH:/usr/local/go/bin
+            echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+            source ~/.bashrc
+          fi
+          
           # 重新编译程序
           cd backend
           go mod download
