@@ -790,9 +790,12 @@ class UIManager {
                         <span class="text-xs font-medium text-blue-200 drop-shadow-sm">文件数：</span>
                         <span class="text-xs font-bold text-cyan-400 ml-1">${fileCount}</span>
                     </div>
-                    <div class="folder-info flex items-center justify-center space-x-2 mb-4">
-                        <i class="fa fa-calendar text-xs text-gray-400"></i>
-                        <span class="text-xs text-gray-400">创建于 ${this.formatDate(folder.created_at)}</span>
+                    <div class="flex items-center justify-center">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500/30 to-blue-600/30 rounded-lg flex items-center justify-center mr-2">
+                            <i class="fa fa-calendar text-xs text-blue-300"></i>
+                        </div>
+                        <span class="text-xs font-medium text-blue-200 drop-shadow-sm">创建于</span>
+                        <span class="text-xs font-bold text-cyan-400 ml-1">${this.formatDate(folder.created_at)}</span>
                     </div>
                 </div>
                 <div class="flex items-center justify-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-2 w-full">
