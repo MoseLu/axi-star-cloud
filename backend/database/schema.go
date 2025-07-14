@@ -83,27 +83,7 @@ func InsertInitialData(db *sql.DB) error {
 		return err
 	}
 
-	// 检查是否已有测试文件数据
-	var count int
-	err = db.QueryRow("SELECT COUNT(*) FROM files WHERE name = 'test.txt'").Scan(&count)
-	if err != nil {
-		return err
-	}
-
-	// 如果没有测试文件数据，则插入
-	if count == 0 {
-		insertFile := `
-		INSERT INTO files (name, size, type, path, user_id) VALUES 
-		('test.txt', 1024, 'document', '/uploads/document/test.txt', '550e8400-e29b-41d4-a716-446655440000')`
-
-		_, err = db.Exec(insertFile)
-		if err != nil {
-			return err
-		}
-		log.Println("测试文件数据已插入")
-	} else {
-		log.Println("测试文件数据已存在")
-	}
+	// 删除自动插入测试文件的逻辑
 
 	return nil
 }

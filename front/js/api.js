@@ -56,7 +56,13 @@ class ApiManager {
                         id: file.id,
                         name: file.name,
                         size: file.size, // 保持原始数字，让UI层处理格式化
-                        date: new Date(file.created_at).toLocaleString('zh-CN'),
+                        date: (() => {
+                            const date = new Date(file.created_at);
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            return `${year}-${month}-${day}`;
+                        })(),
                         type: file.type,
                         icon: this.getFileIcon(file.type),
                         iconColor: this.getFileIconColor(file.type),

@@ -220,6 +220,11 @@ class UIManager {
             this.showSettingsModal();
         });
 
+        // 存储管理按钮
+        document.getElementById('storage-settings-btn')?.addEventListener('click', () => {
+            this.showSettingsModal();
+        });
+
         // 退出登录按钮
         document.getElementById('logout-btn')?.addEventListener('click', () => {
             this.logout();
@@ -485,9 +490,12 @@ class UIManager {
         fileCard.setAttribute('data-file-id', file.id);
         fileCard.setAttribute('draggable', 'true');
 
-        // 格式化日期
+        // 格式化日期为 yyyy-mm-dd 格式
         const date = new Date(file.date || file.created_at || Date.now());
-        const formattedDate = date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
 
         // 获取文件大小
         const fileSize = file.size ? this.formatStorageSize(file.size) : '0 B';
@@ -769,7 +777,13 @@ class UIManager {
                     </div>
                     <div class="folder-info flex items-center justify-center space-x-2 mb-4">
                         <i class="fa fa-calendar text-xs text-gray-400"></i>
-                        <span class="text-xs text-gray-400">创建于 ${new Date(folder.created_at).toLocaleDateString('zh-CN')}</span>
+                        <span class="text-xs text-gray-400">创建于 ${(() => {
+                            const date = new Date(folder.created_at);
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            return `${year}-${month}-${day}`;
+                        })()}</span>
                     </div>
                 </div>
                 <div class="flex items-center justify-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-2 w-full">
@@ -817,7 +831,13 @@ class UIManager {
                 <!-- 中间：创建时间 -->
                 <div class="folder-info flex items-center justify-center space-x-2 mb-4">
                     <i class="fa fa-calendar text-xs text-gray-400"></i>
-                    <span class="text-xs text-gray-400">创建于 ${new Date(folder.created_at).toLocaleDateString('zh-CN')}</span>
+                    <span class="text-xs text-gray-400">创建于 ${(() => {
+                        const date = new Date(folder.created_at);
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        return `${year}-${month}-${day}`;
+                    })()}</span>
                 </div>
                 
                 <!-- 底部：操作按钮区域 -->
