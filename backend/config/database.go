@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	"gopkg.in/yaml.v3"
@@ -43,12 +44,34 @@ type DBConfig struct {
 	DSN    string `yaml:"dsn"`
 }
 
-var defaultConfigPath = "config/config.yaml"
+// 可能的配置文件路径
+var configPaths = []string{
+	"config/config.yaml",
+	"backend/config/config.yaml",
+	"./config/config.yaml",
+	"./backend/config/config.yaml",
+	"../config/config.yaml",
+	"../backend/config/config.yaml",
+}
+
+// findConfigFile 查找配置文件
+func findConfigFile() (string, error) {
+	for _, path := range configPaths {
+		if _, err := os.Stat(path); err == nil {
+			return path, nil
+		}
+	}
+	return "", errors.New("找不到配置文件")
+}
 
 // LoadConfig 读取完整配置
 func LoadConfig(path string) (*Config, error) {
 	if path == "" {
-		path = defaultConfigPath
+		var err error
+		path, err = findConfigFile()
+		if err != nil {
+			return nil, err
+		}
 	}
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
