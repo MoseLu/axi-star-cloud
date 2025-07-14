@@ -1300,12 +1300,13 @@ class UIManager {
             console.log('Loading markdown from:', fileUrl);
             console.log('File object:', file);
             
-            // 尝试多种路径格式
+            // 尝试多种路径格式 - 优先使用/uploads路径
             const possibleUrls = [
                 fileUrl,
                 file.path,
                 `/uploads/${file.type}/${file.name}`,
-                `/static/uploads/${file.type}/${file.name}`
+                `/static/uploads/${file.type}/${file.name}`,
+                `/static/${file.type}/${file.name}`
             ];
             
             let response = null;
@@ -1319,6 +1320,7 @@ class UIManager {
                     response = await fetch(url);
                     if (response.ok) {
                         successfulUrl = url;
+                        console.log('Successfully loaded from:', url);
                         break;
                     }
                 } catch (e) {
