@@ -34,7 +34,7 @@ jobs:
     - name: 创建远程目录
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
-          "mkdir -p /www/wwwroot/axi-star-cloud/logs /www/wwwroot/axi-star-cloud/uploads /www/wwwroot/axi-star-cloud/config"
+          "mkdir -p /www/wwwroot/axi-star-cloud/logs /www/wwwroot/axi-star-cloud/uploads /www/wwwroot/axi-star-cloud/config /www/wwwroot/axi-star-cloud/front"
           
     - name: 上传文件
       run: |
@@ -42,6 +42,10 @@ jobs:
             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/www/wwwroot/axi-star-cloud/
         scp -o StrictHostKeyChecking=no backend/config/config.yaml \
             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/www/wwwroot/axi-star-cloud/config/
+        scp -r -o StrictHostKeyChecking=no front/* \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/www/wwwroot/axi-star-cloud/front/
+        scp -o StrictHostKeyChecking=no index.html \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/www/wwwroot/axi-star-cloud/
             
     - name: 部署并重启服务
       run: |

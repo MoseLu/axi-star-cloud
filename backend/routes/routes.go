@@ -114,20 +114,72 @@ func (r *Router) SetupRoutes(
 
 // registerStaticRoutes 注册静态文件路由
 func (r *Router) registerStaticRoutes() {
-	r.engine.Static("/static", "../front")          // 指向根目录下front
-	r.engine.Static("/uploads", "../front/uploads") // 指向front/uploads目录
+	// 尝试多个可能的路径
+	staticPaths := []string{
+		"../front",
+		"front",
+		"./front",
+		"static",
+		"./static",
+	}
+
+	uploadsPaths := []string{
+		"../front/uploads",
+		"front/uploads",
+		"./front/uploads",
+		"uploads",
+		"./uploads",
+	}
+
+	// 设置静态文件路由
+	for _, path := range staticPaths {
+		if _, err := os.Stat(path); err == nil {
+			r.engine.Static("/static", path)
+			log.Printf("静态文件路径设置为: %s", path)
+			break
+		}
+	}
+
+	// 设置上传文件路由
+	for _, path := range uploadsPaths {
+		if _, err := os.Stat(path); err == nil {
+			r.engine.Static("/uploads", path)
+			log.Printf("上传文件路径设置为: %s", path)
+			break
+		}
+	}
 }
 
 // registerPageRoutes 注册页面路由
 func (r *Router) registerPageRoutes() {
-	absPath, err := filepath.Abs("../index.html")
-	if err != nil {
-		log.Fatalf("获取index.html绝对路径失败: %v", err)
+	// 尝试多个可能的index.html路径
+	indexPaths := []string{
+		"../index.html",
+		"index.html",
+		"./index.html",
+		"front/index.html",
+		"../front/index.html",
+		"./front/index.html",
 	}
-	if _, err := os.Stat(absPath); err != nil {
-		log.Fatalf("index.html not found at %s: %v", absPath, err)
+
+	for _, path := range indexPaths {
+		if _, err := os.Stat(path); err == nil {
+			absPath, err := filepath.Abs(path)
+			if err == nil {
+				r.engine.StaticFile("/", absPath)
+				log.Printf("首页文件路径设置为: %s", absPath)
+				return
+			}
+		}
 	}
-	r.engine.StaticFile("/", absPath)
+
+	// 如果找不到index.html，创建一个简单的首页
+	log.Println("未找到index.html，创建简单首页")
+	r.engine.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"title": "星际云盘",
+		})
+	})
 }
 
 // registerHealthRoutes 注册健康检查路由
