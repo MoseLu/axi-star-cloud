@@ -35,12 +35,16 @@ jobs:
         script: |
           cd /www/wwwroot/axi-star-cloud
           
+          echo "=== 开始部署流程 ==="
+          
           # 备份当前版本
           if [ -f star-cloud ]; then
+            echo "备份当前版本..."
             cp star-cloud star-cloud.backup.$(date +%Y%m%d_%H%M%S)
           fi
           
           # 拉取最新代码
+          echo "拉取最新代码..."
           git pull origin main
           
           # 设置Go环境路径
@@ -57,34 +61,85 @@ jobs:
           # 重新编译程序
           echo "开始编译程序..."
           cd backend
+          echo "下载依赖..."
           /usr/local/btgo/bin/go mod download
+          echo "整理依赖..."
           /usr/local/btgo/bin/go mod tidy
+          echo "编译程序..."
           /usr/local/btgo/bin/go build -o ../star-cloud main.go
           cd ..
+          
+          # 检查编译结果
+          if [ ! -f star-cloud ]; then
+            echo "❌ 编译失败，程序文件不存在"
+            exit 1
+          fi
+          
+          echo "设置执行权限..."
           chmod +x star-cloud
           
           # 停止当前服务
           echo "停止当前服务..."
           pkill -f "star-cloud" || true
-          sleep 2
+          sleep 3
+          
+          # 检查是否还有进程在运行
+          if pgrep -f "star-cloud" > /dev/null; then
+            echo "强制停止服务..."
+            pkill -9 -f "star-cloud" || true
+            sleep 2
+          fi
           
           # 启动新服务
           echo "启动新服务..."
+          mkdir -p logs
           nohup ./star-cloud > logs/app.log 2>&1 &
           echo $! > pid.txt
           
-          # 等待服务启动
-          sleep 5
+          echo "等待服务启动..."
+          sleep 10
+          
+          # 检查进程是否运行
+          if ! pgrep -f "star-cloud" > /dev/null; then
+            echo "❌ 服务启动失败"
+            echo "查看日志文件:"
+            tail -20 logs/app.log || echo "日志文件不存在"
+            exit 1
+          fi
+          
+          echo "服务已启动，检查健康状态..."
           
           # 检查服务状态
-          if curl -f http://localhost:8080/health > /dev/null 2>&1; then
-            echo "✅ 部署成功！"
-          else
-            echo "❌ 部署失败，回滚到备份版本"
-            if [ -f star-cloud.backup.* ]; then
-              latest_backup=$(ls -t star-cloud.backup.* | head -1)
-              mv "$latest_backup" star-cloud
-              nohup ./star-cloud > logs/app.log 2>&1 &
-              echo $! > pid.txt
+          for i in {1..5}; do
+            echo "第 $i 次健康检查..."
+            if curl -f http://localhost:8080/health > /dev/null 2>&1; then
+              echo "✅ 部署成功！服务正常运行"
+              exit 0
+            else
+              echo "健康检查失败，等待重试..."
+              sleep 3
             fi
+          done
+          
+          echo "❌ 部署失败，服务无法正常响应"
+          echo "查看服务日志:"
+          tail -20 logs/app.log || echo "日志文件不存在"
+          
+          # 回滚到备份版本
+          echo "尝试回滚到备份版本..."
+          if [ -f star-cloud.backup.* ]; then
+            latest_backup=$(ls -t star-cloud.backup.* | head -1)
+            echo "使用备份文件: $latest_backup"
+            mv "$latest_backup" star-cloud
+            chmod +x star-cloud
+            nohup ./star-cloud > logs/app.log 2>&1 &
+            echo $! > pid.txt
+            sleep 5
+            if curl -f http://localhost:8080/health > /dev/null 2>&1; then
+              echo "✅ 回滚成功，服务已恢复"
+            else
+              echo "❌ 回滚也失败了"
+            fi
+          else
+            echo "没有找到备份文件"
           fi 
