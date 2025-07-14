@@ -52,13 +52,37 @@ jobs:
           echo "停止当前服务..."
           if [ -f pid.txt ]; then
             pid=$(cat pid.txt)
+            echo "找到PID文件，PID: $pid"
             if kill -0 $pid 2>/dev/null; then
+              echo "正在停止进程 $pid..."
               kill $pid
+              sleep 5
+              if kill -0 $pid 2>/dev/null; then
+                echo "强制停止进程 $pid..."
+                kill -9 $pid
+              fi
               echo "已停止进程 $pid"
+            else
+              echo "进程 $pid 不存在"
             fi
+          else
+            echo "没有找到PID文件"
           fi
-          pkill -f "star-cloud" || echo "没有找到运行中的服务"
+          
+          # 确保所有相关进程都已停止
+          echo "检查是否还有相关进程..."
+          pkill -f "star-cloud" && echo "已停止其他相关进程" || echo "没有其他相关进程"
           sleep 3
+          
+          # 检查端口占用
+          echo "检查8080端口占用..."
+          if lsof -i :8080 > /dev/null 2>&1; then
+            echo "端口8080被占用，正在释放..."
+            lsof -ti :8080 | xargs kill -9
+            sleep 2
+          else
+            echo "端口8080空闲"
+          fi
           
           # 拉取最新代码（带重试）
           echo "拉取最新代码..."
@@ -79,13 +103,27 @@ jobs:
           
           # 验证Go环境
           echo "验证Go环境..."
-          /usr/local/btgo/bin/go version || echo "Go环境验证失败"
+          if /usr/local/btgo/bin/go version; then
+            echo "✅ Go环境正常"
+          else
+            echo "❌ Go环境验证失败"
+            exit 1
+          fi
           
           # 重新编译程序
           echo "开始编译程序..."
           cd backend
+          echo "当前目录: $(pwd)"
+          echo "检查go.mod文件..."
+          ls -la go.mod go.sum
+          
+          echo "下载依赖..."
           /usr/local/btgo/bin/go mod download
+          
+          echo "整理依赖..."
           /usr/local/btgo/bin/go mod tidy
+          
+          echo "编译程序..."
           /usr/local/btgo/bin/go build -o ../star-cloud main.go
           cd ..
           
@@ -93,8 +131,11 @@ jobs:
           if [ -f star-cloud ]; then
             echo "✅ 编译成功"
             ls -la star-cloud
+            file star-cloud
           else
             echo "❌ 编译失败"
+            echo "检查backend目录内容:"
+            ls -la backend/
             exit 1
           fi
           
@@ -102,6 +143,7 @@ jobs:
           chmod +x star-cloud
           
           # 创建必要的目录
+          echo "创建必要的目录..."
           mkdir -p logs uploads
           mkdir -p uploads/{image,document,audio,video,other,avatars}
           
