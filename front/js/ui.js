@@ -2652,9 +2652,26 @@ class UIManager {
         const avatarIcon = document.getElementById('profile-avatar-icon');
         const avatarImage = document.getElementById('profile-avatar-image');
         
-        if (avatarUrl) {
+        // 构建完整的头像URL
+        const getAvatarUrl = (avatarPath) => {
+            if (!avatarPath) return null;
+            // 如果已经是完整URL，直接返回
+            if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
+                return avatarPath;
+            }
+            // 如果是相对路径，添加当前域名
+            if (avatarPath.startsWith('/')) {
+                return window.location.origin + avatarPath;
+            }
+            // 其他情况，添加域名和/uploads前缀
+            return window.location.origin + '/uploads/' + avatarPath;
+        };
+
+        const fullAvatarUrl = getAvatarUrl(avatarUrl);
+        
+        if (fullAvatarUrl) {
             // 有头像，显示图片
-            avatarImage.src = avatarUrl;
+            avatarImage.src = fullAvatarUrl;
             avatarImage.classList.remove('hidden');
             avatarIcon.classList.add('hidden');
         } else {
@@ -2810,12 +2827,29 @@ class UIManager {
             userName.className = 'text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500';
         }
 
+        // 构建完整的头像URL
+        const getAvatarUrl = (avatarPath) => {
+            if (!avatarPath) return null;
+            // 如果已经是完整URL，直接返回
+            if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
+                return avatarPath;
+            }
+            // 如果是相对路径，添加当前域名
+            if (avatarPath.startsWith('/')) {
+                return window.location.origin + avatarPath;
+            }
+            // 其他情况，添加域名和/uploads前缀
+            return window.location.origin + '/uploads/' + avatarPath;
+        };
+
+        const avatarUrl = getAvatarUrl(userData.avatar);
+
         // 更新主内容区域头像
         const mainAvatarIcon = document.getElementById('avatar-icon');
         const mainAvatarImage = document.getElementById('avatar-image');
         
-        if (userData.avatar) {
-            mainAvatarImage.src = userData.avatar;
+        if (avatarUrl) {
+            mainAvatarImage.src = avatarUrl;
             mainAvatarImage.classList.remove('hidden');
             mainAvatarIcon.classList.add('hidden');
         } else {
@@ -2826,8 +2860,8 @@ class UIManager {
         // 更新header中的头像
         const headerAvatar = document.getElementById('user-avatar');
         if (headerAvatar) {
-            if (userData.avatar) {
-                headerAvatar.src = userData.avatar;
+            if (avatarUrl) {
+                headerAvatar.src = avatarUrl;
             } else {
                 // 如果没有头像，使用默认头像
                 headerAvatar.src = 'https://picsum.photos/200/200?random=1';
