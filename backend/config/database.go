@@ -3,13 +3,41 @@ package config
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"io/ioutil"
 
 	_ "github.com/go-sql-driver/mysql"
 	"gopkg.in/yaml.v3"
 )
 
-// DBConfig 数据库配置结构体
+// Config 完整配置结构体
+type Config struct {
+	Server struct {
+		Port string `yaml:"port"`
+	} `yaml:"server"`
+
+	Database struct {
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
+		Name     string `yaml:"name"`
+	} `yaml:"database"`
+
+	LogsDatabase struct {
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
+		Name     string `yaml:"name"`
+	} `yaml:"logs_database"`
+
+	JWT struct {
+		Secret string `yaml:"secret"`
+	} `yaml:"jwt"`
+}
+
+// DBConfig 数据库配置结构体（保持向后兼容）
 type DBConfig struct {
 	Driver string `yaml:"driver"`
 	DSN    string `yaml:"dsn"`
@@ -17,8 +45,8 @@ type DBConfig struct {
 
 var defaultConfigPath = "config/config.yaml"
 
-// LoadDBConfig 读取数据库配置
-func LoadDBConfig(path string) (*DBConfig, error) {
+// LoadConfig 读取完整配置
+func LoadConfig(path string) (*Config, error) {
 	if path == "" {
 		path = defaultConfigPath
 	}
@@ -26,11 +54,33 @@ func LoadDBConfig(path string) (*DBConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	var cfg DBConfig
+	var cfg Config
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, err
 	}
 	return &cfg, nil
+}
+
+// LoadDBConfig 读取数据库配置（保持向后兼容）
+func LoadDBConfig(path string) (*DBConfig, error) {
+	cfg, err := LoadConfig(path)
+	if err != nil {
+		return nil, err
+	}
+
+	// 构建DSN
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		cfg.Database.User,
+		cfg.Database.Password,
+		cfg.Database.Host,
+		cfg.Database.Port,
+		cfg.Database.Name,
+	)
+
+	return &DBConfig{
+		Driver: "mysql",
+		DSN:    dsn,
+	}, nil
 }
 
 // InitDB 初始化数据库连接池，参数可为nil或配置文件路径
