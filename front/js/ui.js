@@ -607,33 +607,28 @@ class UIManager {
 
     // 获取缩略图URL
     getThumbnailUrl(file) {
-
-        
         // 对于图片文件，尝试显示缩略图
         if (file.type === 'image' && file.previewUrl) {
-
-            
             // 构建完整的图片URL
             let fullUrl;
             if (file.previewUrl.startsWith('/')) {
-                fullUrl = `http://localhost:8080${file.previewUrl}`;
+                // 使用当前域名而不是硬编码localhost
+                fullUrl = window.location.origin + file.previewUrl;
             } else if (file.previewUrl.startsWith('http')) {
                 fullUrl = file.previewUrl;
             } else {
-                fullUrl = `http://localhost:8080/uploads/${file.type}/${file.name}`;
+                // 使用当前域名构建URL
+                fullUrl = window.location.origin + `/uploads/${file.type}/${file.name}`;
             }
             
-
             return fullUrl;
         }
         
         // 对于视频文件，暂时使用默认图标
         // 未来可以添加视频缩略图生成功能
         if (file.type === 'video') {
-
             return null;
         }
-
 
         return null;
     }
@@ -981,7 +976,7 @@ class UIManager {
                 
                 <!-- 图片容器 -->
                 <div class="relative w-full h-full flex items-center justify-center preview-image-container" style="overflow: hidden;">
-                    <img src="${file.path || `/static/uploads/${file.type}/${file.name}`}" alt="${file.name}" class="max-w-full max-h-full object-contain rounded-lg">
+                    <img src="${file.path || `/uploads/${file.type}/${file.name}`}" alt="${file.name}" class="max-w-full max-h-full object-contain rounded-lg">
                 </div>
             </div>
         `;
@@ -1028,7 +1023,7 @@ class UIManager {
                 <!-- 视频容器 -->
                 <div class="relative w-full h-full flex items-center justify-center preview-video-container" style="overflow: hidden;">
                     <video controls class="max-w-full max-h-full rounded-lg" autoplay>
-                        <source src="${file.path || `/static/uploads/${file.type}/${file.name}`}" type="video/mp4">
+                        <source src="${file.path || `/uploads/${file.type}/${file.name}`}" type="video/mp4">
                         您的浏览器不支持视频播放
                     </video>
                 </div>
@@ -1080,7 +1075,7 @@ class UIManager {
                         <i class="fa fa-music text-8xl text-cyan-400"></i>
                     </div>
                     <audio controls class="w-full max-w-lg mx-auto" autoplay>
-                        <source src="${file.path || `/static/uploads/${file.type}/${file.name}`}" type="audio/mpeg">
+                        <source src="${file.path || `/uploads/${file.type}/${file.name}`}" type="audio/mpeg">
                         您的浏览器不支持音频播放
                     </audio>
                 </div>
@@ -1134,7 +1129,7 @@ class UIManager {
                     <h3 class="text-lg font-semibold text-white mb-2">${file.name}</h3>
                     <p class="text-gray-300 mb-6">${file.size} • ${file.type}</p>
                     <div class="space-y-3">
-                        <button onclick="window.open('${file.path || `/static/uploads/${file.type}/${file.name}`}', '_blank')" class="w-full bg-gradient-to-r from-orange-500/80 to-amber-500/80 hover:from-orange-500 hover:to-amber-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                        <button onclick="window.open('${file.path || `/uploads/${file.type}/${file.name}`}', '_blank')" class="w-full bg-gradient-to-r from-orange-500/80 to-amber-500/80 hover:from-orange-500 hover:to-amber-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
                             <i class="fa fa-external-link mr-2"></i>在新窗口打开
                         </button>
                         <button class="download-doc-btn w-full bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-500 hover:to-emerald-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
