@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"backend/database"
 	"backend/models"
@@ -149,8 +150,9 @@ func (h *FileHandler) DownloadFile(c *gin.Context) {
 		return
 	}
 
-	// 构建绝对路径
-	absolutePath := filepath.Join(currentDir, file.Path)
+	// 构建绝对路径 - 将 /uploads/type/filename 转换为 ../front/uploads/type/filename
+	relativePath := strings.TrimPrefix(file.Path, "/uploads/")
+	absolutePath := filepath.Join(currentDir, "../front/uploads", relativePath)
 	log.Printf("文件绝对路径: %s", absolutePath)
 
 	// 检查文件是否存在
@@ -236,8 +238,8 @@ func (h *FileHandler) UploadFile(c *gin.Context) {
 	fileType := utils.GetFileType(header.Filename)
 	uploadPath := utils.GetUploadPath(header.Filename, fileType)
 
-	// 创建上传目录
-	uploadDir := filepath.Join("uploads", fileType)
+	// 创建上传目录 - 使用相对于项目根目录的路径
+	uploadDir := filepath.Join("../front/uploads", fileType)
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
 		log.Printf("创建上传目录错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建上传目录失败"})
@@ -339,7 +341,9 @@ func (h *FileHandler) DeleteFile(c *gin.Context) {
 
 	// 删除物理文件
 	currentDir, _ := os.Getwd()
-	absolutePath := filepath.Join(currentDir, file.Path)
+	// 将 /uploads/type/filename 转换为 ../front/uploads/type/filename
+	relativePath := strings.TrimPrefix(file.Path, "/uploads/")
+	absolutePath := filepath.Join(currentDir, "../front/uploads", relativePath)
 	if err := os.Remove(absolutePath); err != nil && !os.IsNotExist(err) {
 		log.Printf("删除物理文件错误: %v", err)
 	}
