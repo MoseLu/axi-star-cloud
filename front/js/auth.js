@@ -114,6 +114,36 @@ class AuthManager {
     isLoggedIn() {
         return this.loginData !== null;
     }
+
+    // 处理登录
+    async handleLogin(username, password) {
+        try {
+            // 调用登录API
+            if (window.apiManager) {
+                const result = await window.apiManager.login(username, password);
+                if (result.success) {
+                    this.saveLoginData(result);
+                } else {
+                    if (window.Notify) {
+                        window.Notify.show({ message: result.error || '登录失败', type: 'error' });
+                    }
+                }
+            } else {
+                // 如果没有API管理器，使用默认用户数据
+                const userData = {
+                    username: username,
+                    uuid: '550e8400-e29b-41d4-a716-446655440000',
+                    timestamp: Date.now()
+                };
+                this.saveLoginData(userData);
+            }
+        } catch (error) {
+            console.error('登录失败:', error);
+            if (window.Notify) {
+                window.Notify.show({ message: error.message || '登录失败', type: 'error' });
+            }
+        }
+    }
 }
 
 // 导出认证管理器
@@ -192,12 +222,20 @@ function bindLoginEvents() {
             const password = document.getElementById('password').value;
 
             if (username && password) {
-                const userData = {
-                    username: username,
-                    uuid: 'temp-uuid', // 实际应用中应从后端获取
-                    timestamp: Date.now()
-                };
-                AuthManager.saveLoginData(userData);
+                // 使用实际的登录API
+                if (window.authManager) {
+                    window.authManager.handleLogin(username, password);
+                } else {
+                    // 如果没有authManager实例，使用临时数据
+                    const userData = {
+                        username: username,
+                        uuid: '550e8400-e29b-41d4-a716-446655440000', // 使用默认UUID
+                        timestamp: Date.now()
+                    };
+                    // 创建临时AuthManager实例
+                    const tempAuthManager = new AuthManager();
+                    tempAuthManager.saveLoginData(userData);
+                }
             } else {
                 if (window.Notify) {
                     window.Notify.show({ message: '请输入用户名和密码', type: 'error' });
