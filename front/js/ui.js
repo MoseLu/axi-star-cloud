@@ -479,7 +479,7 @@ class UIManager {
     // 创建文件卡片
     createFileCard(file) {
         const fileCard = document.createElement('div');
-        fileCard.className = 'glass-effect rounded-xl p-4 border border-purple-light/20 hover:border-purple-light/40 transition-all duration-300 cursor-pointer group file-card relative hover:shadow-lg hover:shadow-purple-500/10 min-h-[180px] w-full min-w-[280px]';
+        fileCard.className = 'glass-effect rounded-xl p-4 border border-purple-light/20 hover:border-purple-light/40 transition-all duration-300 cursor-pointer group file-card relative hover:shadow-lg hover:shadow-purple-500/10 min-h-[180px] w-full';
         fileCard.setAttribute('data-type', file.type);
         fileCard.setAttribute('data-file-id', file.id);
         fileCard.setAttribute('draggable', 'true');
@@ -495,16 +495,16 @@ class UIManager {
         const thumbnailContent = this.generateThumbnailContent(file);
 
         fileCard.innerHTML = `
-            <div class="flex flex-col h-full">
+            <div class="card-content flex flex-col h-full">
                 <!-- 第一排：缩略图/图标和文件名 -->
-                <div class="flex items-start space-x-3 mb-4">
-                    <div class="w-16 h-16 bg-gradient-to-br ${thumbnailContent.bgColor} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg flex-shrink-0 overflow-hidden">
+                <div class="file-icon-container flex flex-col items-center justify-center mb-4">
+                    <div class="w-16 h-16 bg-gradient-to-br ${thumbnailContent.bgColor} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg flex-shrink-0 overflow-hidden mb-3">
                         ${thumbnailContent.html}
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <h4 class="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300 group-hover:from-purple-200 group-hover:to-blue-200 transition-all duration-300 text-sm mb-2 leading-tight truncate max-w-[120px]" title="${file.name}">${this.truncateFileName(file.name)}</h4>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-xs px-2 py-1 rounded-full ${this.getCategoryBadgeColor(file.type)} ${this.getCategoryBadgeBg(file.type)} font-medium">
+                    <div class="text-center w-full">
+                        <div class="flex items-center justify-center gap-2">
+                            <h4 class="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300 group-hover:from-purple-200 group-hover:to-blue-200 transition-all duration-300 text-sm leading-tight truncate max-w-[120px]" title="${file.name}">${this.truncateFileName(file.name)}</h4>
+                            <span class="text-xs px-2 py-1 rounded-full ${this.getCategoryBadgeColor(file.type)} ${this.getCategoryBadgeBg(file.type)} font-medium flex-shrink-0">
                                 ${this.getCategoryLabel(file.type)}
                             </span>
                         </div>
@@ -512,19 +512,19 @@ class UIManager {
                 </div>
                 
                 <!-- 第二排：文件大小和日期（带图标） -->
-                <div class="flex items-center space-x-4 mb-4 text-xs text-gray-400">
+                <div class="file-info flex items-center justify-center space-x-4 mb-4 text-xs text-gray-400">
                     <div class="flex items-center space-x-1 flex-shrink-0">
                         <i class="fa fa-hdd-o text-blue-400 flex-shrink-0"></i>
-                        <span class="bg-gray-800/50 px-1.5 py-0.5 rounded-full font-medium truncate max-w-[100px] text-blue-300" title="${fileSize}">${fileSize}</span>
+                        <span class="bg-gray-800/50 px-1.5 py-0.5 rounded-full font-medium truncate max-w-[80px] text-blue-300" title="${fileSize}">${fileSize}</span>
                     </div>
                     <div class="flex items-center space-x-1 flex-shrink-0">
                         <i class="fa fa-calendar text-green-400 flex-shrink-0"></i>
-                        <span class="bg-gray-800/50 px-1.5 py-0.5 rounded-full font-medium text-green-300 truncate max-w-[80px]" title="${formattedDate}">${formattedDate}</span>
+                        <span class="bg-gray-800/50 px-1.5 py-0.5 rounded-full font-medium text-green-300 truncate max-w-[60px]" title="${formattedDate}">${formattedDate}</span>
                     </div>
                 </div>
                 
                 <!-- 第三排：操作按钮 -->
-                <div class="flex items-center justify-center mt-auto space-x-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                <div class="file-actions flex items-center justify-center mt-auto space-x-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <button class="file-preview-btn text-blue-400 hover:text-blue-300 transition-colors p-3 rounded-lg hover:bg-blue-500/10" title="预览">
                         <i class="fa fa-eye text-lg"></i>
                     </button>
@@ -771,11 +771,9 @@ class UIManager {
                         <span class="text-xs font-medium text-blue-200 drop-shadow-sm">文件数：</span>
                         <span class="text-xs font-bold text-cyan-400 ml-1">${fileCount}</span>
                     </div>
-                    <div class="flex items-center justify-center">
-                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500/30 to-blue-600/30 rounded-lg flex items-center justify-center mr-2">
-                            <i class="fa fa-calendar text-xl text-blue-300"></i>
-                        </div>
-                        <span class="text-xs font-medium text-blue-200 drop-shadow-sm">${new Date(folder.created_at).toLocaleDateString('zh-CN')}</span>
+                    <div class="folder-info flex items-center justify-center space-x-2 mb-4">
+                        <i class="fa fa-calendar text-xs text-gray-400"></i>
+                        <span class="text-xs text-gray-400">创建于 ${new Date(folder.created_at).toLocaleDateString('zh-CN')}</span>
                     </div>
                 </div>
                 <div class="flex items-center justify-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-2 w-full">
@@ -799,33 +797,35 @@ class UIManager {
     // 创建文件夹卡片
     createFolderCard(folder) {
         const folderCard = document.createElement('div');
-        folderCard.className = 'glass-effect rounded-xl p-6 border border-blue-400/20 hover:border-blue-400/40 transition-all duration-300 cursor-pointer group drop-zone relative min-h-[180px] w-full';
+        folderCard.className = 'glass-effect rounded-xl p-6 border border-blue-400/20 hover:border-blue-400/40 transition-all duration-300 cursor-pointer group folder-card drop-zone relative min-h-[180px] w-full';
         folderCard.setAttribute('data-folder-id', folder.id);
 
         folderCard.innerHTML = `
             <!-- 主要内容区域 -->
-            <div class="flex flex-col h-full" data-folder-id="${folder.id}" title="点击查看文件夹内容">
+            <div class="card-content flex flex-col h-full" data-folder-id="${folder.id}" title="点击查看文件夹内容">
                 <!-- 顶部：图标和标题 -->
-                <div class="flex items-center space-x-4 mb-4">
-                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+                <div class="folder-icon-container flex flex-col items-center justify-center mb-4">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 flex-shrink-0 mb-3">
                         <i class="fa fa-folder text-3xl text-blue-400"></i>
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <h4 class="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-300 truncate text-sm mb-1 max-w-[120px]" title="${folder.name}">${this.truncateFileName(folder.name)}</h4>
-                        <span class="text-xs px-3 py-1 rounded-full ${this.getCategoryBadgeColor(folder.category)} ${this.getCategoryBadgeBg(folder.category)} font-medium">
-                            ${this.getCategoryLabel(folder.category)}
-                        </span>
+                    <div class="text-center w-full">
+                        <div class="flex items-center justify-center gap-2">
+                            <h4 class="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-300 truncate text-sm max-w-[120px]" title="${folder.name}">${this.truncateFileName(folder.name)}</h4>
+                            <span class="text-xs px-3 py-1 rounded-full ${this.getCategoryBadgeColor(folder.category)} ${this.getCategoryBadgeBg(folder.category)} font-medium flex-shrink-0">
+                                ${this.getCategoryLabel(folder.category)}
+                            </span>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- 中间：创建时间 -->
-                <div class="flex items-center space-x-2 mb-4">
+                <div class="folder-info flex items-center justify-center space-x-2 mb-4">
                     <i class="fa fa-calendar text-xs text-gray-400"></i>
                     <span class="text-xs text-gray-400">创建于 ${new Date(folder.created_at).toLocaleDateString('zh-CN')}</span>
                 </div>
                 
                 <!-- 底部：操作按钮区域 -->
-                <div class="mt-auto pt-4 border-t border-blue-400/10">
+                <div class="folder-actions mt-auto pt-4 border-t border-blue-400/10">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-2">
                             <i class="fa fa-file-o text-xs text-gray-400"></i>
