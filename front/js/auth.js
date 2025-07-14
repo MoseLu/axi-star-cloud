@@ -223,13 +223,13 @@ class AuthManager {
                 
                 localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
                 
-                // 触发登录成功事件
+                // 触发登录成功事件，让App管理器处理界面切换
                 window.dispatchEvent(new CustomEvent('loginSuccess', { detail: this.currentUser }));
                 
-                // 延迟跳转到主页面
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 1000);
+                // 如果App管理器已初始化，直接调用其方法
+                if (window.app && window.app.onLoginSuccess) {
+                    window.app.onLoginSuccess(this.currentUser);
+                }
             } else {
                 this.showMessage(data.error || '登录失败', 'error');
             }
@@ -312,10 +312,7 @@ class AuthManager {
         if (savedUser) {
             try {
                 this.currentUser = JSON.parse(savedUser);
-                // 如果已登录，跳转到主页面
-                if (window.location.pathname === '/login.html' || window.location.pathname === '/') {
-                    window.location.href = '/';
-                }
+                // 不再自动跳转，让App管理器处理界面切换
             } catch (error) {
                 console.error('解析用户信息失败:', error);
                 localStorage.removeItem('currentUser');
