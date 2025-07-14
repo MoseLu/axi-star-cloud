@@ -68,6 +68,12 @@ class AuthManager {
     showLoginPage() {
         document.getElementById('login-page').classList.remove('hidden');
         document.getElementById('app').classList.add('hidden');
+        
+        // 初始化登录页面的粒子效果
+        initLoginParticles();
+        
+        // 绑定登录表单事件
+        bindLoginEvents();
     }
 
     // 保存登录数据
@@ -112,3 +118,91 @@ class AuthManager {
 
 // 导出认证管理器
 window.AuthManager = AuthManager; 
+
+// 初始化登录页面的粒子效果
+function initLoginParticles() {
+    if (typeof particlesJS !== 'undefined') {
+        // 确保粒子容器存在
+        const particlesContainer = document.getElementById('particles-js');
+        if (particlesContainer) {
+            particlesJS("particles-js", {
+                particles: {
+                    number: { 
+                        value: 100, 
+                        density: { enable: true, value_area: 800 } 
+                    },
+                    color: { value: "#ffffff" },
+                    shape: {
+                        type: "circle",
+                        stroke: { width: 0, color: "#000000" },
+                        polygon: { nb_sides: 5 }
+                    },
+                    opacity: {
+                        value: 0.6,
+                        random: true,
+                        anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false }
+                    },
+                    size: {
+                        value: 2,
+                        random: true,
+                        anim: { enable: true, speed: 2, size_min: 0.1, sync: false }
+                    },
+                    line_linked: {
+                        enable: true,
+                        distance: 150,
+                        color: "#7B61FF",
+                        opacity: 0.3,
+                        width: 1
+                    },
+                    move: {
+                        enable: true,
+                        speed: 1.5,
+                        direction: "none",
+                        random: true,
+                        straight: false,
+                        out_mode: "out",
+                        bounce: false
+                    }
+                },
+                interactivity: {
+                    detect_on: "canvas",
+                    events: {
+                        onhover: { enable: true, mode: "grab" },
+                        onclick: { enable: true, mode: "push" },
+                        resize: true
+                    },
+                    modes: {
+                        grab: { distance: 140, line_linked: { opacity: 0.5 } },
+                        push: { particles_nb: 4 }
+                    }
+                },
+                retina_detect: true
+            });
+        }
+    }
+}
+
+// 绑定登录表单事件
+function bindLoginEvents() {
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username && password) {
+                const userData = {
+                    username: username,
+                    uuid: 'temp-uuid', // 实际应用中应从后端获取
+                    timestamp: Date.now()
+                };
+                AuthManager.saveLoginData(userData);
+            } else {
+                if (window.Notify) {
+                    window.Notify.show({ message: '请输入用户名和密码', type: 'error' });
+                }
+            }
+        });
+    }
+} 

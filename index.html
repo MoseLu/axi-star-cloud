@@ -123,8 +123,8 @@
             }
         }
 
-        // 粒子效果配置
-        function initParticles() {
+        // 粒子效果配置 - 主应用页面
+        function initMainParticles() {
             if (typeof particlesJS !== 'undefined') {
                 particlesJS("particles-js", {
                     particles: {
@@ -182,8 +182,8 @@
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', async function() {
             await initializeTemplates();
-            // 初始化粒子效果
-            setTimeout(initParticles, 100);
+            // 初始化主应用粒子效果（如果需要的话）
+            // setTimeout(initMainParticles, 100);
         });
     </script>
 </body>
