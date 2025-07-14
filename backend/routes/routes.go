@@ -143,18 +143,22 @@ func (r *Router) registerStaticRoutes() {
 	}
 
 	// 设置上传文件路由
+	uploadsFound := false
 	for _, path := range uploadsPaths {
 		if _, err := os.Stat(path); err == nil {
 			r.engine.Static("/uploads", path)
 			log.Printf("上传文件路径设置为: %s", path)
+			uploadsFound = true
 			break
 		}
 	}
 
-	// 如果所有相对路径都失败，尝试绝对路径
-	if _, err := os.Stat("/www/wwwroot/axi-star-cloud/uploads"); err == nil {
-		r.engine.Static("/uploads", "/www/wwwroot/axi-star-cloud/uploads")
-		log.Printf("使用绝对路径设置上传文件路径: /www/wwwroot/axi-star-cloud/uploads")
+	// 如果相对路径都失败，尝试绝对路径
+	if !uploadsFound {
+		if _, err := os.Stat("/www/wwwroot/axi-star-cloud/uploads"); err == nil {
+			r.engine.Static("/uploads", "/www/wwwroot/axi-star-cloud/uploads")
+			log.Printf("使用绝对路径设置上传文件路径: /www/wwwroot/axi-star-cloud/uploads")
+		}
 	}
 }
 
