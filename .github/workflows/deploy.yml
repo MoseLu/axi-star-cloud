@@ -43,13 +43,25 @@ jobs:
           # 拉取最新代码
           git pull origin main
           
-          # 检查Go环境
+          # 检查并设置Go环境
           echo "检查Go环境..."
-          which go || echo "go命令未找到"
-          go version || echo "go版本检查失败"
           
           # 尝试多个可能的Go路径
           export PATH=$PATH:/usr/local/go/bin:/usr/local/bin:/usr/bin
+          
+          # 如果Go不存在，尝试安装
+          if ! command -v go &> /dev/null; then
+            echo "Go环境未安装，正在安装..."
+            # 下载并安装Go
+            wget https://go.dev/dl/go1.23.4.linux-amd64.tar.gz
+            tar -C /usr/local -xzf go1.23.4.linux-amd64.tar.gz
+            export PATH=$PATH:/usr/local/go/bin
+            echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+            source ~/.bashrc
+          fi
+          
+          # 验证Go环境
+          go version || echo "Go环境设置失败"
           
           # 重新编译程序
           cd backend
