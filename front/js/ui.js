@@ -178,15 +178,24 @@ class UIManager {
                         
                         // 如果有缓存的数据，直接使用
                         if (this.allFiles.length > 0) {
-                            // 显示所有文件，不重新渲染
+                            // 立即隐藏所有文件卡片，避免残留显示
                             const fileCards = document.querySelectorAll('#files-grid > div');
-                            let visibleCount = 0;
                             fileCards.forEach(card => {
-                                card.classList.remove('hidden');
-                                visibleCount++;
+                                card.style.transition = 'opacity 0.2s ease-in-out';
+                                card.style.opacity = '0';
                             });
-                            this.updateFileCount(visibleCount);
-                            this.toggleEmptyState(visibleCount);
+                            
+                            // 短暂延迟后显示所有文件
+                            setTimeout(() => {
+                                let visibleCount = 0;
+                                fileCards.forEach(card => {
+                                    card.classList.remove('hidden');
+                                    card.style.opacity = '1';
+                                    visibleCount++;
+                                });
+                                this.updateFileCount(visibleCount);
+                                this.toggleEmptyState(visibleCount);
+                            }, 200);
                         } else {
                             // 如果没有缓存，才请求数据
                             const files = await this.api.getFiles();
@@ -1859,48 +1868,39 @@ class UIManager {
 
     // 过滤文件
     filterFiles(type) {
-
-        
         // 设置当前分类
         this.currentCategory = type;
         
         const fileCards = document.querySelectorAll('#files-grid > div');
-
-        
         let visibleCount = 0;
 
-        // 添加淡入淡出效果
-        fileCards.forEach((card, index) => {
-            const fileData = card.getAttribute('data-type');
-
-            
-            if (fileData === type) {
-                // 显示匹配的文件卡片
-                card.style.opacity = '0';
-                card.classList.remove('hidden');
-                card.style.transition = 'opacity 0.3s ease-in-out';
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                }, 10);
-                visibleCount++;
-            } else {
-                // 隐藏不匹配的文件卡片
-                card.style.transition = 'opacity 0.3s ease-in-out';
-                card.style.opacity = '0';
-                setTimeout(() => {
-                    card.classList.add('hidden');
-                    card.style.opacity = '';
-                }, 300);
-            }
+        // 立即隐藏所有文件卡片，避免残留显示
+        fileCards.forEach(card => {
+            card.style.transition = 'opacity 0.2s ease-in-out';
+            card.style.opacity = '0';
         });
 
-
-
-        // 延迟更新计数，等待动画完成
+        // 短暂延迟后重新显示匹配的文件
         setTimeout(() => {
+            fileCards.forEach(card => {
+                const fileData = card.getAttribute('data-type');
+                
+                if (fileData === type) {
+                    // 显示匹配的文件卡片
+                    card.classList.remove('hidden');
+                    card.style.opacity = '1';
+                    visibleCount++;
+                } else {
+                    // 隐藏不匹配的文件卡片
+                    card.classList.add('hidden');
+                    card.style.opacity = '0';
+                }
+            });
+
+            // 更新计数和状态
             this.updateFileCount(visibleCount);
             this.toggleEmptyState(visibleCount);
-        }, 350);
+        }, 200);
         
         // 更新新建分组按钮状态
         this.forceUpdateCreateFolderButton();
@@ -1937,20 +1937,18 @@ class UIManager {
         const files = document.querySelectorAll('#files-grid > div:not(.hidden)');
         const count = visibleCount !== null ? visibleCount : files.length;
 
-
-
         if (count === 0) {
             // 没有可见文件，显示空状态，隐藏文件网格和上传区域
-            fileGrid.style.transition = 'opacity 0.3s ease-in-out';
+            fileGrid.style.transition = 'opacity 0.2s ease-in-out';
             fileGrid.style.opacity = '0';
             setTimeout(() => {
                 fileGrid.classList.add('hidden');
                 fileGrid.style.opacity = '';
-            }, 300);
+            }, 200);
             
             emptyState.style.opacity = '0';
             emptyState.classList.remove('hidden');
-            emptyState.style.transition = 'opacity 0.3s ease-in-out';
+            emptyState.style.transition = 'opacity 0.2s ease-in-out';
             setTimeout(() => {
                 emptyState.style.opacity = '1';
             }, 10);
@@ -1960,16 +1958,16 @@ class UIManager {
             }
         } else {
             // 有可见文件，显示文件网格，隐藏空状态和上传区域
-            emptyState.style.transition = 'opacity 0.3s ease-in-out';
+            emptyState.style.transition = 'opacity 0.2s ease-in-out';
             emptyState.style.opacity = '0';
             setTimeout(() => {
                 emptyState.classList.add('hidden');
                 emptyState.style.opacity = '';
-            }, 300);
+            }, 200);
             
             fileGrid.style.opacity = '0';
             fileGrid.classList.remove('hidden');
-            fileGrid.style.transition = 'opacity 0.3s ease-in-out';
+            fileGrid.style.transition = 'opacity 0.2s ease-in-out';
             setTimeout(() => {
                 fileGrid.style.opacity = '1';
             }, 10);
