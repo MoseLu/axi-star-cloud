@@ -17,6 +17,8 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: '1.23.4'
+        cache: true
+        cache-dependency-path: backend/go.sum
         
     - name: 构建Go程序
       run: |
