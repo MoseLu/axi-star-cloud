@@ -1,34 +1,32 @@
 // 智能环境检测和URL配置
 window.APP_CONFIG = (function() {
     // 检测当前环境
-    const isLocalhost = window.location.hostname === 'localhost' || 
-                       window.location.hostname === '127.0.0.1' ||
-                       window.location.hostname.includes('192.168.');
-    
-    const isDev = window.location.hostname.includes('dev') || 
-                  window.location.hostname.includes('test');
-    
-    // 根据环境自动选择API地址
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || 
+                        hostname === '127.0.0.1' ||
+                        hostname.startsWith('192.168.');
+    const isCloudIP = hostname === '47.112.163.152';
+
     let API_BASE_URL;
-    
+
     if (isLocalhost) {
         // 本地开发环境
         API_BASE_URL = 'http://localhost:8080';
         console.log('🌐 检测到本地开发环境，使用:', API_BASE_URL);
-    } else if (isDev) {
-        // 测试环境
-        API_BASE_URL = 'https://dev.yourdomain.com'; // 替换为你的测试域名
-        console.log('🧪 检测到测试环境，使用:', API_BASE_URL);
+    } else if (isCloudIP) {
+        // 云服务器环境
+        API_BASE_URL = 'http://47.112.163.152:8080';
+        console.log('☁️ 检测到云服务器环境，使用:', API_BASE_URL);
     } else {
         // 生产环境 - 使用当前域名
         API_BASE_URL = window.location.origin;
         console.log('🚀 检测到生产环境，使用:', API_BASE_URL);
     }
-    
+
     return {
         API_BASE_URL: API_BASE_URL,
-        ENV: isLocalhost ? 'local' : (isDev ? 'dev' : 'prod'),
-        DEBUG: isLocalhost || isDev
+        ENV: isLocalhost ? 'local' : (isCloudIP ? 'cloud' : 'prod'),
+        DEBUG: isLocalhost || isCloudIP
     };
 })();
 
