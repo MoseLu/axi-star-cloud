@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header版本测试</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .header-preview {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin: 5px;
+        }
+        .success { background: #22c55e; color: white; }
+        .error { background: #ef4444; color: white; }
+        .info { background: #3b82f6; color: white; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Header版本测试</h1>
+        <p>检查当前部署的header是否包含文档链接图标：</p>
+        
+        <div class="header-preview">
+            <h3>当前Header内容预览：</h3>
+            <div id="header-content"></div>
+        </div>
+        
+        <div class="status info">检查中...</div>
+        
+        <h2>测试结果</h2>
+        <div id="test-results"></div>
+        
+        <h2>调试信息</h2>
+        <p>页面URL: <span id="page-url"></span></p>
+        <p>加载时间: <span id="load-time"></span></p>
+        <p>User Agent: <span id="user-agent"></span></p>
+        
+        <script>
+            // 显示页面信息
+            document.getElementById('page-url').textContent = window.location.href;
+            document.getElementById('load-time').textContent = new Date().toLocaleString();
+            document.getElementById('user-agent').textContent = navigator.userAgent;
+            
+            // 检查header内容
+            function checkHeader() {
+                const header = document.querySelector('header');
+                const results = document.getElementById('test-results');
+                const status = document.querySelector('.status');
+                
+                if (!header) {
+                    status.className = 'status error';
+                    status.textContent = '未找到header元素';
+                    results.innerHTML = '<div class="status error">❌ Header元素不存在</div>';
+                    return;
+                }
+                
+                // 检查文档链接
+                const docsLink = header.querySelector('a[href*="redamancy.com.cn/docs"]');
+                const docsImg = header.querySelector('img[src*="docs.png"]');
+                
+                let html = '<h3>检查结果：</h3>';
+                
+                if (docsLink) {
+                    html += '<div class="status success">✅ 找到文档链接: ' + docsLink.href + '</div>';
+                } else {
+                    html += '<div class="status error">❌ 未找到文档链接</div>';
+                }
+                
+                if (docsImg) {
+                    html += '<div class="status success">✅ 找到文档图标: ' + docsImg.src + '</div>';
+                } else {
+                    html += '<div class="status error">❌ 未找到文档图标</div>';
+                }
+                
+                // 显示header HTML
+                document.getElementById('header-content').innerHTML = '<pre>' + header.outerHTML + '</pre>';
+                
+                if (docsLink && docsImg) {
+                    status.className = 'status success';
+                    status.textContent = '✅ Header包含文档链接和图标';
+                } else {
+                    status.className = 'status error';
+                    status.textContent = '❌ Header缺少文档链接或图标';
+                }
+                
+                results.innerHTML = html;
+            }
+            
+            // 页面加载完成后检查
+            window.addEventListener('load', function() {
+                setTimeout(checkHeader, 1000); // 延迟1秒检查，确保所有内容加载完成
+            });
+            
+            // 如果页面已经加载完成，立即检查
+            if (document.readyState === 'complete') {
+                setTimeout(checkHeader, 1000);
+            }
+        </script>
+    </div>
+</body>
+</html> 
