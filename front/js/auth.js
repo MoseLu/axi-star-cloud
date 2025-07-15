@@ -7,15 +7,25 @@ class AuthManager {
     }
 
     init() {
-        this.setupParticles();
-        this.setupEventListeners();
         this.checkLoginStatus();
+        this.setupEventListeners();
+        // 延迟初始化粒子效果，确保DOM已加载
+        setTimeout(() => {
+            this.setupParticles();
+        }, 200);
     }
 
     // 设置粒子背景
     setupParticles() {
+        const particlesContainer = document.getElementById('particles-js');
+        if (!particlesContainer) {
+            console.warn('粒子容器未找到，跳过粒子效果初始化');
+            return;
+        }
+
         if (typeof particlesJS !== 'undefined') {
-            particlesJS('particles-js', {
+            try {
+                particlesJS('particles-js', {
                 particles: {
                     number: {
                         value: 80,
@@ -117,6 +127,11 @@ class AuthManager {
                 },
                 retina_detect: true
             });
+            } catch (error) {
+                console.error('粒子效果初始化失败:', error);
+            }
+        } else {
+            console.warn('particlesJS 库未加载');
         }
     }
 
@@ -318,6 +333,16 @@ class AuthManager {
                 localStorage.removeItem('currentUser');
             }
         }
+    }
+
+    // 检查是否已登录
+    isLoggedIn() {
+        return this.currentUser !== null;
+    }
+
+    // 获取当前用户
+    getCurrentUser() {
+        return this.currentUser;
     }
 
     // 显示消息
