@@ -296,14 +296,6 @@ class AuthManager {
                 console.log('🔐 [AuthManager] 准备触发loginSuccess事件');
                 window.dispatchEvent(new CustomEvent('loginSuccess', { detail: this.currentUser }));
                 console.log('🔐 [AuthManager] loginSuccess事件已触发');
-                
-                // 如果App管理器已初始化，直接调用其方法
-                if (window.app && window.app.onLoginSuccess) {
-                    console.log('🔐 [AuthManager] 直接调用app.onLoginSuccess');
-                    window.app.onLoginSuccess(this.currentUser);
-                } else {
-                    console.log('🔐 [AuthManager] app.onLoginSuccess不可用');
-                }
             } else {
                 this.showMessage(data.error || '登录失败', 'error');
             }
