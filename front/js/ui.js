@@ -2849,28 +2849,29 @@ class UIManager {
     // 初始化用户头像显示
     async initUserProfile() {
         try {
-            // 从localStorage获取用户信息
-            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-            const loginData = JSON.parse(localStorage.getItem('loginData') || '{}');
+            // 获取当前登录用户信息
+            const currentUser = window.authManager ? window.authManager.getCurrentUser() : null;
             
-            // 先使用本地数据更新显示
-            const mergedUserData = {
-                username: userData.username || loginData.username || '用户',
-                avatar: userData.avatar || null
-            };
-            this.updateProfileDisplay(mergedUserData);
-            
-            // 从后端获取最新的用户信息
-            if (window.authManager && window.authManager.isLoggedIn()) {
+            if (currentUser) {
+                // 使用当前登录用户信息
+                const userData = {
+                    username: currentUser.username || '用户',
+                    avatar: null // 新用户默认没有头像
+                };
+                
+                // 更新页面显示
+                this.updateProfileDisplay(userData);
+                
+                // 从后端获取最新的用户信息
                 try {
                     const profile = await this.api.getProfile();
                     if (profile) {
                         // 更新localStorage中的用户数据
                         const updatedUserData = {
-                            username: profile.username || userData.username || loginData.username || '用户',
-                            email: profile.email || userData.email || '',
-                            bio: profile.bio || userData.bio || '',
-                            avatar: profile.avatar || userData.avatar || null
+                            username: profile.username || currentUser.username || '用户',
+                            email: profile.email || '',
+                            bio: profile.bio || '',
+                            avatar: profile.avatar || null
                         };
                         localStorage.setItem('userData', JSON.stringify(updatedUserData));
                         
@@ -2878,11 +2879,14 @@ class UIManager {
                         this.updateProfileDisplay(updatedUserData);
                     }
                 } catch (error) {
-                    // 如果获取失败，继续使用本地数据
+                    console.log('获取用户资料失败，使用当前用户信息');
+                    // 如果获取失败，继续使用当前用户信息
                 }
+            } else {
+                console.log('未找到当前用户信息');
             }
         } catch (error) {
-            // 初始化用户头像失败
+            console.error('初始化用户头像失败:', error);
         }
     }
 
@@ -3123,8 +3127,14 @@ class UIManager {
     // 检查并显示管理员菜单
     checkAndShowAdminMenu() {
         const adminMenu = document.getElementById('admin-menu');
-        if (adminMenu && this.api.isAdmin()) {
-            adminMenu.classList.remove('hidden');
+        if (adminMenu) {
+            // 只有Mose用户才能看到管理员菜单
+            const currentUser = window.authManager ? window.authManager.getCurrentUser() : null;
+            if (currentUser && currentUser.username === 'Mose' && this.api.isAdmin()) {
+                adminMenu.classList.remove('hidden');
+            } else {
+                adminMenu.classList.add('hidden');
+            }
         }
     }
 
