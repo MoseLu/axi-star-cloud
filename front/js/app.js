@@ -9,6 +9,8 @@ class App {
 
     async init() {
         try {
+            console.log('App开始初始化...');
+            
             // 初始化各个模块
             this.authManager = new AuthManager();
             this.apiManager = new ApiManager();
@@ -18,6 +20,8 @@ class App {
             window.authManager = this.authManager;
             window.apiManager = this.apiManager;
             window.uiManager = this.uiManager;
+
+            console.log('所有模块初始化完成');
 
             // 初始化日期显示
             this.initDateDisplay();

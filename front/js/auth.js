@@ -385,13 +385,4 @@ class AuthManager {
     }
 }
 
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM加载完成，准备初始化AuthManager...');
-    // 延迟初始化，确保所有模板都已加载
-    setTimeout(() => {
-        console.log('开始初始化AuthManager...');
-        window.authManager = new AuthManager();
-        console.log('AuthManager初始化完成');
-    }, 1000);
-}); 
+// AuthManager类定义完成，由App类统一管理初始化 
