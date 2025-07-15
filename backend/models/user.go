@@ -55,6 +55,10 @@ type RegisterResponse struct {
 type UserListResponse struct {
 	Success bool   `json:"success"`
 	Users   []User `json:"users"`
+	Total   int    `json:"total,omitempty"`
+	Page    int    `json:"page,omitempty"`
+	PageSize int   `json:"page_size,omitempty"`
+	HasMore bool   `json:"has_more,omitempty"`
 }
 
 // UpdateUserStorageRequest 更新用户存储限制请求结构体

@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"log"
 )
 
 // CreateTables 创建数据库表
@@ -67,16 +66,15 @@ func CreateTables(db *sql.DB) error {
 		return err
 	}
 
-	log.Println("数据库表创建成功")
 	return nil
 }
 
 // InsertInitialData 插入初始数据
 func InsertInitialData(db *sql.DB) error {
-	// 插入测试用户数据，包含完整的个人资料信息
+	// 插入Mose管理员用户数据
 	insertUser := `
-	INSERT IGNORE INTO user (uuid, username, password, email, bio, avatar) VALUES 
-	('550e8400-e29b-41d4-a716-446655440000', 'admin', '123456', 'admin@example.com', '系统管理员', '/uploads/avatars/default.jpg')`
+	INSERT IGNORE INTO user (uuid, username, password, email, bio, is_admin) VALUES 
+	('550e8400-e29b-41d4-a716-446655440000', 'Mose', '123456', 'mose@example.com', '系统管理员', TRUE)`
 
 	_, err := db.Exec(insertUser)
 	if err != nil {

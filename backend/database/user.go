@@ -85,7 +85,10 @@ func (r *UserRepository) GetUserByID(id string) (*models.User, error) {
 
 // GetAllUsers 获取所有用户（管理员功能）
 func (r *UserRepository) GetAllUsers() ([]models.User, error) {
-	query := `SELECT uuid, username, email, bio, avatar, storage_limit, is_admin, created_at, updated_at FROM user ORDER BY created_at DESC`
+	// 先获取管理员用户，再获取普通用户，管理员始终在最前面
+	query := `SELECT uuid, username, email, bio, avatar, storage_limit, is_admin, created_at, updated_at 
+			  FROM user 
+			  ORDER BY is_admin DESC, created_at DESC`
 
 	rows, err := r.db.Query(query)
 	if err != nil {
@@ -119,6 +122,65 @@ func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	}
 
 	return users, nil
+}
+
+// GetUsersWithPagination 获取用户列表（带分页）
+func (r *UserRepository) GetUsersWithPagination(page, pageSize int) ([]models.User, int, error) {
+	// 获取总用户数
+	var total int
+	err := r.db.QueryRow("SELECT COUNT(*) FROM user").Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// 计算偏移量
+	offset := (page - 1) * pageSize
+
+	// 获取分页用户数据，管理员始终在最前面
+	query := `SELECT uuid, username, email, bio, avatar, storage_limit, is_admin, created_at, updated_at 
+			  FROM user 
+			  ORDER BY is_admin DESC, created_at DESC
+			  LIMIT ? OFFSET ?`
+
+	rows, err := r.db.Query(query, pageSize, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		var email, bio, avatar sql.NullString
+
+		err := rows.Scan(
+			&user.UUID, &user.Username,
+			&email, &bio, &avatar,
+			&user.StorageLimit, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt)
+
+		if err != nil {
+			return nil, 0, err
+		}
+
+		// 处理NULL值
+		user.Email = email.String
+		user.Bio = bio.String
+		user.Avatar = avatar.String
+
+		// 不返回密码
+		user.Password = ""
+
+		users = append(users, user)
+	}
+
+	return users, total, nil
+}
+
+// GetUserCount 获取用户总数
+func (r *UserRepository) GetUserCount() (int, error) {
+	var count int
+	err := r.db.QueryRow("SELECT COUNT(*) FROM user").Scan(&count)
+	return count, err
 }
 
 // UpdateUser 更新用户信息

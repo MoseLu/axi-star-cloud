@@ -10,14 +10,29 @@ class ApiManager {
         const savedUser = localStorage.getItem('currentUser');
         if (savedUser) {
             try {
-                return JSON.parse(savedUser);
+                const user = JSON.parse(savedUser);
+                // 同步到实例变量
+                this.currentUser = user;
+                return user;
             } catch (error) {
-                console.error('解析用户信息失败:', error);
+    
                 localStorage.removeItem('currentUser');
+                this.currentUser = null;
                 return null;
             }
         }
+        this.currentUser = null;
         return null;
+    }
+
+    // 设置当前用户信息
+    setCurrentUser(userData) {
+        this.currentUser = userData;
+        if (userData) {
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+        } else {
+            localStorage.removeItem('currentUser');
+        }
     }
 
     // 获取当前用户UUID
@@ -43,16 +58,15 @@ class ApiManager {
 
             const data = await response.json();
             if (data.success) {
-                this.currentUser = {
+                this.setCurrentUser({
                     uuid: data.user.uuid,
                     username: data.user.username,
                     isAdmin: data.user.is_admin
-                };
-                localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                });
             }
             return data;
         } catch (error) {
-            console.error('登录失败:', error);
+
             return { success: false, error: '网络错误' };
         }
     }
@@ -70,19 +84,23 @@ class ApiManager {
 
             return await response.json();
         } catch (error) {
-            console.error('注册失败:', error);
+
             return { success: false, error: '网络错误' };
         }
     }
 
     // 获取所有用户（管理员功能）
-    async getAllUsers() {
+    async getAllUsers(page = 1, pageSize = 5) {
         if (!this.isAdmin()) {
             return { success: false, error: '权限不足' };
         }
 
         try {
-            const response = await fetch(`${this.baseUrl}/api/admin/users`, {
+            const url = new URL(`${this.baseUrl}/api/admin/users`);
+            url.searchParams.set('page', page.toString());
+            url.searchParams.set('page_size', pageSize.toString());
+
+            const response = await fetch(url, {
                 method: 'GET',
                 headers: {
                     'User-UUID': this.getCurrentUserId(),
@@ -92,7 +110,7 @@ class ApiManager {
 
             return await response.json();
         } catch (error) {
-            console.error('获取用户列表失败:', error);
+
             return { success: false, error: '网络错误' };
         }
     }
@@ -115,7 +133,7 @@ class ApiManager {
 
             return await response.json();
         } catch (error) {
-            console.error('更新用户存储限制失败:', error);
+
             return { success: false, error: '网络错误' };
         }
     }
@@ -266,7 +284,7 @@ class ApiManager {
 
             return await response.json();
         } catch (error) {
-            console.error('上传文件失败:', error);
+
             return { success: false, error: '上传失败' };
         }
     }
@@ -341,21 +359,24 @@ class ApiManager {
         if (!userId) throw new Error('请先登录');
 
         try {
-            const response = await fetch(`${this.baseUrl}/api/files/${fileId}`, {
+            const response = await fetch(`${this.baseUrl}/api/files/${fileId}?user_id=${userId}`, {
                 method: 'DELETE'
             });
 
             return await response.json();
         } catch (error) {
-            console.error('删除文件失败:', error);
+
             return { success: false, error: '删除失败' };
         }
     }
 
     // 下载文件
     async downloadFile(fileId) {
+        const userId = this.getCurrentUserId();
+        if (!userId) return { success: false, error: '请先登录' };
+
         try {
-            const response = await fetch(`${this.baseUrl}/api/files/${fileId}/download`);
+            const response = await fetch(`${this.baseUrl}/api/files/${fileId}/download?user_id=${userId}`);
             if (response.ok) {
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
@@ -371,7 +392,7 @@ class ApiManager {
                 return { success: false, error: '下载失败' };
             }
         } catch (error) {
-            console.error('下载文件失败:', error);
+
             return { success: false, error: '下载失败' };
         }
     }
@@ -382,29 +403,31 @@ class ApiManager {
         if (!userId) return { success: false, error: '未登录' };
 
         try {
-            const response = await fetch(`${this.baseUrl}/api/folders`, {
+            const response = await fetch(`${this.baseUrl}/api/folders?user_id=${userId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     name: name,
-                    category: category,
-                    user_id: userId
+                    category: category
                 })
             });
 
             return await response.json();
         } catch (error) {
-            console.error('创建文件夹失败:', error);
+
             return { success: false, error: '创建失败' };
         }
     }
 
     // 更新文件夹
     async updateFolder(folderId, name) {
+        const userId = this.getCurrentUserId();
+        if (!userId) return { success: false, error: '未登录' };
+
         try {
-            const response = await fetch(`${this.baseUrl}/api/folders/${folderId}`, {
+            const response = await fetch(`${this.baseUrl}/api/folders/${folderId}?user_id=${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -414,29 +437,35 @@ class ApiManager {
 
             return await response.json();
         } catch (error) {
-            console.error('更新文件夹失败:', error);
+
             return { success: false, error: '更新失败' };
         }
     }
 
     // 删除文件夹
     async deleteFolder(folderId) {
+        const userId = this.getCurrentUserId();
+        if (!userId) return { success: false, error: '未登录' };
+
         try {
-            const response = await fetch(`${this.baseUrl}/api/folders/${folderId}`, {
+            const response = await fetch(`${this.baseUrl}/api/folders/${folderId}?user_id=${userId}`, {
                 method: 'DELETE'
             });
 
             return await response.json();
         } catch (error) {
-            console.error('删除文件夹失败:', error);
+
             return { success: false, error: '删除失败' };
         }
     }
 
     // 获取文件夹文件数量
     async getFolderFileCount(folderId) {
+        const userId = this.getCurrentUserId();
+        if (!userId) return 0;
+
         try {
-            const response = await fetch(`${this.baseUrl}/api/folders/${folderId}/count`);
+            const response = await fetch(`${this.baseUrl}/api/folders/${folderId}/count?user_id=${userId}`);
             const data = await response.json();
             
             if (data.success) {
@@ -451,8 +480,11 @@ class ApiManager {
 
     // 移动文件
     async moveFile(fileId, folderId) {
+        const userId = this.getCurrentUserId();
+        if (!userId) return { success: false, error: '未登录' };
+
         try {
-            const response = await fetch(`${this.baseUrl}/api/files/${fileId}/move`, {
+            const response = await fetch(`${this.baseUrl}/api/files/${fileId}/move?user_id=${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -462,7 +494,7 @@ class ApiManager {
 
             return await response.json();
         } catch (error) {
-            console.error('移动文件失败:', error);
+
             return { success: false, error: '移动失败' };
         }
     }
@@ -515,7 +547,7 @@ class ApiManager {
                 return null;
             }
         } catch (error) {
-            console.error('获取个人资料失败:', error);
+
             return null;
         }
     }
@@ -526,20 +558,17 @@ class ApiManager {
         if (!userId) return { success: false, error: '未登录' };
 
         try {
-            const response = await fetch(`${this.baseUrl}/api/profile`, {
+            const response = await fetch(`${this.baseUrl}/api/profile?user_id=${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    ...profileData,
-                    user_id: userId
-                })
+                body: JSON.stringify(profileData)
             });
 
             return await response.json();
         } catch (error) {
-            console.error('更新个人资料失败:', error);
+
             return { success: false, error: '更新失败' };
         }
     }
@@ -551,17 +580,16 @@ class ApiManager {
 
         const formData = new FormData();
         formData.append('avatar', file);
-        formData.append('user_id', userId);
 
         try {
-            const response = await fetch(`${this.baseUrl}/api/profile/avatar`, {
+            const response = await fetch(`${this.baseUrl}/api/profile/avatar?user_id=${userId}`, {
                 method: 'POST',
                 body: formData
             });
 
             return await response.json();
         } catch (error) {
-            console.error('上传头像失败:', error);
+
             return { success: false, error: '上传失败' };
         }
     }

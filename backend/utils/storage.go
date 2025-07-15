@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"os"
 	"path/filepath"
@@ -61,8 +60,6 @@ func GetUploadDir() string {
 		return "../uploads"
 	}
 
-	log.Printf("当前工作目录: %s", currentDir)
-
 	// 在云端服务器上，优先使用绝对路径
 	// 尝试多个可能的绝对路径
 	absolutePaths := []string{
@@ -74,7 +71,6 @@ func GetUploadDir() string {
 
 	for _, absPath := range absolutePaths {
 		if _, err := os.Stat(absPath); err == nil {
-			log.Printf("找到绝对路径: %s", absPath)
 			return absPath
 		}
 	}
@@ -83,12 +79,10 @@ func GetUploadDir() string {
 	// 检查是否在backend目录中
 	if strings.HasSuffix(currentDir, "backend") {
 		relativePath := filepath.Join(currentDir, "../uploads")
-		log.Printf("使用相对路径: %s", relativePath)
 		return relativePath
 	}
 
 	// 如果在项目根目录，直接使用相对路径
-	log.Printf("使用默认相对路径: uploads")
 	return "uploads"
 }
 
@@ -145,6 +139,13 @@ func GetAvatarUploadDir() string {
 	// 如果都找不到，创建默认路径
 	defaultPath := "uploads/avatars"
 	os.MkdirAll(defaultPath, 0755)
+
+	// 返回绝对路径
+	absPath, err := filepath.Abs(defaultPath)
+	if err == nil {
+		return absPath
+	}
+
 	return defaultPath
 }
 

@@ -31,7 +31,7 @@ func main() {
 
 	// 更新现有用户的存储限制
 	if err := database.UpdateExistingUserStorageLimits(db); err != nil {
-		log.Printf("更新用户存储限制失败: %v", err)
+		// 静默处理，不打印错误
 	}
 
 	// 插入初始数据
@@ -60,21 +60,7 @@ func main() {
 	// 设置所有路由
 	routerManager.SetupRoutes(authHandler, fileHandler, folderHandler, storageHandler, profileHandler)
 
-	// 打印注册的路由信息
-	log.Println("=== 已注册的路由 ===")
-	registeredRoutes := routerManager.GetRegisteredRoutes()
-	for groupName, routes := range registeredRoutes {
-		log.Printf("路由组: %s", groupName)
-		for _, route := range routes {
-			log.Printf("  %s %s - %s", route.Method, route.Path, route.Description)
-		}
-	}
-	log.Println("==================")
-
 	// 启动服务器
-	log.Println("服务器启动在 http://localhost:8080")
-	log.Println("健康检查: http://localhost:8080/health")
-
 	if err := router.Run(":8080"); err != nil {
 		log.Fatalf("服务器启动失败: %v", err)
 	}

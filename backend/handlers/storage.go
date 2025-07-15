@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
 	"backend/database"
@@ -32,7 +31,6 @@ func (h *StorageHandler) GetStorageInfo(c *gin.Context) {
 
 	storageInfo, err := h.userRepo.GetUserStorageInfo(userID)
 	if err != nil {
-		log.Printf("获取存储信息错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取存储信息失败"})
 		return
 	}
@@ -67,7 +65,6 @@ func (h *StorageHandler) UpdateStorageLimit(c *gin.Context) {
 
 	var updateRequest models.UpdateStorageRequest
 	if err := c.ShouldBindJSON(&updateRequest); err != nil {
-		log.Printf("请求参数绑定错误: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数错误"})
 		return
 	}
@@ -81,7 +78,6 @@ func (h *StorageHandler) UpdateStorageLimit(c *gin.Context) {
 	// 获取当前存储信息
 	currentStorage, err := h.userRepo.GetUserStorageInfo(userID)
 	if err != nil {
-		log.Printf("获取当前存储信息错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取存储信息失败"})
 		return
 	}
@@ -94,12 +90,9 @@ func (h *StorageHandler) UpdateStorageLimit(c *gin.Context) {
 
 	// 更新存储限制
 	if err := h.userRepo.UpdateStorageLimit(userID, updateRequest.StorageLimit); err != nil {
-		log.Printf("更新存储限制错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "更新存储限制失败"})
 		return
 	}
-
-	log.Printf("存储限制更新成功: userID=%s, newLimit=%d", userID, updateRequest.StorageLimit)
 
 	response := models.UpdateStorageResponse{
 		Success: true,

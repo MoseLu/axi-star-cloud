@@ -2,91 +2,85 @@ package database
 
 import (
 	"database/sql"
-	"log"
+	"strings"
 )
 
 // MigrateDatabase 执行数据库迁移
 func MigrateDatabase(db *sql.DB) error {
-	log.Println("开始执行数据库迁移...")
-
-	// 检查email字段是否存在
-	var emailExists bool
-	err := db.QueryRow("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_NAME = 'user' AND COLUMN_NAME = 'email'").Scan(&emailExists)
-	if err != nil {
-		log.Printf("检查email字段失败: %v", err)
+	// 添加 is_admin 字段（如果不存在）
+	if err := addAdminField(db); err != nil {
+		return err
 	}
 
-	if !emailExists {
-		log.Println("添加email字段...")
-		_, err = db.Exec("ALTER TABLE user ADD COLUMN email VARCHAR(100)")
+	// 确保Mose用户具有管理员权限
+	if err := ensureMoseAdmin(db); err != nil {
+		return err
+	}
+
+	// 修复头像路径格式
+	if err := fixAvatarPaths(db); err != nil {
+		return err
+	}
+
+	// 清理不存在的头像数据
+	if err := cleanInvalidAvatars(db); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// addAdminField 添加管理员字段
+func addAdminField(db *sql.DB) error {
+	// 检查 is_admin 字段是否存在
+	var columnExists int
+	err := db.QueryRow(`
+		SELECT COUNT(*) 
+		FROM information_schema.columns 
+		WHERE table_name = 'user' AND column_name = 'is_admin'
+	`).Scan(&columnExists)
+
+	if err != nil {
+		return err
+	}
+
+	if columnExists == 0 {
+		_, err := db.Exec("ALTER TABLE user ADD COLUMN is_admin BOOLEAN DEFAULT FALSE")
 		if err != nil {
-			log.Printf("添加email字段失败: %v", err)
 			return err
 		}
-		log.Println("email字段添加成功")
 	}
 
-	// 检查bio字段是否存在
-	var bioExists bool
-	err = db.QueryRow("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_NAME = 'user' AND COLUMN_NAME = 'bio'").Scan(&bioExists)
+	return nil
+}
+
+// fixAvatarPaths 修复头像路径格式
+func fixAvatarPaths(db *sql.DB) error {
+	// 查询所有有头像的用户
+	rows, err := db.Query("SELECT uuid, avatar FROM user WHERE avatar IS NOT NULL AND avatar != ''")
 	if err != nil {
-		log.Printf("检查bio字段失败: %v", err)
+		return err
 	}
+	defer rows.Close()
 
-	if !bioExists {
-		log.Println("添加bio字段...")
-		_, err = db.Exec("ALTER TABLE user ADD COLUMN bio TEXT")
-		if err != nil {
-			log.Printf("添加bio字段失败: %v", err)
-			return err
+	for rows.Next() {
+		var uuid, avatar string
+		if err := rows.Scan(&uuid, &avatar); err != nil {
+			continue
 		}
-		log.Println("bio字段添加成功")
-	}
 
-	// 检查avatar字段是否存在
-	var avatarExists bool
-	err = db.QueryRow("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_NAME = 'user' AND COLUMN_NAME = 'avatar'").Scan(&avatarExists)
-	if err != nil {
-		log.Printf("检查avatar字段失败: %v", err)
-	}
+		// 如果头像路径是完整路径，提取文件名
+		if strings.HasPrefix(avatar, "/uploads/avatars/") {
+			fileName := strings.TrimPrefix(avatar, "/uploads/avatars/")
 
-	if !avatarExists {
-		log.Println("添加avatar字段...")
-		_, err = db.Exec("ALTER TABLE user ADD COLUMN avatar VARCHAR(500)")
-		if err != nil {
-			log.Printf("添加avatar字段失败: %v", err)
-			return err
-		}
-		log.Println("avatar字段添加成功")
-	}
-
-	// 检查is_admin字段是否存在
-	var isAdminExists bool
-	err = db.QueryRow("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_NAME = 'user' AND COLUMN_NAME = 'is_admin'").Scan(&isAdminExists)
-	if err != nil {
-		log.Printf("检查is_admin字段失败: %v", err)
-	}
-
-	if !isAdminExists {
-		log.Println("添加is_admin字段...")
-		_, err = db.Exec("ALTER TABLE user ADD COLUMN is_admin BOOLEAN DEFAULT FALSE")
-		if err != nil {
-			log.Printf("添加is_admin字段失败: %v", err)
-			return err
-		}
-		log.Println("is_admin字段添加成功")
-
-		// 将现有的Mose用户设置为管理员
-		log.Println("设置Mose用户为管理员...")
-		_, err = db.Exec("UPDATE user SET is_admin = TRUE WHERE username = 'Mose'")
-		if err != nil {
-			log.Printf("设置Mose为管理员失败: %v", err)
-		} else {
-			log.Println("Mose用户已设置为管理员")
+			// 更新数据库中的路径为只存储文件名
+			_, err := db.Exec("UPDATE user SET avatar = ? WHERE uuid = ?", fileName, uuid)
+			if err != nil {
+				continue
+			}
 		}
 	}
 
-	log.Println("数据库迁移完成")
 	return nil
 }
 
@@ -102,6 +96,63 @@ func UpdateExistingUserStorageLimits(db *sql.DB) error {
 	_, err = db.Exec("UPDATE user SET storage_limit = ? WHERE username != 'Mose'", 1024*1024*1024)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// cleanInvalidAvatars 清理不存在的头像数据
+func cleanInvalidAvatars(db *sql.DB) error {
+	// 查询所有有头像的用户
+	rows, err := db.Query("SELECT uuid, avatar FROM user WHERE avatar IS NOT NULL AND avatar != ''")
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var uuid, avatar string
+		if err := rows.Scan(&uuid, &avatar); err != nil {
+			continue
+		}
+
+		// 检查是否为默认头像或已知不存在的头像
+		if avatar == "avatar.jpg" || avatar == "550e8400-e29b-41d4-a716-446655440000_1589165e-2f57-4986-9a68-c4da532bd507.jpg" {
+			// 将这些头像设置为null
+			_, err := db.Exec("UPDATE user SET avatar = NULL WHERE uuid = ?", uuid)
+			if err != nil {
+				continue
+			}
+		}
+	}
+
+	return nil
+}
+
+// ensureMoseAdmin 确保Mose用户具有管理员权限
+func ensureMoseAdmin(db *sql.DB) error {
+	// 检查Mose用户是否存在
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM user WHERE username = 'Mose'").Scan(&count)
+	if err != nil {
+		return err
+	}
+
+	if count == 0 {
+		// Mose用户不存在，创建管理员用户
+		_, err := db.Exec(`
+			INSERT INTO user (uuid, username, password, email, bio, is_admin, storage_limit) VALUES 
+			('550e8400-e29b-41d4-a716-446655440000', 'Mose', '123456', 'mose@example.com', '系统管理员', TRUE, ?)
+		`, 5*1024*1024*1024) // 5GB存储空间
+		if err != nil {
+			return err
+		}
+	} else {
+		// Mose用户存在，确保具有管理员权限
+		_, err := db.Exec("UPDATE user SET is_admin = TRUE, storage_limit = ? WHERE username = 'Mose'", 5*1024*1024*1024)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

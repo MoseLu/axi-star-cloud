@@ -1,7 +1,8 @@
 // UI模块 - 处理界面渲染和交互
 class UIManager {
     constructor() {
-        this.api = new ApiManager();
+        // 使用全局的ApiManager实例，而不是创建新的
+        this.api = window.apiManager || new ApiManager();
         this.currentFolderId = null;
         this.folders = [];
         this.currentCategory = 'all'; // 新增：记录当前分类
@@ -25,7 +26,7 @@ class UIManager {
             this.forceUpdateCreateFolderButton();
             
             // 登录状态检测由App统一处理，避免重复调用
-            console.log('UIManager初始化完成，等待App处理登录状态');
+    
             
             // 初始化用户头像显示
             await this.initUserProfile();
@@ -244,10 +245,10 @@ class UIManager {
             this.showSettingsModal();
         });
 
-        // 退出登录按钮
-        document.getElementById('logout-btn')?.addEventListener('click', () => {
-            this.logout();
-        });
+        // 退出登录按钮事件由App统一处理，避免重复绑定
+        // document.getElementById('logout-btn')?.addEventListener('click', () => {
+        //     this.logout();
+        // });
 
         // 搜索功能
         document.getElementById('search-input')?.addEventListener('input', (e) => {
@@ -369,10 +370,34 @@ class UIManager {
 
     // 登录成功回调
     async onLoginSuccess(userData) {
-        console.log('🎨 [UIManager] onLoginSuccess被调用，用户数据:', userData);
+
         try {
-            // 更新用户显示（用户名和头像）
+            // 首先更新用户显示（使用登录时获取的基本信息）
             this.updateProfileDisplay(userData);
+            
+            // 从后端获取完整的用户信息（包括头像等）
+            try {
+                const profile = await this.api.getProfile();
+                if (profile) {
+                    // 合并用户信息
+                    const completeUserData = {
+                        ...userData,
+                        username: profile.username || userData.username,
+                        email: profile.email || '',
+                        bio: profile.bio || '',
+                        avatar: profile.avatar || null
+                    };
+                    
+                    // 更新localStorage中的用户数据
+                    localStorage.setItem('userData', JSON.stringify(completeUserData));
+                    
+                    // 更新页面显示
+                    this.updateProfileDisplay(completeUserData);
+                }
+            } catch (error) {
+
+                // 如果获取失败，继续使用登录时的基本信息
+            }
             
             // 初始化用户头像显示
             await this.initUserProfile();
@@ -405,7 +430,7 @@ class UIManager {
         } catch (error) {
             this.showMessage('数据加载失败', 'error');
         }
-        console.log('🎨 [UIManager] onLoginSuccess处理完成');
+
     }
 
     // 渲染文件列表
@@ -454,7 +479,7 @@ class UIManager {
     // 创建文件卡片
     createFileCard(file) {
         const fileCard = document.createElement('div');
-        fileCard.className = 'glass-effect rounded-xl p-4 border border-purple-light/20 hover:border-purple-light/40 transition-all duration-300 cursor-pointer group file-card relative hover:shadow-lg hover:shadow-purple-500/10 min-h-[180px] w-full';
+        fileCard.className = 'glass-effect rounded-xl p-2 border border-purple-light/20 hover:border-purple-light/40 transition-all duration-300 cursor-pointer group file-card relative hover:shadow-lg hover:shadow-purple-500/10 min-h-[140px] w-full max-w-[200px]';
         fileCard.setAttribute('data-type', file.type);
         fileCard.setAttribute('data-file-id', file.id);
         fileCard.setAttribute('draggable', 'true');
@@ -475,14 +500,14 @@ class UIManager {
         fileCard.innerHTML = `
             <div class="card-content flex flex-col h-full">
                 <!-- 第一排：缩略图/图标和文件名 -->
-                <div class="file-icon-container flex flex-col items-center justify-center mb-4">
-                    <div class="w-16 h-16 bg-gradient-to-br ${thumbnailContent.bgColor} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg flex-shrink-0 overflow-hidden mb-3">
+                <div class="file-icon-container flex flex-col items-center justify-center mb-2">
+                    <div class="w-12 h-12 bg-gradient-to-br ${thumbnailContent.bgColor} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg flex-shrink-0 overflow-hidden mb-2">
                         ${thumbnailContent.html}
                     </div>
                     <div class="text-center w-full">
-                        <div class="flex items-center justify-center gap-2">
-                            <h4 class="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300 group-hover:from-purple-200 group-hover:to-blue-200 transition-all duration-300 text-sm leading-tight truncate max-w-[120px]" title="${file.name}">${this.truncateFileName(file.name)}</h4>
-                            <span class="text-xs px-2 py-1 rounded-full ${this.getCategoryBadgeColor(file.type)} ${this.getCategoryBadgeBg(file.type)} font-medium flex-shrink-0">
+                        <div class="flex items-center justify-center gap-1">
+                            <h4 class="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300 group-hover:from-purple-200 group-hover:to-blue-200 transition-all duration-300 text-xs leading-tight truncate max-w-[100px]" title="${file.name}">${this.truncateFileName(file.name)}</h4>
+                            <span class="text-xs px-1.5 py-0.5 rounded-full ${this.getCategoryBadgeColor(file.type)} ${this.getCategoryBadgeBg(file.type)} font-medium flex-shrink-0">
                                 ${this.getCategoryLabel(file.type)}
                             </span>
                         </div>
@@ -490,27 +515,27 @@ class UIManager {
                 </div>
                 
                 <!-- 第二排：文件大小和日期（带图标） -->
-                <div class="file-info flex items-center justify-center space-x-4 mb-4 text-xs text-gray-400">
+                <div class="file-info flex items-center justify-center space-x-1 mb-2 text-xs text-gray-400">
                     <div class="flex items-center space-x-1 flex-shrink-0">
-                        <i class="fa fa-hdd-o text-blue-400 flex-shrink-0"></i>
-                        <span class="bg-gray-800/50 px-1.5 py-0.5 rounded-full font-medium truncate max-w-[80px] text-blue-300" title="${fileSize}">${fileSize}</span>
+                        <i class="fa fa-hdd-o text-blue-400 flex-shrink-0 text-xs"></i>
+                        <span class="bg-gray-800/50 px-1 py-0.5 rounded-full font-medium truncate max-w-[60px] text-blue-300" title="${fileSize}">${fileSize}</span>
                     </div>
                     <div class="flex items-center space-x-1 flex-shrink-0">
-                        <i class="fa fa-calendar text-green-400 flex-shrink-0"></i>
-                        <span class="bg-gray-800/50 px-1.5 py-0.5 rounded-full font-medium text-green-300 truncate max-w-[60px]" title="${formattedDate}">${formattedDate}</span>
+                        <i class="fa fa-calendar text-green-400 flex-shrink-0 text-xs"></i>
+                        <span class="bg-gray-800/50 px-1 py-0.5 rounded-full font-medium text-green-300 truncate max-w-[50px]" title="${formattedDate}">${formattedDate}</span>
                     </div>
                 </div>
                 
                 <!-- 第三排：操作按钮 -->
-                <div class="file-actions flex items-center justify-center mt-auto space-x-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    <button class="file-preview-btn text-blue-400 hover:text-blue-300 transition-colors p-3 rounded-lg hover:bg-blue-500/10" title="预览">
-                        <i class="fa fa-eye text-lg"></i>
+                <div class="file-actions flex items-center justify-center mt-auto space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                    <button class="file-preview-btn text-blue-400 hover:text-blue-300 transition-colors p-2 rounded-lg hover:bg-blue-500/10" title="预览">
+                        <i class="fa fa-eye text-sm"></i>
                     </button>
-                    <button class="file-download-btn text-green-400 hover:text-green-300 transition-colors p-3 rounded-lg hover:bg-green-500/10" title="下载">
-                        <i class="fa fa-download text-lg"></i>
+                    <button class="file-download-btn text-green-400 hover:text-green-300 transition-colors p-2 rounded-lg hover:bg-green-500/10" title="下载">
+                        <i class="fa fa-download text-sm"></i>
                     </button>
-                    <button class="file-delete-btn text-red-400 hover:text-red-300 transition-colors p-3 rounded-lg hover:bg-red-500/10" title="删除">
-                        <i class="fa fa-trash text-lg"></i>
+                    <button class="file-delete-btn text-red-400 hover:text-red-300 transition-colors p-2 rounded-lg hover:bg-red-500/10" title="删除">
+                        <i class="fa fa-trash text-sm"></i>
                     </button>
                 </div>
             </div>
@@ -585,28 +610,26 @@ class UIManager {
     // 获取缩略图URL
     getThumbnailUrl(file) {
         // 对于图片文件，尝试显示缩略图
-        if (file.type === 'image' && file.previewUrl) {
-            // 构建完整的图片URL
-            let fullUrl;
-            if (file.previewUrl.startsWith('/')) {
-                // 使用当前域名而不是硬编码localhost
-                fullUrl = window.location.origin + file.previewUrl;
-            } else if (file.previewUrl.startsWith('http')) {
-                fullUrl = file.previewUrl;
+        if (file.type === 'image') {
+            // 优先使用file.previewUrl或file.path
+            let url = file.previewUrl || file.path;
+            if (url) {
+                if (url.startsWith('/')) {
+                    return window.location.origin + url;
+                } else if (url.startsWith('http')) {
+                    return url;
             } else {
-                // 使用当前域名构建URL
-                fullUrl = window.location.origin + `/uploads/${file.type}/${file.name}`;
+                    // 使用正确的文件类型路径
+                    return window.location.origin + `/uploads/${file.type}/${file.name}`;
             }
-            
-            return fullUrl;
+            }
+            // 回退 - 使用正确的文件类型路径
+            return window.location.origin + `/uploads/${file.type}/${file.name}`;
         }
-        
-        // 对于视频文件，暂时使用默认图标
-        // 未来可以添加视频缩略图生成功能
+        // 视频文件不显示缩略图
         if (file.type === 'video') {
             return null;
         }
-
         return null;
     }
 
@@ -732,38 +755,47 @@ class UIManager {
         }
 
         return `
-            <div class="glass-effect rounded-xl p-6 border border-blue-400/40 hover:border-blue-400/80 transition-all duration-300 cursor-pointer group drop-zone relative min-h-[120px] w-full max-w-xs flex flex-col justify-between items-center bg-gradient-to-br from-blue-900/60 to-dark/80 shadow-lg" data-folder-id="${folder.id}" title="点击查看文件夹内容">
-                <h4 class="font-semibold text-blue-300 truncate text-sm mb-2 w-full text-center tracking-wider" title="${folder.name}">
-                    ${folder.name.length > 7 ? folder.name.slice(0, 7) + '…' : folder.name}
-                </h4>
-                <div class="flex flex-col items-center justify-center w-full mb-2 space-y-1">
-                    <div class="flex items-center justify-center">
-                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500/30 to-blue-600/30 rounded-lg flex items-center justify-center mr-2">
-                            <i class="fa fa-folder text-lg text-blue-300"></i>
-                        </div>
-                        <span class="text-xs font-medium text-blue-200 drop-shadow-sm">文件数：</span>
-                        <span class="text-xs font-bold text-cyan-400 ml-1">${fileCount}</span>
-                    </div>
-                    <div class="flex items-center justify-center">
-                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500/30 to-blue-600/30 rounded-lg flex items-center justify-center mr-2">
-                            <i class="fa fa-calendar text-lg text-blue-300"></i>
-                        </div>
-                        <span class="text-xs font-medium text-blue-200 drop-shadow-sm">创建于</span>
-                        <span class="text-xs font-bold text-cyan-400 ml-1">${this.formatDate(folder.created_at)}</span>
+            <div class="glass-effect rounded-xl p-3 border border-blue-400/40 hover:border-blue-400/80 transition-all duration-300 cursor-pointer group drop-zone relative min-h-[100px] max-w-[200px] flex flex-col justify-between items-center bg-gradient-to-br from-blue-900/60 to-dark/80 shadow-lg" data-folder-id="${folder.id}" title="点击查看文件夹内容">
+                                <!-- 第一行：文件夹名称和操作按钮 -->
+                <div class="flex items-center justify-between w-full mb-2">
+                    <h4 class="font-semibold text-blue-300 truncate text-xs flex-1 min-w-0 max-w-[70%]" title="${folder.name}">
+                        ${folder.name.length > 7 ? folder.name.slice(0, 7) + '…' : folder.name}
+                    </h4>
+                    <div class="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <button class="folder-edit-btn text-blue-400 hover:text-blue-300 transition-colors p-1 rounded-lg hover:bg-blue-400/10" title="重命名">
+                            <i class="fa fa-edit text-xs"></i>
+                        </button>
+                        <button class="folder-delete-btn text-red-400 hover:text-red-300 transition-colors p-1 rounded-lg hover:bg-red-400/10" title="删除">
+                            <i class="fa fa-trash text-xs"></i>
+                        </button>
                     </div>
                 </div>
-                <div class="flex items-center justify-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-2 w-full">
-                    <button class="folder-edit-btn text-blue-400 hover:text-blue-300 transition-colors p-2 rounded-lg hover:bg-blue-400/10" title="重命名">
-                        <i class="fa fa-edit text-sm"></i>
-                    </button>
-                    <button class="folder-delete-btn text-red-400 hover:text-red-300 transition-colors p-2 rounded-lg hover:bg-red-400/10" title="删除">
-                        <i class="fa fa-trash text-sm"></i>
-                    </button>
+                
+                <!-- 第二行：文件数量 -->
+                <div class="flex items-center w-full mb-2">
+                    <div class="w-5 h-5 bg-gradient-to-br from-blue-500/30 to-blue-600/30 rounded-lg flex items-center justify-center mr-1 flex-shrink-0">
+                        <i class="fa fa-folder text-xs text-blue-300"></i>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-xs font-medium text-blue-200 drop-shadow-sm flex-shrink-0">文件数：</span>
+                        <span class="text-xs font-bold text-cyan-400 ml-0.5 flex-shrink-0">${fileCount}</span>
+                    </div>
+                </div>
+                
+                <!-- 第三行：创建时间 -->
+                <div class="flex items-center w-full mb-2">
+                    <div class="w-5 h-5 bg-gradient-to-br from-blue-500/30 to-blue-600/30 rounded-lg flex items-center justify-center mr-1 flex-shrink-0">
+                        <i class="fa fa-calendar text-xs text-blue-300"></i>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-xs font-medium text-blue-200 drop-shadow-sm flex-shrink-0">创建于</span>
+                        <span class="text-xs font-bold text-cyan-400 ml-0.5 flex-shrink-0">${this.formatDate(folder.created_at)}</span>
+                    </div>
                 </div>
                 <div class="absolute inset-0 bg-blue-500/5 border-2 border-dashed border-blue-400/30 rounded-xl opacity-0 transition-opacity duration-300 flex items-center justify-center pointer-events-none drag-hint">
                     <div class="text-center">
-                        <i class="fa fa-arrow-down text-2xl text-blue-400 mb-2"></i>
-                        <p class="text-sm text-blue-400 font-medium">拖拽文件到这里</p>
+                        <i class="fa fa-arrow-down text-xl text-blue-400 mb-2"></i>
+                        <p class="text-xs text-blue-400 font-medium">拖拽文件到这里</p>
                     </div>
                 </div>
             </div>
@@ -773,49 +805,47 @@ class UIManager {
     // 创建文件夹卡片
     createFolderCard(folder) {
         const folderCard = document.createElement('div');
-        folderCard.className = 'glass-effect rounded-xl p-6 border border-blue-400/20 hover:border-blue-400/40 transition-all duration-300 cursor-pointer group folder-card drop-zone relative min-h-[180px] w-full';
+        folderCard.className = 'glass-effect rounded-xl p-6 border border-blue-400/20 hover:border-blue-400/40 transition-all duration-300 cursor-pointer group folder-card drop-zone relative min-h-[180px] max-w-[280px]';
         folderCard.setAttribute('data-folder-id', folder.id);
 
         folderCard.innerHTML = `
             <!-- 主要内容区域 -->
             <div class="card-content flex flex-col h-full" data-folder-id="${folder.id}" title="点击查看文件夹内容">
-                <!-- 顶部：图标和标题 -->
+                <!-- 顶部：图标 -->
                 <div class="folder-icon-container flex flex-col items-center justify-center mb-4">
                     <div class="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 flex-shrink-0 mb-3">
                         <i class="fa fa-folder text-3xl text-blue-400"></i>
                     </div>
-                    <div class="text-center w-full">
-                        <div class="flex items-center justify-center gap-2">
-                            <h4 class="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-300 truncate text-sm max-w-[120px]" title="${folder.name}">${this.truncateFileName(folder.name)}</h4>
-                            <span class="text-xs px-3 py-1 rounded-full ${this.getCategoryBadgeColor(folder.category)} ${this.getCategoryBadgeBg(folder.category)} font-medium flex-shrink-0">
-                                ${this.getCategoryLabel(folder.category)}
-                            </span>
-                        </div>
+                </div>
+                
+                <!-- 第一行：文件夹名称和操作按钮 -->
+                <div class="flex items-center justify-between w-full mb-3">
+                    <div class="flex items-center gap-1 flex-1 min-w-0 max-w-[70%]">
+                        <h4 class="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-300 truncate text-sm" title="${folder.name}">${this.truncateFileName(folder.name)}</h4>
+                        <span class="text-xs px-1.5 py-0.5 rounded-full ${this.getCategoryBadgeColor(folder.category)} ${this.getCategoryBadgeBg(folder.category)} font-medium flex-shrink-0">
+                            ${this.getCategoryLabel(folder.category)}
+                        </span>
+                    </div>
+                    <div class="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <button class="folder-edit-btn text-blue-400 hover:text-blue-300 transition-colors p-1 rounded-lg hover:bg-blue-400/10" title="重命名">
+                            <i class="fa fa-edit text-xs"></i>
+                        </button>
+                        <button class="folder-delete-btn text-red-400 hover:text-red-300 transition-colors p-1 rounded-lg hover:bg-red-400/10" title="删除">
+                            <i class="fa fa-trash text-xs"></i>
+                        </button>
                     </div>
                 </div>
                 
-                <!-- 中间：创建时间 -->
-                <div class="folder-info flex items-center justify-center space-x-2 mb-4">
-                    <i class="fa fa-calendar text-xs text-gray-400"></i>
+                <!-- 第二行：文件数量 -->
+                <div class="flex items-center mb-3 w-full">
+                    <i class="fa fa-file-o text-xs text-gray-400 mr-1"></i>
+                    <span class="text-xs text-gray-400">0 个文件</span>
+                </div>
+                
+                <!-- 第三行：创建时间 -->
+                <div class="flex items-center mb-3 w-full">
+                    <i class="fa fa-calendar text-xs text-gray-400 mr-1"></i>
                     <span class="text-xs text-gray-400">创建于 ${this.formatDate(folder.created_at)}</span>
-                </div>
-                
-                <!-- 底部：操作按钮区域 -->
-                <div class="folder-actions mt-auto pt-4 border-t border-blue-400/10">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <i class="fa fa-file-o text-xs text-gray-400"></i>
-                            <span class="text-xs text-gray-400">0 个文件</span>
-                        </div>
-                        <div class="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <button class="folder-edit-btn text-blue-400 hover:text-blue-300 transition-colors p-2 rounded-lg hover:bg-blue-400/10" title="重命名">
-                                <i class="fa fa-edit text-sm"></i>
-                            </button>
-                            <button class="folder-delete-btn text-red-400 hover:text-red-300 transition-colors p-2 rounded-lg hover:bg-red-400/10" title="删除">
-                                <i class="fa fa-trash text-sm"></i>
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
             
@@ -935,44 +965,32 @@ class UIManager {
 
     // 预览图片
     previewImage(file) {
-        // 给body添加类防止滚动
         document.body.classList.add('modal-open');
-        
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
         modal.style.overflow = 'hidden';
+        // 优先使用file.path
+        let imgUrl = file.path || file.previewUrl || `/uploads/${file.type}/${file.name}`;
+        if (imgUrl && !imgUrl.startsWith('http') && !imgUrl.startsWith('/')) {
+            imgUrl = `/uploads/${file.type}/${file.name}`;
+        }
         modal.innerHTML = `
             <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
-                <!-- 关闭按钮 -->
                 <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
                     <i class="fa fa-times"></i>
                 </button>
-                
-                <!-- 文件信息 - 显示在顶部 -->
                 <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
                     <h3 class="text-xl font-semibold">${file.name}</h3>
                     <p class="text-gray-300 text-sm">${file.size} • ${file.type}</p>
                 </div>
-                
-                <!-- 图片容器 -->
                 <div class="relative w-full h-full flex items-center justify-center preview-image-container" style="overflow: hidden;">
-                    <img src="${file.path || `/uploads/${file.type}/${file.name}`}" alt="${file.name}" class="max-w-full max-h-full object-contain rounded-lg">
+                    <img src="${imgUrl}" alt="${file.name}" class="max-w-full max-h-full object-contain rounded-lg">
                 </div>
             </div>
         `;
         document.body.appendChild(modal);
-        
-        // 点击背景关闭
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                modal.remove();
-                document.body.classList.remove('modal-open');
-            }
-        });
-        
-        // ESC键关闭
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
                 modal.remove();
                 document.body.classList.remove('modal-open');
             }
@@ -981,47 +999,34 @@ class UIManager {
 
     // 预览视频
     previewVideo(file) {
-        // 给body添加类防止滚动
         document.body.classList.add('modal-open');
-        
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
         modal.style.overflow = 'hidden';
+        let videoUrl = file.path || file.previewUrl || `/uploads/video/${file.name}`;
+        if (videoUrl && !videoUrl.startsWith('http') && !videoUrl.startsWith('/')) {
+            videoUrl = `/uploads/video/${file.name}`;
+        }
         modal.innerHTML = `
             <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
-                <!-- 关闭按钮 -->
                 <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
                     <i class="fa fa-times"></i>
                 </button>
-                
-                <!-- 文件信息 - 显示在顶部 -->
                 <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
                     <h3 class="text-xl font-semibold">${file.name}</h3>
                     <p class="text-gray-300 text-sm">${file.size} • ${file.type}</p>
                 </div>
-                
-                <!-- 视频容器 -->
                 <div class="relative w-full h-full flex items-center justify-center preview-video-container" style="overflow: hidden;">
                     <video controls class="max-w-full max-h-full rounded-lg" autoplay>
-                        <source src="${file.path || `/uploads/${file.type}/${file.name}`}" type="video/mp4">
+                        <source src="${videoUrl}" type="video/mp4">
                         您的浏览器不支持视频播放
                     </video>
                 </div>
             </div>
         `;
         document.body.appendChild(modal);
-        
-        // 点击背景关闭
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                modal.remove();
-                document.body.classList.remove('modal-open');
-            }
-        });
-        
-        // ESC键关闭
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
                 modal.remove();
                 document.body.classList.remove('modal-open');
             }
@@ -1030,50 +1035,37 @@ class UIManager {
 
     // 预览音频
     previewAudio(file) {
-        // 给body添加类防止滚动
         document.body.classList.add('modal-open');
-        
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
         modal.style.overflow = 'hidden';
+        let audioUrl = file.path || file.previewUrl || `/uploads/audio/${file.name}`;
+        if (audioUrl && !audioUrl.startsWith('http') && !audioUrl.startsWith('/')) {
+            audioUrl = `/uploads/audio/${file.name}`;
+        }
         modal.innerHTML = `
             <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
-                <!-- 关闭按钮 -->
                 <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
                     <i class="fa fa-times"></i>
                 </button>
-                
-                <!-- 文件信息 - 显示在顶部 -->
                 <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
                     <h3 class="text-xl font-semibold">${file.name}</h3>
                     <p class="text-gray-300 text-sm">${file.size} • ${file.type}</p>
                 </div>
-                
-                <!-- 音频播放器容器 -->
                 <div class="text-center max-w-2xl preview-audio-container">
                     <div class="w-48 h-48 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
                         <i class="fa fa-music text-8xl text-cyan-400"></i>
                     </div>
                     <audio controls class="w-full max-w-lg mx-auto" autoplay>
-                        <source src="${file.path || `/uploads/${file.type}/${file.name}`}" type="audio/mpeg">
+                        <source src="${audioUrl}" type="audio/mpeg">
                         您的浏览器不支持音频播放
                     </audio>
                 </div>
             </div>
         `;
         document.body.appendChild(modal);
-        
-        // 点击背景关闭
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                modal.remove();
-                document.body.classList.remove('modal-open');
-            }
-        });
-        
-        // ESC键关闭
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
                 modal.remove();
                 document.body.classList.remove('modal-open');
             }
@@ -1156,8 +1148,7 @@ class UIManager {
                 fileUrl = `/uploads/${file.type}/${file.name}`;
             }
             
-            console.log('Loading text file from:', fileUrl);
-            console.log('File object:', file);
+
             
             // 尝试多种路径格式
             const possibleUrls = [
@@ -1174,14 +1165,13 @@ class UIManager {
                 if (!url) continue;
                 
                 try {
-                    console.log('Trying URL:', url);
                     response = await fetch(url);
                     if (response.ok) {
                         successfulUrl = url;
                         break;
                     }
                 } catch (e) {
-                    console.log('Failed to fetch:', url, e);
+                    // 静默处理错误
                 }
             }
             
@@ -1246,9 +1236,7 @@ class UIManager {
     async previewMarkdown(file) {
         try {
             // 先通过API获取文件的完整信息
-            console.log('Getting file details from API...');
             const fileDetails = await this.api.getFile(file.id);
-            console.log('File details from API:', fileDetails);
             
             // 构建正确的文件URL
             let fileUrl;
@@ -1260,12 +1248,7 @@ class UIManager {
                 fileUrl = `/uploads/${file.type}/${file.name}`;
             }
             
-            console.log('Loading markdown from:', fileUrl);
-            console.log('File object:', file);
-            console.log('File details:', fileDetails);
-            console.log('File path:', fileDetails.path);
-            console.log('File type:', file.type);
-            console.log('File name:', file.name);
+
             
             // 尝试多种路径格式 - 优先使用/uploads路径
             const possibleUrls = [
@@ -1284,20 +1267,14 @@ class UIManager {
                 if (!url) continue;
                 
                 try {
-                    console.log('Trying URL:', url);
                     response = await fetch(url);
-                    console.log('Response status:', response.status);
-                    console.log('Response headers:', response.headers);
                     
                     if (response.ok) {
                         successfulUrl = url;
-                        console.log('Successfully loaded from:', url);
                         break;
-                    } else {
-                        console.log('Failed with status:', response.status, response.statusText);
                     }
                 } catch (e) {
-                    console.log('Failed to fetch:', url, e);
+                    // 静默处理错误
                 }
             }
             
@@ -1368,7 +1345,7 @@ class UIManager {
             }
             
         } catch (error) {
-            console.error('Markdown preview error:', error);
+            // 静默处理错误
             this.showMessage(`无法加载Markdown文件内容: ${error.message}`, 'error');
         }
     }
@@ -1644,15 +1621,17 @@ class UIManager {
             // 重置当前文件夹ID
             this.currentFolderId = null;
             
-            // 使用缓存的文件数据，如果没有缓存则重新获取
-            let files = this.allFiles;
-            if (!files || files.length === 0) {
-                files = await this.api.getFiles();
-                this.allFiles = files; // 更新缓存
-            }
+            // 重新获取根目录的文件（不传folderId，获取根目录文件）
+            const files = await this.api.getFiles();
+            this.allFiles = files; // 更新缓存
             
             // 重新渲染文件列表
             this.renderFileList(files);
+            
+            // 如果当前有分类过滤，重新应用过滤
+            if (this.currentCategory && this.currentCategory !== 'all') {
+                this.filterFiles(this.currentCategory);
+            }
             
             // 隐藏面包屑导航
             this.hideBreadcrumb();
@@ -2279,7 +2258,7 @@ class UIManager {
                         this.showMessage('文件移动成功', 'success');
                         
                         // 重新加载文件列表，保持当前分类状态
-                        const files = await this.api.getFiles();
+                        const files = await this.api.getFiles(this.currentFolderId);
                         this.updateFileCount(files.length);
                         this.renderFileList(files);
                         
@@ -2832,14 +2811,14 @@ class UIManager {
                         this.updateProfileDisplay(updatedUserData);
                     }
                 } catch (error) {
-                    console.log('获取用户资料失败，使用当前用户信息');
+    
                     // 如果获取失败，继续使用当前用户信息
                 }
             } else {
-                console.log('未找到当前用户信息');
+
             }
         } catch (error) {
-            console.error('初始化用户头像失败:', error);
+
         }
     }
 
@@ -2859,12 +2838,27 @@ class UIManager {
             userName.className = 'text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500';
         }
 
-        // 使用全局工具函数构建头像URL
-        const getAvatarUrl = (avatarPath) => {
-            return window.APP_UTILS.buildAvatarUrl(avatarPath);
-        };
-
-        const avatarUrl = getAvatarUrl(userData.avatar);
+        // 构建头像URL
+        let avatarUrl = null;
+        if (userData.avatar) {
+            // 使用全局工具函数构建头像URL
+            if (window.APP_UTILS && window.APP_UTILS.buildAvatarUrl) {
+                avatarUrl = window.APP_UTILS.buildAvatarUrl(userData.avatar);
+            } else {
+                // 备用方案：直接构建URL
+                if (userData.avatar === 'avatar.jpg') {
+                    // 默认头像
+                    avatarUrl = `${window.location.origin}/static/public/avatar.jpg`;
+                } else if (userData.avatar.startsWith('/uploads/avatars/')) {
+                    // 处理旧格式的完整路径
+                    const fileName = userData.avatar.replace('/uploads/avatars/', '');
+                    avatarUrl = `${window.location.origin}/uploads/avatars/${fileName}`;
+                } else {
+                    // 如果只是文件名，添加完整路径
+                    avatarUrl = `${window.location.origin}/uploads/avatars/${userData.avatar}`;
+                }
+            }
+        }
 
         // 更新主内容区域头像
         const mainAvatarIcon = document.getElementById('avatar-icon');
@@ -2885,8 +2879,9 @@ class UIManager {
             if (avatarUrl) {
                 headerAvatar.src = avatarUrl;
             } else {
-                // 如果没有头像，使用默认头像
-                headerAvatar.src = '/static/public/avatar.jpg';
+                // 如果没有头像，不设置src，避免404错误
+                // headerAvatar.src = '/static/public/avatar.jpg'; // 注释掉这行
+                // 保持默认的占位符图片
             }
         }
     }
@@ -2918,6 +2913,17 @@ class UIManager {
                             <span class="ml-2 text-gray-300">加载中...</span>
                         </div>
                     </div>
+                    
+                    <!-- 分页控件 -->
+                    <div id="pagination-controls" class="mt-6 flex items-center justify-center space-x-2 hidden">
+                        <button id="prev-page-btn" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fa fa-chevron-left mr-1"></i>上一页
+                        </button>
+                        <span id="page-info" class="text-gray-300 text-sm"></span>
+                        <button id="next-page-btn" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            下一页<i class="fa fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -2929,23 +2935,61 @@ class UIManager {
     }
 
     // 加载用户列表
-    async loadUsersList() {
+    async loadUsersList(page = 1) {
         try {
-            const result = await this.api.getAllUsers();
+            const result = await this.api.getAllUsers(page, 5);
             
             if (result.success) {
-                this.renderUsersList(result.users);
+                this.renderUsersList(result.users, result);
+                this.updatePaginationControls(result, page);
             } else {
                 this.showMessage(result.error || '获取用户列表失败', 'error');
             }
         } catch (error) {
-            console.error('加载用户列表失败:', error);
+
             this.showMessage('加载用户列表失败', 'error');
         }
     }
 
+    // 更新分页控件
+    updatePaginationControls(result, currentPage) {
+        const paginationControls = document.getElementById('pagination-controls');
+        const prevBtn = document.getElementById('prev-page-btn');
+        const nextBtn = document.getElementById('next-page-btn');
+        const pageInfo = document.getElementById('page-info');
+
+        if (!paginationControls || !prevBtn || !nextBtn || !pageInfo) return;
+
+        // 如果用户总数超过5个且有分页信息，显示分页控件
+        if (result.total > 5 && result.page_size) {
+            paginationControls.classList.remove('hidden');
+            
+            const totalPages = Math.ceil(result.total / result.page_size);
+            pageInfo.textContent = `第 ${currentPage} 页，共 ${totalPages} 页 (共 ${result.total} 个用户)`;
+            
+            // 更新按钮状态
+            prevBtn.disabled = currentPage <= 1;
+            nextBtn.disabled = currentPage >= totalPages;
+            
+            // 绑定分页事件
+            prevBtn.onclick = () => {
+                if (currentPage > 1) {
+                    this.loadUsersList(currentPage - 1);
+                }
+            };
+            
+            nextBtn.onclick = () => {
+                if (currentPage < totalPages) {
+                    this.loadUsersList(currentPage + 1);
+                }
+            };
+        } else {
+            paginationControls.classList.add('hidden');
+        }
+    }
+
     // 渲染用户列表
-    renderUsersList(users) {
+    renderUsersList(users, result = null) {
         const usersList = document.getElementById('users-list');
         if (!usersList) return;
 
@@ -2959,17 +3003,30 @@ class UIManager {
             return;
         }
 
-        usersList.innerHTML = users.map(user => `
-            <div class="bg-dark border border-gray-700 rounded-lg p-4 hover:border-blue-400/50 transition-colors">
+        // 添加用户统计信息
+        let headerHtml = '';
+        if (result && result.total !== undefined) {
+            headerHtml = `
+                <div class="mb-4 p-3 bg-blue-900/20 border border-blue-400/30 rounded-lg">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-blue-300">用户统计</span>
+                        <span class="text-gray-300">共 ${result.total} 个用户</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        usersList.innerHTML = headerHtml + users.map(user => `
+            <div class="bg-dark border border-gray-700 rounded-lg p-4 hover:border-blue-400/50 transition-colors ${user.is_admin ? 'border-red-400/50 bg-red-900/10' : ''}">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
-                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center">
-                            <i class="fa fa-user text-blue-400 text-xl"></i>
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center ${user.is_admin ? 'from-red-500/20 to-orange-500/20' : ''}">
+                            <i class="fa fa-user text-blue-400 text-xl ${user.is_admin ? 'text-red-400' : ''}"></i>
                         </div>
                         <div>
                             <div class="flex items-center space-x-2">
                                 <h4 class="text-white font-semibold">${user.username}</h4>
-                                ${user.is_admin ? '<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded-full text-xs">管理员</span>' : ''}
+                                ${user.is_admin ? '<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded-full text-xs font-medium">管理员</span>' : ''}
                             </div>
                             <p class="text-gray-400 text-sm">${user.email || '未设置邮箱'}</p>
                             <p class="text-gray-500 text-xs">创建于 ${this.formatDate(user.created_at)}</p>
@@ -3063,7 +3120,7 @@ class UIManager {
                 this.showMessage(result.error || '更新失败', 'error');
             }
         } catch (error) {
-            console.error('更新存储限制失败:', error);
+
             this.showMessage('更新失败', 'error');
         }
     }
@@ -3107,15 +3164,6 @@ class UIManager {
             adminUsersBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 this.showAdminUsersModal();
-            });
-        }
-
-        // 存储管理按钮
-        const adminStorageBtn = document.getElementById('admin-storage-btn');
-        if (adminStorageBtn) {
-            adminStorageBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.showAdminStorageModal();
             });
         }
     }

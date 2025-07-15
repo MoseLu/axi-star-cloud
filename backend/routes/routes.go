@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -148,7 +147,6 @@ func (r *Router) registerStaticRoutes() {
 	for _, path := range staticPaths {
 		if _, err := os.Stat(path); err == nil {
 			r.engine.Static("/static", path)
-			log.Printf("静态文件路径设置为: %s", path)
 			break
 		}
 	}
@@ -156,29 +154,21 @@ func (r *Router) registerStaticRoutes() {
 	// 设置上传文件路由
 	uploadsFound := false
 	for _, path := range uploadsPaths {
-		log.Printf("检查上传路径: %s", path)
 		if _, err := os.Stat(path); err == nil {
 			r.engine.Static("/uploads", path)
-			log.Printf("✅ 上传文件路径设置为: %s", path)
 			uploadsFound = true
 
 			// 测试路径是否可访问
 			testFile := filepath.Join(path, "test.txt")
 			if err := os.WriteFile(testFile, []byte("test"), 0644); err == nil {
-				log.Printf("✅ 路径可写: %s", path)
 				os.Remove(testFile) // 清理测试文件
-			} else {
-				log.Printf("❌ 路径不可写: %s, 错误: %v", path, err)
 			}
 			break
-		} else {
-			log.Printf("❌ 路径不存在: %s, 错误: %v", path, err)
 		}
 	}
 
 	// 如果相对路径都失败，尝试绝对路径
 	if !uploadsFound {
-		log.Printf("相对路径都失败，尝试绝对路径...")
 		absolutePaths := []string{
 			"/www/wwwroot/axi-star-cloud/uploads",
 			"/www/wwwroot/redamancy.com.cn/uploads",
@@ -187,20 +177,12 @@ func (r *Router) registerStaticRoutes() {
 		}
 
 		for _, absPath := range absolutePaths {
-			log.Printf("检查绝对路径: %s", absPath)
 			if _, err := os.Stat(absPath); err == nil {
 				r.engine.Static("/uploads", absPath)
-				log.Printf("✅ 使用绝对路径设置上传文件路径: %s", absPath)
 				uploadsFound = true
 				break
-			} else {
-				log.Printf("❌ 绝对路径不存在: %s, 错误: %v", absPath, err)
 			}
 		}
-	}
-
-	if !uploadsFound {
-		log.Printf("⚠️  警告: 未找到任何可用的上传目录")
 	}
 }
 
@@ -221,14 +203,12 @@ func (r *Router) registerPageRoutes() {
 			absPath, err := filepath.Abs(path)
 			if err == nil {
 				r.engine.StaticFile("/", absPath)
-				log.Printf("首页文件路径设置为: %s", absPath)
 				return
 			}
 		}
 	}
 
 	// 如果找不到index.html，创建一个简单的首页
-	log.Println("未找到index.html，创建简单首页")
 	r.engine.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"title": "星际云盘",
@@ -249,13 +229,9 @@ func (r *Router) registerHealthRoutes() {
 // applyGroups 应用所有路由组
 func (r *Router) applyGroups() {
 	for name, group := range r.groups {
-		log.Printf("注册路由组: %s (前缀: %s)", name, group.Prefix)
-
 		ginGroup := r.engine.Group(group.Prefix, group.Handlers...)
 
 		for _, route := range group.Routes {
-			log.Printf("  %s %s - %s", route.Method, route.Path, route.Description)
-
 			switch route.Method {
 			case "GET":
 				ginGroup.GET(route.Path, route.Handler)

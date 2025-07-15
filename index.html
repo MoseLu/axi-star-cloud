@@ -98,7 +98,6 @@
                 const response = await fetch(`/static/html/${templateName}.html`);
                 return await response.text();
             } catch (error) {
-                console.error(`加载模板 ${templateName} 失败:`, error);
                 return '';
             }
         }
@@ -109,7 +108,7 @@
             if (typeof particlesJS !== 'undefined') {
                 const particlesContainer = document.getElementById('particles-js');
                 if (particlesContainer && particlesContainer.children.length === 0) {
-                    console.log('立即初始化粒子效果...');
+
                     try {
                         particlesContainer.style.position = 'fixed';
                         particlesContainer.style.top = '0';
@@ -146,9 +145,9 @@
                             },
                             retina_detect: true
                         });
-                        console.log('粒子效果立即初始化成功');
+
                     } catch (error) {
-                        console.error('粒子效果立即初始化失败:', error);
+
                     }
                 }
             }
@@ -176,20 +175,16 @@
                 // 立即尝试初始化粒子效果
                 initParticlesImmediately();
 
-                // 初始化AuthManager（如果还没有初始化）
-                if (!window.authManager) {
-                    console.log('🔐 [index.html] 创建新的AuthManager实例');
-                    window.authManager = new AuthManager();
-                    console.log('AuthManager初始化完成');
-                } else {
-                    console.log('🔐 [index.html] 使用已存在的AuthManager实例');
-                }
-
                 // 模板加载完成后初始化应用
-                console.log('模板加载完成，初始化应用...');
+
                 window.app = new App();
+                
+                // 应用初始化完成后，确保AuthManager存在
+                if (!window.authManager) {
+                    window.authManager = new AuthManager();
+                }
             } catch (error) {
-                console.error('模板加载失败:', error);
+                // 静默处理错误
             }
         }
 

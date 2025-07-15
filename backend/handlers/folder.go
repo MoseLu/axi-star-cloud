@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -33,7 +32,6 @@ func (h *FolderHandler) GetFolders(c *gin.Context) {
 
 	folders, err := h.folderRepo.GetFoldersByUserID(userID)
 	if err != nil {
-		log.Printf("查询文件夹列表错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文件夹列表失败"})
 		return
 	}
@@ -56,7 +54,6 @@ func (h *FolderHandler) CreateFolder(c *gin.Context) {
 
 	var createRequest models.CreateFolderRequest
 	if err := c.ShouldBindJSON(&createRequest); err != nil {
-		log.Printf("请求参数绑定错误: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数错误"})
 		return
 	}
@@ -75,12 +72,9 @@ func (h *FolderHandler) CreateFolder(c *gin.Context) {
 	}
 
 	if err := h.folderRepo.CreateFolder(folder); err != nil {
-		log.Printf("创建文件夹错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建文件夹失败"})
 		return
 	}
-
-	log.Printf("文件夹创建成功: %s", folder.Name)
 
 	response := models.FolderResponse{
 		Success: true,
@@ -107,7 +101,6 @@ func (h *FolderHandler) UpdateFolder(c *gin.Context) {
 
 	var updateRequest models.UpdateFolderRequest
 	if err := c.ShouldBindJSON(&updateRequest); err != nil {
-		log.Printf("请求参数绑定错误: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数错误"})
 		return
 	}
@@ -118,7 +111,6 @@ func (h *FolderHandler) UpdateFolder(c *gin.Context) {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, gin.H{"error": "文件夹不存在"})
 		} else {
-			log.Printf("查询文件夹信息错误: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文件夹信息失败"})
 		}
 		return
@@ -126,12 +118,9 @@ func (h *FolderHandler) UpdateFolder(c *gin.Context) {
 
 	// 更新文件夹
 	if err := h.folderRepo.UpdateFolder(folderID, userID, updateRequest.Name, updateRequest.Category); err != nil {
-		log.Printf("更新文件夹错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "更新文件夹失败"})
 		return
 	}
-
-	log.Printf("文件夹更新成功: ID=%d", folderID)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -156,12 +145,11 @@ func (h *FolderHandler) DeleteFolder(c *gin.Context) {
 	}
 
 	// 检查文件夹是否存在
-	folder, err := h.folderRepo.GetFolderByID(folderID, userID)
+	_, err = h.folderRepo.GetFolderByID(folderID, userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, gin.H{"error": "文件夹不存在"})
 		} else {
-			log.Printf("查询文件夹信息错误: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文件夹信息失败"})
 		}
 		return
@@ -169,12 +157,9 @@ func (h *FolderHandler) DeleteFolder(c *gin.Context) {
 
 	// 删除文件夹（包括其中的文件）
 	if err := h.folderRepo.DeleteFolder(folderID, userID); err != nil {
-		log.Printf("删除文件夹错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "删除文件夹失败"})
 		return
 	}
-
-	log.Printf("文件夹删除成功: %s", folder.Name)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -200,7 +185,6 @@ func (h *FolderHandler) GetFolderFileCount(c *gin.Context) {
 
 	count, err := h.folderRepo.GetFolderFileCount(folderID, userID)
 	if err != nil {
-		log.Printf("获取文件夹文件数量错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文件夹文件数量失败"})
 		return
 	}

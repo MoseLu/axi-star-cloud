@@ -9,19 +9,21 @@ class App {
 
     async init() {
         try {
-            console.log('App开始初始化...');
+    
+            
+            // 先初始化API管理器，确保AuthManager可以访问
+            this.apiManager = new ApiManager();
+            window.apiManager = this.apiManager;
+
             
             // 使用已存在的AuthManager实例，避免重复初始化
             this.authManager = window.authManager || new AuthManager();
-            this.apiManager = new ApiManager();
-            this.uiManager = new UIManager();
-
-            // 设置全局引用
             window.authManager = this.authManager;
-            window.apiManager = this.apiManager;
+            
+            this.uiManager = new UIManager();
             window.uiManager = this.uiManager;
 
-            console.log('所有模块初始化完成');
+
 
             // 初始化日期显示
             this.initDateDisplay();
@@ -36,20 +38,93 @@ class App {
             this.checkLoginStatus();
 
         } catch (error) {
-            console.error('应用初始化失败:', error);
+
         }
     }
 
     // 检查登录状态
     checkLoginStatus() {
-        const currentUser = this.apiManager.getCurrentUser();
-        if (currentUser) {
-            // 用户已登录，显示主界面
+        
+        
+        // 从localStorage获取用户信息
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            try {
+                const userData = JSON.parse(savedUser);
+    
+                
+                // 更新API管理器的用户信息
+                if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
+                    this.apiManager.setCurrentUser(userData);
+    
+                } else {
+
+                    // 延迟重试
+                    setTimeout(() => {
+                        if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
+                            this.apiManager.setCurrentUser(userData);
+        
+                        }
+                    }, 100);
+                }
+                
+                // 显示主界面
             this.showMainInterface();
-            this.updateUserDisplay(currentUser);
+                this.updateUserDisplay(userData);
+                
+                // 检查并显示管理员菜单
+                if (this.uiManager) {
+                    this.uiManager.checkAndShowAdminMenu();
+                }
+                
+                // 加载用户数据
+                this.loadUserData(userData);
+                
+            } catch (error) {
+    
+                localStorage.removeItem('currentUser');
+                this.showLoginInterface();
+            }
         } else {
-            // 用户未登录，显示登录页面
+
             this.showLoginInterface();
+        }
+    }
+
+    // 加载用户数据
+    async loadUserData(userData) {
+        try {
+
+            
+            // 并行加载文件列表和文件夹列表
+            const [files, folders] = await Promise.all([
+                this.apiManager.getFiles(),
+                this.apiManager.getFolders()
+            ]);
+            
+
+            
+            // 更新UI管理器的数据
+            if (this.uiManager) {
+                this.uiManager.allFiles = files;
+                this.uiManager.folders = folders;
+                
+                // 更新文件列表显示
+                this.uiManager.updateFileCount(files.length);
+                this.uiManager.renderFileList(files);
+                
+                // 更新文件夹列表显示
+                this.uiManager.renderFolderList(folders);
+                
+                // 更新存储信息
+                const storageInfo = await this.apiManager.getStorageInfo();
+                this.uiManager.updateStorageDisplay(storageInfo);
+            }
+            
+
+            
+        } catch (error) {
+
         }
     }
 
@@ -83,7 +158,16 @@ class App {
         }
         
         if (userAvatar && user.avatar) {
-            userAvatar.src = user.avatar;
+            // 构建头像URL
+            let avatarUrl = null;
+            if (window.APP_UTILS && window.APP_UTILS.buildAvatarUrl) {
+                avatarUrl = window.APP_UTILS.buildAvatarUrl(user.avatar);
+            }
+            
+            if (avatarUrl) {
+                userAvatar.src = avatarUrl;
+            }
+            // 如果avatarUrl为null，不设置src，避免404错误
         }
     }
 
@@ -105,9 +189,9 @@ class App {
     // 设置事件监听器
     setupEventListeners() {
         // 登录成功事件监听
-        console.log('🚀 [App] 设置loginSuccess事件监听器');
+        
         window.addEventListener('loginSuccess', async (event) => {
-            console.log('🚀 [App] 收到loginSuccess事件');
+
             await this.onLoginSuccess(event.detail);
         });
 
@@ -128,16 +212,21 @@ class App {
 
     // 登录成功处理
     async onLoginSuccess(userData) {
-        console.log('🚀 [App] onLoginSuccess被调用，用户数据:', userData);
+        
+        
+        // 同步用户信息到API管理器
+        if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
+            this.apiManager.setCurrentUser(userData);
+
+        } else {
+            
+        }
         
         // 更新用户显示
         this.updateUserDisplay(userData);
         
         // 显示主界面
         this.showMainInterface();
-        
-        // 更新API管理器的用户信息
-        this.apiManager.currentUser = userData;
         
         // 检查并显示管理员菜单
         if (this.uiManager) {
@@ -146,31 +235,41 @@ class App {
         
         // 调用UIManager的onLoginSuccess方法
         if (this.uiManager) {
-            console.log('🚀 [App] 调用UIManager.onLoginSuccess');
+
             await this.uiManager.onLoginSuccess(userData);
         }
         
-        // 移除重复的登录成功通知，因为auth.js已经显示了
-        // if (window.Notify) {
-        //     window.Notify.show({ message: '登录成功', type: 'success' });
-        // }
-        console.log('🚀 [App] onLoginSuccess处理完成');
+        // 加载用户数据
+        await this.loadUserData(userData);
+        
+        
     }
 
     // 退出登录
     logout() {
-        console.log('🚀 [App] logout被调用');
+        
         
         // 调用AuthManager的清除方法
         if (this.authManager) {
             this.authManager.clearLoginData();
         }
         
-        // 清除本地存储
-        localStorage.removeItem('currentUser');
+        // 清除API管理器的用户信息
+        if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
+            this.apiManager.setCurrentUser(null);
+
+        } else {
+            
+        }
         
-        // 重置API管理器的用户信息
-        this.apiManager.currentUser = null;
+        // 清除UI管理器的数据
+        if (this.uiManager) {
+            this.uiManager.allFiles = [];
+            this.uiManager.folders = [];
+            this.uiManager.renderFileList([]);
+            this.uiManager.renderFolderList([]);
+            this.uiManager.updateFileCount(0);
+        }
         
         // 显示登录界面
         this.showLoginInterface();
@@ -180,7 +279,7 @@ class App {
             window.Notify.show({ message: '已退出登录', type: 'info' });
         }
         
-        console.log('🚀 [App] logout处理完成');
+        
     }
 }
 

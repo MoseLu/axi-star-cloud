@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -39,12 +38,9 @@ func (h *ProfileHandler) GetProfile(c *gin.Context) {
 		return
 	}
 
-	log.Printf("获取个人资料请求: userID=%s", userID)
-
 	// 从数据库获取用户信息
 	user, err := h.userRepo.GetUserByID(userID)
 	if err != nil {
-		log.Printf("获取用户信息失败: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"error":   "获取用户信息失败",
@@ -53,16 +49,12 @@ func (h *ProfileHandler) GetProfile(c *gin.Context) {
 	}
 
 	if user == nil {
-		log.Printf("用户不存在: userID=%s", userID)
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"error":   "用户不存在",
 		})
 		return
 	}
-
-	log.Printf("成功获取用户信息: username=%s, email=%s, bio=%s, avatar=%s",
-		user.Username, user.Email, user.Bio, user.Avatar)
 
 	// 构建个人资料响应
 	profile := gin.H{
@@ -84,6 +76,7 @@ func (h *ProfileHandler) GetProfile(c *gin.Context) {
 // UpdateProfile 更新用户个人资料
 func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 	userID := c.Query("user_id")
+
 	if userID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -91,8 +84,6 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 		})
 		return
 	}
-
-	log.Printf("更新个人资料请求: userID=%s", userID)
 
 	// 解析请求体
 	var updateData struct {
@@ -122,7 +113,6 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 	// 检查用户名是否已被其他用户使用（排除当前用户）
 	existingUser, err := h.userRepo.GetUserByUsername(updateData.Username)
 	if err != nil {
-		log.Printf("检查用户名失败: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"error":   "检查用户名失败",
@@ -141,7 +131,6 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 	// 更新用户信息
 	user, err := h.userRepo.GetUserByID(userID)
 	if err != nil {
-		log.Printf("获取用户信息失败: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"error":   "获取用户信息失败",
@@ -168,7 +157,6 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 
 	// 保存到数据库
 	if err := h.userRepo.UpdateUser(user); err != nil {
-		log.Printf("更新用户信息失败: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"error":   "更新用户信息失败",
@@ -194,6 +182,7 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 // UploadAvatar 上传头像
 func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 	userID := c.Query("user_id")
+
 	if userID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -242,15 +231,12 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 	// 创建上传目录
 	uploadDir := utils.GetAvatarUploadDir()
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
-		log.Printf("创建上传目录失败: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"error":   "创建上传目录失败",
 		})
 		return
 	}
-
-	log.Printf("头像上传目录: %s", uploadDir)
 
 	// 生成唯一文件名
 	fileExt := filepath.Ext(file.Filename)
@@ -259,7 +245,6 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 
 	// 保存文件
 	if err := c.SaveUploadedFile(file, filePath); err != nil {
-		log.Printf("保存头像文件失败: %v, 路径: %s", err, filePath)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"error":   "保存头像文件失败",
@@ -269,7 +254,6 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 
 	// 验证文件是否保存成功
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		log.Printf("文件保存后不存在: %s", filePath)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"error":   "文件保存失败",
@@ -277,11 +261,8 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	log.Printf("头像文件保存成功: %s", filePath)
-
-	// 生成访问URL
-	avatarURL := fmt.Sprintf("/uploads/avatars/%s", fileName)
-	log.Printf("生成头像URL: %s", avatarURL)
+	// 生成访问URL - 只保存文件名，不包含路径
+	avatarURL := fileName
 
 	// 更新用户头像
 	user, err := h.userRepo.GetUserByID(userID)
@@ -303,8 +284,13 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 
 	// 删除旧头像文件（如果存在）
 	if user.Avatar != "" {
-		oldAvatarPath := strings.TrimPrefix(user.Avatar, "/uploads/avatars/")
-		if oldAvatarPath != "" {
+		// 处理旧的头像路径格式（可能是完整路径或只是文件名）
+		oldAvatarPath := user.Avatar
+		if strings.HasPrefix(oldAvatarPath, "/uploads/avatars/") {
+			oldAvatarPath = strings.TrimPrefix(oldAvatarPath, "/uploads/avatars/")
+		}
+
+		if oldAvatarPath != "" && oldAvatarPath != fileName {
 			oldFilePath := filepath.Join(uploadDir, oldAvatarPath)
 			if _, err := os.Stat(oldFilePath); err == nil {
 				os.Remove(oldFilePath)
@@ -312,7 +298,7 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 		}
 	}
 
-	// 更新用户头像
+	// 更新用户头像 - 只存储文件名
 	user.Avatar = avatarURL
 	user.UpdatedAt = time.Now()
 

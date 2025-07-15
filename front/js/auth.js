@@ -6,18 +6,22 @@ class AuthManager {
         this.isInitialized = false;
         this.eventsBound = false;
         this.isLoggingIn = false; // 新增：防止重复提交
-        console.log('🔐 [AuthManager] 构造函数被调用，实例ID:', Date.now());
+
+        
+        // 延迟初始化，确保所有依赖都准备好
+        setTimeout(() => {
         this.init();
+        }, 0);
     }
 
     init() {
         // 防止重复初始化
         if (this.isInitialized) {
-            console.log('AuthManager已经初始化，跳过重复初始化');
+
             return;
         }
         
-        console.log('检测到登录页面，准备初始化粒子效果...');
+        
         
         // 立即尝试初始化粒子效果
         this.setupParticles();
@@ -44,39 +48,47 @@ class AuthManager {
 
     // 设置粒子背景
     setupParticles() {
-        console.log('setupParticles 被调用');
+
         
         // 检查是否在登录页面
         const loginPage = document.getElementById('login-page');
         if (!loginPage || loginPage.classList.contains('hidden')) {
-            console.log('不在登录页面，跳过粒子效果初始化');
+
             return;
         }
 
         const particlesContainer = document.getElementById('particles-js');
         if (!particlesContainer) {
-            console.warn('粒子容器未找到，跳过粒子效果初始化');
+
             return;
         }
 
         // 检查particlesJS库是否已加载
         if (typeof particlesJS === 'undefined') {
-            console.warn('particlesJS 库未加载，跳过粒子效果初始化');
-            // 如果库未加载，延迟重试
+
+            // 如果库未加载，延迟重试（最多重试3次）
+            if (!this.particlesRetryCount) {
+                this.particlesRetryCount = 0;
+            }
+            if (this.particlesRetryCount < 3) {
+                this.particlesRetryCount++;
             setTimeout(() => {
                 this.setupParticles();
             }, 200);
+            } else {
+
+            }
             return;
         }
 
         // 检查容器是否有内容
         if (particlesContainer.children.length > 0) {
-            console.log('粒子容器已有内容，跳过重复初始化');
+
             return;
         }
 
         try {
-            console.log('开始初始化粒子效果...');
+
             
             // 先设置容器的基本样式，确保立即可见
             particlesContainer.style.position = 'fixed';
@@ -189,9 +201,9 @@ class AuthManager {
                 },
                 retina_detect: true
             });
-            console.log('粒子效果初始化成功');
+
         } catch (error) {
-            console.error('粒子效果初始化失败:', error);
+
             // 如果初始化失败，延迟重试
             setTimeout(() => {
                 this.setupParticles();
@@ -203,36 +215,36 @@ class AuthManager {
     setupEventListeners() {
         // 防止重复绑定事件
         if (this.eventsBound) {
-            console.log('🔐 [AuthManager] 事件监听器已经绑定，跳过重复绑定');
+
             return;
         }
         
-        console.log('🔐 [AuthManager] 开始绑定事件监听器');
+        
         
         // 延迟设置事件监听器，确保DOM元素已加载
         setTimeout(() => {
             // 登录表单提交
             const loginForm = document.getElementById('loginForm');
             if (loginForm) {
-                console.log('🔐 [AuthManager] 绑定登录表单事件');
+    
                 loginForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     this.handleLogin();
                 });
             } else {
-                console.log('🔐 [AuthManager] 登录表单未找到');
+
             }
 
             // 注册表单提交
             const registerForm = document.getElementById('registerForm');
             if (registerForm) {
-                console.log('🔐 [AuthManager] 绑定注册表单事件');
+    
                 registerForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     this.handleRegister();
                 });
             } else {
-                console.log('🔐 [AuthManager] 注册表单未找到');
+
             }
 
             // 切换表单按钮
@@ -240,14 +252,14 @@ class AuthManager {
             const showLoginBtn = document.getElementById('showLoginBtn');
             
             if (showRegisterBtn) {
-                console.log('🔐 [AuthManager] 绑定显示注册按钮事件');
+    
                 showRegisterBtn.addEventListener('click', () => {
                     this.showRegisterForm();
                 });
             }
             
             if (showLoginBtn) {
-                console.log('🔐 [AuthManager] 绑定显示登录按钮事件');
+    
                 showLoginBtn.addEventListener('click', () => {
                     this.showLoginForm();
                 });
@@ -255,7 +267,7 @@ class AuthManager {
             
             // 标记事件已绑定
             this.eventsBound = true;
-            console.log('🔐 [AuthManager] 事件监听器绑定完成');
+
         }, 100);
     }
 
@@ -285,7 +297,7 @@ class AuthManager {
     async handleLogin() {
         // 防止重复提交
         if (this.isLoggingIn) {
-            console.log('🔐 [AuthManager] 登录请求正在进行中，跳过重复请求');
+
             return;
         }
         
@@ -318,9 +330,9 @@ class AuthManager {
             const data = await response.json();
 
             if (data.success) {
-                console.log('🔐 [AuthManager] 登录成功，准备显示消息');
+    
                 this.showMessage('登录成功', 'success');
-                console.log('🔐 [AuthManager] 登录成功消息已显示');
+
                 
                 // 保存用户信息到本地存储
                 this.currentUser = {
@@ -330,17 +342,35 @@ class AuthManager {
                 };
                 
                 localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-                console.log('🔐 [AuthManager] 用户信息已保存到localStorage');
+
+                
+                // 同步到API管理器
+
+                
+                if (window.apiManager) {
+
+                }
+                
+                if (window.apiManager && typeof window.apiManager.setCurrentUser === 'function') {
+                    try {
+                        window.apiManager.setCurrentUser(this.currentUser);
+    
+                    } catch (error) {
+
+                    }
+                } else {
+
+                }
                 
                 // 触发登录成功事件，让App管理器处理界面切换
-                console.log('🔐 [AuthManager] 准备触发loginSuccess事件');
+
                 window.dispatchEvent(new CustomEvent('loginSuccess', { detail: this.currentUser }));
-                console.log('🔐 [AuthManager] loginSuccess事件已触发');
+
             } else {
                 this.showMessage(data.error || '登录失败', 'error');
             }
         } catch (error) {
-            console.error('登录错误:', error);
+
             this.showMessage('网络错误，请稍后重试', 'error');
         } finally {
             this.isLoggingIn = false;
@@ -405,7 +435,7 @@ class AuthManager {
                 this.showMessage(data.error || '注册失败', 'error');
             }
         } catch (error) {
-            console.error('注册错误:', error);
+
             this.showMessage('网络错误，请稍后重试', 'error');
         } finally {
             registerBtn.innerHTML = originalText;
@@ -421,7 +451,7 @@ class AuthManager {
                 this.currentUser = JSON.parse(savedUser);
                 // 不再自动跳转，让App管理器处理界面切换
             } catch (error) {
-                console.error('解析用户信息失败:', error);
+    
                 localStorage.removeItem('currentUser');
             }
         }

@@ -3,7 +3,6 @@ package handlers
 import (
 	"database/sql"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -38,10 +37,7 @@ func (h *FileHandler) GetFiles(c *gin.Context) {
 	userID := c.Query("user_id")
 	folderIDStr := c.Query("folder_id")
 
-	log.Printf("获取文件列表请求: userID=%s, folderID=%s", userID, folderIDStr)
-
 	if userID == "" {
-		log.Printf("未提供用户ID")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "缺少用户ID"})
 		return
 	}
@@ -55,17 +51,9 @@ func (h *FileHandler) GetFiles(c *gin.Context) {
 
 	files, err := h.fileRepo.GetFilesByUserID(userID, folderID)
 	if err != nil {
-		log.Printf("查询文件列表错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文件列表失败"})
 		return
 	}
-
-	for _, file := range files {
-		log.Printf("找到文件: ID=%d, 名称=%s, 类型=%s, 路径=%s, 文件夹ID=%v",
-			file.ID, file.Name, file.Type, file.Path, file.FolderID)
-	}
-
-	log.Printf("用户 %s 在文件夹 %s 的文件总数: %d", userID, folderIDStr, len(files))
 
 	response := models.FileListResponse{
 		Success: true,
@@ -95,7 +83,6 @@ func (h *FileHandler) GetFile(c *gin.Context) {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
 		} else {
-			log.Printf("查询文件信息错误: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文件信息失败"})
 		}
 		return
@@ -113,10 +100,7 @@ func (h *FileHandler) DownloadFile(c *gin.Context) {
 	fileIDStr := c.Param("id")
 	userID := c.Query("user_id")
 
-	log.Printf("下载请求: fileID=%s, userID=%s", fileIDStr, userID)
-
 	if userID == "" {
-		log.Printf("未提供用户ID")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权访问"})
 		return
 	}
@@ -131,24 +115,18 @@ func (h *FileHandler) DownloadFile(c *gin.Context) {
 	file, err := h.fileRepo.GetFileByID(fileID, userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			log.Printf("文件不存在: fileID=%s, userID=%s", fileIDStr, userID)
 			c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
 		} else {
-			log.Printf("查询文件信息错误: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文件信息失败"})
 		}
 		return
 	}
 
-	log.Printf("找到文件: %s, 路径: %s", file.Name, file.Path)
-
 	// 构建绝对路径 - 使用统一的路径处理
 	absolutePath := utils.GetFileAbsolutePath(file.Path)
-	log.Printf("文件绝对路径: %s", absolutePath)
 
 	// 检查文件是否存在
 	if _, err := os.Stat(absolutePath); os.IsNotExist(err) {
-		log.Printf("文件不存在: %s", absolutePath)
 		c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
 		return
 	}
@@ -156,7 +134,6 @@ func (h *FileHandler) DownloadFile(c *gin.Context) {
 	// 获取文件实际大小
 	fileInfo, err := os.Stat(absolutePath)
 	if err != nil {
-		log.Printf("获取文件信息错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文件信息失败"})
 		return
 	}
@@ -170,7 +147,6 @@ func (h *FileHandler) DownloadFile(c *gin.Context) {
 	// 打开文件
 	fileHandle, err := os.Open(absolutePath)
 	if err != nil {
-		log.Printf("打开文件错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "打开文件失败"})
 		return
 	}
@@ -179,12 +155,9 @@ func (h *FileHandler) DownloadFile(c *gin.Context) {
 	// 发送文件
 	_, err = io.Copy(c.Writer, fileHandle)
 	if err != nil {
-		log.Printf("发送文件错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "发送文件失败"})
 		return
 	}
-
-	log.Printf("文件下载成功: %s", file.Name)
 }
 
 // UploadFile 上传文件
@@ -200,7 +173,6 @@ func (h *FileHandler) UploadFile(c *gin.Context) {
 	// 获取上传的文件
 	file, header, err := c.Request.FormFile("file")
 	if err != nil {
-		log.Printf("获取上传文件错误: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "请选择要上传的文件"})
 		return
 	}
@@ -215,7 +187,6 @@ func (h *FileHandler) UploadFile(c *gin.Context) {
 	// 获取用户存储信息
 	storageInfo, err := h.userRepo.GetUserStorageInfo(userID)
 	if err != nil {
-		log.Printf("获取用户存储信息错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取存储信息失败"})
 		return
 	}
@@ -232,20 +203,16 @@ func (h *FileHandler) UploadFile(c *gin.Context) {
 
 	// 创建上传目录 - 使用统一的路径处理
 	uploadDir := utils.GetFileUploadDir(fileType)
-	log.Printf("文件上传目录: %s", uploadDir)
 
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
-		log.Printf("创建上传目录错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建上传目录失败"})
 		return
 	}
 
 	// 保存文件
 	filePath := filepath.Join(uploadDir, header.Filename)
-	log.Printf("文件保存路径: %s", filePath)
 	dst, err := os.Create(filePath)
 	if err != nil {
-		log.Printf("创建文件错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "保存文件失败"})
 		return
 	}
@@ -254,7 +221,6 @@ func (h *FileHandler) UploadFile(c *gin.Context) {
 	// 复制文件内容
 	_, err = io.Copy(dst, file)
 	if err != nil {
-		log.Printf("保存文件错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "保存文件失败"})
 		return
 	}
@@ -262,13 +228,11 @@ func (h *FileHandler) UploadFile(c *gin.Context) {
 	// 获取实际文件大小
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
-		log.Printf("获取文件信息错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文件信息失败"})
 		return
 	}
 
 	actualSize := fileInfo.Size()
-	log.Printf("文件上传: %s, 请求头大小: %d, 实际大小: %d", header.Filename, header.Size, actualSize)
 
 	// 创建文件记录
 	newFile := &models.File{
@@ -292,12 +256,9 @@ func (h *FileHandler) UploadFile(c *gin.Context) {
 
 	// 保存到数据库
 	if err := h.fileRepo.CreateFile(newFile); err != nil {
-		log.Printf("保存文件记录错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "保存文件记录失败"})
 		return
 	}
-
-	log.Printf("文件上传成功: %s, 大小: %d bytes", header.Filename, header.Size)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -328,7 +289,6 @@ func (h *FileHandler) DeleteFile(c *gin.Context) {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
 		} else {
-			log.Printf("查询文件信息错误: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文件信息失败"})
 		}
 		return
@@ -337,17 +297,14 @@ func (h *FileHandler) DeleteFile(c *gin.Context) {
 	// 删除物理文件
 	absolutePath := utils.GetFileAbsolutePath(file.Path)
 	if err := os.Remove(absolutePath); err != nil && !os.IsNotExist(err) {
-		log.Printf("删除物理文件错误: %v", err)
+		// 静默处理删除错误
 	}
 
 	// 删除数据库记录
 	if err := h.fileRepo.DeleteFile(fileID, userID); err != nil {
-		log.Printf("删除文件记录错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "删除文件失败"})
 		return
 	}
-
-	log.Printf("文件删除成功: %s", file.Name)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -383,7 +340,6 @@ func (h *FileHandler) MoveFile(c *gin.Context) {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
 		} else {
-			log.Printf("查询文件信息错误: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文件信息失败"})
 		}
 		return
@@ -393,7 +349,6 @@ func (h *FileHandler) MoveFile(c *gin.Context) {
 	if moveRequest.FolderID > 0 {
 		exists, err := h.folderRepo.CheckFolderExists(moveRequest.FolderID, userID)
 		if err != nil {
-			log.Printf("检查文件夹错误: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "检查文件夹失败"})
 			return
 		}
@@ -410,12 +365,9 @@ func (h *FileHandler) MoveFile(c *gin.Context) {
 	}
 
 	if err := h.fileRepo.MoveFile(fileID, userID, folderID); err != nil {
-		log.Printf("移动文件错误: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "移动文件失败"})
 		return
 	}
-
-	log.Printf("文件移动成功: fileID=%d, folderID=%v", fileID, folderID)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

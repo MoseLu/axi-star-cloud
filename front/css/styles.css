@@ -855,13 +855,19 @@ body.modal-open {
   }
 }
 
-/* 文件卡片网格布局优化 */
-.files-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-    align-items: start;
-    justify-items: center;
+/* 文件卡片网格布局 */
+#files-grid, .files-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 240px));
+  gap: 24px;
+  align-items: start;
+  justify-items: start;
+  justify-content: start;
+}
+
+.file-card {
+  max-width: 240px;
+  width: 100%;
 }
 
 /* 文件卡片样式优化 */
@@ -877,16 +883,17 @@ body.modal-open {
     transition: all 0.3s ease;
 }
 
-/* 文件夹网格布局优化 */
-#folders-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1.5rem;
+/* 文件夹网格布局 */
+#folders-grid, .folders-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 240px));
+    gap: 24px;
     align-items: start;
-    justify-items: center;
+    justify-items: start;
+    justify-content: start;
 }
 
-/* 文件夹卡片样式优化 */
+/* 文件夹卡片样式 */
 .folder-card {
     width: 100%;
     max-width: 240px;

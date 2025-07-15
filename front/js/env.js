@@ -69,11 +69,25 @@ window.APP_UTILS = {
     
     // 构建头像URL
     buildAvatarUrl: function(avatarPath) {
-        if (!avatarPath) return null;
+        if (!avatarPath || avatarPath.trim() === '') {
+            return null; // 返回null，前端会显示默认图标
+        }
         
         // 如果已经是完整URL，直接返回
         if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
             return avatarPath;
+        }
+        
+        // 如果是默认头像且文件不存在，返回null
+        if (avatarPath === 'avatar.jpg') {
+            // 检查默认头像是否存在，如果不存在返回null
+            return null;
+        }
+        
+        // 如果头像路径是完整路径（旧格式），提取文件名
+        if (avatarPath.startsWith('/uploads/avatars/')) {
+            const fileName = avatarPath.replace('/uploads/avatars/', '');
+            return window.APP_CONFIG.API_BASE_URL + '/uploads/avatars/' + fileName;
         }
         
         // 如果是相对路径，添加API基地址
@@ -86,6 +100,7 @@ window.APP_UTILS = {
         if (avatarPath.includes('avatars/')) {
             return window.APP_CONFIG.API_BASE_URL + '/uploads/' + avatarPath;
         } else {
+            // 如果只是文件名，添加完整路径
             return window.APP_CONFIG.API_BASE_URL + '/uploads/avatars/' + avatarPath;
         }
     },
