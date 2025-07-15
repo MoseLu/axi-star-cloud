@@ -82,7 +82,12 @@ window.APP_UTILS = {
         }
         
         // 其他情况，添加API基地址和uploads/avatars路径
-        return window.APP_CONFIG.API_BASE_URL + '/uploads/avatars/' + avatarPath;
+        // 确保路径正确，avatarPath可能已经包含avatars目录
+        if (avatarPath.includes('avatars/')) {
+            return window.APP_CONFIG.API_BASE_URL + '/uploads/' + avatarPath;
+        } else {
+            return window.APP_CONFIG.API_BASE_URL + '/uploads/avatars/' + avatarPath;
+        }
     },
     
     // 构建文件URL

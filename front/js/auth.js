@@ -7,26 +7,31 @@ class AuthManager {
     }
 
     init() {
-        this.checkLoginStatus();
+        console.log('检测到登录页面，准备初始化粒子效果...');
+        
+        // 立即尝试初始化粒子效果
+        this.setupParticles();
+        
+        // 设置事件监听器
         this.setupEventListeners();
         
-        // 检查是否在登录页面，如果是则初始化粒子效果
-        const loginPage = document.getElementById('login-page');
-        if (loginPage && !loginPage.classList.contains('hidden')) {
-            console.log('检测到登录页面，准备初始化粒子效果...');
-            // 延迟初始化粒子效果，确保DOM已加载
-            setTimeout(() => {
-                this.setupParticles();
-            }, 1500);
-        } else {
-            console.log('不在登录页面，跳过粒子效果初始化');
-        }
+        // 检查登录状态
+        this.checkLoginStatus();
+        
+        // 延迟再次尝试初始化粒子效果，确保库已加载
+        setTimeout(() => {
+            this.setupParticles();
+        }, 100);
+        
+        // 再次延迟尝试，确保DOM完全准备好
+        setTimeout(() => {
+            this.setupParticles();
+        }, 500);
     }
 
     // 设置粒子背景
     setupParticles() {
-        console.log('setupParticles 被调用 - 暂时禁用粒子效果');
-        return; // 暂时禁用粒子效果，避免错误
+        console.log('setupParticles 被调用');
         
         // 检查是否在登录页面
         const loginPage = document.getElementById('login-page');
@@ -44,6 +49,10 @@ class AuthManager {
         // 检查particlesJS库是否已加载
         if (typeof particlesJS === 'undefined') {
             console.warn('particlesJS 库未加载，跳过粒子效果初始化');
+            // 如果库未加载，延迟重试
+            setTimeout(() => {
+                this.setupParticles();
+            }, 200);
             return;
         }
 
@@ -55,6 +64,16 @@ class AuthManager {
 
         try {
             console.log('开始初始化粒子效果...');
+            
+            // 先设置容器的基本样式，确保立即可见
+            particlesContainer.style.position = 'fixed';
+            particlesContainer.style.top = '0';
+            particlesContainer.style.left = '0';
+            particlesContainer.style.width = '100%';
+            particlesContainer.style.height = '100%';
+            particlesContainer.style.zIndex = '0';
+            particlesContainer.style.pointerEvents = 'none';
+            
             particlesJS('particles-js', {
                 particles: {
                     number: {
@@ -160,6 +179,10 @@ class AuthManager {
             console.log('粒子效果初始化成功');
         } catch (error) {
             console.error('粒子效果初始化失败:', error);
+            // 如果初始化失败，延迟重试
+            setTimeout(() => {
+                this.setupParticles();
+            }, 300);
         }
     }
 
