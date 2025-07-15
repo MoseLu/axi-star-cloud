@@ -396,6 +396,23 @@ class AuthManager {
         return this.currentUser;
     }
 
+    // 清除登录数据
+    clearLoginData() {
+        this.currentUser = null;
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('userData');
+        localStorage.removeItem('loginData');
+    }
+
+    // 显示登录页面
+    showLoginPage() {
+        const loginPage = document.getElementById('login-page');
+        const app = document.getElementById('app');
+        
+        if (loginPage) loginPage.classList.remove('hidden');
+        if (app) app.classList.add('hidden');
+    }
+
     // 显示消息
     showMessage(message, type = 'info') {
         // 使用全局的Notify系统

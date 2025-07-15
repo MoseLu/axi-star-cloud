@@ -368,60 +368,8 @@ class UIManager {
 
     // 设置登录表单
     setupLoginForm() {
-        const loginForm = document.getElementById('login-form');
-        if (!loginForm) return;
-
-        // 密码小眼睛切换
-        const passwordInput = document.getElementById('password');
-        const togglePasswordBtn = document.getElementById('toggle-password');
-        const togglePasswordIcon = document.getElementById('toggle-password-icon');
-        if (togglePasswordBtn && passwordInput && togglePasswordIcon) {
-            togglePasswordBtn.addEventListener('click', () => {
-                const isPassword = passwordInput.type === 'password';
-                passwordInput.type = isPassword ? 'text' : 'password';
-                togglePasswordIcon.classList.toggle('fa-eye');
-                togglePasswordIcon.classList.toggle('fa-eye-slash');
-            });
-        }
-
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await this.handleLogin();
-        });
-    }
-
-    // 处理登录
-    async handleLogin() {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const loginBtn = document.getElementById('login-btn');
-
-        // 验证输入
-        if (!username || !password) {
-            this.showMessage('请输入用户名和密码', 'error');
-            return;
-        }
-
-        // 显示加载状态
-        const originalText = loginBtn.innerHTML;
-        loginBtn.disabled = true;
-        loginBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>登录中...';
-
-        try {
-            const data = await this.api.login(username, password);
-            
-            if (data.success) {
-                // 保存登录状态
-                window.authManager.saveLoginData(data.user);
-                // 登录成功只允许Notify，不允许MessageBox
-            }
-        } catch (error) {
-            this.showMessage(error.message, 'error');
-        } finally {
-            // 恢复按钮状态
-            loginBtn.disabled = false;
-            loginBtn.innerHTML = originalText;
-        }
+        // 登录表单事件由 AuthManager 处理，避免重复绑定
+        // 移除这里的登录处理逻辑
     }
 
     // 登录成功回调
@@ -435,8 +383,6 @@ class UIManager {
                 this.api.getFiles(), // 不传folderId，获取所有文件
                 this.api.getFolders()
             ]);
-
-            
 
             // 保存文件夹数据
             this.folders = folders;
@@ -457,7 +403,6 @@ class UIManager {
             // 初始化拖拽功能
             this.setupDragAndDrop();
 
-    
         } catch (error) {
             this.showMessage('数据加载失败', 'error');
         }
@@ -2182,8 +2127,16 @@ class UIManager {
     showSettingsModal() {
         const modal = document.getElementById('settings-modal');
         if (modal) {
-            modal.classList.remove('invisible', 'opacity-0');
-            this.loadStorageSettings();
+            // 检查是否为管理员
+            const currentUser = window.authManager ? window.authManager.getCurrentUser() : null;
+            if (currentUser && currentUser.username === 'Mose' && this.api.isAdmin()) {
+                // 只有Mose管理员才能看到存储设置
+                modal.classList.remove('invisible', 'opacity-0');
+                this.loadStorageSettings();
+            } else {
+                // 非管理员用户显示权限提示
+                this.showMessage('只有管理员才能修改存储设置', 'warning');
+            }
         }
     }
 
@@ -2933,7 +2886,7 @@ class UIManager {
                 headerAvatar.src = avatarUrl;
             } else {
                 // 如果没有头像，使用默认头像
-                headerAvatar.src = 'https://picsum.photos/200/200?random=1';
+                headerAvatar.src = '/static/public/avatar.jpg';
             }
         }
     }

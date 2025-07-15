@@ -65,26 +65,43 @@
       <div class="flex-1 min-w-0"><p class="${theme.text} text-xs font-medium leading-snug">${message}</p></div>
       <button class="flex-shrink-0 w-5 h-5 bg-white/10 hover:bg-white/20 rounded flex items-center justify-center transition-all duration-200"><i class="fa fa-times text-gray-400 hover:text-white text-xs"></i></button>
     `;
+    
+    // 初始状态：透明且向右偏移
     notify.style.opacity = '0';
     notify.style.transform = 'translateX(100%) scale(0.95)';
+    notify.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+    
     container.appendChild(notify);
+    
+    // 强制重绘后显示动画
     setTimeout(() => {
       notify.style.opacity = '1';
       notify.style.transform = 'translateX(0) scale(1)';
     }, 10);
+    
     const close = () => {
       notify.style.opacity = '0';
       notify.style.transform = 'translateX(100%) scale(0.95)';
       setTimeout(() => {
         if (notify.parentNode) notify.parentNode.removeChild(notify);
         if (typeof onClose === 'function') onClose();
-      }, 200);
+      }, 300);
     };
+    
     const closeBtn = notify.querySelector('button');
     closeBtn.addEventListener('click', close);
-    setTimeout(close, duration);
-    notify.addEventListener('mouseenter', () => { clearTimeout(close); });
-    notify.addEventListener('mouseleave', () => { setTimeout(close, duration); });
+    
+    // 自动关闭
+    const autoClose = setTimeout(close, duration);
+    
+    // 鼠标悬停时暂停自动关闭
+    notify.addEventListener('mouseenter', () => { 
+      clearTimeout(autoClose); 
+    });
+    
+    notify.addEventListener('mouseleave', () => { 
+      setTimeout(close, duration); 
+    });
   }
 
   global.Notify = { show };

@@ -140,10 +140,10 @@ class App {
             this.uiManager.checkAndShowAdminMenu();
         }
         
-        // 显示登录成功通知
-        if (window.Notify) {
-            window.Notify.show({ message: '登录成功', type: 'success' });
-        }
+        // 移除重复的登录成功通知，因为auth.js已经显示了
+        // if (window.Notify) {
+        //     window.Notify.show({ message: '登录成功', type: 'success' });
+        // }
     }
 
     // 退出登录
