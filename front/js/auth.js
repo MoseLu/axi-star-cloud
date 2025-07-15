@@ -25,7 +25,8 @@ class AuthManager {
 
     // 设置粒子背景
     setupParticles() {
-        console.log('setupParticles 被调用');
+        console.log('setupParticles 被调用 - 暂时禁用粒子效果');
+        return; // 暂时禁用粒子效果，避免错误
         
         // 检查是否在登录页面
         const loginPage = document.getElementById('login-page');
