@@ -55,7 +55,13 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		Username:     registerData.Username,
 		Password:     registerData.Password, // 实际应用中应该哈希密码
 		Email:        registerData.Email,
-		StorageLimit: 1024 * 1024 * 1024,              // 1GB 默认存储空间
+		StorageLimit: func() int64 {
+			// 管理员用户设置更大的存储空间（5GB），普通用户设置较小的存储空间（1GB）
+			if registerData.Username == "Mose" {
+				return 5 * 1024 * 1024 * 1024 // 5GB
+			}
+			return 1024 * 1024 * 1024 // 1GB
+		}(),
 		IsAdmin:      registerData.Username == "Mose", // 只有Mose用户才能是管理员
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),

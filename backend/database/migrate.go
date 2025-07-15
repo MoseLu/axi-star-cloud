@@ -89,3 +89,20 @@ func MigrateDatabase(db *sql.DB) error {
 	log.Println("数据库迁移完成")
 	return nil
 }
+
+// UpdateExistingUserStorageLimits 更新现有用户的存储限制
+func UpdateExistingUserStorageLimits(db *sql.DB) error {
+	// 更新管理员用户的存储限制为5GB
+	_, err := db.Exec("UPDATE user SET storage_limit = ? WHERE username = 'Mose'", 5*1024*1024*1024)
+	if err != nil {
+		return err
+	}
+
+	// 更新其他用户的存储限制为1GB
+	_, err = db.Exec("UPDATE user SET storage_limit = ? WHERE username != 'Mose'", 1024*1024*1024)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

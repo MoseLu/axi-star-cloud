@@ -29,6 +29,11 @@ func main() {
 		log.Fatalf("数据库迁移失败: %v", err)
 	}
 
+	// 更新现有用户的存储限制
+	if err := database.UpdateExistingUserStorageLimits(db); err != nil {
+		log.Printf("更新用户存储限制失败: %v", err)
+	}
+
 	// 插入初始数据
 	if err := database.InsertInitialData(db); err != nil {
 		log.Fatalf("插入初始数据失败: %v", err)
