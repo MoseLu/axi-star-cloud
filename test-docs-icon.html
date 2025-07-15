@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试文档图标</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .icon-test {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 5px;
+        }
+        .icon-test img {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .success { background: #22c55e; color: white; }
+        .error { background: #ef4444; color: white; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>文档图标测试</h1>
+        <p>测试各种路径下的docs.png图标是否能正常显示：</p>
+        
+        <div class="icon-test">
+            <img src="/static/public/docs.png" alt="文档图标" onload="this.nextElementSibling.textContent='成功'" onerror="this.nextElementSibling.textContent='失败'">
+            <span class="status">测试中...</span>
+            <span>/static/public/docs.png</span>
+        </div>
+        
+        <div class="icon-test">
+            <img src="/front/public/docs.png" alt="文档图标" onload="this.nextElementSibling.textContent='成功'" onerror="this.nextElementSibling.textContent='失败'">
+            <span class="status">测试中...</span>
+            <span>/front/public/docs.png</span>
+        </div>
+        
+        <div class="icon-test">
+            <img src="/public/docs.png" alt="文档图标" onload="this.nextElementSibling.textContent='成功'" onerror="this.nextElementSibling.textContent='失败'">
+            <span class="status">测试中...</span>
+            <span>/public/docs.png</span>
+        </div>
+        
+        <div class="icon-test">
+            <img src="front/public/docs.png" alt="文档图标" onload="this.nextElementSibling.textContent='成功'" onerror="this.nextElementSibling.textContent='失败'">
+            <span class="status">测试中...</span>
+            <span>front/public/docs.png (相对路径)</span>
+        </div>
+        
+        <h2>调试信息</h2>
+        <p>当前页面URL: <span id="current-url"></span></p>
+        <p>页面加载时间: <span id="load-time"></span></p>
+        
+        <script>
+            document.getElementById('current-url').textContent = window.location.href;
+            document.getElementById('load-time').textContent = new Date().toLocaleString();
+            
+            // 测试图片加载
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                img.addEventListener('load', function() {
+                    this.nextElementSibling.className = 'status success';
+                });
+                img.addEventListener('error', function() {
+                    this.nextElementSibling.className = 'status error';
+                });
+            });
+        </script>
+    </div>
+</body>
+</html> 
