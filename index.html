@@ -118,6 +118,14 @@
                 const mainContentTemplate = await loadTemplate('main-content');
                 document.getElementById('main-content').innerHTML = mainContentTemplate;
 
+                // 显示登录页，隐藏主应用
+                document.getElementById('login-page').classList.remove('hidden');
+                document.getElementById('app').classList.add('hidden');
+
+                // 先初始化AuthManager，后初始化App
+                window.authManager = new AuthManager();
+                console.log('AuthManager初始化完成');
+
                 // 模板加载完成后初始化应用
                 console.log('模板加载完成，初始化应用...');
                 window.app = new App();
