@@ -56,6 +56,7 @@
   }
 
   function show({ message, type = 'info', duration = 3000, onClose }) {
+    console.log('🔔 [Notify] 显示通知:', message, '类型:', type);
     createContainer();
     const theme = themes[type] || themes.info;
     const notify = document.createElement('div');
@@ -72,14 +73,17 @@
     notify.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
     
     container.appendChild(notify);
+    console.log('🔔 [Notify] 通知元素已添加到DOM');
     
     // 强制重绘后显示动画
     setTimeout(() => {
       notify.style.opacity = '1';
       notify.style.transform = 'translateX(0) scale(1)';
+      console.log('🔔 [Notify] 通知动画开始');
     }, 10);
     
     const close = () => {
+      console.log('🔔 [Notify] 关闭通知:', message);
       notify.style.opacity = '0';
       notify.style.transform = 'translateX(100%) scale(0.95)';
       setTimeout(() => {

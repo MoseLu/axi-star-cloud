@@ -278,7 +278,9 @@ class AuthManager {
             const data = await response.json();
 
             if (data.success) {
+                console.log('🔐 [AuthManager] 登录成功，准备显示消息');
                 this.showMessage('登录成功', 'success');
+                console.log('🔐 [AuthManager] 登录成功消息已显示');
                 
                 // 保存用户信息到本地存储
                 this.currentUser = {
@@ -288,13 +290,19 @@ class AuthManager {
                 };
                 
                 localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                console.log('🔐 [AuthManager] 用户信息已保存到localStorage');
                 
                 // 触发登录成功事件，让App管理器处理界面切换
+                console.log('🔐 [AuthManager] 准备触发loginSuccess事件');
                 window.dispatchEvent(new CustomEvent('loginSuccess', { detail: this.currentUser }));
+                console.log('🔐 [AuthManager] loginSuccess事件已触发');
                 
                 // 如果App管理器已初始化，直接调用其方法
                 if (window.app && window.app.onLoginSuccess) {
+                    console.log('🔐 [AuthManager] 直接调用app.onLoginSuccess');
                     window.app.onLoginSuccess(this.currentUser);
+                } else {
+                    console.log('🔐 [AuthManager] app.onLoginSuccess不可用');
                 }
             } else {
                 this.showMessage(data.error || '登录失败', 'error');

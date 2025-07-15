@@ -105,7 +105,9 @@ class App {
     // 设置事件监听器
     setupEventListeners() {
         // 登录成功事件监听
+        console.log('🚀 [App] 设置loginSuccess事件监听器');
         window.addEventListener('loginSuccess', async (event) => {
+            console.log('🚀 [App] 收到loginSuccess事件');
             await this.onLoginSuccess(event.detail);
         });
 
@@ -126,6 +128,8 @@ class App {
 
     // 登录成功处理
     async onLoginSuccess(userData) {
+        console.log('🚀 [App] onLoginSuccess被调用，用户数据:', userData);
+        
         // 更新用户显示
         this.updateUserDisplay(userData);
         
@@ -140,10 +144,17 @@ class App {
             this.uiManager.checkAndShowAdminMenu();
         }
         
+        // 调用UIManager的onLoginSuccess方法
+        if (this.uiManager) {
+            console.log('🚀 [App] 调用UIManager.onLoginSuccess');
+            await this.uiManager.onLoginSuccess(userData);
+        }
+        
         // 移除重复的登录成功通知，因为auth.js已经显示了
         // if (window.Notify) {
         //     window.Notify.show({ message: '登录成功', type: 'success' });
         // }
+        console.log('🚀 [App] onLoginSuccess处理完成');
     }
 
     // 退出登录

@@ -93,10 +93,10 @@ class UIManager {
 
     // 设置事件监听器
     setupEventListeners() {
-        // 登录成功事件监听
-        window.addEventListener('loginSuccess', (event) => {
-            this.onLoginSuccess(event.detail);
-        });
+        // 移除重复的登录成功事件监听，由App统一处理
+        // window.addEventListener('loginSuccess', (event) => {
+        //     this.onLoginSuccess(event.detail);
+        // });
 
         // 上传按钮事件
         document.getElementById('upload-btn')?.addEventListener('click', () => {
@@ -374,6 +374,7 @@ class UIManager {
 
     // 登录成功回调
     async onLoginSuccess(userData) {
+        console.log('🎨 [UIManager] onLoginSuccess被调用，用户数据:', userData);
         try {
             // 初始化用户头像显示
             await this.initUserProfile();
@@ -406,6 +407,7 @@ class UIManager {
         } catch (error) {
             this.showMessage('数据加载失败', 'error');
         }
+        console.log('🎨 [UIManager] onLoginSuccess处理完成');
     }
 
     // 渲染文件列表
