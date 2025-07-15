@@ -497,12 +497,21 @@ class UIManager {
         // 生成缩略图或图标
         const thumbnailContent = this.generateThumbnailContent(file);
 
-        // 检查文件是否在文件夹中
-        const folderIndicator = file.folder_id ? `
-            <div class="absolute top-2 right-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs px-1.5 py-1 rounded-full z-10 shadow-lg border border-blue-400/30">
-                <i class="fa fa-folder text-xs"></i>
-            </div>
-        ` : '';
+        // 检查文件是否在文件夹中，并获取文件夹名称
+        let folderIndicator = '';
+        if (file.folder_id) {
+            // 从缓存的文件夹列表中查找文件夹名称
+            const folder = this.folders ? this.folders.find(f => f.id === file.folder_id) : null;
+            const folderName = folder ? folder.name : '文件夹';
+            
+            folderIndicator = `
+                <div class="absolute top-2 right-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs px-1.5 py-1 rounded-full z-10 shadow-lg border border-blue-400/30 cursor-pointer" 
+                     data-folder-id="${file.folder_id}" 
+                     title="点击查看文件夹：${folderName}">
+                    <i class="fa fa-folder text-xs"></i>
+                </div>
+            `;
+        }
 
         fileCard.innerHTML = `
             ${folderIndicator}
@@ -660,6 +669,15 @@ class UIManager {
             e.stopPropagation();
             this.deleteFile(file);
         });
+
+        // 文件夹图标点击事件
+        const folderIcon = fileCard.querySelector('[data-folder-id]');
+        if (folderIcon && file.folder_id) {
+            folderIcon.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                await this.showFolderFromFile(file.folder_id);
+            });
+        }
     }
 
     // 渲染文件夹列表
@@ -1491,6 +1509,23 @@ class UIManager {
             
         } catch (error) {
             this.showMessage('获取文件夹内容失败', 'error');
+        }
+    }
+
+    // 从文件跳转到对应文件夹
+    async showFolderFromFile(folderId) {
+        try {
+            // 获取文件夹信息
+            const folders = await this.api.getFolders();
+            const folder = folders.find(f => f.id === folderId);
+            
+            if (folder) {
+                await this.showFolderFiles(folderId, folder.name);
+            } else {
+                this.showMessage('文件夹不存在', 'error');
+            }
+        } catch (error) {
+            this.showMessage('跳转到文件夹失败', 'error');
         }
     }
 
