@@ -228,7 +228,7 @@ func (r *Router) registerHealthRoutes() {
 
 // applyGroups 应用所有路由组
 func (r *Router) applyGroups() {
-	for name, group := range r.groups {
+	for _, group := range r.groups {
 		ginGroup := r.engine.Group(group.Prefix, group.Handlers...)
 
 		for _, route := range group.Routes {
