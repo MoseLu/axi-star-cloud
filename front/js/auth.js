@@ -12,20 +12,33 @@ class AuthManager {
         // 延迟初始化粒子效果，确保DOM已加载
         setTimeout(() => {
             this.setupParticles();
-        }, 200);
+        }, 1000);
     }
 
     // 设置粒子背景
     setupParticles() {
+        // 检查是否在登录页面
+        const loginPage = document.getElementById('login-page');
+        if (!loginPage || loginPage.classList.contains('hidden')) {
+            console.log('不在登录页面，跳过粒子效果初始化');
+            return;
+        }
+
         const particlesContainer = document.getElementById('particles-js');
         if (!particlesContainer) {
             console.warn('粒子容器未找到，跳过粒子效果初始化');
             return;
         }
 
-        if (typeof particlesJS !== 'undefined') {
-            try {
-                particlesJS('particles-js', {
+        // 检查particlesJS库是否已加载
+        if (typeof particlesJS === 'undefined') {
+            console.warn('particlesJS 库未加载，跳过粒子效果初始化');
+            return;
+        }
+
+        try {
+            console.log('开始初始化粒子效果...');
+            particlesJS('particles-js', {
                 particles: {
                     number: {
                         value: 80,
@@ -359,5 +372,8 @@ class AuthManager {
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', () => {
-    new AuthManager();
+    // 延迟初始化，确保所有模板都已加载
+    setTimeout(() => {
+        new AuthManager();
+    }, 500);
 }); 

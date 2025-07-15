@@ -25,7 +25,7 @@ class UIManager {
             this.forceUpdateCreateFolderButton();
             
             // 主动检测登录状态，确保刷新后文件列表加载
-            if (window.authManager && window.authManager.isLoggedIn()) {
+            if (window.authManager && typeof window.authManager.isLoggedIn === 'function' && window.authManager.isLoggedIn()) {
                 this.onLoginSuccess(window.authManager.getCurrentUser());
             }
             
