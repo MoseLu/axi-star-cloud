@@ -169,7 +169,8 @@ class ApiManager {
                         type: file.type,
                         icon: this.getFileIcon(file.type),
                         iconColor: this.getFileIconColor(file.type),
-                        previewUrl: file.path // 使用后端返回的路径
+                        previewUrl: file.path, // 使用后端返回的路径
+                        folder_id: file.folder_id // 添加文件夹ID字段
                     };
                 });
                 return files;
