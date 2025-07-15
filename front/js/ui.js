@@ -2737,19 +2737,9 @@ class UIManager {
         const avatarIcon = document.getElementById('profile-avatar-icon');
         const avatarImage = document.getElementById('profile-avatar-image');
         
-        // 构建完整的头像URL
+        // 使用全局工具函数构建头像URL
         const getAvatarUrl = (avatarPath) => {
-            if (!avatarPath) return null;
-            // 如果已经是完整URL，直接返回
-            if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
-                return avatarPath;
-            }
-            // 如果是相对路径，添加当前域名
-            if (avatarPath.startsWith('/')) {
-                return window.location.origin + avatarPath;
-            }
-            // 其他情况，添加域名和/uploads/avatars前缀
-            return window.location.origin + '/uploads/avatars/' + avatarPath;
+            return window.APP_UTILS.buildAvatarUrl(avatarPath);
         };
 
         const fullAvatarUrl = getAvatarUrl(avatarUrl);
@@ -2912,19 +2902,9 @@ class UIManager {
             userName.className = 'text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500';
         }
 
-        // 构建完整的头像URL
+        // 使用全局工具函数构建头像URL
         const getAvatarUrl = (avatarPath) => {
-            if (!avatarPath) return null;
-            // 如果已经是完整URL，直接返回
-            if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
-                return avatarPath;
-            }
-            // 如果是相对路径，添加当前域名
-            if (avatarPath.startsWith('/')) {
-                return window.location.origin + avatarPath;
-            }
-            // 其他情况，添加域名和/uploads/avatars前缀
-            return window.location.origin + '/uploads/avatars/' + avatarPath;
+            return window.APP_UTILS.buildAvatarUrl(avatarPath);
         };
 
         const avatarUrl = getAvatarUrl(userData.avatar);
