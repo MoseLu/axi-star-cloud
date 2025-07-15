@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404错误诊断 - 星际云盘</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(30, 41, 59, 0.8);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 10px;
+            border-left: 4px solid #7B61FF;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background: rgba(34, 197, 94, 0.2); border: 1px solid #22C55E; }
+        .error { background: rgba(239, 68, 68, 0.2); border: 1px solid #EF4444; }
+        .warning { background: rgba(245, 158, 11, 0.2); border: 1px solid #F59E0B; }
+        button {
+            background: #7B61FF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #6B46C1;
+        }
+        .log {
+            background: #1E293B;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 404错误诊断工具</h1>
+        <p>这个页面将帮助您诊断404错误的原因。</p>
+
+        <div class="test-section">
+            <h2>1. 基础连接测试</h2>
+            <button onclick="testBasicConnection()">测试基础连接</button>
+            <div id="basic-status"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. 静态文件测试</h2>
+            <button onclick="testStaticFiles()">测试静态文件</button>
+            <div id="static-status"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. API接口测试</h2>
+            <button onclick="testAPIEndpoints()">测试API接口</button>
+            <div id="api-status"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. 服务状态检查</h2>
+            <button onclick="checkServiceStatus()">检查服务状态</button>
+            <div id="service-status"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>5. 诊断日志</h2>
+            <div id="diagnostic-log" class="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>6. 快速修复建议</h2>
+            <div id="fix-suggestions"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('diagnostic-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#EF4444' : type === 'success' ? '#22C55E' : '#F59E0B';
+            logDiv.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function testBasicConnection() {
+            log('开始基础连接测试...');
+            
+            try {
+                const response = await fetch('/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    updateStatus('basic-status', `✅ 服务正常 - ${data.message}`, 'success');
+                    log('基础连接测试成功', 'success');
+                } else {
+                    updateStatus('basic-status', `❌ 服务响应异常 - ${response.status}`, 'error');
+                    log(`基础连接测试失败: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                updateStatus('basic-status', `❌ 连接失败 - ${error.message}`, 'error');
+                log(`基础连接测试异常: ${error.message}`, 'error');
+            }
+        }
+
+        async function testStaticFiles() {
+            log('开始静态文件测试...');
+            
+            const staticFiles = [
+                '/static/css/styles.css',
+                '/static/js/app.js',
+                '/static/html/header.html',
+                '/static/public/favicon.ico'
+            ];
+
+            let successCount = 0;
+            let totalCount = staticFiles.length;
+
+            for (const file of staticFiles) {
+                try {
+                    const response = await fetch(file);
+                    if (response.ok) {
+                        successCount++;
+                        log(`✅ ${file} - 可访问`, 'success');
+                    } else {
+                        log(`❌ ${file} - ${response.status}`, 'error');
+                    }
+                } catch (error) {
+                    log(`❌ ${file} - ${error.message}`, 'error');
+                }
+            }
+
+            const successRate = (successCount / totalCount * 100).toFixed(1);
+            updateStatus('static-status', 
+                `${successCount}/${totalCount} 个静态文件可访问 (${successRate}%)`, 
+                successCount === totalCount ? 'success' : 'warning');
+        }
+
+        async function testAPIEndpoints() {
+            log('开始API接口测试...');
+            
+            const apiEndpoints = [
+                '/api/storage',
+                '/api/files',
+                '/api/folders'
+            ];
+
+            let successCount = 0;
+            let totalCount = apiEndpoints.length;
+
+            for (const endpoint of apiEndpoints) {
+                try {
+                    const response = await fetch(endpoint);
+                    if (response.status === 401) {
+                        successCount++; // 401表示接口存在但需要认证
+                        log(`✅ ${endpoint} - 需要认证`, 'success');
+                    } else if (response.ok) {
+                        successCount++;
+                        log(`✅ ${endpoint} - 正常`, 'success');
+                    } else {
+                        log(`❌ ${endpoint} - ${response.status}`, 'error');
+                    }
+                } catch (error) {
+                    log(`❌ ${endpoint} - ${error.message}`, 'error');
+                }
+            }
+
+            const successRate = (successCount / totalCount * 100).toFixed(1);
+            updateStatus('api-status', 
+                `${successCount}/${totalCount} 个API接口可访问 (${successRate}%)`, 
+                successCount === totalCount ? 'success' : 'warning');
+        }
+
+        async function checkServiceStatus() {
+            log('开始服务状态检查...');
+            
+            try {
+                // 检查多个可能的健康检查端点
+                const healthEndpoints = ['/health', '/api/health', '/status'];
+                let serviceRunning = false;
+                
+                for (const endpoint of healthEndpoints) {
+                    try {
+                        const response = await fetch(endpoint);
+                        if (response.ok) {
+                            serviceRunning = true;
+                            log(`✅ 服务运行正常 (${endpoint})`, 'success');
+                            break;
+                        }
+                    } catch (error) {
+                        log(`❌ ${endpoint} 不可访问`, 'error');
+                    }
+                }
+
+                if (serviceRunning) {
+                    updateStatus('service-status', '✅ 后端服务运行正常', 'success');
+                } else {
+                    updateStatus('service-status', '❌ 后端服务可能未运行', 'error');
+                    log('建议检查服务器上的服务状态', 'warning');
+                }
+            } catch (error) {
+                updateStatus('service-status', `❌ 服务检查失败 - ${error.message}`, 'error');
+                log(`服务状态检查异常: ${error.message}`, 'error');
+            }
+        }
+
+        function generateFixSuggestions() {
+            const suggestions = document.getElementById('fix-suggestions');
+            suggestions.innerHTML = `
+                <h3>可能的解决方案：</h3>
+                <ul>
+                    <li><strong>1. 检查服务状态：</strong>在服务器上运行 <code>sudo systemctl status star-cloud.service</code></li>
+                    <li><strong>2. 重启服务：</strong>运行 <code>sudo systemctl restart star-cloud.service</code></li>
+                    <li><strong>3. 检查端口：</strong>确认8080端口是否被占用 <code>netstat -tlnp | grep 8080</code></li>
+                    <li><strong>4. 检查nginx配置：</strong>确认nginx是否正确代理到后端服务</li>
+                    <li><strong>5. 检查文件权限：</strong>确认静态文件目录权限正确</li>
+                    <li><strong>6. 查看日志：</strong>运行 <code>sudo journalctl -u star-cloud.service -f</code></li>
+                </ul>
+            `;
+        }
+
+        // 页面加载时自动生成建议
+        window.addEventListener('load', function() {
+            generateFixSuggestions();
+            log('404错误诊断工具已加载', 'success');
+        });
+    </script>
+</body>
+</html> 

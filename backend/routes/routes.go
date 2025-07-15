@@ -144,10 +144,28 @@ func (r *Router) registerStaticRoutes() {
 	}
 
 	// 设置静态文件路由
+	staticFound := false
 	for _, path := range staticPaths {
 		if _, err := os.Stat(path); err == nil {
 			r.engine.Static("/static", path)
+			staticFound = true
 			break
+		}
+	}
+
+	// 如果静态文件路径都失败，尝试绝对路径
+	if !staticFound {
+		absoluteStaticPaths := []string{
+			"/www/wwwroot/axi-star-cloud/front",
+			"/www/wwwroot/redamancy.com.cn/front",
+		}
+
+		for _, absPath := range absoluteStaticPaths {
+			if _, err := os.Stat(absPath); err == nil {
+				r.engine.Static("/static", absPath)
+				staticFound = true
+				break
+			}
 		}
 	}
 
@@ -198,22 +216,42 @@ func (r *Router) registerPageRoutes() {
 		"./front/index.html",
 	}
 
+	indexFound := false
 	for _, path := range indexPaths {
 		if _, err := os.Stat(path); err == nil {
 			absPath, err := filepath.Abs(path)
 			if err == nil {
 				r.engine.StaticFile("/", absPath)
-				return
+				indexFound = true
+				break
+			}
+		}
+	}
+
+	// 如果相对路径都失败，尝试绝对路径
+	if !indexFound {
+		absoluteIndexPaths := []string{
+			"/www/wwwroot/axi-star-cloud/index.html",
+			"/www/wwwroot/redamancy.com.cn/index.html",
+		}
+
+		for _, absPath := range absoluteIndexPaths {
+			if _, err := os.Stat(absPath); err == nil {
+				r.engine.StaticFile("/", absPath)
+				indexFound = true
+				break
 			}
 		}
 	}
 
 	// 如果找不到index.html，创建一个简单的首页
-	r.engine.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", gin.H{
-			"title": "星际云盘",
+	if !indexFound {
+		r.engine.GET("/", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "index.html", gin.H{
+				"title": "星际云盘",
+			})
 		})
-	})
+	}
 }
 
 // registerHealthRoutes 注册健康检查路由
