@@ -2748,8 +2748,8 @@ class UIManager {
             if (avatarPath.startsWith('/')) {
                 return window.location.origin + avatarPath;
             }
-            // 其他情况，添加域名和/uploads前缀
-            return window.location.origin + '/uploads/' + avatarPath;
+            // 其他情况，添加域名和/uploads/avatars前缀
+            return window.location.origin + '/uploads/avatars/' + avatarPath;
         };
 
         const fullAvatarUrl = getAvatarUrl(avatarUrl);
@@ -2923,8 +2923,8 @@ class UIManager {
             if (avatarPath.startsWith('/')) {
                 return window.location.origin + avatarPath;
             }
-            // 其他情况，添加域名和/uploads前缀
-            return window.location.origin + '/uploads/' + avatarPath;
+            // 其他情况，添加域名和/uploads/avatars前缀
+            return window.location.origin + '/uploads/avatars/' + avatarPath;
         };
 
         const avatarUrl = getAvatarUrl(userData.avatar);
