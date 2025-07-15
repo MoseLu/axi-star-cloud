@@ -499,9 +499,8 @@ class UIManager {
 
         // 检查文件是否在文件夹中
         const folderIndicator = file.folder_id ? `
-            <div class="absolute top-2 right-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs px-2 py-1 rounded-full z-10 shadow-lg border border-blue-400/30">
-                <i class="fa fa-folder text-xs mr-1"></i>
-                <span class="text-xs font-medium">文件夹</span>
+            <div class="absolute top-2 right-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs px-1.5 py-1 rounded-full z-10 shadow-lg border border-blue-400/30">
+                <i class="fa fa-folder text-xs"></i>
             </div>
         ` : '';
 
