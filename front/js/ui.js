@@ -497,7 +497,15 @@ class UIManager {
         // 生成缩略图或图标
         const thumbnailContent = this.generateThumbnailContent(file);
 
+        // 检查文件是否在文件夹中
+        const folderIndicator = file.folder_id ? `
+            <div class="absolute top-1 right-1 bg-blue-500/80 text-white text-xs px-1 py-0.5 rounded-full z-10">
+                <i class="fa fa-folder text-xs"></i>
+            </div>
+        ` : '';
+
         fileCard.innerHTML = `
+            ${folderIndicator}
             <div class="card-content flex flex-col h-full">
                 <!-- 第一排：缩略图/图标和文件名 -->
                 <div class="file-icon-container flex flex-col items-center justify-center mb-2">

@@ -23,10 +23,10 @@ func (r *FileRepository) GetFilesByUserID(userID string, folderID *int) ([]model
 	var err error
 
 	if folderID == nil {
-		// 查询该用户在根目录的文件（folder_id为NULL）
+		// 查询该用户的所有文件（包括文件夹中的文件）
 		rows, err = r.db.Query(`
 			SELECT id, name, size, type, path, user_id, folder_id, created_at, updated_at 
-			FROM files WHERE user_id = ? AND folder_id IS NULL 
+			FROM files WHERE user_id = ? 
 			ORDER BY created_at DESC`, userID)
 	} else {
 		// 查询指定文件夹的文件
