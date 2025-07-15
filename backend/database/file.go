@@ -113,3 +113,11 @@ func (r *FileRepository) GetUserTotalStorage(userID string) (int64, error) {
 	err := r.db.QueryRow(query, userID).Scan(&totalSize)
 	return totalSize, err
 }
+
+// GetUserTotalFileCount 获取用户所有文件总数（包括文件夹中的文件）
+func (r *FileRepository) GetUserTotalFileCount(userID string) (int, error) {
+	var totalCount int
+	query := `SELECT COUNT(*) FROM files WHERE user_id = ?`
+	err := r.db.QueryRow(query, userID).Scan(&totalCount)
+	return totalCount, err
+}

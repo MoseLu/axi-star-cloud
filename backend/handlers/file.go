@@ -374,3 +374,24 @@ func (h *FileHandler) MoveFile(c *gin.Context) {
 		"message": "文件移动成功",
 	})
 }
+
+// GetTotalFileCount 获取用户所有文件总数
+func (h *FileHandler) GetTotalFileCount(c *gin.Context) {
+	userID := c.Query("user_id")
+
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "缺少用户ID"})
+		return
+	}
+
+	count, err := h.fileRepo.GetUserTotalFileCount(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文件总数失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"count":   count,
+	})
+}

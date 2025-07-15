@@ -1971,7 +1971,13 @@ class UIManager {
         // 更新欢迎区域的文件数量
         const fileCountElement = document.getElementById('file-count');
         if (fileCountElement) {
-            fileCountElement.textContent = count;
+            // 如果是"全部文件"分类，使用总文件数（包括文件夹中的文件）
+            if (this.currentCategory === 'all' || !this.currentCategory) {
+                const totalCount = this.totalFileCount || count;
+                fileCountElement.textContent = totalCount;
+            } else {
+                fileCountElement.textContent = count;
+            }
         }
 
         // 更新文件列表区域的文件数量（右上角）
@@ -1988,6 +1994,9 @@ class UIManager {
                         displayCount++;
                     }
                 });
+            } else if (this.currentCategory === 'all' || !this.currentCategory) {
+                // 全部文件分类，使用总文件数
+                displayCount = this.totalFileCount || count;
             }
             fileCountDisplay.textContent = displayCount;
             fileCountDesc.innerHTML = `共 <span id="file-count-display" class="text-purple-300 font-bold">${displayCount}</span> 个${desc}`;
@@ -2365,11 +2374,15 @@ class UIManager {
 
             if (uploadedFiles.success) {
                 this.showMessage(uploadedFiles.message, 'success');
-                // 重新加载文件列表
-                const files = await this.api.getFiles(this.currentFolderId);
+                // 重新加载文件列表和总文件数
+                const [files, totalFileCount] = await Promise.all([
+                    this.api.getFiles(this.currentFolderId),
+                    this.api.getTotalFileCount()
+                ]);
                 
                 // 更新缓存
                 this.allFiles = files;
+                this.totalFileCount = totalFileCount;
                 
                 // 根据当前类别过滤文件
                 if (this.currentCategory && this.currentCategory !== 'all') {

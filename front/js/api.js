@@ -459,24 +459,43 @@ class ApiManager {
         }
     }
 
-    // 获取文件夹文件数量
-    async getFolderFileCount(folderId) {
-        const userId = this.getCurrentUserId();
-        if (!userId) return 0;
+    	// 获取文件夹文件数量
+	async getFolderFileCount(folderId) {
+		const userId = this.getCurrentUserId();
+		if (!userId) return 0;
 
-        try {
-            const response = await fetch(`${this.baseUrl}/api/folders/${folderId}/count?user_id=${userId}`);
-            const data = await response.json();
-            
-            if (data.success) {
-                return data.count;
-            } else {
-                return 0;
-            }
-        } catch (error) {
-            return 0;
-        }
-    }
+		try {
+			const response = await fetch(`${this.baseUrl}/api/folders/${folderId}/count?user_id=${userId}`);
+			const data = await response.json();
+			
+			if (data.success) {
+				return data.count;
+			} else {
+				return 0;
+			}
+		} catch (error) {
+			return 0;
+		}
+	}
+
+	// 获取用户所有文件总数（包括文件夹中的文件）
+	async getTotalFileCount() {
+		const userId = this.getCurrentUserId();
+		if (!userId) return 0;
+
+		try {
+			const response = await fetch(`${this.baseUrl}/api/files/count?user_id=${userId}`);
+			const data = await response.json();
+			
+			if (data.success) {
+				return data.count;
+			} else {
+				return 0;
+			}
+		} catch (error) {
+			return 0;
+		}
+	}
 
     // 移动文件
     async moveFile(fileId, folderId) {

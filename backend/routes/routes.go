@@ -82,6 +82,7 @@ func (r *Router) SetupRoutes(
 
 	// 文件相关路由
 	apiGroup.AddRoute("GET", "/files", fileHandler.GetFiles, "获取文件列表")
+	apiGroup.AddRoute("GET", "/files/count", fileHandler.GetTotalFileCount, "获取用户所有文件总数")
 	apiGroup.AddRoute("GET", "/files/:id", fileHandler.GetFile, "获取单个文件信息")
 	apiGroup.AddRoute("GET", "/files/:id/download", fileHandler.DownloadFile, "下载文件")
 	apiGroup.AddRoute("POST", "/upload", fileHandler.UploadFile, "上传文件")
