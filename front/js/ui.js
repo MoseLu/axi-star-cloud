@@ -371,6 +371,9 @@ class UIManager {
     async onLoginSuccess(userData) {
         console.log('🎨 [UIManager] onLoginSuccess被调用，用户数据:', userData);
         try {
+            // 更新用户显示（用户名和头像）
+            this.updateProfileDisplay(userData);
+            
             // 初始化用户头像显示
             await this.initUserProfile();
             
@@ -2126,8 +2129,8 @@ class UIManager {
         if (modal) {
             // 检查是否为管理员
             const currentUser = window.authManager ? window.authManager.getCurrentUser() : null;
-            if (currentUser && currentUser.username === 'Mose' && this.api.isAdmin()) {
-                // 只有Mose管理员才能看到存储设置
+            if (currentUser && currentUser.isAdmin) {
+                // 管理员可以修改存储设置
                 modal.classList.remove('invisible', 'opacity-0');
                 this.loadStorageSettings();
             } else {
@@ -2890,7 +2893,8 @@ class UIManager {
 
     // 显示管理员用户管理界面
     showAdminUsersModal() {
-        if (!this.api.isAdmin()) {
+        const currentUser = window.authManager ? window.authManager.getCurrentUser() : null;
+        if (!currentUser || !currentUser.isAdmin) {
             this.showMessage('权限不足，需要管理员权限', 'error');
             return;
         }
@@ -3066,7 +3070,8 @@ class UIManager {
 
     // 显示管理员存储管理界面
     showAdminStorageModal() {
-        if (!this.api.isAdmin()) {
+        const currentUser = window.authManager ? window.authManager.getCurrentUser() : null;
+        if (!currentUser || !currentUser.isAdmin) {
             this.showMessage('权限不足，需要管理员权限', 'error');
             return;
         }
@@ -3077,12 +3082,18 @@ class UIManager {
     // 检查并显示管理员菜单
     checkAndShowAdminMenu() {
         const adminMenu = document.getElementById('admin-menu');
-        if (adminMenu) {
-            // 只有Mose用户才能看到管理员菜单
+        const settingsBtn = document.getElementById('settings-btn');
+        
+        if (adminMenu && settingsBtn) {
             const currentUser = window.authManager ? window.authManager.getCurrentUser() : null;
-            if (currentUser && currentUser.username === 'Mose' && this.api.isAdmin()) {
+            
+            if (currentUser && currentUser.isAdmin) {
+                // 管理员：显示设置按钮和管理员菜单
+                settingsBtn.style.display = 'block';
                 adminMenu.classList.remove('hidden');
             } else {
+                // 非管理员：隐藏设置按钮和管理员菜单
+                settingsBtn.style.display = 'none';
                 adminMenu.classList.add('hidden');
             }
         }

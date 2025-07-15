@@ -3,10 +3,20 @@ class AuthManager {
     constructor() {
         this.baseUrl = window.location.origin;
         this.currentUser = null;
+        this.isInitialized = false;
+        this.eventsBound = false;
+        this.isLoggingIn = false; // 新增：防止重复提交
+        console.log('🔐 [AuthManager] 构造函数被调用，实例ID:', Date.now());
         this.init();
     }
 
     init() {
+        // 防止重复初始化
+        if (this.isInitialized) {
+            console.log('AuthManager已经初始化，跳过重复初始化');
+            return;
+        }
+        
         console.log('检测到登录页面，准备初始化粒子效果...');
         
         // 立即尝试初始化粒子效果
@@ -27,6 +37,9 @@ class AuthManager {
         setTimeout(() => {
             this.setupParticles();
         }, 500);
+        
+        // 标记为已初始化
+        this.isInitialized = true;
     }
 
     // 设置粒子背景
@@ -188,24 +201,38 @@ class AuthManager {
 
     // 设置事件监听器
     setupEventListeners() {
+        // 防止重复绑定事件
+        if (this.eventsBound) {
+            console.log('🔐 [AuthManager] 事件监听器已经绑定，跳过重复绑定');
+            return;
+        }
+        
+        console.log('🔐 [AuthManager] 开始绑定事件监听器');
+        
         // 延迟设置事件监听器，确保DOM元素已加载
         setTimeout(() => {
             // 登录表单提交
             const loginForm = document.getElementById('loginForm');
             if (loginForm) {
+                console.log('🔐 [AuthManager] 绑定登录表单事件');
                 loginForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     this.handleLogin();
                 });
+            } else {
+                console.log('🔐 [AuthManager] 登录表单未找到');
             }
 
             // 注册表单提交
             const registerForm = document.getElementById('registerForm');
             if (registerForm) {
+                console.log('🔐 [AuthManager] 绑定注册表单事件');
                 registerForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     this.handleRegister();
                 });
+            } else {
+                console.log('🔐 [AuthManager] 注册表单未找到');
             }
 
             // 切换表单按钮
@@ -213,16 +240,22 @@ class AuthManager {
             const showLoginBtn = document.getElementById('showLoginBtn');
             
             if (showRegisterBtn) {
+                console.log('🔐 [AuthManager] 绑定显示注册按钮事件');
                 showRegisterBtn.addEventListener('click', () => {
                     this.showRegisterForm();
                 });
             }
             
             if (showLoginBtn) {
+                console.log('🔐 [AuthManager] 绑定显示登录按钮事件');
                 showLoginBtn.addEventListener('click', () => {
                     this.showLoginForm();
                 });
             }
+            
+            // 标记事件已绑定
+            this.eventsBound = true;
+            console.log('🔐 [AuthManager] 事件监听器绑定完成');
         }, 100);
     }
 
@@ -250,6 +283,12 @@ class AuthManager {
 
     // 处理登录
     async handleLogin() {
+        // 防止重复提交
+        if (this.isLoggingIn) {
+            console.log('🔐 [AuthManager] 登录请求正在进行中，跳过重复请求');
+            return;
+        }
+        
         const username = document.getElementById('loginUsername').value.trim();
         const password = document.getElementById('loginPassword').value.trim();
 
@@ -258,6 +297,7 @@ class AuthManager {
             return;
         }
 
+        this.isLoggingIn = true;
         const loginBtn = document.getElementById('loginBtn');
         const originalText = loginBtn.innerHTML;
         loginBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>登录中...';
@@ -303,6 +343,7 @@ class AuthManager {
             console.error('登录错误:', error);
             this.showMessage('网络错误，请稍后重试', 'error');
         } finally {
+            this.isLoggingIn = false;
             loginBtn.innerHTML = originalText;
             loginBtn.disabled = false;
         }

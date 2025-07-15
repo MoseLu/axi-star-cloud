@@ -176,9 +176,14 @@
                 // 立即尝试初始化粒子效果
                 initParticlesImmediately();
 
-                // 先初始化AuthManager，后初始化App
-                window.authManager = new AuthManager();
-                console.log('AuthManager初始化完成');
+                // 初始化AuthManager（如果还没有初始化）
+                if (!window.authManager) {
+                    console.log('🔐 [index.html] 创建新的AuthManager实例');
+                    window.authManager = new AuthManager();
+                    console.log('AuthManager初始化完成');
+                } else {
+                    console.log('🔐 [index.html] 使用已存在的AuthManager实例');
+                }
 
                 // 模板加载完成后初始化应用
                 console.log('模板加载完成，初始化应用...');

@@ -11,8 +11,8 @@ class App {
         try {
             console.log('App开始初始化...');
             
-            // 初始化各个模块
-            this.authManager = new AuthManager();
+            // 使用已存在的AuthManager实例，避免重复初始化
+            this.authManager = window.authManager || new AuthManager();
             this.apiManager = new ApiManager();
             this.uiManager = new UIManager();
 
@@ -159,6 +159,13 @@ class App {
 
     // 退出登录
     logout() {
+        console.log('🚀 [App] logout被调用');
+        
+        // 调用AuthManager的清除方法
+        if (this.authManager) {
+            this.authManager.clearLoginData();
+        }
+        
         // 清除本地存储
         localStorage.removeItem('currentUser');
         
@@ -172,6 +179,8 @@ class App {
         if (window.Notify) {
             window.Notify.show({ message: '已退出登录', type: 'info' });
         }
+        
+        console.log('🚀 [App] logout处理完成');
     }
 }
 
