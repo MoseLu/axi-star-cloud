@@ -9,14 +9,24 @@ class AuthManager {
     init() {
         this.checkLoginStatus();
         this.setupEventListeners();
-        // 延迟初始化粒子效果，确保DOM已加载
-        setTimeout(() => {
-            this.setupParticles();
-        }, 1000);
+        
+        // 检查是否在登录页面，如果是则初始化粒子效果
+        const loginPage = document.getElementById('login-page');
+        if (loginPage && !loginPage.classList.contains('hidden')) {
+            console.log('检测到登录页面，准备初始化粒子效果...');
+            // 延迟初始化粒子效果，确保DOM已加载
+            setTimeout(() => {
+                this.setupParticles();
+            }, 1500);
+        } else {
+            console.log('不在登录页面，跳过粒子效果初始化');
+        }
     }
 
     // 设置粒子背景
     setupParticles() {
+        console.log('setupParticles 被调用');
+        
         // 检查是否在登录页面
         const loginPage = document.getElementById('login-page');
         if (!loginPage || loginPage.classList.contains('hidden')) {
@@ -33,6 +43,12 @@ class AuthManager {
         // 检查particlesJS库是否已加载
         if (typeof particlesJS === 'undefined') {
             console.warn('particlesJS 库未加载，跳过粒子效果初始化');
+            return;
+        }
+
+        // 检查容器是否有内容
+        if (particlesContainer.children.length > 0) {
+            console.log('粒子容器已有内容，跳过重复初始化');
             return;
         }
 
@@ -140,11 +156,9 @@ class AuthManager {
                 },
                 retina_detect: true
             });
-            } catch (error) {
-                console.error('粒子效果初始化失败:', error);
-            }
-        } else {
-            console.warn('particlesJS 库未加载');
+            console.log('粒子效果初始化成功');
+        } catch (error) {
+            console.error('粒子效果初始化失败:', error);
         }
     }
 
@@ -372,8 +386,11 @@ class AuthManager {
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM加载完成，准备初始化AuthManager...');
     // 延迟初始化，确保所有模板都已加载
     setTimeout(() => {
-        new AuthManager();
-    }, 500);
+        console.log('开始初始化AuthManager...');
+        window.authManager = new AuthManager();
+        console.log('AuthManager初始化完成');
+    }, 1000);
 }); 

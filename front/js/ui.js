@@ -26,7 +26,10 @@ class UIManager {
             
             // 主动检测登录状态，确保刷新后文件列表加载
             if (window.authManager && typeof window.authManager.isLoggedIn === 'function' && window.authManager.isLoggedIn()) {
+                console.log('检测到已登录用户，加载主界面...');
                 this.onLoginSuccess(window.authManager.getCurrentUser());
+            } else {
+                console.log('用户未登录或AuthManager未初始化');
             }
             
             // 初始化用户头像显示
