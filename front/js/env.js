@@ -6,6 +6,8 @@ window.APP_CONFIG = (function() {
                         hostname === '127.0.0.1' ||
                         hostname.startsWith('192.168.');
     const isCloudIP = hostname === '47.112.163.152';
+    const isRedamancyDomain = hostname === 'redamancy.com.cn' || hostname.includes('redamancy.com.cn');
+    const isAxiStarDomain = hostname === 'axi-star-cloud.com' || hostname.includes('axi-star-cloud.com');
 
     let API_BASE_URL;
 
@@ -17,8 +19,16 @@ window.APP_CONFIG = (function() {
         // 云服务器环境
         API_BASE_URL = 'http://47.112.163.152:8080';
         console.log('☁️ 检测到云服务器环境，使用:', API_BASE_URL);
+    } else if (isRedamancyDomain) {
+        // redamancy.com.cn 域名 - 使用 axi-star-cloud.com 的API
+        API_BASE_URL = 'https://axi-star-cloud.com';
+        console.log('🌐 检测到redamancy域名，使用axi-star-cloud API:', API_BASE_URL);
+    } else if (isAxiStarDomain) {
+        // axi-star-cloud.com 域名
+        API_BASE_URL = window.location.origin;
+        console.log('🚀 检测到axi-star-cloud域名，使用:', API_BASE_URL);
     } else {
-        // 生产环境 - 使用当前域名
+        // 其他生产环境 - 使用当前域名
         API_BASE_URL = window.location.origin;
         console.log('🚀 检测到生产环境，使用:', API_BASE_URL);
     }
