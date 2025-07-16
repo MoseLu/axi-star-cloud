@@ -1048,29 +1048,35 @@ body.modal-open {
     max-width: 100px;
 }
 
-/* 网格列跨度类 */
+/* 网格列跨度类 - 默认垂直布局 */
 .col-span-full {
     grid-column: 1 / -1;
     width: 100%;
     max-width: none !important;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 400px;
 }
 
-/* 外站文档空状态特殊样式 */
-.col-span-full .text-center {
+/* 外站文档空状态特殊样式 - 只在外部文档分类下生效 */
+.external-docs-category .col-span-full .text-center {
     width: 100%;
     max-width: 600px;
     margin: 0 auto;
     text-align: center;
 }
 
-/* 确保外站文档空状态在网格中居中 */
-#files-grid .col-span-full {
+/* 确保外站文档空状态在网格中居中 - 只在外部文档分类下生效 */
+.external-docs-category #files-grid .col-span-full {
     justify-self: center;
     align-self: center;
+}
+
+/* 外站文档分类下的空状态使用水平布局 */
+.external-docs-category .col-span-full {
+    flex-direction: row;
 }
 
 /* 文件图标容器优化 */

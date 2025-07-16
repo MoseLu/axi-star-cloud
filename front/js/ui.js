@@ -13,7 +13,8 @@ class UIManager {
     }
 
     init() {
-
+        // 确保移除外站文档分类CSS类
+        document.body.classList.remove('external-docs-category');
         
         // 延迟设置事件监听器，确保DOM元素已加载
         setTimeout(async () => {
@@ -193,6 +194,9 @@ class UIManager {
                 e.target.classList.remove('bg-dark-light', 'hover:bg-dark-light/70');
 
                 try {
+                    // 移除所有分类相关的CSS类
+                    document.body.classList.remove('external-docs-category');
+                    
                     if (type === 'all') {
                         this.currentCategory = 'all';
                         this.currentFolderId = null;
@@ -239,6 +243,9 @@ class UIManager {
                     } else if (type === 'external-docs') {
                         this.currentCategory = 'external-docs';
                         this.currentFolderId = null;
+                        
+                        // 添加外站文档分类CSS类
+                        document.body.classList.add('external-docs-category');
                         
                         // 隐藏文件夹区域
                         this.hideFolderSection();
