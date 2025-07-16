@@ -1048,6 +1048,31 @@ body.modal-open {
     max-width: 100px;
 }
 
+/* 网格列跨度类 */
+.col-span-full {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: none !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+/* 外站文档空状态特殊样式 */
+.col-span-full .text-center {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* 确保外站文档空状态在网格中居中 */
+#files-grid .col-span-full {
+    justify-self: center;
+    align-self: center;
+}
+
 /* 文件图标容器优化 */
 .file-icon-container,
 .folder-icon-container {

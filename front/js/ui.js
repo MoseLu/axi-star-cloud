@@ -1143,7 +1143,7 @@ class UIManager {
         });
     }
 
-    // 预览文档
+    // 预览文档（普通文件）
     previewDocument(file) {
         // 检查是否为Markdown文件
         if (file.name.toLowerCase().endsWith('.md') || file.name.toLowerCase().endsWith('.markdown')) {
@@ -1206,6 +1206,108 @@ class UIManager {
         });
     }
 
+    // 预览外站文档
+    async previewExternalDocument(doc) {
+        try {
+            // 获取文档内容
+            const response = await fetch(`${window.location.origin}${doc.path}`);
+            if (!response.ok) {
+                throw new Error('无法加载文档内容');
+            }
+            
+            const content = await response.text();
+            
+            // 显示完整文档内容，包括frontmatter
+            const fullContent = content;
+            
+            // 给body添加类防止滚动
+            document.body.classList.add('modal-open');
+            
+            // 创建预览模态框
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
+            modal.style.overflow = 'hidden';
+            modal.innerHTML = `
+                <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
+                    <!-- 关闭按钮 -->
+                    <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fa fa-times"></i>
+                    </button>
+                    
+                    <!-- 文档信息 - 显示在顶部 -->
+                    <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fa fa-book text-emerald-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold">${doc.title}</h3>
+                                <p class="text-gray-300 text-sm">${doc.category} • 外站文档</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 文档内容容器 -->
+                    <div class="bg-white rounded-lg w-full h-full max-w-6xl max-h-[90vh] preview-content modal-scrollbar" style="overflow: auto;">
+                        <div class="p-8">
+                            <div class="prose prose-lg max-w-none">
+                                <div class="markdown-content">${this.renderMarkdown(fullContent)}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // 点击背景关闭
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                    document.body.classList.remove('modal-open');
+                }
+            });
+            
+            // ESC键关闭
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    modal.remove();
+                    document.body.classList.remove('modal-open');
+                }
+            });
+            
+        } catch (error) {
+            this.showMessage('无法加载文档内容: ' + error.message, 'error');
+        }
+    }
+
+    // 简单的Markdown渲染函数
+    renderMarkdown(text) {
+        return text
+            // 标题
+            .replace(/^### (.*$)/gim, '<h3 class="text-2xl font-bold text-gray-900 mb-4">$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2 class="text-3xl font-bold text-gray-900 mb-4">$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1 class="text-4xl font-bold text-gray-900 mb-4">$1</h1>')
+            // 粗体和斜体
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+            // 代码块
+            .replace(/```([\s\S]*?)```/g, '<pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4"><code>$1</code></pre>')
+            .replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-2 py-1 rounded text-sm">$1</code>')
+            // 链接
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:text-blue-800 underline" target="_blank">$1</a>')
+            // 列表
+            .replace(/^\* (.*$)/gim, '<li class="ml-4">$1</li>')
+            .replace(/^- (.*$)/gim, '<li class="ml-4">$1</li>')
+            // 段落
+            .replace(/\n\n/g, '</p><p class="mb-4">')
+            .replace(/^(?!<[h|p|li|pre|ul|ol]).*/gim, '<p class="mb-4">$&')
+            // 清理多余的标签
+            .replace(/<p class="mb-4"><\/p>/g, '')
+            .replace(/<p class="mb-4">\s*<\/p>/g, '')
+            // 确保段落正确闭合
+            .replace(/<p class="mb-4">([^<]*(?:<[^p][^>]*>[^<]*<\/[^p][^>]*>[^<]*)*)<\/p>/g, '<p class="mb-4">$1</p>');
+    }
+
     // 预览文本文件
     async previewTextFile(file) {
         try {
@@ -1218,8 +1320,6 @@ class UIManager {
                 // 根据文件类型构建路径
                 fileUrl = `/uploads/${file.type}/${file.name}`;
             }
-            
-
             
             // 尝试多种路径格式
             const possibleUrls = [
@@ -1318,8 +1418,6 @@ class UIManager {
                 // 根据文件类型构建路径
                 fileUrl = `/uploads/${file.type}/${file.name}`;
             }
-            
-
             
             // 尝试多种路径格式 - 优先使用/uploads路径
             const possibleUrls = [
@@ -3581,17 +3679,16 @@ class UIManager {
                         </div>
                         <div class="flex-1 min-w-0">
                             <h4 class="text-white font-semibold truncate" title="${doc.title}">${doc.title}</h4>
-                            <p class="text-emerald-300 text-sm">${doc.category}</p>
+                            <p class="text-emerald-300 text-sm">分类：${doc.category}</p>
                         </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        ${doc.order > 0 ? `<span class="bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-full text-xs font-medium">#${doc.order}</span>` : ''}
                     </div>
                 </div>
                 
                 <div class="flex items-center justify-between text-xs text-gray-400 mb-3">
-                    <span>创建时间</span>
-                    <span class="text-emerald-300">${this.formatDate(doc.created_at)}</span>
+                    <div class="flex items-center space-x-1">
+                        <i class="fa fa-clock-o text-emerald-400"></i>
+                    </div>
+                    <span class="text-emerald-300 font-medium">${this.formatDate(doc.created_at)}</span>
                 </div>
                 
                 <!-- 操作按钮 -->
@@ -3615,7 +3712,7 @@ class UIManager {
         // 预览按钮
         card.querySelector('.doc-preview-btn')?.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.previewDocument(doc);
+            this.previewExternalDocument(doc);
         });
 
         // 下载按钮
@@ -3640,14 +3737,143 @@ class UIManager {
 
     // 下载文档
     downloadDocument(doc) {
-        // 创建下载链接
-        const docUrl = `${window.location.origin}${doc.path}`;
-        const link = document.createElement('a');
-        link.href = docUrl;
-        link.download = doc.filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // 显示下载选项对话框
+        const showDownloadOptions = () => {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/60';
+                modal.innerHTML = `
+                    <div class="bg-dark-light rounded-xl p-6 w-full max-w-md shadow-2xl border border-emerald-400/30">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center">
+                                <i class="fa fa-download text-emerald-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-emerald-300">下载文档</h3>
+                                <p class="text-gray-400 text-sm">选择下载格式</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3 mb-6">
+                            <button class="w-full p-3 bg-emerald-500/20 border border-emerald-400/30 rounded-lg hover:bg-emerald-500/30 transition-colors text-left" 
+                                    onclick="window.uiManager.downloadDocumentConfirm('complete')">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="text-emerald-300 font-medium">完整文档</div>
+                                        <div class="text-gray-400 text-sm">包含元数据的完整Markdown文件</div>
+                                    </div>
+                                    <i class="fa fa-file-text-o text-emerald-400"></i>
+                                </div>
+                            </button>
+                            
+                            <button class="w-full p-3 bg-blue-500/20 border border-blue-400/30 rounded-lg hover:bg-blue-500/30 transition-colors text-left"
+                                    onclick="window.uiManager.downloadDocumentConfirm('content')">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="text-blue-300 font-medium">仅内容</div>
+                                        <div class="text-gray-400 text-sm">仅文档内容，不包含元数据</div>
+                                    </div>
+                                    <i class="fa fa-file-o text-blue-400"></i>
+                                </div>
+                            </button>
+                        </div>
+                        
+                        <div class="flex justify-end">
+                            <button class="px-4 py-2 text-gray-400 hover:text-gray-300 transition-colors" 
+                                    onclick="window.uiManager.downloadDocumentConfirm('cancel')">
+                                取消
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // 绑定确认方法
+                window.uiManager.downloadDocumentConfirm = (type) => {
+                    modal.remove();
+                    resolve(type);
+                };
+            });
+        };
+
+        // 显示选项并处理下载
+        showDownloadOptions().then(async (type) => {
+            if (type === 'cancel') return;
+            
+            if (type === 'complete') {
+                // 下载完整文件（确保包含标准YAML frontmatter格式）
+                try {
+                    const response = await fetch(`${window.location.origin}${doc.path}`);
+                    const content = await response.text();
+                    
+                    // 检查是否已经有完整的YAML frontmatter格式
+                    const hasCompleteFrontmatter = /^---\s*\n[\s\S]*?\n---\s*\n/.test(content);
+                    
+                    let completeContent;
+                    if (hasCompleteFrontmatter) {
+                        // 如果已经有完整的frontmatter，直接使用原始内容
+                        completeContent = content;
+                    } else {
+                        // 如果没有完整的frontmatter，生成标准的YAML frontmatter格式
+                        const frontmatter = this.generateFrontmatter(doc.title, doc.category, doc.order);
+                        const contentWithoutFrontmatter = this.removeFrontmatter(content);
+                        completeContent = frontmatter + '\n' + contentWithoutFrontmatter;
+                    }
+                    
+                    // 创建下载链接
+                    const blob = new Blob([completeContent], { type: 'text/markdown' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = doc.filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                } catch (error) {
+                    this.showMessage('下载失败: ' + error.message, 'error');
+                }
+            } else if (type === 'content') {
+                // 下载仅内容版本
+                try {
+                    const response = await fetch(`${window.location.origin}${doc.path}`);
+                    const content = await response.text();
+                    
+                    // 移除frontmatter
+                    const contentOnly = this.removeFrontmatter(content);
+                    
+                    // 创建下载链接
+                    const blob = new Blob([contentOnly], { type: 'text/markdown' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = doc.filename.replace('.md', '_content.md');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                } catch (error) {
+                    this.showMessage('下载失败: ' + error.message, 'error');
+                }
+            }
+        });
+    }
+
+    // 移除frontmatter
+    removeFrontmatter(content) {
+        // 匹配frontmatter格式 (---开头和结尾)
+        const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n/;
+        return content.replace(frontmatterRegex, '');
+    }
+
+    // 生成完整的YAML frontmatter格式
+    generateFrontmatter(title, category, order) {
+        return `---
+title: ${title}
+category: ${category}
+order: ${order}
+---`;
     }
 
     // 删除文档
@@ -3716,5 +3942,7 @@ class UIManager {
     }
 }
 
+// 导出UI管理器
+window.UIManager = UIManager; 
 // 导出UI管理器
 window.UIManager = UIManager; 

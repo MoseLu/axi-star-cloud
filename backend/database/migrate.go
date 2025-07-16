@@ -158,10 +158,24 @@ func ensureMoseAdmin(db *sql.DB) error {
 			return err
 		}
 	} else {
-		// Mose用户存在，确保具有管理员权限
-		_, err := db.Exec("UPDATE user SET is_admin = TRUE, storage_limit = ? WHERE username = 'Mose'", 5*1024*1024*1024)
+		// Mose用户存在，只确保具有管理员权限，不覆盖存储限制
+		_, err := db.Exec("UPDATE user SET is_admin = TRUE WHERE username = 'Mose'")
 		if err != nil {
 			return err
+		}
+
+		// 只有在存储限制为NULL或0时才设置默认值
+		var storageLimit int64
+		err = db.QueryRow("SELECT storage_limit FROM user WHERE username = 'Mose'").Scan(&storageLimit)
+		if err != nil {
+			return err
+		}
+
+		if storageLimit == 0 {
+			_, err = db.Exec("UPDATE user SET storage_limit = ? WHERE username = 'Mose'", 5*1024*1024*1024)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
