@@ -129,6 +129,13 @@ func (r *Router) SetupRoutes(
 
 // registerStaticRoutes 注册静态文件路由
 func (r *Router) registerStaticRoutes() {
+	// 打印当前工作目录
+	if currentDir, err := os.Getwd(); err == nil {
+		fmt.Printf("🔍 当前工作目录: %s\n", currentDir)
+	} else {
+		fmt.Printf("❌ 无法获取当前工作目录: %v\n", err)
+	}
+
 	// 尝试多个可能的路径
 	staticPaths := []string{
 		"../front",
@@ -159,11 +166,15 @@ func (r *Router) registerStaticRoutes() {
 
 	// 设置静态文件路由
 	staticFound := false
+	fmt.Printf("🔍 尝试静态文件路径:\n")
 	for _, path := range staticPaths {
 		if _, err := os.Stat(path); err == nil {
 			r.engine.Static("/static", path)
+			fmt.Printf("✅ 找到静态文件路径: %s\n", path)
 			staticFound = true
 			break
+		} else {
+			fmt.Printf("❌ 未找到静态文件路径: %s, 错误: %v\n", path, err)
 		}
 	}
 
@@ -174,17 +185,22 @@ func (r *Router) registerStaticRoutes() {
 			"/www/wwwroot/redamancy.com.cn/front",
 		}
 
+		fmt.Printf("🔍 尝试静态文件绝对路径:\n")
 		for _, absPath := range absoluteStaticPaths {
 			if _, err := os.Stat(absPath); err == nil {
 				r.engine.Static("/static", absPath)
+				fmt.Printf("✅ 找到静态文件绝对路径: %s\n", absPath)
 				staticFound = true
 				break
+			} else {
+				fmt.Printf("❌ 未找到静态文件绝对路径: %s, 错误: %v\n", absPath, err)
 			}
 		}
 	}
 
 	// 设置上传文件路由
 	uploadsFound := false
+	fmt.Printf("🔍 尝试uploads路径:\n")
 	for _, path := range uploadsPaths {
 		if _, err := os.Stat(path); err == nil {
 			r.engine.Static("/uploads", path)
@@ -205,6 +221,7 @@ func (r *Router) registerStaticRoutes() {
 			"/www/wwwroot/redamancy.com.cn/front/uploads",
 		}
 
+		fmt.Printf("🔍 尝试uploads绝对路径:\n")
 		for _, absPath := range absolutePaths {
 			if _, err := os.Stat(absPath); err == nil {
 				r.engine.Static("/uploads", absPath)
@@ -215,6 +232,11 @@ func (r *Router) registerStaticRoutes() {
 				fmt.Printf("❌ 未找到uploads绝对路径: %s, 错误: %v\n", absPath, err)
 			}
 		}
+	}
+
+	// 如果所有路径都失败，打印警告
+	if !uploadsFound {
+		fmt.Printf("⚠️  警告: 未找到任何uploads路径，文件访问可能失败\n")
 	}
 }
 

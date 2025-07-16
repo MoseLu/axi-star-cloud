@@ -1,7 +1,7 @@
 // API模块 - 处理所有后端接口调用
 class ApiManager {
     constructor() {
-        this.baseUrl = window.location.origin;
+        this.baseUrl = '';
         this.currentUser = this.getCurrentUser();
     }
 

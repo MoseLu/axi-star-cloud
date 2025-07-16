@@ -1,7 +1,7 @@
 // 认证管理类
 class AuthManager {
     constructor() {
-        this.baseUrl = window.location.origin;
+        this.baseUrl = '';
         this.currentUser = null;
         this.isInitialized = false;
         this.eventsBound = false;

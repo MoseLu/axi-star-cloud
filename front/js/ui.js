@@ -720,16 +720,16 @@ class UIManager {
             let url = file.previewUrl || file.path;
             if (url) {
                 if (url.startsWith('/')) {
-                    return window.location.origin + url;
+                    return url;
                 } else if (url.startsWith('http')) {
                     return url;
             } else {
                     // 使用正确的文件类型路径
-                    return window.location.origin + `/uploads/${file.type}/${file.name}`;
+                    return `/uploads/${file.type}/${file.name}`;
             }
             }
             // 回退 - 使用正确的文件类型路径
-            return window.location.origin + `/uploads/${file.type}/${file.name}`;
+            return `/uploads/${file.type}/${file.name}`;
         }
         // 视频文件不显示缩略图
         if (file.type === 'video') {
@@ -1253,7 +1253,7 @@ class UIManager {
     async previewExternalDocument(doc) {
         try {
             // 获取文档内容
-            const response = await fetch(`${window.location.origin}${doc.path}`);
+            const response = await fetch(`${doc.path}`);
             if (!response.ok) {
                 throw new Error('无法加载文档内容');
             }
@@ -3131,14 +3131,14 @@ class UIManager {
                 // 备用方案：直接构建URL
                 if (userData.avatar === 'avatar.jpg') {
                     // 默认头像
-                    avatarUrl = `${window.location.origin}/static/public/avatar.jpg`;
+                    avatarUrl = `/static/public/avatar.jpg`;
                 } else if (userData.avatar.startsWith('/uploads/avatars/')) {
                     // 处理旧格式的完整路径
                     const fileName = userData.avatar.replace('/uploads/avatars/', '');
-                    avatarUrl = `${window.location.origin}/uploads/avatars/${fileName}`;
+                    avatarUrl = `/uploads/avatars/${fileName}`;
                 } else {
                     // 如果只是文件名，添加完整路径
-                    avatarUrl = `${window.location.origin}/uploads/avatars/${userData.avatar}`;
+                    avatarUrl = `/uploads/avatars/${userData.avatar}`;
                 }
             }
         }
@@ -3828,7 +3828,7 @@ class UIManager {
     // 预览文档
     previewDocument(doc) {
         // 在新窗口打开文档
-        const docUrl = `${window.location.origin}${doc.path}`;
+        const docUrl = `${doc.path}`;
         window.open(docUrl, '_blank');
     }
 
@@ -3901,7 +3901,7 @@ class UIManager {
             if (type === 'complete') {
                 // 下载完整文件（确保包含标准YAML frontmatter格式）
                 try {
-                    const response = await fetch(`${window.location.origin}${doc.path}`);
+                    const response = await fetch(`${doc.path}`);
                     const content = await response.text();
                     
                     // 检查是否已经有完整的YAML frontmatter格式
@@ -3934,7 +3934,7 @@ class UIManager {
             } else if (type === 'content') {
                 // 下载仅内容版本
                 try {
-                    const response = await fetch(`${window.location.origin}${doc.path}`);
+                    const response = await fetch(`${doc.path}`);
                     const content = await response.text();
                     
                     // 移除frontmatter

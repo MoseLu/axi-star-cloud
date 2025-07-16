@@ -24,7 +24,15 @@ window.APP_UTILS = {
             return path;
         }
         if (path.startsWith('/')) {
+            // 如果API_BASE_URL为空，使用相对路径
+            if (!window.APP_CONFIG.API_BASE_URL) {
+                return path;
+            }
             return window.APP_CONFIG.API_BASE_URL + path;
+        }
+        // 如果API_BASE_URL为空，使用相对路径
+        if (!window.APP_CONFIG.API_BASE_URL) {
+            return '/' + path;
         }
         return window.APP_CONFIG.API_BASE_URL + '/' + path;
     },
@@ -36,6 +44,10 @@ window.APP_UTILS = {
         }
         if (!endpoint.startsWith('/')) {
             endpoint = '/' + endpoint;
+        }
+        // 如果API_BASE_URL为空，使用相对路径
+        if (!window.APP_CONFIG.API_BASE_URL) {
+            return endpoint;
         }
         return window.APP_CONFIG.API_BASE_URL + endpoint;
     },
