@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -141,16 +142,17 @@ func (r *Router) registerStaticRoutes() {
 	}
 
 	uploadsPaths := []string{
-		// 相对路径（本地开发）
+		// 优先使用项目根目录的 uploads（统一路径）
 		"../uploads",
 		"uploads",
 		"./uploads",
+		// 云端服务器绝对路径
+		"/www/wwwroot/axi-star-cloud/uploads",
+		"/www/wwwroot/redamancy.com.cn/uploads",
+		// 备用路径（避免混淆）
 		"../front/uploads",
 		"front/uploads",
 		"./front/uploads",
-		// 绝对路径（云端服务器）
-		"/www/wwwroot/axi-star-cloud/uploads",
-		"/www/wwwroot/redamancy.com.cn/uploads",
 		"/www/wwwroot/axi-star-cloud/front/uploads",
 		"/www/wwwroot/redamancy.com.cn/front/uploads",
 	}
@@ -186,8 +188,11 @@ func (r *Router) registerStaticRoutes() {
 	for _, path := range uploadsPaths {
 		if _, err := os.Stat(path); err == nil {
 			r.engine.Static("/uploads", path)
+			fmt.Printf("✅ 找到uploads路径: %s\n", path)
 			uploadsFound = true
 			break
+		} else {
+			fmt.Printf("❌ 未找到uploads路径: %s, 错误: %v\n", path, err)
 		}
 	}
 
@@ -203,8 +208,11 @@ func (r *Router) registerStaticRoutes() {
 		for _, absPath := range absolutePaths {
 			if _, err := os.Stat(absPath); err == nil {
 				r.engine.Static("/uploads", absPath)
+				fmt.Printf("✅ 找到uploads绝对路径: %s\n", absPath)
 				uploadsFound = true
 				break
+			} else {
+				fmt.Printf("❌ 未找到uploads绝对路径: %s, 错误: %v\n", absPath, err)
 			}
 		}
 	}
