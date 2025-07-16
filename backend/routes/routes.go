@@ -138,11 +138,6 @@ func (r *Router) registerStaticRoutes() {
 	}
 
 	uploadsPaths := []string{
-		// 优先使用绝对路径（云端服务器）
-		"/www/wwwroot/axi-star-cloud/uploads",
-		"/www/wwwroot/redamancy.com.cn/uploads",
-		"/www/wwwroot/axi-star-cloud/front/uploads",
-		"/www/wwwroot/redamancy.com.cn/front/uploads",
 		// 相对路径（本地开发）
 		"../uploads",
 		"uploads",
@@ -150,6 +145,11 @@ func (r *Router) registerStaticRoutes() {
 		"../front/uploads",
 		"front/uploads",
 		"./front/uploads",
+		// 绝对路径（云端服务器）
+		"/www/wwwroot/axi-star-cloud/uploads",
+		"/www/wwwroot/redamancy.com.cn/uploads",
+		"/www/wwwroot/axi-star-cloud/front/uploads",
+		"/www/wwwroot/redamancy.com.cn/front/uploads",
 	}
 
 	// 设置静态文件路由
@@ -184,12 +184,6 @@ func (r *Router) registerStaticRoutes() {
 		if _, err := os.Stat(path); err == nil {
 			r.engine.Static("/uploads", path)
 			uploadsFound = true
-
-			// 测试路径是否可访问
-			testFile := filepath.Join(path, "test.txt")
-			if err := os.WriteFile(testFile, []byte("test"), 0644); err == nil {
-				os.Remove(testFile) // 清理测试文件
-			}
 			break
 		}
 	}
