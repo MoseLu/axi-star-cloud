@@ -3505,7 +3505,13 @@ class UIManager {
             const documents = await this.api.getDocuments();
             this.renderExternalDocs(documents);
         } catch (error) {
-            this.showMessage('加载外站文档失败', 'error');
+            console.error('加载外站文档失败:', error);
+            // 如果是权限问题，显示特殊提示
+            if (error.message && error.message.includes('权限')) {
+                this.showMessage('需要管理员权限才能访问外站文档', 'warning');
+            } else {
+                this.showMessage('加载外站文档失败', 'error');
+            }
         }
     }
 

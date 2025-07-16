@@ -501,19 +501,24 @@ class ApiManager {
 	// 获取所有文档
 	async getDocuments() {
 		const userId = this.getCurrentUserId();
-		if (!userId) return [];
+		if (!userId) throw new Error('请先登录');
 
 		try {
 			const response = await fetch(`${this.baseUrl}/api/documents?user_id=${userId}`);
 			const data = await response.json();
 			
-			if (data.success) {
+			if (response.ok && data.success) {
 				return data.documents;
 			} else {
-				return [];
+				// 如果是401错误，说明权限不足
+				if (response.status === 401) {
+					throw new Error('权限不足，需要管理员权限');
+				}
+				// 其他错误
+				throw new Error(data.error || '获取文档失败');
 			}
 		} catch (error) {
-			return [];
+			throw error;
 		}
 	}
 
@@ -528,9 +533,20 @@ class ApiManager {
 				body: formData
 			});
 
-			return await response.json();
+			const data = await response.json();
+			
+			if (response.ok && data.success) {
+				return data;
+			} else {
+				// 如果是401错误，说明权限不足
+				if (response.status === 401) {
+					throw new Error('权限不足，需要管理员权限');
+				}
+				// 其他错误
+				throw new Error(data.error || '创建文档失败');
+			}
 		} catch (error) {
-			throw new Error('创建文档失败');
+			throw error;
 		}
 	}
 
@@ -544,9 +560,20 @@ class ApiManager {
 				method: 'DELETE'
 			});
 
-			return await response.json();
+			const data = await response.json();
+			
+			if (response.ok && data.success) {
+				return data;
+			} else {
+				// 如果是401错误，说明权限不足
+				if (response.status === 401) {
+					throw new Error('权限不足，需要管理员权限');
+				}
+				// 其他错误
+				throw new Error(data.error || '删除文档失败');
+			}
 		} catch (error) {
-			throw new Error('删除文档失败');
+			throw error;
 		}
 	}
 
