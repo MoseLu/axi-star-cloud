@@ -3533,8 +3533,8 @@ class UIManager {
 
         if (documents.length === 0) {
             filesGrid.innerHTML = `
-                <div class="col-span-full flex items-center justify-center py-16">
-                    <div class="text-center max-w-md">
+                <div class="col-span-full flex items-center justify-center py-16" style="min-height: 400px;">
+                    <div class="text-center max-w-md mx-auto">
                         <div class="w-24 h-24 mb-6 rounded-full bg-emerald-500/10 flex items-center justify-center animate-pulse-slow mx-auto">
                             <i class="fa fa-book text-4xl text-emerald-500/70"></i>
                         </div>
