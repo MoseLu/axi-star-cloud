@@ -235,28 +235,6 @@ func (r *Router) registerStaticRoutes() {
 		}
 	}
 
-	// 如果相对路径都失败，尝试绝对路径
-	if !uploadsFound {
-		absolutePaths := []string{
-			"/www/wwwroot/axi-star-cloud/uploads",
-			"/www/wwwroot/redamancy.com.cn/uploads",
-			"/www/wwwroot/axi-star-cloud/front/uploads",
-			"/www/wwwroot/redamancy.com.cn/front/uploads",
-		}
-
-		fmt.Printf("🔍 尝试uploads绝对路径:\n")
-		for _, absPath := range absolutePaths {
-			if _, err := os.Stat(absPath); err == nil {
-				r.engine.Static("/uploads", absPath)
-				fmt.Printf("✅ 找到uploads绝对路径: %s\n", absPath)
-				uploadsFound = true
-				break
-			} else {
-				fmt.Printf("❌ 未找到uploads绝对路径: %s, 错误: %v\n", absPath, err)
-			}
-		}
-	}
-
 	// 如果所有路径都失败，打印警告
 	if !uploadsFound {
 		fmt.Printf("⚠️  警告: 未找到任何uploads路径，文件访问可能失败\n")
