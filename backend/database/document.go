@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"backend/models"
@@ -19,6 +20,19 @@ func NewDocumentRepository(db *sql.DB) *DocumentRepository {
 
 // CreateDocument 创建文档记录
 func (r *DocumentRepository) CreateDocument(doc *models.Document) error {
+	// 检查是否已存在相同标题和分类的文档
+	checkQuery := `SELECT id FROM documents WHERE title = ? AND category = ?`
+	var existingID int
+	err := r.db.QueryRow(checkQuery, doc.Title, doc.Category).Scan(&existingID)
+	if err == nil {
+		// 文档已存在
+		return fmt.Errorf("文档已存在")
+	} else if err != sql.ErrNoRows {
+		// 其他数据库错误
+		return err
+	}
+
+	// 创建新文档记录
 	query := `INSERT INTO documents (title, category, ` + "`order`" + `, filename, path, created_at, updated_at) 
 			  VALUES (?, ?, ?, ?, ?, ?, ?)`
 

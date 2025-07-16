@@ -84,8 +84,14 @@ func (h *DocumentHandler) CreateDocument(c *gin.Context) {
 		return
 	}
 
-	// 保存文件
+	// 检查文件是否已存在
 	filePath := filepath.Join(mdDir, header.Filename)
+	if _, err := os.Stat(filePath); err == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "文件已存在，请使用不同的文件名"})
+		return
+	}
+
+	// 保存文件
 	dst, err := os.Create(filePath)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "保存文件失败"})
@@ -127,7 +133,11 @@ func (h *DocumentHandler) CreateDocument(c *gin.Context) {
 	}
 
 	if err := h.docRepo.CreateDocument(doc); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建文档记录失败"})
+		if err.Error() == "文档已存在" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "文档已存在，请使用不同的标题或分类"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "创建文档记录失败"})
+		}
 		return
 	}
 

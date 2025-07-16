@@ -8,6 +8,7 @@ class UIManager {
         this.currentCategory = 'all'; // 新增：记录当前分类
         this.allFiles = []; // 缓存所有文件数据
         this.isLoading = false; // 防抖标志
+        this.isSubmittingDoc = false; // 防重复提交标志
         this.init();
     }
 
@@ -829,8 +830,8 @@ class UIManager {
                                 <!-- 第一行：文件夹名称和操作按钮 -->
                 <div class="flex items-center justify-between w-full mb-2">
                     <h4 class="font-semibold text-blue-300 truncate text-xs flex-1 min-w-0 max-w-[70%]" title="${folder.name}">
-                        ${folder.name.length > 7 ? folder.name.slice(0, 7) + '…' : folder.name}
-                    </h4>
+                    ${folder.name.length > 7 ? folder.name.slice(0, 7) + '…' : folder.name}
+                </h4>
                     <div class="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <button class="folder-edit-btn text-blue-400 hover:text-blue-300 transition-colors p-1 rounded-lg hover:bg-blue-400/10" title="重命名">
                             <i class="fa fa-edit text-xs"></i>
@@ -838,14 +839,14 @@ class UIManager {
                         <button class="folder-delete-btn text-red-400 hover:text-red-300 transition-colors p-1 rounded-lg hover:bg-red-400/10" title="删除">
                             <i class="fa fa-trash text-xs"></i>
                         </button>
+                        </div>
                     </div>
-                </div>
                 
                 <!-- 第二行：文件数量 -->
                 <div class="flex items-center w-full mb-2">
                     <div class="w-5 h-5 bg-gradient-to-br from-blue-500/30 to-blue-600/30 rounded-lg flex items-center justify-center mr-1 flex-shrink-0">
                         <i class="fa fa-folder text-xs text-blue-300"></i>
-                    </div>
+                        </div>
                     <div class="flex items-center">
                         <span class="text-xs font-medium text-blue-200 drop-shadow-sm flex-shrink-0">文件数：</span>
                         <span class="text-xs font-bold text-cyan-400 ml-0.5 flex-shrink-0">${fileCount}</span>
@@ -893,18 +894,18 @@ class UIManager {
                     <div class="flex items-center gap-1 flex-1 min-w-0 max-w-[70%]">
                         <h4 class="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-300 truncate text-sm" title="${folder.name}">${this.truncateFileName(folder.name)}</h4>
                         <span class="text-xs px-1.5 py-0.5 rounded-full ${this.getCategoryBadgeColor(folder.category)} ${this.getCategoryBadgeBg(folder.category)} font-medium flex-shrink-0">
-                            ${this.getCategoryLabel(folder.category)}
-                        </span>
-                    </div>
-                    <div class="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                ${this.getCategoryLabel(folder.category)}
+                            </span>
+                        </div>
+                        <div class="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <button class="folder-edit-btn text-blue-400 hover:text-blue-300 transition-colors p-1 rounded-lg hover:bg-blue-400/10" title="重命名">
                             <i class="fa fa-edit text-xs"></i>
-                        </button>
+                            </button>
                         <button class="folder-delete-btn text-red-400 hover:text-red-300 transition-colors p-1 rounded-lg hover:bg-red-400/10" title="删除">
                             <i class="fa fa-trash text-xs"></i>
-                        </button>
+                            </button>
+                        </div>
                     </div>
-                </div>
                 
                 <!-- 第二行：文件数量 -->
                 <div class="flex items-center mb-3 w-full">
@@ -1710,7 +1711,7 @@ class UIManager {
             
             // 重新获取根目录的文件（不传folderId，获取根目录文件）
             const files = await this.api.getFiles();
-            this.allFiles = files; // 更新缓存
+                this.allFiles = files; // 更新缓存
             
             // 重新渲染文件列表
             this.renderFileList(files);
@@ -2073,7 +2074,12 @@ class UIManager {
         if (fileCountDisplay && fileCountDesc) {
             let displayCount = count;
             let desc = '文件';
-            if (this.currentCategory && this.currentCategory !== 'all') {
+            
+            // 外站文档分类特殊处理
+            if (this.currentCategory === 'external-docs') {
+                displayCount = count;
+                desc = '文档';
+            } else if (this.currentCategory && this.currentCategory !== 'all') {
                 const fileCards = document.querySelectorAll('#files-grid > div');
                 displayCount = 0;
                 fileCards.forEach(card => {
@@ -2085,6 +2091,7 @@ class UIManager {
                 // 全部文件分类，使用总文件数
                 displayCount = this.totalFileCount || count;
             }
+            
             fileCountDisplay.textContent = displayCount;
             fileCountDesc.innerHTML = `共 <span id="file-count-display" class="text-purple-300 font-bold">${displayCount}</span> 个${desc}`;
         }
@@ -3411,6 +3418,13 @@ class UIManager {
 
     // 提交同步文档
     async submitSyncDocs() {
+        // 防止重复提交
+        if (this.isSubmittingDoc) {
+            return;
+        }
+        
+        this.isSubmittingDoc = true;
+        
         const title = document.getElementById('doc-title').value.trim();
         const category = document.getElementById('doc-category').value.trim();
         const order = document.getElementById('doc-order').value.trim();
@@ -3418,16 +3432,19 @@ class UIManager {
         // 验证必填字段
         if (!title) {
             this.showMessage('请输入文档标题', 'error');
+            this.isSubmittingDoc = false;
             return;
         }
 
         if (!category) {
             this.showMessage('请输入文档分类', 'error');
+            this.isSubmittingDoc = false;
             return;
         }
 
         if (!this.selectedDocFile) {
             this.showMessage('请选择要上传的Markdown文件', 'error');
+            this.isSubmittingDoc = false;
             return;
         }
 
@@ -3437,6 +3454,7 @@ class UIManager {
             orderNum = parseInt(order);
             if (isNaN(orderNum) || orderNum < 0) {
                 this.showMessage('排序序号必须是数字且不能小于0', 'error');
+                this.isSubmittingDoc = false;
                 return;
             }
         }
@@ -3477,6 +3495,7 @@ class UIManager {
             // 恢复按钮状态
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
+            this.isSubmittingDoc = false;
         }
     }
 
@@ -3531,7 +3550,7 @@ class UIManager {
     // 创建文档卡片
     createDocumentCard(doc) {
         return `
-            <div class="file-card bg-gradient-to-br from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 rounded-xl p-4 border border-emerald-400/30 hover:border-emerald-400/50 transition-all duration-300 transform hover:scale-[1.02] shadow-lg backdrop-blur-sm cursor-pointer" data-doc-id="${doc.id}">
+            <div class="file-card bg-gradient-to-br from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 rounded-xl p-4 border border-emerald-400/30 hover:border-emerald-400/50 transition-all duration-300 transform hover:scale-[1.02] shadow-lg backdrop-blur-sm cursor-pointer group" data-doc-id="${doc.id}">
                 <div class="flex items-start justify-between mb-3">
                     <div class="flex items-center space-x-3">
                         <div class="w-12 h-12 bg-gradient-to-br from-emerald-500/30 to-teal-500/30 rounded-lg flex items-center justify-center">
@@ -3543,22 +3562,26 @@ class UIManager {
                         </div>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <span class="bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-full text-xs font-medium">#${doc.order}</span>
-                        <button class="doc-delete-btn text-red-400 hover:text-red-300 transition-colors p-1" title="删除文档">
-                            <i class="fa fa-trash"></i>
-                        </button>
+                        ${doc.order > 0 ? `<span class="bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-full text-xs font-medium">#${doc.order}</span>` : ''}
                     </div>
                 </div>
                 
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between text-xs text-gray-400">
-                        <span>文件名</span>
-                        <span class="truncate ml-2" title="${doc.filename}">${doc.filename}</span>
-                    </div>
-                    <div class="flex items-center justify-between text-xs text-gray-400">
-                        <span>创建时间</span>
-                        <span>${this.formatDate(doc.created_at)}</span>
-                    </div>
+                <div class="flex items-center justify-between text-xs text-gray-400 mb-3">
+                    <span>创建时间</span>
+                    <span class="text-emerald-300">${this.formatDate(doc.created_at)}</span>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="doc-actions flex items-center justify-center space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                    <button class="doc-preview-btn text-blue-400 hover:text-blue-300 transition-colors p-2 rounded-lg hover:bg-blue-500/10" title="预览">
+                        <i class="fa fa-eye text-sm"></i>
+                    </button>
+                    <button class="doc-download-btn text-green-400 hover:text-green-300 transition-colors p-2 rounded-lg hover:bg-green-500/10" title="下载">
+                        <i class="fa fa-download text-sm"></i>
+                    </button>
+                    <button class="doc-delete-btn text-red-400 hover:text-red-300 transition-colors p-2 rounded-lg hover:bg-red-500/10" title="删除">
+                        <i class="fa fa-trash text-sm"></i>
+                    </button>
                 </div>
             </div>
         `;
@@ -3566,21 +3589,23 @@ class UIManager {
 
     // 添加文档卡片事件监听器
     addDocumentCardEventListeners(card, doc) {
-        // 点击卡片预览文档
-        card.addEventListener('click', (e) => {
-            if (!e.target.closest('.doc-delete-btn')) {
-                this.previewDocument(doc);
-            }
+        // 预览按钮
+        card.querySelector('.doc-preview-btn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.previewDocument(doc);
         });
 
-        // 删除文档
-        const deleteBtn = card.querySelector('.doc-delete-btn');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.deleteDocument(doc);
-            });
-        }
+        // 下载按钮
+        card.querySelector('.doc-download-btn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.downloadDocument(doc);
+        });
+
+        // 删除按钮
+        card.querySelector('.doc-delete-btn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.deleteDocument(doc);
+        });
     }
 
     // 预览文档
@@ -3588,6 +3613,18 @@ class UIManager {
         // 在新窗口打开文档
         const docUrl = `${window.location.origin}${doc.path}`;
         window.open(docUrl, '_blank');
+    }
+
+    // 下载文档
+    downloadDocument(doc) {
+        // 创建下载链接
+        const docUrl = `${window.location.origin}${doc.path}`;
+        const link = document.createElement('a');
+        link.href = docUrl;
+        link.download = doc.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     // 删除文档
