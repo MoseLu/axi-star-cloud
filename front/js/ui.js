@@ -2120,6 +2120,11 @@ class UIManager {
         if (!fileGrid || !emptyState) {
             return;
         }
+        
+        // 如果不是外站文档分类，确保移除外站文档CSS类
+        if (this.currentCategory !== 'external-docs') {
+            document.body.classList.remove('external-docs-category');
+        }
 
         const files = document.querySelectorAll('#files-grid > div:not(.hidden)');
         const count = visibleCount !== null ? visibleCount : files.length;
@@ -2138,6 +2143,9 @@ class UIManager {
                 // 外站文档分类下，空状态由renderExternalDocs方法处理
                 return;
             }
+            
+            // 确保移除外站文档分类CSS类
+            document.body.classList.remove('external-docs-category');
             
             emptyState.style.opacity = '0';
             emptyState.classList.remove('hidden');
@@ -3651,9 +3659,11 @@ class UIManager {
                         </div>
                         <h2 class="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300 mb-2">暂无外站文档</h2>
                         <p class="text-gray-400 mb-6">还没有同步任何文档。请点击顶栏的<span class="text-emerald-300 font-medium">同步文档</span>按钮来添加外站文档。</p>
-                        <div class="flex items-center justify-center space-x-2 text-sm text-gray-500">
-                            <i class="fa fa-info-circle"></i>
-                            <span>只有管理员可以添加外站文档</span>
+                        <div class="flex flex-col items-center space-y-2 text-sm text-gray-500">
+                            <div class="flex items-center space-x-2">
+                                <i class="fa fa-info-circle"></i>
+                                <span>只有管理员可以添加外站文档</span>
+                            </div>
                         </div>
                     </div>
                 </div>
