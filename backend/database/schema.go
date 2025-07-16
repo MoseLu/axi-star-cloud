@@ -72,13 +72,13 @@ func CreateTables(db *sql.DB) error {
 		id INT AUTO_INCREMENT PRIMARY KEY,
 		title VARCHAR(255) NOT NULL,
 		category VARCHAR(100) NOT NULL,
-		"order" INT DEFAULT 0,
+		` + "`order`" + ` INT DEFAULT 0,
 		filename VARCHAR(255) NOT NULL,
 		path VARCHAR(500) NOT NULL,
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 		INDEX idx_category (category),
-		INDEX idx_order ("order")
+		INDEX idx_order (` + "`order`" + `)
 	)`
 
 	_, err = db.Exec(createDocumentsTable)
