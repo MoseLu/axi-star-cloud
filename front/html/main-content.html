@@ -187,6 +187,9 @@
         <button class="file-type-btn bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]" data-type="other">
             <i class="fa fa-file-o mr-1"></i> 其他
         </button>
+        <button class="file-type-btn bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]" data-type="external-docs">
+            <i class="fa fa-book mr-1"></i> 外站文档
+        </button>
     </div>
 
     <!-- 文件上传区域 -->
@@ -350,6 +353,68 @@
             </button>
             <button id="save-settings-btn" class="px-4 py-2 bg-gradient-to-r from-primary/80 to-secondary/80 hover:from-primary to-secondary text-white rounded-lg shadow-md shadow-primary/20 transition-all duration-300 transform hover:scale-[1.03]">
                 <i class="fa fa-save mr-1"></i> 保存设置
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 同步文档模态框 -->
+<div id="sync-docs-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300">
+    <div class="glass-effect rounded-2xl max-w-2xl w-full mx-4 border border-emerald-light/20 shadow-2xl transform scale-95 transition-all duration-300">
+        <div class="p-6 border-b border-emerald-light/20 flex justify-between items-center">
+            <h3 class="text-xl font-semibold text-white">同步文档</h3>
+            <button id="close-sync-docs-btn" class="text-gray-400 hover:text-white transition-colors">
+                <i class="fa fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <form id="sync-docs-form" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">文档标题 <span class="text-red-400">*</span></label>
+                    <input type="text" id="doc-title" name="title" required
+                           class="w-full bg-dark-light border border-emerald-light/30 text-gray-100 rounded-lg px-4 py-3 focus:ring-2 focus:ring-emerald-light/50 focus:border-emerald-light transition-all duration-300"
+                           placeholder="请输入文档标题">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">文档分类 <span class="text-red-400">*</span></label>
+                    <input type="text" id="doc-category" name="category" required
+                           class="w-full bg-dark-light border border-emerald-light/30 text-gray-100 rounded-lg px-4 py-3 focus:ring-2 focus:ring-emerald-light/50 focus:border-emerald-light transition-all duration-300"
+                           placeholder="请输入文档分类">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">排序序号</label>
+                    <input type="number" id="doc-order" name="order" min="0"
+                           class="w-full bg-dark-light border border-emerald-light/30 text-gray-100 rounded-lg px-4 py-3 focus:ring-2 focus:ring-emerald-light/50 focus:border-emerald-light transition-all duration-300"
+                           placeholder="请输入排序序号（可选）">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Markdown文件 <span class="text-red-400">*</span></label>
+                    <div class="border-2 border-dashed border-emerald-light/30 rounded-lg p-6 text-center cursor-pointer hover:border-emerald-light/60 transition-colors" id="doc-drop-area">
+                        <i class="fa fa-file-text-o text-3xl text-emerald-light/60 mb-3"></i>
+                        <p class="text-gray-300 mb-2">点击选择或拖放.md文件</p>
+                        <p class="text-emerald-light text-sm">仅支持.md格式文件</p>
+                        <input type="file" id="doc-file-input" class="hidden" accept=".md" required>
+                    </div>
+                    <div id="doc-file-info" class="hidden mt-3 p-3 bg-emerald-500/10 rounded-lg border border-emerald-400/30">
+                        <div class="flex items-center justify-between">
+                            <span class="text-emerald-300 text-sm" id="doc-file-name"></span>
+                            <button type="button" id="doc-remove-file" class="text-red-400 hover:text-red-300">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="p-6 border-t border-emerald-light/20 flex justify-end space-x-3">
+            <button id="cancel-sync-docs-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors">
+                取消
+            </button>
+            <button id="submit-sync-docs-btn" class="px-4 py-2 bg-gradient-to-r from-emerald-500/80 to-teal-500/80 hover:from-emerald-500 to-teal-500 text-white rounded-lg shadow-md shadow-emerald-500/20 transition-all duration-300 transform hover:scale-[1.03]">
+                <i class="fa fa-sync mr-1"></i> 同步文档
             </button>
         </div>
     </div>

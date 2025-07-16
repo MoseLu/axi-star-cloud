@@ -37,6 +37,9 @@ class UIManager {
             // 绑定管理员功能事件
             this.bindAdminEvents();
             
+            // 绑定同步文档事件
+            this.bindSyncDocsEvents();
+            
             // 检查并显示管理员菜单
             this.checkAndShowAdminMenu();
     
@@ -97,6 +100,11 @@ class UIManager {
         // 上传按钮事件
         document.getElementById('upload-btn')?.addEventListener('click', () => {
             this.showUploadArea();
+        });
+
+        // 同步文档按钮事件
+        document.getElementById('sync-docs-btn')?.addEventListener('click', () => {
+            this.showSyncDocsModal();
         });
 
         // 空状态上传按钮
@@ -214,6 +222,18 @@ class UIManager {
                         this.forceUpdateCreateFolderButton();
                         // 重新渲染文件夹列表（隐藏所有文件夹）
                         await this.renderFolderList(this.folders || []);
+                        // 更新上传区域提示信息
+                        this.updateUploadAreaHint();
+                    } else if (type === 'external-docs') {
+                        this.currentCategory = 'external-docs';
+                        this.currentFolderId = null;
+                        
+                        // 隐藏文件夹区域
+                        this.hideFolderSection();
+                        
+                        // 加载外站文档
+                        await this.loadExternalDocs();
+                        
                         // 更新上传区域提示信息
                         this.updateUploadAreaHint();
                     } else {
@@ -3196,18 +3216,25 @@ class UIManager {
     checkAndShowAdminMenu() {
         const adminMenu = document.getElementById('admin-menu');
         const settingsBtn = document.getElementById('settings-btn');
+        const syncDocsBtn = document.getElementById('sync-docs-btn');
         
         if (adminMenu && settingsBtn) {
             const currentUser = window.authManager ? window.authManager.getCurrentUser() : null;
             
             if (currentUser && currentUser.isAdmin) {
-                // 管理员：显示设置按钮和管理员菜单
+                // 管理员：显示设置按钮、管理员菜单和同步文档按钮
                 settingsBtn.style.display = 'block';
                 adminMenu.classList.remove('hidden');
+                if (syncDocsBtn) {
+                    syncDocsBtn.classList.remove('hidden');
+                }
             } else {
-                // 非管理员：隐藏设置按钮和管理员菜单
+                // 非管理员：隐藏设置按钮、管理员菜单和同步文档按钮
                 settingsBtn.style.display = 'none';
                 adminMenu.classList.add('hidden');
+                if (syncDocsBtn) {
+                    syncDocsBtn.classList.add('hidden');
+                }
             }
         }
     }
@@ -3221,6 +3248,388 @@ class UIManager {
                 e.preventDefault();
                 this.showAdminUsersModal();
             });
+        }
+    }
+
+    // 绑定同步文档事件
+    bindSyncDocsEvents() {
+        // 关闭同步文档模态框
+        document.getElementById('close-sync-docs-btn')?.addEventListener('click', () => {
+            this.hideSyncDocsModal();
+        });
+
+        // 取消同步文档
+        document.getElementById('cancel-sync-docs-btn')?.addEventListener('click', () => {
+            this.hideSyncDocsModal();
+        });
+
+        // 提交同步文档
+        document.getElementById('submit-sync-docs-btn')?.addEventListener('click', () => {
+            this.submitSyncDocs();
+        });
+
+        // 文档文件选择
+        document.getElementById('doc-file-input')?.addEventListener('change', (e) => {
+            this.handleDocFileSelect(e);
+        });
+
+        // 文档拖拽区域
+        const docDropArea = document.getElementById('doc-drop-area');
+        if (docDropArea) {
+            docDropArea.addEventListener('click', () => {
+                document.getElementById('doc-file-input')?.click();
+            });
+
+            docDropArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                docDropArea.classList.add('border-emerald-light/60');
+            });
+
+            docDropArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                docDropArea.classList.remove('border-emerald-light/60');
+            });
+
+            docDropArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                docDropArea.classList.remove('border-emerald-light/60');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.handleDocFileDrop(files[0]);
+                }
+            });
+        }
+
+        // 移除文档文件
+        document.getElementById('doc-remove-file')?.addEventListener('click', () => {
+            this.removeDocFile();
+        });
+    }
+
+    // 显示同步文档模态框
+    showSyncDocsModal() {
+        const currentUser = window.authManager ? window.authManager.getCurrentUser() : null;
+        if (!currentUser || !currentUser.isAdmin) {
+            this.showMessage('权限不足，需要管理员权限', 'error');
+            return;
+        }
+
+        const modal = document.getElementById('sync-docs-modal');
+        if (modal) {
+            modal.classList.remove('opacity-0', 'invisible');
+            modal.classList.add('opacity-100', 'visible');
+            modal.querySelector('.glass-effect').classList.remove('scale-95');
+            modal.querySelector('.glass-effect').classList.add('scale-100');
+        }
+    }
+
+    // 隐藏同步文档模态框
+    hideSyncDocsModal() {
+        const modal = document.getElementById('sync-docs-modal');
+        if (modal) {
+            modal.classList.add('opacity-0', 'invisible');
+            modal.classList.remove('opacity-100', 'visible');
+            modal.querySelector('.glass-effect').classList.add('scale-95');
+            modal.querySelector('.glass-effect').classList.remove('scale-100');
+            
+            // 重置表单
+            this.resetSyncDocsForm();
+        }
+    }
+
+    // 重置同步文档表单
+    resetSyncDocsForm() {
+        document.getElementById('doc-title').value = '';
+        document.getElementById('doc-category').value = '';
+        document.getElementById('doc-order').value = '';
+        document.getElementById('doc-file-input').value = '';
+        document.getElementById('doc-file-info').classList.add('hidden');
+        document.getElementById('doc-file-name').textContent = '';
+    }
+
+    // 处理文档文件选择
+    handleDocFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            this.handleDocFile(file);
+        }
+    }
+
+    // 处理文档文件拖放
+    handleDocFileDrop(file) {
+        this.handleDocFile(file);
+    }
+
+    // 处理文档文件
+    handleDocFile(file) {
+        if (!file.name.toLowerCase().endsWith('.md')) {
+            this.showMessage('只支持上传.md格式的文件', 'error');
+            return;
+        }
+
+        const fileInfo = document.getElementById('doc-file-info');
+        const fileName = document.getElementById('doc-file-name');
+        
+        fileName.textContent = file.name;
+        fileInfo.classList.remove('hidden');
+        
+        // 存储文件对象
+        this.selectedDocFile = file;
+    }
+
+    // 移除文档文件
+    removeDocFile() {
+        document.getElementById('doc-file-info').classList.add('hidden');
+        document.getElementById('doc-file-name').textContent = '';
+        document.getElementById('doc-file-input').value = '';
+        this.selectedDocFile = null;
+    }
+
+    // 提交同步文档
+    async submitSyncDocs() {
+        const title = document.getElementById('doc-title').value.trim();
+        const category = document.getElementById('doc-category').value.trim();
+        const order = document.getElementById('doc-order').value.trim();
+
+        // 验证必填字段
+        if (!title) {
+            this.showMessage('请输入文档标题', 'error');
+            return;
+        }
+
+        if (!category) {
+            this.showMessage('请输入文档分类', 'error');
+            return;
+        }
+
+        if (!this.selectedDocFile) {
+            this.showMessage('请选择要上传的Markdown文件', 'error');
+            return;
+        }
+
+        // 验证order字段
+        let orderNum = 0;
+        if (order) {
+            orderNum = parseInt(order);
+            if (isNaN(orderNum) || orderNum < 0) {
+                this.showMessage('排序序号必须是数字且不能小于0', 'error');
+                return;
+            }
+        }
+
+        try {
+            // 创建FormData
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('category', category);
+            formData.append('order', orderNum.toString());
+            formData.append('file', this.selectedDocFile);
+
+            // 显示加载状态
+            const submitBtn = document.getElementById('submit-sync-docs-btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-1"></i> 同步中...';
+            submitBtn.disabled = true;
+
+            // 提交请求
+            const result = await this.api.createDocument(formData);
+            
+            if (result.success) {
+                this.showMessage('文档同步成功', 'success');
+                this.hideSyncDocsModal();
+                
+                // 如果当前在外站文档分类，刷新文件列表
+                if (this.currentCategory === 'external-docs') {
+                    await this.loadExternalDocs();
+                }
+            } else {
+                this.showMessage(result.error || '同步失败', 'error');
+            }
+        } catch (error) {
+            this.showMessage('同步失败: ' + error.message, 'error');
+        } finally {
+            // 恢复按钮状态
+            const submitBtn = document.getElementById('submit-sync-docs-btn');
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+
+    // 加载外站文档
+    async loadExternalDocs() {
+        try {
+            const documents = await this.api.getDocuments();
+            this.renderExternalDocs(documents);
+        } catch (error) {
+            this.showMessage('加载外站文档失败', 'error');
+        }
+    }
+
+    // 渲染外站文档
+    renderExternalDocs(documents) {
+        const filesGrid = document.getElementById('files-grid');
+        if (!filesGrid) return;
+
+        if (documents.length === 0) {
+            filesGrid.innerHTML = `
+                <div class="col-span-full text-center py-16">
+                    <div class="w-24 h-24 mb-6 rounded-full bg-emerald-500/10 flex items-center justify-center animate-pulse-slow">
+                        <i class="fa fa-book text-4xl text-emerald-500/70"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300 mb-2">暂无外站文档</h2>
+                    <p class="text-gray-400 max-w-md mb-6">还没有同步任何文档。点击同步文档按钮添加文档。</p>
+                    <button class="bg-gradient-to-r from-emerald-500/80 to-teal-500/80 hover:from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-lg shadow-md shadow-emerald-500/20 transition-all duration-300 transform hover:scale-[1.03]">
+                        <i class="fa fa-sync mr-2"></i>同步文档
+                    </button>
+                </div>
+            `;
+            this.updateFileCount(0);
+            this.toggleEmptyState(0);
+            return;
+        }
+
+        // 按order排序
+        documents.sort((a, b) => a.order - b.order);
+
+        const filesHtml = documents.map(doc => this.createDocumentCard(doc)).join('');
+        filesGrid.innerHTML = filesHtml;
+
+        // 添加事件监听器
+        documents.forEach(doc => {
+            const card = document.querySelector(`[data-doc-id="${doc.id}"]`);
+            if (card) {
+                this.addDocumentCardEventListeners(card, doc);
+            }
+        });
+
+        this.updateFileCount(documents.length);
+        this.toggleEmptyState(documents.length);
+    }
+
+    // 创建文档卡片
+    createDocumentCard(doc) {
+        return `
+            <div class="file-card bg-gradient-to-br from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 rounded-xl p-4 border border-emerald-400/30 hover:border-emerald-400/50 transition-all duration-300 transform hover:scale-[1.02] shadow-lg backdrop-blur-sm cursor-pointer" data-doc-id="${doc.id}">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-emerald-500/30 to-teal-500/30 rounded-lg flex items-center justify-center">
+                            <i class="fa fa-book text-emerald-400 text-xl"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-white font-semibold truncate" title="${doc.title}">${doc.title}</h4>
+                            <p class="text-emerald-300 text-sm">${doc.category}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-full text-xs font-medium">#${doc.order}</span>
+                        <button class="doc-delete-btn text-red-400 hover:text-red-300 transition-colors p-1" title="删除文档">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-xs text-gray-400">
+                        <span>文件名</span>
+                        <span class="truncate ml-2" title="${doc.filename}">${doc.filename}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-gray-400">
+                        <span>创建时间</span>
+                        <span>${this.formatDate(doc.created_at)}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // 添加文档卡片事件监听器
+    addDocumentCardEventListeners(card, doc) {
+        // 点击卡片预览文档
+        card.addEventListener('click', (e) => {
+            if (!e.target.closest('.doc-delete-btn')) {
+                this.previewDocument(doc);
+            }
+        });
+
+        // 删除文档
+        const deleteBtn = card.querySelector('.doc-delete-btn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteDocument(doc);
+            });
+        }
+    }
+
+    // 预览文档
+    previewDocument(doc) {
+        // 在新窗口打开文档
+        const docUrl = `${window.location.origin}${doc.path}`;
+        window.open(docUrl, '_blank');
+    }
+
+    // 删除文档
+    async deleteDocument(doc) {
+        const confirmDelete = () => {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/60';
+                modal.innerHTML = `
+                    <div class="bg-dark-light rounded-xl p-6 w-full max-w-md shadow-2xl border border-red-400/30">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
+                                <i class="fa fa-exclamation-triangle text-red-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-red-300">删除文档</h3>
+                                <p class="text-gray-400 text-sm">此操作不可撤销</p>
+                            </div>
+                        </div>
+                        
+                        <p class="text-gray-300 mb-6">确定要删除文档 <strong class="text-white">${doc.title}</strong> 吗？</p>
+                        
+                        <div class="flex justify-end space-x-3">
+                            <button class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors" 
+                                    onclick="this.closest('.fixed').remove(); window.uiManager.deleteDocumentConfirm(false)">
+                                取消
+                            </button>
+                            <button class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                                    onclick="window.uiManager.deleteDocumentConfirm(true)">
+                                删除
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // 存储当前文档信息
+                window.uiManager.currentDeleteDoc = doc;
+                
+                // 绑定确认删除方法
+                window.uiManager.deleteDocumentConfirm = (confirmed) => {
+                    modal.remove();
+                    resolve(confirmed);
+                };
+            });
+        };
+
+        const confirmed = await confirmDelete();
+        if (!confirmed) return;
+
+        try {
+            const result = await this.api.deleteDocument(doc.id);
+            
+            if (result.success) {
+                this.showMessage('文档删除成功', 'success');
+                
+                // 重新加载外站文档
+                await this.loadExternalDocs();
+            } else {
+                this.showMessage(result.error || '删除失败', 'error');
+            }
+        } catch (error) {
+            this.showMessage('删除失败: ' + error.message, 'error');
         }
     }
 }

@@ -498,6 +498,58 @@ class ApiManager {
 		}
 	}
 
+	// 获取所有文档
+	async getDocuments() {
+		const userId = this.getCurrentUserId();
+		if (!userId) return [];
+
+		try {
+			const response = await fetch(`${this.baseUrl}/api/documents?user_id=${userId}`);
+			const data = await response.json();
+			
+			if (data.success) {
+				return data.documents;
+			} else {
+				return [];
+			}
+		} catch (error) {
+			return [];
+		}
+	}
+
+	// 创建文档
+	async createDocument(formData) {
+		const userId = this.getCurrentUserId();
+		if (!userId) throw new Error('请先登录');
+
+		try {
+			const response = await fetch(`${this.baseUrl}/api/documents?user_id=${userId}`, {
+				method: 'POST',
+				body: formData
+			});
+
+			return await response.json();
+		} catch (error) {
+			throw new Error('创建文档失败');
+		}
+	}
+
+	// 删除文档
+	async deleteDocument(docId) {
+		const userId = this.getCurrentUserId();
+		if (!userId) throw new Error('请先登录');
+
+		try {
+			const response = await fetch(`${this.baseUrl}/api/documents/${docId}?user_id=${userId}`, {
+				method: 'DELETE'
+			});
+
+			return await response.json();
+		} catch (error) {
+			throw new Error('删除文档失败');
+		}
+	}
+
     // 移动文件
     async moveFile(fileId, folderId) {
         const userId = this.getCurrentUserId();

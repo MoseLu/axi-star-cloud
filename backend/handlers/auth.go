@@ -131,6 +131,9 @@ func (h *AuthHandler) CheckAdminPermission() gin.HandlerFunc {
 		if userUUID == "" {
 			userUUID = c.Query("user_uuid")
 		}
+		if userUUID == "" {
+			userUUID = c.Query("user_id") // 兼容前端发送的user_id参数
+		}
 
 		if userUUID == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "未提供用户信息"})
