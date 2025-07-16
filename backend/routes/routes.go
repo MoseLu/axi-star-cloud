@@ -123,6 +123,9 @@ func (r *Router) SetupRoutes(
 	// 注册健康检查路由
 	r.registerHealthRoutes()
 
+	// 注册文件路径测试路由
+	r.registerTestRoutes()
+
 	// 注册静态文件列表路由
 	// r.registerStaticFilesRoutes()
 
@@ -156,15 +159,10 @@ func (r *Router) registerStaticRoutes() {
 		"../uploads",
 		"uploads",
 		"./uploads",
-		// 云端服务器绝对路径 - 项目在axi-star-cloud目录
-		"/www/wwwroot/axi-star-cloud/uploads",
-		"/www/wwwroot/redamancy.com.cn/uploads",
 		// 备用路径（避免混淆）
 		"../front/uploads",
 		"front/uploads",
 		"./front/uploads",
-		"/www/wwwroot/axi-star-cloud/front/uploads",
-		"/www/wwwroot/redamancy.com.cn/front/uploads",
 	}
 
 	// 设置静态文件路由
@@ -212,6 +210,28 @@ func (r *Router) registerStaticRoutes() {
 			break
 		} else {
 			fmt.Printf("❌ 未找到uploads路径: %s, 错误: %v\n", path, err)
+		}
+	}
+
+	// 如果相对路径都失败，尝试绝对路径
+	if !uploadsFound {
+		absolutePaths := []string{
+			"/www/wwwroot/axi-star-cloud/uploads",
+			"/www/wwwroot/redamancy.com.cn/uploads",
+			"/www/wwwroot/axi-star-cloud/front/uploads",
+			"/www/wwwroot/redamancy.com.cn/front/uploads",
+		}
+
+		fmt.Printf("🔍 尝试uploads绝对路径:\n")
+		for _, absPath := range absolutePaths {
+			if _, err := os.Stat(absPath); err == nil {
+				r.engine.Static("/uploads", absPath)
+				fmt.Printf("✅ 找到uploads绝对路径: %s\n", absPath)
+				uploadsFound = true
+				break
+			} else {
+				fmt.Printf("❌ 未找到uploads绝对路径: %s, 错误: %v\n", absPath, err)
+			}
 		}
 	}
 
@@ -304,6 +324,45 @@ func (r *Router) registerHealthRoutes() {
 			"status":  "ok",
 			"message": "服务器运行正常",
 		})
+	})
+}
+
+// registerTestRoutes 注册测试路由
+func (r *Router) registerTestRoutes() {
+	r.engine.GET("/test/uploads", func(c *gin.Context) {
+		// 测试uploads目录是否存在
+		possiblePaths := []string{
+			"../uploads",
+			"uploads",
+			"./uploads",
+			"/www/wwwroot/axi-star-cloud/uploads",
+			"/www/wwwroot/redamancy.com.cn/uploads",
+		}
+
+		result := gin.H{
+			"message": "uploads路径测试",
+			"paths":   []gin.H{},
+		}
+
+		for _, path := range possiblePaths {
+			if info, err := os.Stat(path); err == nil {
+				result["paths"] = append(result["paths"].([]gin.H), gin.H{
+					"path":    path,
+					"exists":  true,
+					"isDir":   info.IsDir(),
+					"size":    info.Size(),
+					"modTime": info.ModTime(),
+				})
+			} else {
+				result["paths"] = append(result["paths"].([]gin.H), gin.H{
+					"path":   path,
+					"exists": false,
+					"error":  err.Error(),
+				})
+			}
+		}
+
+		c.JSON(http.StatusOK, result)
 	})
 }
 
