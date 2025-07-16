@@ -84,6 +84,11 @@ class UIManager {
             allButton.classList.add('active', 'bg-gradient-to-r', 'from-primary', 'to-secondary', 'text-white', 'shadow-md', 'shadow-primary/20');
             allButton.classList.remove('bg-dark-light', 'hover:bg-dark-light/70');
             
+            // 确保上传按钮显示（默认是全部文件分类）
+            const uploadBtn = document.getElementById('upload-btn');
+            if (uploadBtn) {
+                uploadBtn.style.display = 'flex';
+            }
     
         } else {
             // 未找到全部文件按钮
@@ -218,6 +223,12 @@ class UIManager {
                             this.renderFileList(files);
                         }
                         
+                        // 显示上传按钮（全部文件分类）
+                        const uploadBtn = document.getElementById('upload-btn');
+                        if (uploadBtn) {
+                            uploadBtn.style.display = 'flex';
+                        }
+                        
                         // 更新新建分组按钮状态
                         this.forceUpdateCreateFolderButton();
                         // 重新渲染文件夹列表（隐藏所有文件夹）
@@ -231,6 +242,12 @@ class UIManager {
                         // 隐藏文件夹区域
                         this.hideFolderSection();
                         
+                        // 隐藏上传按钮（外站文档分类下不允许上传）
+                        const uploadBtn = document.getElementById('upload-btn');
+                        if (uploadBtn) {
+                            uploadBtn.style.display = 'none';
+                        }
+                        
                         // 加载外站文档
                         await this.loadExternalDocs();
                         
@@ -239,6 +256,13 @@ class UIManager {
                     } else {
                         this.currentCategory = type;
                         this.filterFiles(type);
+                        
+                        // 显示上传按钮（非外站文档分类）
+                        const uploadBtn = document.getElementById('upload-btn');
+                        if (uploadBtn) {
+                            uploadBtn.style.display = 'flex';
+                        }
+                        
                         // 重新渲染文件夹列表（只显示当前分类的文件夹）
                         await this.renderFolderList(this.folders || []);
                         // 更新上传区域提示信息
@@ -3477,10 +3501,7 @@ class UIManager {
                         <i class="fa fa-book text-4xl text-emerald-500/70"></i>
                     </div>
                     <h2 class="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300 mb-2">暂无外站文档</h2>
-                    <p class="text-gray-400 max-w-md mb-6">还没有同步任何文档。点击同步文档按钮添加文档。</p>
-                    <button class="bg-gradient-to-r from-emerald-500/80 to-teal-500/80 hover:from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-lg shadow-md shadow-emerald-500/20 transition-all duration-300 transform hover:scale-[1.03]">
-                        <i class="fa fa-sync mr-2"></i>同步文档
-                    </button>
+                    <p class="text-gray-400 max-w-md mb-6">还没有同步任何文档。只有管理员可以通过同步文档功能添加文档。</p>
                 </div>
             `;
             this.updateFileCount(0);
