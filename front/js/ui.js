@@ -3441,6 +3441,10 @@ class UIManager {
             }
         }
 
+        // 获取提交按钮和原始文本
+        const submitBtn = document.getElementById('submit-sync-docs-btn');
+        const originalText = submitBtn.innerHTML;
+
         try {
             // 创建FormData
             const formData = new FormData();
@@ -3450,8 +3454,6 @@ class UIManager {
             formData.append('file', this.selectedDocFile);
 
             // 显示加载状态
-            const submitBtn = document.getElementById('submit-sync-docs-btn');
-            const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-1"></i> 同步中...';
             submitBtn.disabled = true;
 
@@ -3473,7 +3475,6 @@ class UIManager {
             this.showMessage('同步失败: ' + error.message, 'error');
         } finally {
             // 恢复按钮状态
-            const submitBtn = document.getElementById('submit-sync-docs-btn');
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
         }
