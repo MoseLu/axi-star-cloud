@@ -135,6 +135,9 @@ func (r *Router) registerStaticRoutes() {
 		"./front",
 		"static",
 		"./static",
+		// 云端服务器路径
+		"/www/wwwroot/axi-star-cloud/front",
+		"/www/wwwroot/redamancy.com.cn/front",
 	}
 
 	uploadsPaths := []string{
