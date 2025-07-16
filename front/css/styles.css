@@ -1092,12 +1092,11 @@ body.modal-open {
 
 /* 确保外站文档空状态内容完全居中 */
 .external-docs-category .col-span-full > div {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
     width: 100%;
     padding: 0;
     margin: 0;
+    text-align: center;
 }
 
 /* 文件图标容器优化 */

@@ -48,6 +48,30 @@ class UIManager {
         }, 100);
     }
 
+    // 清理外站文档样式
+    cleanupExternalDocsStyles() {
+        // 移除外站文档CSS类
+        document.body.classList.remove('external-docs-category');
+        
+        // 移除外站文档空状态
+        const externalDocsEmptyState = document.querySelector('#files-grid .external-docs-empty-state');
+        if (externalDocsEmptyState) {
+            externalDocsEmptyState.remove();
+        }
+        
+        // 移除外站文档卡片
+        const externalDocsCards = document.querySelectorAll('#files-grid [data-doc-id]');
+        externalDocsCards.forEach(card => {
+            card.remove();
+        });
+        
+        // 恢复默认空状态容器的可用性
+        const defaultEmptyState = document.getElementById('empty-state');
+        if (defaultEmptyState) {
+            defaultEmptyState.classList.remove('hidden');
+        }
+    }
+
     // 强制更新新建分组按钮状态
     forceUpdateCreateFolderButton() {
         const createFolderBtn = document.getElementById('create-folder-main-btn');
@@ -194,8 +218,8 @@ class UIManager {
                 e.target.classList.remove('bg-dark-light', 'hover:bg-dark-light/70');
 
                 try {
-                    // 移除所有分类相关的CSS类
-                    document.body.classList.remove('external-docs-category');
+                    // 清理外站文档样式
+                    this.cleanupExternalDocsStyles();
                     
                     if (type === 'all') {
                         this.currentCategory = 'all';
@@ -254,6 +278,12 @@ class UIManager {
                         const uploadBtn = document.getElementById('upload-btn');
                         if (uploadBtn) {
                             uploadBtn.style.display = 'none';
+                        }
+                        
+                        // 隐藏默认空状态容器（如果存在）
+                        const defaultEmptyState = document.getElementById('empty-state');
+                        if (defaultEmptyState) {
+                            defaultEmptyState.classList.add('hidden');
                         }
                         
                         // 加载外站文档
@@ -1814,12 +1844,18 @@ class UIManager {
             // 重置当前文件夹ID
             this.currentFolderId = null;
             
-            // 确保移除外站文档分类CSS类
-            document.body.classList.remove('external-docs-category');
+            // 清理外站文档样式
+            this.cleanupExternalDocsStyles();
             
             // 重新获取根目录的文件（不传folderId，获取根目录文件）
             const files = await this.api.getFiles();
                 this.allFiles = files; // 更新缓存
+            
+            // 清空外站文档内容
+            const externalDocsEmptyState = document.querySelector('#files-grid .col-span-full');
+            if (externalDocsEmptyState) {
+                externalDocsEmptyState.remove();
+            }
             
             // 重新渲染文件列表
             this.renderFileList(files);
@@ -2055,11 +2091,20 @@ class UIManager {
         // 设置当前分类
         this.currentCategory = type;
         
-        // 确保移除外站文档分类CSS类
-        document.body.classList.remove('external-docs-category');
+        // 清理外站文档样式
+        this.cleanupExternalDocsStyles();
         
         const fileCards = document.querySelectorAll('#files-grid > div');
         let visibleCount = 0;
+
+        // 如果是切换到非外站文档分类，清空外站文档内容
+        if (type !== 'external-docs') {
+            // 检查是否有外站文档的空状态内容，如果有则清空
+            const externalDocsEmptyState = document.querySelector('#files-grid .col-span-full');
+            if (externalDocsEmptyState) {
+                externalDocsEmptyState.remove();
+            }
+        }
 
         // 立即隐藏所有文件卡片，避免残留显示
         fileCards.forEach(card => {
@@ -2121,9 +2166,9 @@ class UIManager {
             return;
         }
         
-        // 如果不是外站文档分类，确保移除外站文档CSS类
+        // 如果不是外站文档分类，确保清理外站文档样式
         if (this.currentCategory !== 'external-docs') {
-            document.body.classList.remove('external-docs-category');
+            this.cleanupExternalDocsStyles();
         }
 
         const files = document.querySelectorAll('#files-grid > div:not(.hidden)');
@@ -3650,45 +3695,62 @@ class UIManager {
             documents = [];
         }
 
+        // 隐藏默认空状态容器
+        const defaultEmptyState = document.getElementById('empty-state');
+        if (defaultEmptyState) {
+            defaultEmptyState.classList.add('hidden');
+        }
+
+        // 移除外站文档空状态（如果存在）
+        const existingExternalEmptyState = filesGrid.querySelector('.external-docs-empty-state');
+        if (existingExternalEmptyState) {
+            existingExternalEmptyState.remove();
+        }
+
+        // 移除现有的外站文档卡片
+        const existingDocCards = filesGrid.querySelectorAll('[data-doc-id]');
+        existingDocCards.forEach(card => {
+            card.remove();
+        });
+
         if (documents.length === 0) {
-            filesGrid.innerHTML = `
-                <div class="col-span-full py-16" style="min-height: 400px;">
-                    <div class="text-center max-w-md mx-auto">
-                        <div class="w-24 h-24 mb-6 rounded-full bg-emerald-500/10 flex items-center justify-center animate-pulse-slow mx-auto">
-                            <i class="fa fa-book text-4xl text-emerald-500/70"></i>
-                        </div>
-                        <h2 class="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300 mb-2">暂无外站文档</h2>
-                        <p class="text-gray-400 mb-6">还没有同步任何文档。请点击顶栏的<span class="text-emerald-300 font-medium">同步文档</span>按钮来添加外站文档。</p>
-                        <div class="flex flex-col items-center space-y-2 text-sm text-gray-500">
-                            <div class="flex items-center space-x-2">
-                                <i class="fa fa-info-circle"></i>
-                                <span>只有管理员可以添加外站文档</span>
-                            </div>
-                        </div>
+            // 添加外站文档空状态
+            const emptyStateDiv = document.createElement('div');
+            emptyStateDiv.className = 'col-span-full py-16 external-docs-empty-state';
+            emptyStateDiv.style.minHeight = '400px';
+            emptyStateDiv.innerHTML = `
+                <div class="text-center max-w-md mx-auto">
+                    <div class="w-24 h-24 mb-6 rounded-full bg-emerald-500/10 flex items-center justify-center animate-pulse-slow mx-auto">
+                        <i class="fa fa-book text-4xl text-emerald-500/70"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300 mb-2">暂无外站文档</h2>
+                    <p class="text-gray-400 mb-6">还没有同步任何文档。请点击顶栏的<span class="text-emerald-300 font-medium">同步文档</span>按钮来添加外站文档。</p>
+                    <div class="flex items-center justify-center space-x-2 text-sm text-gray-500">
+                        <i class="fa fa-info-circle"></i>
+                        <span>只有管理员可以添加外站文档</span>
                     </div>
                 </div>
             `;
+            filesGrid.appendChild(emptyStateDiv);
             this.updateFileCount(0);
-            this.toggleEmptyState(0);
             return;
         }
 
         // 按order排序
         documents.sort((a, b) => a.order - b.order);
 
-        const filesHtml = documents.map(doc => this.createDocumentCard(doc)).join('');
-        filesGrid.innerHTML = filesHtml;
-
-        // 添加事件监听器
+        // 添加外站文档卡片
         documents.forEach(doc => {
-            const card = document.querySelector(`[data-doc-id="${doc.id}"]`);
-            if (card) {
-                this.addDocumentCardEventListeners(card, doc);
-            }
+            const docCard = document.createElement('div');
+            docCard.innerHTML = this.createDocumentCard(doc);
+            const cardElement = docCard.firstElementChild;
+            filesGrid.appendChild(cardElement);
+            
+            // 添加事件监听器
+            this.addDocumentCardEventListeners(cardElement, doc);
         });
 
         this.updateFileCount(documents.length);
-        this.toggleEmptyState(documents.length);
     }
 
     // 创建文档卡片
