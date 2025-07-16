@@ -143,7 +143,7 @@ func (r *Router) registerStaticRoutes() {
 		"./front",
 		"static",
 		"./static",
-		// 云端服务器路径
+		// 云端服务器路径 - 项目在axi-star-cloud目录
 		"/www/wwwroot/axi-star-cloud/front",
 		"/www/wwwroot/redamancy.com.cn/front",
 	}
@@ -153,7 +153,7 @@ func (r *Router) registerStaticRoutes() {
 		"../uploads",
 		"uploads",
 		"./uploads",
-		// 云端服务器绝对路径
+		// 云端服务器绝对路径 - 项目在axi-star-cloud目录
 		"/www/wwwroot/axi-star-cloud/uploads",
 		"/www/wwwroot/redamancy.com.cn/uploads",
 		// 备用路径（避免混淆）
@@ -271,11 +271,15 @@ func (r *Router) registerPageRoutes() {
 			"/www/wwwroot/redamancy.com.cn/index.html",
 		}
 
+		fmt.Printf("🔍 尝试首页绝对路径:\n")
 		for _, absPath := range absoluteIndexPaths {
 			if _, err := os.Stat(absPath); err == nil {
 				r.engine.StaticFile("/", absPath)
+				fmt.Printf("✅ 找到首页绝对路径: %s\n", absPath)
 				indexFound = true
 				break
+			} else {
+				fmt.Printf("❌ 未找到首页绝对路径: %s, 错误: %v\n", absPath, err)
 			}
 		}
 	}
