@@ -43,6 +43,7 @@ func main() {
 	userRepo := database.NewUserRepository(db)
 	fileRepo := database.NewFileRepository(db)
 	folderRepo := database.NewFolderRepository(db)
+	docRepo := database.NewDocumentRepository(db)
 
 	// 初始化处理器层
 	authHandler := handlers.NewAuthHandler(userRepo)
@@ -50,6 +51,7 @@ func main() {
 	folderHandler := handlers.NewFolderHandler(folderRepo)
 	storageHandler := handlers.NewStorageHandler(userRepo)
 	profileHandler := handlers.NewProfileHandler(userRepo)
+	documentHandler := handlers.NewDocumentHandler(docRepo)
 
 	// 创建Gin引擎
 	router := gin.Default()
@@ -58,7 +60,7 @@ func main() {
 	routerManager := routes.NewRouter(router)
 
 	// 设置所有路由
-	routerManager.SetupRoutes(authHandler, fileHandler, folderHandler, storageHandler, profileHandler)
+	routerManager.SetupRoutes(authHandler, fileHandler, folderHandler, storageHandler, profileHandler, documentHandler)
 
 	// 启动服务器
 	if err := router.Run(":8080"); err != nil {

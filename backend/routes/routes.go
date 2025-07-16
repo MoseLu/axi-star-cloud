@@ -67,6 +67,7 @@ func (r *Router) SetupRoutes(
 	folderHandler *handlers.FolderHandler,
 	storageHandler *handlers.StorageHandler,
 	profileHandler *handlers.ProfileHandler,
+	documentHandler *handlers.DocumentHandler,
 ) {
 	// 注册API路由组
 	apiGroup := r.RegisterGroup("api", "/api")
@@ -104,6 +105,13 @@ func (r *Router) SetupRoutes(
 	apiGroup.AddRoute("GET", "/profile", profileHandler.GetProfile, "获取个人资料")
 	apiGroup.AddRoute("PUT", "/profile", profileHandler.UpdateProfile, "更新个人资料")
 	apiGroup.AddRoute("POST", "/profile/avatar", profileHandler.UploadAvatar, "上传头像")
+
+	// 文档相关路由（需要管理员权限）
+	docGroup := r.RegisterGroup("documents", "/api/documents", authHandler.CheckAdminPermission())
+	docGroup.AddRoute("GET", "", documentHandler.GetDocuments, "获取所有文档")
+	docGroup.AddRoute("POST", "", documentHandler.CreateDocument, "创建文档")
+	docGroup.AddRoute("GET", "/:id", documentHandler.GetDocument, "获取单个文档")
+	docGroup.AddRoute("DELETE", "/:id", documentHandler.DeleteDocument, "删除文档")
 
 	// 注册静态文件路由
 	r.registerStaticRoutes()
