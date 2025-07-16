@@ -14,7 +14,9 @@ import (
 // Config 完整配置结构体
 type Config struct {
 	Server struct {
-		Port string `yaml:"port"`
+		Port        string   `yaml:"port"`
+		Host        string   `yaml:"host"`
+		CorsOrigins []string `yaml:"cors_origins"`
 	} `yaml:"server"`
 
 	Database struct {
@@ -36,6 +38,13 @@ type Config struct {
 	JWT struct {
 		Secret string `yaml:"secret"`
 	} `yaml:"jwt"`
+
+	Deployment struct {
+		Type       string `yaml:"type"`
+		Domain     string `yaml:"domain"`
+		StaticPath string `yaml:"static_path"`
+		UploadPath string `yaml:"upload_path"`
+	} `yaml:"deployment"`
 }
 
 // DBConfig 数据库配置结构体（保持向后兼容）

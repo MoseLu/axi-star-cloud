@@ -127,7 +127,7 @@ func cleanInvalidAvatars(db *sql.DB) error {
 		}
 
 		// 检查是否为默认头像或已知不存在的头像
-		if avatar == "avatar.jpg" || avatar == "550e8400-e29b-41d4-a716-446655440000_1589165e-2f57-4986-9a68-c4da532bd507.jpg" {
+		if avatar == "avatar.png" || avatar == "550e8400-e29b-41d4-a716-446655440000_1589165e-2f57-4986-9a68-c4da532bd507.jpg" {
 			// 将这些头像设置为null
 			_, err := db.Exec("UPDATE user SET avatar = NULL WHERE uuid = ?", uuid)
 			if err != nil {

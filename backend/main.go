@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"backend/config"
@@ -12,6 +13,12 @@ import (
 )
 
 func main() {
+	// 加载配置
+	cfg, err := config.LoadConfig("")
+	if err != nil {
+		log.Fatalf("加载配置失败: %v", err)
+	}
+
 	// 初始化数据库连接池
 	db, err := config.InitDB(nil)
 	if err != nil {
@@ -62,8 +69,16 @@ func main() {
 	// 设置所有路由
 	routerManager.SetupRoutes(authHandler, fileHandler, folderHandler, storageHandler, profileHandler, documentHandler)
 
+	// 构建服务器地址
+	host := cfg.Server.Host
+	if host == "" {
+		host = "0.0.0.0" // 默认值
+	}
+	serverAddr := fmt.Sprintf("%s:%s", host, cfg.Server.Port)
+
 	// 启动服务器
-	if err := router.Run(":8080"); err != nil {
+	log.Printf("服务器启动在: %s", serverAddr)
+	if err := router.Run(serverAddr); err != nil {
 		log.Fatalf("服务器启动失败: %v", err)
 	}
 }

@@ -714,8 +714,9 @@ class UIManager {
 
     // 获取缩略图URL
     getThumbnailUrl(file) {
-        // 静态图片白名单
-        const staticImages = ['cloud.png', 'bg.jpg', 'bg2.png', 'docs.png', 'favicon.png'];
+        // 使用默认的静态文件列表
+        const staticImages = ['cloud.png', 'docs.png', 'favicon.png', 'avatar.png'];
+        
         if (file && file.name && staticImages.includes(file.name)) {
             return `/static/public/${file.name}`;
         }
@@ -2228,7 +2229,7 @@ class UIManager {
                 const totalCount = this.totalFileCount || count;
                 fileCountElement.textContent = totalCount;
             } else {
-                fileCountElement.textContent = count;
+            fileCountElement.textContent = count;
             }
         }
 
@@ -3117,9 +3118,9 @@ class UIManager {
                 avatarUrl = window.APP_UTILS.buildAvatarUrl(userData.avatar);
             } else {
                 // 备用方案：直接构建URL
-                if (userData.avatar === 'avatar.jpg') {
+                        if (userData.avatar === 'avatar.png') {
                     // 默认头像
-                    avatarUrl = `/static/public/avatar.jpg`;
+            avatarUrl = `/static/public/avatar.png`;
                 } else if (userData.avatar.startsWith('/uploads/avatars/')) {
                     // 处理旧格式的完整路径
                     const fileName = userData.avatar.replace('/uploads/avatars/', '');
@@ -3151,7 +3152,7 @@ class UIManager {
                 headerAvatar.src = avatarUrl;
             } else {
                 // 如果没有头像，不设置src，避免404错误
-                // headerAvatar.src = '/static/public/avatar.jpg'; // 注释掉这行
+                // headerAvatar.src = '/static/public/avatar.png'; // 注释掉这行
                 // 保持默认的占位符图片
             }
         }
@@ -3160,6 +3161,7 @@ class UIManager {
     // 显示管理员用户管理界面
     showAdminUsersModal() {
         const currentUser = window.authManager ? window.authManager.getCurrentUser() : null;
+        
         if (!currentUser || !currentUser.isAdmin) {
             this.showMessage('权限不足，需要管理员权限', 'error');
             return;

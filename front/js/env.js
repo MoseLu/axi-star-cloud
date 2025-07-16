@@ -4,14 +4,27 @@ window.APP_CONFIG = (function() {
     const isLocalhost = hostname === 'localhost' || 
                         hostname === '127.0.0.1' ||
                         hostname.startsWith('192.168.');
+    
+    // 宝塔面板部署环境检测
+    const isBaotaDeployment = hostname === 'redamancy.com.cn' || 
+                              hostname.endsWith('.redamancy.com.cn');
+    
     let API_BASE_URL = '';
     if (isLocalhost) {
         API_BASE_URL = 'http://localhost:8080';
+    } else if (isBaotaDeployment) {
+        // 宝塔面板部署环境 - 使用相对路径，因为前后端在同一域名下
+        API_BASE_URL = '';
+    } else {
+        // 其他生产环境
+        API_BASE_URL = '';
     }
+    
     return {
         API_BASE_URL: API_BASE_URL,
-        ENV: isLocalhost ? 'local' : 'prod',
-        DEBUG: isLocalhost
+        ENV: isLocalhost ? 'local' : (isBaotaDeployment ? 'baota' : 'prod'),
+        DEBUG: isLocalhost,
+        HOSTNAME: hostname
     };
 })();
 
@@ -59,7 +72,7 @@ window.APP_UTILS = {
         if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
             return avatarPath;
         }
-        if (avatarPath === 'avatar.jpg') {
+        if (avatarPath === 'avatar.png') {
             return null;
         }
         if (avatarPath.startsWith('/uploads/avatars/')) {

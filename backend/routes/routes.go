@@ -123,6 +123,9 @@ func (r *Router) SetupRoutes(
 	// 注册健康检查路由
 	r.registerHealthRoutes()
 
+	// 注册静态文件列表路由
+	// r.registerStaticFilesRoutes()
+
 	// 应用所有路由组
 	r.applyGroups()
 }
@@ -301,6 +304,41 @@ func (r *Router) registerHealthRoutes() {
 			"status":  "ok",
 			"message": "服务器运行正常",
 		})
+	})
+}
+
+// registerStaticFilesRoutes 注册静态文件列表路由
+func (r *Router) registerStaticFilesRoutes() {
+	r.engine.GET("/static/list", func(c *gin.Context) {
+		// 尝试多个可能的public目录路径
+		possiblePaths := []string{
+			"../front/public",
+			"front/public",
+			"./front/public",
+			"public",
+			"./public",
+			"/www/wwwroot/axi-star-cloud/front/public",
+			"/www/wwwroot/redamancy.com.cn/front/public",
+		}
+
+		var files []string
+		for _, dir := range possiblePaths {
+			if fileInfos, err := os.ReadDir(dir); err == nil {
+				for _, f := range fileInfos {
+					if !f.IsDir() {
+						files = append(files, f.Name())
+					}
+				}
+				break // 找到第一个有效的目录就停止
+			}
+		}
+
+		if len(files) == 0 {
+			// 如果都找不到，返回默认列表
+			files = []string{"cloud.png", "docs.png", "favicon.png", "avatar.png"}
+		}
+
+		c.JSON(http.StatusOK, gin.H{"files": files})
 	})
 }
 

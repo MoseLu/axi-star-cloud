@@ -42,4 +42,16 @@ vendor/
 # backend/config/config.yaml
 
 # Go相关
-go.sum 
+go.sum
+
+# 用户上传的文件
+uploads/avatars/
+uploads/image/
+uploads/video/
+uploads/audio/
+uploads/document/
+uploads/md/
+uploads/other/
+
+# 重复的静态资源
+front/public/favicon.png 
