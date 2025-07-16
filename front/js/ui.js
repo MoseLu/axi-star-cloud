@@ -65,6 +65,12 @@ class UIManager {
             card.remove();
         });
         
+        // 恢复所有被隐藏的文件卡片显示
+        const hiddenCards = document.querySelectorAll('#files-grid div[style*="display: none"]');
+        hiddenCards.forEach(card => {
+            card.style.display = '';
+        });
+        
         // 恢复默认空状态容器的可用性
         const defaultEmptyState = document.getElementById('empty-state');
         if (defaultEmptyState) {
@@ -3700,6 +3706,12 @@ class UIManager {
         if (defaultEmptyState) {
             defaultEmptyState.classList.add('hidden');
         }
+
+        // 隐藏所有非外站文档的文件卡片
+        const existingFileCards = filesGrid.querySelectorAll('div:not([data-doc-id]):not(.external-docs-empty-state)');
+        existingFileCards.forEach(card => {
+            card.style.display = 'none';
+        });
 
         // 移除外站文档空状态（如果存在）
         const existingExternalEmptyState = filesGrid.querySelector('.external-docs-empty-state');
