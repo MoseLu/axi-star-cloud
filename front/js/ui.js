@@ -3526,6 +3526,11 @@ class UIManager {
         const filesGrid = document.getElementById('files-grid');
         if (!filesGrid) return;
 
+        // 确保documents是数组
+        if (!documents || !Array.isArray(documents)) {
+            documents = [];
+        }
+
         if (documents.length === 0) {
             filesGrid.innerHTML = `
                 <div class="col-span-full text-center py-16">
