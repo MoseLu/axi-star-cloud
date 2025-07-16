@@ -714,26 +714,14 @@ class UIManager {
 
     // 获取缩略图URL
     getThumbnailUrl(file) {
-        // 对于图片文件，尝试显示缩略图
-        if (file.type === 'image') {
-            // 优先使用file.previewUrl或file.path
-            let url = file.previewUrl || file.path;
-            if (url) {
-                if (url.startsWith('/')) {
-                    return url;
-                } else if (url.startsWith('http')) {
-                    return url;
-            } else {
-                    // 使用正确的文件类型路径
-                    return `/uploads/${file.type}/${file.name}`;
-            }
-            }
-            // 回退 - 使用正确的文件类型路径
-            return `/uploads/${file.type}/${file.name}`;
+        // 静态图片白名单
+        const staticImages = ['cloud.png', 'bg.jpg', 'bg2.png', 'docs.png', 'favicon.png'];
+        if (file && file.name && staticImages.includes(file.name)) {
+            return `/static/public/${file.name}`;
         }
-        // 视频文件不显示缩略图
-        if (file.type === 'video') {
-            return null;
+        // 用户上传图片
+        if (file && file.name) {
+            return `/uploads/image/${file.name}`;
         }
         return null;
     }
