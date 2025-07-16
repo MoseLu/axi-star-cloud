@@ -29,8 +29,8 @@ func main() {
 		log.Fatalf("数据库迁移失败: %v", err)
 	}
 
-	// 更新现有用户的存储限制
-	if err := database.UpdateExistingUserStorageLimits(db); err != nil {
+	// 只在第一次启动时设置默认存储限制
+	if err := database.SetDefaultStorageLimitsIfNeeded(db); err != nil {
 		// 静默处理，不打印错误
 	}
 

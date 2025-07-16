@@ -3533,15 +3533,17 @@ class UIManager {
 
         if (documents.length === 0) {
             filesGrid.innerHTML = `
-                <div class="col-span-full text-center py-16">
-                    <div class="w-24 h-24 mb-6 rounded-full bg-emerald-500/10 flex items-center justify-center animate-pulse-slow">
-                        <i class="fa fa-book text-4xl text-emerald-500/70"></i>
-                    </div>
-                    <h2 class="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300 mb-2">暂无外站文档</h2>
-                    <p class="text-gray-400 max-w-md mb-6">还没有同步任何文档。请点击顶栏的<span class="text-emerald-300 font-medium">同步文档</span>按钮来添加外站文档。</p>
-                    <div class="flex items-center justify-center space-x-2 text-sm text-gray-500">
-                        <i class="fa fa-info-circle"></i>
-                        <span>只有管理员可以添加外站文档</span>
+                <div class="col-span-full flex items-center justify-center py-16">
+                    <div class="text-center max-w-md">
+                        <div class="w-24 h-24 mb-6 rounded-full bg-emerald-500/10 flex items-center justify-center animate-pulse-slow mx-auto">
+                            <i class="fa fa-book text-4xl text-emerald-500/70"></i>
+                        </div>
+                        <h2 class="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300 mb-2">暂无外站文档</h2>
+                        <p class="text-gray-400 mb-6">还没有同步任何文档。请点击顶栏的<span class="text-emerald-300 font-medium">同步文档</span>按钮来添加外站文档。</p>
+                        <div class="flex items-center justify-center space-x-2 text-sm text-gray-500">
+                            <i class="fa fa-info-circle"></i>
+                            <span>只有管理员可以添加外站文档</span>
+                        </div>
                     </div>
                 </div>
             `;

@@ -84,18 +84,28 @@ func fixAvatarPaths(db *sql.DB) error {
 	return nil
 }
 
-// UpdateExistingUserStorageLimits 更新现有用户的存储限制
-func UpdateExistingUserStorageLimits(db *sql.DB) error {
-	// 更新管理员用户的存储限制为5GB
-	_, err := db.Exec("UPDATE user SET storage_limit = ? WHERE username = 'Mose'", 5*1024*1024*1024)
+// SetDefaultStorageLimitsIfNeeded 只在需要时设置默认存储限制
+func SetDefaultStorageLimitsIfNeeded(db *sql.DB) error {
+	// 检查是否有用户的存储限制为0或NULL
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM user WHERE storage_limit IS NULL OR storage_limit = 0").Scan(&count)
 	if err != nil {
 		return err
 	}
 
-	// 更新其他用户的存储限制为1GB
-	_, err = db.Exec("UPDATE user SET storage_limit = ? WHERE username != 'Mose'", 1024*1024*1024)
-	if err != nil {
-		return err
+	// 只有在有用户没有设置存储限制时才设置默认值
+	if count > 0 {
+		// 更新管理员用户的存储限制为5GB
+		_, err := db.Exec("UPDATE user SET storage_limit = ? WHERE username = 'Mose' AND (storage_limit IS NULL OR storage_limit = 0)", 5*1024*1024*1024)
+		if err != nil {
+			return err
+		}
+
+		// 更新其他用户的存储限制为1GB
+		_, err = db.Exec("UPDATE user SET storage_limit = ? WHERE username != 'Mose' AND (storage_limit IS NULL OR storage_limit = 0)", 1024*1024*1024)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
