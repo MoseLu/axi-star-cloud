@@ -2022,6 +2022,12 @@ class UIManager {
                 fileGrid.style.opacity = '';
             }, 200);
             
+            // 外站文档分类特殊处理：不显示默认空状态
+            if (this.currentCategory === 'external-docs') {
+                // 外站文档分类下，空状态由renderExternalDocs方法处理
+                return;
+            }
+            
             emptyState.style.opacity = '0';
             emptyState.classList.remove('hidden');
             emptyState.style.transition = 'opacity 0.2s ease-in-out';
@@ -3527,7 +3533,11 @@ class UIManager {
                         <i class="fa fa-book text-4xl text-emerald-500/70"></i>
                     </div>
                     <h2 class="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300 mb-2">暂无外站文档</h2>
-                    <p class="text-gray-400 max-w-md mb-6">还没有同步任何文档。只有管理员可以通过同步文档功能添加文档。</p>
+                    <p class="text-gray-400 max-w-md mb-6">还没有同步任何文档。请点击顶栏的<span class="text-emerald-300 font-medium">同步文档</span>按钮来添加外站文档。</p>
+                    <div class="flex items-center justify-center space-x-2 text-sm text-gray-500">
+                        <i class="fa fa-info-circle"></i>
+                        <span>只有管理员可以添加外站文档</span>
+                    </div>
                 </div>
             `;
             this.updateFileCount(0);
