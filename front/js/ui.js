@@ -1814,6 +1814,9 @@ class UIManager {
             // 重置当前文件夹ID
             this.currentFolderId = null;
             
+            // 确保移除外站文档分类CSS类
+            document.body.classList.remove('external-docs-category');
+            
             // 重新获取根目录的文件（不传folderId，获取根目录文件）
             const files = await this.api.getFiles();
                 this.allFiles = files; // 更新缓存
@@ -2051,6 +2054,9 @@ class UIManager {
     filterFiles(type) {
         // 设置当前分类
         this.currentCategory = type;
+        
+        // 确保移除外站文档分类CSS类
+        document.body.classList.remove('external-docs-category');
         
         const fileCards = document.querySelectorAll('#files-grid > div');
         let visibleCount = 0;

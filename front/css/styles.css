@@ -1083,9 +1083,9 @@ body.modal-open {
     justify-content: center;
 }
 
-/* 外站文档分类下的空状态使用水平布局 */
+/* 外站文档分类下的空状态使用垂直布局 */
 .external-docs-category .col-span-full {
-    flex-direction: row;
+    flex-direction: column;
     padding: 0;
     margin: 0;
 }
