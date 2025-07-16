@@ -1066,17 +1066,38 @@ body.modal-open {
     max-width: 600px;
     margin: 0 auto;
     text-align: center;
+    padding: 0;
 }
 
 /* 确保外站文档空状态在网格中居中 - 只在外部文档分类下生效 */
 .external-docs-category #files-grid .col-span-full {
     justify-self: center;
     align-self: center;
+    padding: 0;
+    margin: 0;
+}
+
+/* 外站文档分类下的文件网格居中布局 */
+.external-docs-category #files-grid {
+    justify-items: center;
+    justify-content: center;
 }
 
 /* 外站文档分类下的空状态使用水平布局 */
 .external-docs-category .col-span-full {
     flex-direction: row;
+    padding: 0;
+    margin: 0;
+}
+
+/* 确保外站文档空状态内容完全居中 */
+.external-docs-category .col-span-full > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0;
+    margin: 0;
 }
 
 /* 文件图标容器优化 */
