@@ -67,13 +67,13 @@ window.APP_UTILS = {
     // 构建头像URL
     buildAvatarUrl: function(avatarPath) {
         if (!avatarPath || avatarPath.trim() === '') {
-            return null;
+            return '/static/public/avatar.png'; // 返回默认头像
         }
         if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
             return avatarPath;
         }
         if (avatarPath === 'avatar.png') {
-            return null;
+            return '/static/public/avatar.png'; // 返回默认头像
         }
         if (avatarPath.startsWith('/uploads/avatars/')) {
             const fileName = avatarPath.replace('/uploads/avatars/', '');
@@ -90,7 +90,7 @@ window.APP_UTILS = {
     },
     // 构建文件URL
     buildFileUrl: function(filePath) {
-        if (!filePath) return null;
+        if (!filePath) return '/static/public/docs.png'; // 返回默认文档图标
         if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
             return filePath;
         }

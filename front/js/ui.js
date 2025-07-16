@@ -720,11 +720,23 @@ class UIManager {
         if (file && file.name && staticImages.includes(file.name)) {
             return `/static/public/${file.name}`;
         }
-        // 用户上传图片
+        
+        // 用户上传图片 - 添加错误处理
         if (file && file.name) {
-            return `/uploads/image/${file.name}`;
+            // 检查文件扩展名，如果是图片文件才返回路径
+            const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
+            const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+            
+            if (imageExtensions.includes(fileExtension)) {
+                return `/uploads/image/${file.name}`;
+            } else {
+                // 非图片文件使用默认图标
+                return `/static/public/docs.png`;
+            }
         }
-        return null;
+        
+        // 默认返回文档图标
+        return `/static/public/docs.png`;
     }
 
     // 添加文件卡片事件监听器
@@ -1087,7 +1099,15 @@ class UIManager {
                     <p class="text-gray-300 text-sm">${file.size} • ${file.type}</p>
                 </div>
                 <div class="relative w-full h-full flex items-center justify-center preview-image-container" style="overflow: hidden;">
-                    <img src="${imgUrl}" alt="${file.name}" class="max-w-full max-h-full object-contain rounded-lg">
+                    <img src="${imgUrl}" alt="${file.name}" class="max-w-full max-h-full object-contain rounded-lg" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="hidden flex items-center justify-center w-full h-full">
+                        <div class="text-center text-white">
+                            <i class="fa fa-image text-6xl mb-4 opacity-50"></i>
+                            <p class="text-lg">图片加载失败</p>
+                            <p class="text-sm opacity-75">文件可能不存在或格式不支持</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -4026,6 +4046,41 @@ order: ${order}
         } catch (error) {
             this.showMessage('删除失败: ' + error.message, 'error');
         }
+    }
+
+    // 处理图片加载错误
+    handleImageError(imgElement, fallbackSrc = '/static/public/docs.png') {
+        imgElement.onerror = function() {
+            this.src = fallbackSrc;
+            this.onerror = null; // 防止无限循环
+        };
+    }
+
+    // 获取缩略图URL
+    getThumbnailUrl(file) {
+        // 使用默认的静态文件列表
+        const staticImages = ['cloud.png', 'docs.png', 'favicon.png', 'avatar.png'];
+        
+        if (file && file.name && staticImages.includes(file.name)) {
+            return `/static/public/${file.name}`;
+        }
+        
+        // 用户上传图片 - 添加错误处理
+        if (file && file.name) {
+            // 检查文件扩展名，如果是图片文件才返回路径
+            const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
+            const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+            
+            if (imageExtensions.includes(fileExtension)) {
+                return `/uploads/image/${file.name}`;
+            } else {
+                // 非图片文件使用默认图标
+                return `/static/public/docs.png`;
+            }
+        }
+        
+        // 默认返回文档图标
+        return `/static/public/docs.png`;
     }
 }
 
