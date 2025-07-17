@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"backend/database"
 	"backend/models"
@@ -147,11 +148,55 @@ func (h *FileHandler) DownloadFile(c *gin.Context) {
 		return
 	}
 
-	// 设置响应头 - 正确处理文件名编码
-	disposition := "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
+	// 根据文件类型决定响应头
+	fileType := utils.GetFileType(file.Name)
+	var disposition string
+	var contentType string
+
+	// 根据文件类型设置不同的响应头
+	switch fileType {
+	case "image":
+		// 图片文件下载，但设置正确的MIME类型
+		disposition = "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
+		contentType = "image/" + strings.ToLower(filepath.Ext(file.Name)[1:]) // 如 image/png, image/jpeg
+	case "video":
+		// 视频文件下载
+		disposition = "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
+		contentType = "video/" + strings.ToLower(filepath.Ext(file.Name)[1:]) // 如 video/mp4
+	case "audio":
+		// 音频文件下载
+		disposition = "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
+		contentType = "audio/" + strings.ToLower(filepath.Ext(file.Name)[1:]) // 如 audio/mp3
+	case "document":
+		// 文档文件根据类型决定
+		ext := strings.ToLower(filepath.Ext(file.Name))
+		switch ext {
+		case ".pdf":
+			disposition = "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
+			contentType = "application/pdf"
+		case ".txt", ".md":
+			disposition = "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
+			contentType = "text/plain"
+		default:
+			// 其他文档类型下载
+			disposition = "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
+			contentType = "application/octet-stream"
+		}
+	default:
+		// 其他文件类型（如zip、exe等）强制下载
+		disposition = "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
+		contentType = "application/octet-stream"
+	}
+
 	c.Header("Content-Disposition", disposition)
-	c.Header("Content-Type", "application/octet-stream")
+	c.Header("Content-Type", contentType)
 	c.Header("Content-Length", strconv.FormatInt(fileInfo.Size(), 10))
+
+	// 如果是HEAD请求，只返回响应头，不返回文件内容
+	if c.Request.Method == "HEAD" {
+		c.Status(http.StatusOK)
+		return
+	}
 
 	// 打开文件
 	fileHandle, err := os.Open(absolutePath)

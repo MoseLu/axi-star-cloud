@@ -404,23 +404,15 @@ class ApiManager {
         if (!userId) return { success: false, error: '请先登录' };
 
         try {
-            const response = await fetch(this.buildApiUrl(`/api/files/${fileId}/download?user_id=${userId}`));
-            if (response.ok) {
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = ''; // 使用服务器返回的文件名
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                return { success: true };
-            } else {
-                return { success: false, error: '下载失败' };
-            }
+            // 构建下载URL
+            const downloadUrl = this.buildApiUrl(`/api/files/${fileId}/download?user_id=${userId}`);
+            
+            // 使用window.open直接触发下载，避免在当前页面打开
+            window.open(downloadUrl, '_self');
+            
+            return { success: true };
         } catch (error) {
-
+            console.error('下载失败:', error);
             return { success: false, error: '下载失败' };
         }
     }
