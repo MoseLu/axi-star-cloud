@@ -1576,7 +1576,7 @@ class UIManager {
         try {
             // 直接使用window.open进行下载，避免另存为对话框
             const userId = this.api.getCurrentUserId();
-            const downloadUrl = `${this.api.baseUrl}/api/files/${file.id}/download?user_id=${userId}`;
+            const downloadUrl = this.api.buildApiUrl(`/api/files/${file.id}/download?user_id=${userId}`);
             
             // 创建一个隐藏的iframe来触发下载
             const iframe = document.createElement('iframe');

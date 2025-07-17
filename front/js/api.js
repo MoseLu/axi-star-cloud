@@ -404,7 +404,7 @@ class ApiManager {
         if (!userId) return { success: false, error: '请先登录' };
 
         try {
-            const response = await fetch(`${this.baseUrl}/api/files/${fileId}/download?user_id=${userId}`);
+            const response = await fetch(this.buildApiUrl(`/api/files/${fileId}/download?user_id=${userId}`));
             if (response.ok) {
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
