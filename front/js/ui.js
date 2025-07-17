@@ -2587,7 +2587,10 @@ class UIManager {
             'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            'text/plain', 'text/markdown', 'text/x-markdown', 'application/x-markdown'
+            'text/plain', 'text/markdown', 'text/x-markdown', 'application/x-markdown',
+            // 压缩文件
+            'application/zip', 'application/x-zip-compressed', 'application/x-rar-compressed',
+            'application/x-7z-compressed', 'application/x-tar', 'application/gzip'
         ];
 
         const invalidFiles = [];
@@ -2625,7 +2628,12 @@ class UIManager {
                                fileName.endsWith('.ogg') ||
                                fileName.endsWith('.flac') ||
                                fileName.endsWith('.aac') ||
-                               fileName.endsWith('.wma');
+                               fileName.endsWith('.wma') ||
+                               fileName.endsWith('.zip') ||
+                               fileName.endsWith('.rar') ||
+                               fileName.endsWith('.7z') ||
+                               fileName.endsWith('.tar') ||
+                               fileName.endsWith('.gz');
             
             if (!isValidType) {
                 invalidFiles.push(file.name);
