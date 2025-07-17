@@ -1,7 +1,7 @@
 // 认证管理类
 class AuthManager {
     constructor() {
-        this.baseUrl = '';
+        this.baseUrl = window.APP_CONFIG?.API_BASE_URL || '';
         this.currentUser = null;
         this.isInitialized = false;
         this.eventsBound = false;
@@ -12,6 +12,18 @@ class AuthManager {
         setTimeout(() => {
         this.init();
         }, 0);
+    }
+
+    // 构建API URL的通用方法
+    buildApiUrl(endpoint) {
+        if (!endpoint) return '';
+        if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
+            return endpoint;
+        }
+        if (!endpoint.startsWith('/')) {
+            endpoint = '/' + endpoint;
+        }
+        return this.baseUrl ? this.baseUrl + endpoint : endpoint;
     }
 
     init() {
@@ -316,7 +328,7 @@ class AuthManager {
         loginBtn.disabled = true;
 
         try {
-            const response = await fetch(`${this.baseUrl}/api/login`, {
+            const response = await fetch(this.buildApiUrl('/api/login'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -407,7 +419,7 @@ class AuthManager {
         registerBtn.disabled = true;
 
         try {
-            const response = await fetch(`${this.baseUrl}/api/register`, {
+            const response = await fetch(this.buildApiUrl('/api/register'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

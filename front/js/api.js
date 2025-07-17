@@ -6,6 +6,18 @@ class ApiManager {
         this.currentUser = this.getCurrentUser();
     }
 
+    // 构建API URL的通用方法
+    buildApiUrl(endpoint) {
+        if (!endpoint) return '';
+        if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
+            return endpoint;
+        }
+        if (!endpoint.startsWith('/')) {
+            endpoint = '/' + endpoint;
+        }
+        return this.baseUrl ? this.baseUrl + endpoint : endpoint;
+    }
+
     // 获取当前用户信息
     getCurrentUser() {
         const savedUser = localStorage.getItem('currentUser');
@@ -49,7 +61,7 @@ class ApiManager {
     // 登录
     async login(username, password) {
         try {
-            const response = await fetch(`${this.baseUrl}/api/login`, {
+            const response = await fetch(this.buildApiUrl('/api/login'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -67,7 +79,7 @@ class ApiManager {
             }
             return data;
         } catch (error) {
-
+            console.error('登录失败:', error);
             return { success: false, error: '网络错误' };
         }
     }
@@ -75,7 +87,7 @@ class ApiManager {
     // 注册
     async register(username, password, email = '') {
         try {
-            const response = await fetch(`${this.baseUrl}/api/register`, {
+            const response = await fetch(this.buildApiUrl('/api/register'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -85,7 +97,7 @@ class ApiManager {
 
             return await response.json();
         } catch (error) {
-
+            console.error('注册失败:', error);
             return { success: false, error: '网络错误' };
         }
     }
@@ -97,11 +109,20 @@ class ApiManager {
         }
 
         try {
-            const url = new URL(`${this.baseUrl}/api/admin/users`);
-            url.searchParams.set('page', page.toString());
-            url.searchParams.set('page_size', pageSize.toString());
+            // 修复URL构建问题 - 在云端环境中API_BASE_URL为空字符串
+            let apiUrl;
+            if (this.baseUrl) {
+                // 本地环境：使用完整URL
+                const url = new URL(`${this.baseUrl}/api/admin/users`);
+                url.searchParams.set('page', page.toString());
+                url.searchParams.set('page_size', pageSize.toString());
+                apiUrl = url.toString();
+            } else {
+                // 云端环境：使用相对路径
+                apiUrl = `/api/admin/users?page=${page}&page_size=${pageSize}`;
+            }
 
-            const response = await fetch(url, {
+            const response = await fetch(apiUrl, {
                 method: 'GET',
                 headers: {
                     'User-UUID': this.getCurrentUserId(),
@@ -111,7 +132,7 @@ class ApiManager {
 
             return await response.json();
         } catch (error) {
-
+            console.error('获取用户列表失败:', error);
             return { success: false, error: '网络错误' };
         }
     }
@@ -123,7 +144,10 @@ class ApiManager {
         }
 
         try {
-            const response = await fetch(`${this.baseUrl}/api/admin/users/storage`, {
+            // 修复URL构建问题
+            const apiUrl = this.baseUrl ? `${this.baseUrl}/api/admin/users/storage` : '/api/admin/users/storage';
+            
+            const response = await fetch(apiUrl, {
                 method: 'PUT',
                 headers: {
                     'User-UUID': this.getCurrentUserId(),
@@ -134,7 +158,7 @@ class ApiManager {
 
             return await response.json();
         } catch (error) {
-
+            console.error('更新用户存储限制失败:', error);
             return { success: false, error: '网络错误' };
         }
     }
@@ -144,7 +168,7 @@ class ApiManager {
         const userId = this.getCurrentUserId();
         if (!userId) return [];
 
-        let url = `${this.baseUrl}/api/files?user_id=${userId}`;
+        let url = this.buildApiUrl(`/api/files?user_id=${userId}`);
         if (folderId) {
             url += `&folder_id=${folderId}`;
         }
@@ -179,6 +203,7 @@ class ApiManager {
                 return [];
             }
         } catch (error) {
+            console.error('获取文件列表失败:', error);
             return [];
         }
     }
@@ -189,7 +214,7 @@ class ApiManager {
         if (!userId) throw new Error('请先登录');
 
         try {
-            const response = await fetch(`${this.baseUrl}/api/files/${fileId}?user_id=${userId}`);
+            const response = await fetch(this.buildApiUrl(`/api/files/${fileId}?user_id=${userId}`));
             const data = await response.json();
             
             if (data.success) {
@@ -198,6 +223,7 @@ class ApiManager {
                 throw new Error(data.error || '获取文件信息失败');
             }
         } catch (error) {
+            console.error('获取文件信息失败:', error);
             throw new Error('获取文件信息失败');
         }
     }
