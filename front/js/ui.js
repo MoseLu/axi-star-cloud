@@ -4098,5 +4098,3 @@ order: ${order}
 
 // 导出UI管理器
 window.UIManager = UIManager; 
-// 导出UI管理器
-window.UIManager = UIManager; 
