@@ -40,7 +40,7 @@ func GetFileType(filename string) string {
 	case ".pdf", ".doc", ".docx", ".txt", ".md", ".rtf":
 		return "document"
 	case ".zip", ".rar", ".7z", ".tar", ".gz":
-		return "archive"
+		return "other"
 	default:
 		return "other"
 	}
