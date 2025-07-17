@@ -2,6 +2,8 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
+	"log"
 	"strings"
 )
 
@@ -177,6 +179,28 @@ func ensureMoseAdmin(db *sql.DB) error {
 				return err
 			}
 		}
+	}
+
+	return nil
+}
+
+// MigrateArchiveToOther 将archive类型的文件迁移为other类型
+func MigrateArchiveToOther(db *sql.DB) error {
+	// 更新所有archive类型的文件为other类型
+	query := `UPDATE files SET type = 'other' WHERE type = 'archive'`
+
+	result, err := db.Exec(query)
+	if err != nil {
+		return fmt.Errorf("迁移archive文件类型失败: %v", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("获取影响行数失败: %v", err)
+	}
+
+	if rowsAffected > 0 {
+		log.Printf("成功迁移 %d 个archive类型文件为other类型", rowsAffected)
 	}
 
 	return nil
