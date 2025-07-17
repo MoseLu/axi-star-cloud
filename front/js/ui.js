@@ -1574,24 +1574,28 @@ class UIManager {
     // 下载文件
     async downloadFile(file) {
         try {
-            // 直接使用window.open进行下载，避免另存为对话框
             const userId = this.api.getCurrentUserId();
             const downloadUrl = this.api.buildApiUrl(`/api/files/${file.id}/download?user_id=${userId}`);
             
-            // 创建一个隐藏的iframe来触发下载
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = downloadUrl;
-            document.body.appendChild(iframe);
+            // 使用fetch先检查文件是否存在
+            const checkResponse = await fetch(downloadUrl, { method: 'HEAD' });
             
-            // 延迟移除iframe
-            setTimeout(() => {
-                document.body.removeChild(iframe);
-            }, 1000);
+            if (!checkResponse.ok) {
+                if (checkResponse.status === 404) {
+                    this.showMessage('文件不存在', 'error');
+                } else {
+                    this.showMessage(`下载失败: ${checkResponse.status} ${checkResponse.statusText}`, 'error');
+                }
+                return;
+            }
+            
+            // 使用window.open直接下载
+            window.open(downloadUrl, '_blank');
             
             this.showMessage('文件下载已开始', 'success');
         } catch (error) {
-            this.showMessage(error.message, 'error');
+            console.error('下载错误:', error);
+            this.showMessage(`下载失败: ${error.message}`, 'error');
         }
     }
 
