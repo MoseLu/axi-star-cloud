@@ -34,14 +34,24 @@ class ComponentLoader {
             }
             
             const html = await response.text();
-            const container = document.getElementById(containerId);
+            let container = document.getElementById(containerId);
+            
+            // 如果容器不存在，等待一下再重试
+            if (!container) {
+                console.log(`⏳ Container not found, retrying: ${containerId}`);
+                await new Promise(resolve => setTimeout(resolve, 100));
+                container = document.getElementById(containerId);
+            }
             
             if (container) {
                 container.innerHTML = html;
                 this.loadedComponents.add(componentName);
                 console.log(`✅ Component loaded: ${componentName}`);
             } else {
-                console.error(`❌ Container not found: ${containerId}`);
+                console.error(`❌ Container not found after retry: ${containerId}`);
+                // 尝试在body中查找容器
+                const allContainers = document.querySelectorAll('[id*="container"]');
+                console.log('Available containers:', Array.from(allContainers).map(el => el.id));
             }
         } catch (error) {
             console.error(`❌ Error loading component ${componentName}:`, error);
@@ -121,7 +131,10 @@ window.componentLoader = new ComponentLoader();
 // 页面加载完成后自动加载所有组件
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Starting component loading...');
-    window.componentLoader.loadAllComponents();
+    // 延迟一点时间确保DOM完全加载
+    setTimeout(() => {
+        window.componentLoader.loadAllComponents();
+    }, 100);
 });
 
 // 监听组件加载完成事件
