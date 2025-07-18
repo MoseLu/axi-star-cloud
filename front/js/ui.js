@@ -1473,7 +1473,7 @@ class UIManager {
                     
                     <!-- PDF预览区域 -->
                     <div class="pdf-viewer hidden w-full h-full">
-                        <iframe id="pdf-iframe" class="w-full h-full border-0" style="background: white;"></iframe>
+                        <iframe id="pdf-iframe" class="w-full h-full border-0" style="background: white;" allowfullscreen></iframe>
                     </div>
                 </div>
             </div>
@@ -1493,18 +1493,6 @@ class UIManager {
         // 自动执行PDF预览
         setTimeout(async () => {
             try {
-                // 使用fetch下载PDF内容并创建blob URL
-                const response = await fetch(pdfUrl);
-                if (!response.ok) {
-                    throw new Error('PDF下载失败');
-                }
-                
-                // 创建blob URL
-                const blob = new Blob([await response.arrayBuffer()], { 
-                    type: 'application/pdf' 
-                });
-                const blobUrl = URL.createObjectURL(blob);
-                
                 // 隐藏加载状态，显示PDF预览区域
                 const loadingDiv = modal.querySelector('.pdf-loading');
                 const viewerDiv = modal.querySelector('.pdf-viewer');
@@ -1514,22 +1502,20 @@ class UIManager {
                     loadingDiv.classList.add('hidden');
                     viewerDiv.classList.remove('hidden');
                     
-                    // 设置iframe的src为blob URL
-                    iframe.src = blobUrl;
+                    // 使用PDF.js查看器
+                    const pdfJsUrl = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(window.location.origin + pdfUrl)}`;
+                    iframe.src = pdfJsUrl;
                     
                     // 添加iframe加载完成事件
                     iframe.onload = () => {
-                        console.log('PDF加载完成');
+                        console.log('PDF.js加载完成');
                     };
                     
                     iframe.onerror = () => {
-                        console.error('PDF加载失败');
-                        // 如果iframe加载失败，回退到新窗口打开
-                        window.open(blobUrl, '_blank');
+                        console.error('PDF.js加载失败');
+                        // 如果PDF.js加载失败，回退到新窗口打开
+                        window.open(pdfUrl, '_blank');
                     };
-                    
-                    // 清理blob URL
-                    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000); // 1分钟后清理
                 }
             } catch (error) {
                 console.error('PDF预览失败:', error);
