@@ -14,7 +14,7 @@ func MigrateUrlFiles(db *sql.DB) error {
 		title VARCHAR(255) NOT NULL,
 		url TEXT NOT NULL,
 		description TEXT,
-		user_id VARCHAR(36) NOT NULL,
+		user_id VARCHAR(50) NOT NULL,
 		folder_id INTEGER,
 		created_at DATETIME NOT NULL,
 		updated_at DATETIME NOT NULL,
