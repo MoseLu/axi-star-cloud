@@ -461,6 +461,12 @@ class UIManager {
         console.log('UIManager.onLoginSuccess 开始处理，用户:', userData.username);
 
         try {
+            // 验证API管理器是否有用户信息
+            if (!this.api.getCurrentUserId()) {
+                console.error('API管理器没有用户ID，无法获取数据');
+                throw new Error('用户未登录');
+            }
+
             // 首先更新用户显示（使用登录时获取的基本信息）
             this.updateProfileDisplay(userData);
             

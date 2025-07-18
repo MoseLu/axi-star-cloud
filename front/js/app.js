@@ -53,16 +53,19 @@ class App {
                 const userData = JSON.parse(savedUser);
                 console.log('找到已保存的用户信息:', userData.username);
                 
-                // 更新API管理器的用户信息
-                if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
+                // 确保API管理器存在并设置用户信息
+                if (this.apiManager) {
+                    console.log('设置API管理器用户信息:', userData.username);
                     this.apiManager.setCurrentUser(userData);
+                    
+                    // 验证用户信息是否正确设置
+                    const currentUser = this.apiManager.getCurrentUser();
+                    const userId = this.apiManager.getCurrentUserId();
+                    console.log('API管理器当前用户:', currentUser);
+                    console.log('API管理器用户ID:', userId);
                 } else {
-                    // 延迟重试
-                    setTimeout(() => {
-                        if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
-                            this.apiManager.setCurrentUser(userData);
-                        }
-                    }, 100);
+                    console.error('API管理器不存在');
+                    return;
                 }
                 
                 // 显示主界面
@@ -78,10 +81,16 @@ class App {
                 setTimeout(async () => {
                     if (this.uiManager) {
                         console.log('开始加载用户数据...');
-                        await this.uiManager.onLoginSuccess(userData);
-                        console.log('用户数据加载完成');
+                        try {
+                            await this.uiManager.onLoginSuccess(userData);
+                            console.log('用户数据加载完成');
+                        } catch (error) {
+                            console.error('加载用户数据失败:', error);
+                        }
+                    } else {
+                        console.error('UI管理器不存在');
                     }
-                }, 200); // 增加延迟时间，确保所有组件都已初始化
+                }, 300); // 增加延迟时间，确保所有组件都已初始化
                 
             } catch (error) {
                 console.error('解析用户信息失败:', error);
