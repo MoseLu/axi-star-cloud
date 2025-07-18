@@ -1501,7 +1501,10 @@ class UIManager {
                         throw new Error('PDF下载失败');
                     }
                     
-                    const blob = await response.blob();
+                    // 确保blob有正确的MIME类型
+                    const blob = new Blob([await response.arrayBuffer()], { 
+                        type: 'application/pdf' 
+                    });
                     const url = URL.createObjectURL(blob);
                     
                     // 在新窗口打开PDF
@@ -1510,7 +1513,7 @@ class UIManager {
                         // 如果弹窗被阻止，直接下载
                         const link = document.createElement('a');
                         link.href = url;
-                        link.download = file.name;
+                        link.download = file.name || 'document.pdf';
                         link.style.display = 'none';
                         document.body.appendChild(link);
                         link.click();
