@@ -2164,6 +2164,20 @@ class UIManager {
         const fileCards = document.querySelectorAll('#files-grid > div');
         let visibleCount = 0;
 
+        // 如果是切换到外站文档分类，检查权限并加载文档
+        if (type === 'external-docs') {
+            // 检查用户是否为管理员
+            const currentUser = this.api.getCurrentUser();
+            if (currentUser && currentUser.isAdmin) {
+                this.loadExternalDocs();
+            } else {
+                // 非管理员用户显示权限提示
+                this.showMessage('需要管理员权限才能访问外站文档', 'warning');
+                this.toggleEmptyState(0);
+                return;
+            }
+        }
+
         // 如果是切换到非外站文档分类，清空外站文档内容
         if (type !== 'external-docs') {
             // 检查是否有外站文档的空状态内容，如果有则清空
@@ -3744,9 +3758,12 @@ class UIManager {
             const documents = await this.api.getDocuments();
             this.renderExternalDocs(documents);
         } catch (error) {
+            console.error('加载外站文档失败:', error);
             // 如果是权限问题，显示特殊提示
-            if (error.message && error.message.includes('权限')) {
+            if (error.message && (error.message.includes('权限') || error.message.includes('Unauthorized'))) {
                 this.showMessage('需要管理员权限才能访问外站文档', 'warning');
+                // 显示权限提示的空状态
+                this.renderExternalDocs([]);
             } else {
                 this.showMessage('加载外站文档失败', 'error');
             }
