@@ -206,7 +206,9 @@ func (r *Router) registerStaticRoutes() {
 	for _, path := range uploadsPaths {
 		if _, err := os.Stat(path); err == nil {
 			// 使用自定义的静态文件处理器，添加下载响应头
+			fmt.Printf("🔧 注册自定义uploads处理器，路径: %s\n", path)
 			r.engine.GET("/uploads/*filepath", func(c *gin.Context) {
+				fmt.Printf("🎯 收到uploads请求: %s\n", c.Request.URL.Path)
 				filepathParam := c.Param("filepath")
 
 				// 获取绝对路径，确保路径正确
