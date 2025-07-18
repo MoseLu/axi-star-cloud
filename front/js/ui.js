@@ -856,6 +856,11 @@ class UIManager {
                 iconColor = 'text-orange-400';
                 bgColor = 'from-orange-500/20 to-amber-500/20';
                 break;
+            case 'pdf':
+                iconClass = 'fa-file-pdf-o';
+                iconColor = 'text-red-400';
+                bgColor = 'from-red-500/20 to-pink-500/20';
+                break;
             case 'word':
                 iconClass = 'fa-file-word-o';
                 iconColor = 'text-blue-500';
@@ -1275,6 +1280,9 @@ class UIManager {
             case 'powerpoint':
                 this.previewPowerPoint(file);
                 break;
+            case 'pdf':
+                this.previewPDF(file);
+                break;
             default:
                 this.showMessage('不支持预览此类型的文件', 'warning');
         }
@@ -1413,6 +1421,94 @@ class UIManager {
         });
     }
 
+    // 预览PDF文档
+    previewPDF(file) {
+        // 强制隐藏html和body滚动条
+        document.body.style.overflow = 'hidden';
+        document.body.style.height = '100%';
+        document.documentElement.style.overflow = 'hidden';
+        document.documentElement.style.height = '100%';
+        
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
+        modal.style.overflow = 'hidden';
+        
+        // 构建PDF文件URL
+        let pdfUrl = file.path || file.previewUrl || `/uploads/${file.type}/${file.name}`;
+        if (pdfUrl && !pdfUrl.startsWith('http') && !pdfUrl.startsWith('/')) {
+            pdfUrl = `/uploads/${file.type}/${file.name}`;
+        }
+        
+        modal.innerHTML = `
+            <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
+                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fa fa-times"></i>
+                </button>
+                <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
+                    <h3 class="text-xl font-semibold">${file.name}</h3>
+                    <p class="text-gray-300 text-sm">${file.size} • PDF文档</p>
+                </div>
+                <div class="relative w-full h-full flex items-center justify-center preview-pdf-container" style="overflow: hidden;">
+                    <iframe src="${pdfUrl}" 
+                            class="w-full h-full rounded-lg" 
+                            style="border: none; background: white;"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    </iframe>
+                    <div class="hidden flex items-center justify-center w-full h-full">
+                        <div class="text-center text-white">
+                            <i class="fa fa-file-pdf-o text-6xl mb-4 opacity-50"></i>
+                            <p class="text-lg">PDF加载失败</p>
+                            <p class="text-sm opacity-75">文件可能不存在或格式不支持</p>
+                            <div class="mt-4 space-y-2">
+                                <button onclick="window.open('${pdfUrl}', '_blank')" class="bg-gradient-to-r from-red-500/80 to-pink-500/80 hover:from-red-500 hover:to-pink-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                                    <i class="fa fa-external-link mr-2"></i>在新窗口打开
+                                </button>
+                                <button class="download-pdf-btn bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-500 hover:to-emerald-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                                    <i class="fa fa-download mr-2"></i>下载文件
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // 绑定下载按钮事件
+        const downloadBtn = modal.querySelector('.download-pdf-btn');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', () => {
+                modal.remove();
+                this.downloadFile(file);
+            });
+        }
+        
+        // 点击背景关闭
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+                // 恢复html和body滚动条
+                document.body.style.overflow = '';
+                document.body.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.documentElement.style.height = '';
+            }
+        });
+        
+        // ESC键关闭
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+                // 恢复html和body滚动条
+                document.body.style.overflow = '';
+                document.body.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.documentElement.style.height = '';
+            }
+        });
+    }
+
     // 预览文档（普通文件）
     previewDocument(file) {
         // 检查是否为Markdown文件
@@ -1424,6 +1520,12 @@ class UIManager {
         // 检查是否为txt文件
         if (file.name.toLowerCase().endsWith('.txt')) {
             this.previewTextFile(file);
+            return;
+        }
+        
+        // 检查是否为PDF文件
+        if (file.name.toLowerCase().endsWith('.pdf')) {
+            this.previewPDF(file);
             return;
         }
         
@@ -3663,6 +3765,7 @@ class UIManager {
             'video': 'text-pink-400',
             'audio': 'text-cyan-400',
             'document': 'text-orange-400',
+            'pdf': 'text-red-400',
             'word': 'text-blue-400',
             'excel': 'text-green-400',
             'powerpoint': 'text-orange-400',
@@ -3678,6 +3781,7 @@ class UIManager {
             'video': 'bg-pink-400/10',
             'audio': 'bg-cyan-400/10',
             'document': 'bg-orange-400/10',
+            'pdf': 'bg-red-400/10',
             'word': 'bg-blue-400/10',
             'excel': 'bg-green-400/10',
             'powerpoint': 'bg-orange-400/10',
@@ -3693,6 +3797,7 @@ class UIManager {
             'video': '视频',
             'audio': '音频',
             'document': '文档',
+            'pdf': 'PDF',
             'word': 'Word',
             'excel': 'Excel',
             'powerpoint': 'PowerPoint',
@@ -3708,6 +3813,7 @@ class UIManager {
             video: 'pink', 
             audio: 'cyan', 
             document: 'orange', 
+            pdf: 'red',
             word: 'blue',
             excel: 'green',
             powerpoint: 'orange',

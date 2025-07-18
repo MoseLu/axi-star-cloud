@@ -37,7 +37,9 @@ func GetFileType(filename string) string {
 		return "video"
 	case ".mp3", ".wav", ".flac", ".aac", ".ogg", ".wma":
 		return "audio"
-	case ".pdf", ".txt", ".md", ".rtf":
+	case ".pdf":
+		return "pdf"
+	case ".txt", ".md", ".rtf":
 		return "document"
 	case ".doc", ".docx":
 		return "word"
