@@ -1577,14 +1577,23 @@ class UIManager {
             // 使用重定向下载API，更高效
             const downloadUrl = this.api.buildApiUrl(`/api/download?id=${file.id}&user_id=${this.api.getCurrentUserId()}`);
             
-            // 使用window.open在新窗口打开下载链接，避免影响当前页面
-            const downloadWindow = window.open(downloadUrl, '_blank');
-            
-            // 如果window.open被阻止，回退到传统方法
-            if (!downloadWindow) {
+            // 先获取重定向URL
+            const response = await fetch(downloadUrl, { method: 'HEAD' });
+            if (response.redirected) {
+                // 获取重定向后的URL
+                const finalUrl = response.url;
+                
+                // 创建隐藏的下载链接并触发下载
+                const link = document.createElement('a');
+                link.href = finalUrl;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                // 如果没有重定向，直接使用原URL
                 const link = document.createElement('a');
                 link.href = downloadUrl;
-                link.target = '_blank'; // 在新标签页打开
                 link.style.display = 'none';
                 document.body.appendChild(link);
                 link.click();
