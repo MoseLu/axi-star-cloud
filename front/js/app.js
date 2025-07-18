@@ -96,9 +96,10 @@ class App {
         try {
 
             
-            // 并行加载文件列表、文件夹列表和总文件数
-            const [files, folders, totalFileCount] = await Promise.all([
+            // 并行加载文件列表、文件夹列表和总文件数（包括普通文件和URL文件）
+            const [files, urlFiles, folders, totalFileCount] = await Promise.all([
                 this.apiManager.getFiles(),
+                this.apiManager.getUrlFiles(),
                 this.apiManager.getFolders(),
                 this.apiManager.getTotalFileCount()
             ]);
@@ -107,13 +108,13 @@ class App {
             
             // 更新UI管理器的数据
             if (this.uiManager) {
-                this.uiManager.allFiles = files;
+                this.uiManager.allFiles = [...files, ...urlFiles];
                 this.uiManager.folders = folders;
                 this.uiManager.totalFileCount = totalFileCount; // 保存总文件数
                 
                 // 更新文件列表显示
-                this.uiManager.updateFileCount(files.length);
-                this.uiManager.renderFileList(files);
+                this.uiManager.updateFileCount(this.uiManager.allFiles.length);
+                this.uiManager.renderFileList(this.uiManager.allFiles);
                 
                 // 更新文件夹列表显示
                 this.uiManager.renderFolderList(folders);

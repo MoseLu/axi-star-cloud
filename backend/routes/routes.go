@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"backend/handlers"
 
@@ -69,6 +70,7 @@ func (r *Router) SetupRoutes(
 	storageHandler *handlers.StorageHandler,
 	profileHandler *handlers.ProfileHandler,
 	documentHandler *handlers.DocumentHandler,
+	urlFileHandler *handlers.UrlFileHandler,
 ) {
 	// 注册API路由组
 	apiGroup := r.RegisterGroup("api", "/api")
@@ -91,6 +93,14 @@ func (r *Router) SetupRoutes(
 	apiGroup.AddRoute("POST", "/upload", fileHandler.UploadFile, "上传文件")
 	apiGroup.AddRoute("DELETE", "/files/:id", fileHandler.DeleteFile, "删除文件")
 	apiGroup.AddRoute("PUT", "/files/:id/move", fileHandler.MoveFile, "移动文件")
+
+	// URL文件相关路由
+	apiGroup.AddRoute("GET", "/url-files", urlFileHandler.GetUrlFiles, "获取URL文件列表")
+	apiGroup.AddRoute("GET", "/url-files/count", urlFileHandler.GetTotalUrlFileCount, "获取用户所有URL文件总数")
+	apiGroup.AddRoute("GET", "/url-files/:id", urlFileHandler.GetUrlFile, "获取单个URL文件信息")
+	apiGroup.AddRoute("POST", "/url-files", urlFileHandler.CreateUrlFile, "创建URL文件")
+	apiGroup.AddRoute("DELETE", "/url-files/:id", urlFileHandler.DeleteUrlFile, "删除URL文件")
+	apiGroup.AddRoute("PUT", "/url-files/:id/move", urlFileHandler.MoveUrlFile, "移动URL文件")
 
 	// 文件夹相关路由
 	apiGroup.AddRoute("GET", "/folders", folderHandler.GetFolders, "获取文件夹列表")
@@ -229,6 +239,16 @@ func (r *Router) registerStaticRoutes() {
 				// 检查文件是否存在
 				if _, err := os.Stat(fullPath); os.IsNotExist(err) {
 					fmt.Printf("❌ 文件不存在: %s\n", fullPath)
+					// 如果是头像文件，返回默认头像
+					if strings.Contains(filepathParam, "avatars/") {
+						// 尝试返回默认头像
+						defaultAvatarPath := filepath.Join(absPath, "..", "..", "front", "public", "avatar.png")
+						if _, err := os.Stat(defaultAvatarPath); err == nil {
+							fmt.Printf("✅ 返回默认头像: %s\n", defaultAvatarPath)
+							c.File(defaultAvatarPath)
+							return
+						}
+					}
 					c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
 					return
 				}
@@ -284,6 +304,16 @@ func (r *Router) registerStaticRoutes() {
 					// 检查文件是否存在
 					if _, err := os.Stat(fullPath); os.IsNotExist(err) {
 						fmt.Printf("❌ 文件不存在: %s\n", fullPath)
+						// 如果是头像文件，返回默认头像
+						if strings.Contains(filepathParam, "avatars/") {
+							// 尝试返回默认头像
+							defaultAvatarPath := filepath.Join(absPath, "..", "..", "front", "public", "avatar.png")
+							if _, err := os.Stat(defaultAvatarPath); err == nil {
+								fmt.Printf("✅ 返回默认头像: %s\n", defaultAvatarPath)
+								c.File(defaultAvatarPath)
+								return
+							}
+						}
 						c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
 						return
 					}

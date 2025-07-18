@@ -296,6 +296,23 @@ class UIManager {
 
         // 上传按钮事件
         document.getElementById('upload-btn')?.addEventListener('click', () => {
+            // 如果是URL类型，显示URL上传模态框
+            if (this.currentCategory === 'url') {
+                this.showUrlUploadModal();
+                return;
+            }
+            
+            this.showUploadArea();
+        });
+        
+        // 空状态上传按钮事件
+        document.getElementById('empty-upload-btn')?.addEventListener('click', () => {
+            // 如果是URL类型，显示URL上传模态框
+            if (this.currentCategory === 'url') {
+                this.showUrlUploadModal();
+                return;
+            }
+            
             this.showUploadArea();
         });
 
@@ -316,6 +333,12 @@ class UIManager {
 
         // 文件选择按钮
         document.getElementById('browse-btn')?.addEventListener('click', () => {
+            // URL类型不允许文件选择
+            if (this.currentCategory === 'url') {
+                this.showMessage('URL类型不支持文件选择，请使用"添加链接"按钮', 'warning');
+                return;
+            }
+            
             const fileInput = document.getElementById('file-input');
             if (fileInput) {
                 fileInput.click();
@@ -324,16 +347,36 @@ class UIManager {
 
         // 文件输入变化事件
         document.getElementById('file-input')?.addEventListener('change', (e) => {
+            // URL类型不允许文件选择
+            if (this.currentCategory === 'url') {
+                this.showMessage('URL类型不支持文件选择，请使用"添加链接"按钮', 'warning');
+                e.target.value = ''; // 清空文件输入框
+                return;
+            }
+            
             this.handleFileSelect(e);
         });
         
-            // 动态设置文件输入框的multiple属性
-    this.updateFileInputMultiple();
-    
-    // 添加文件输入框点击事件，动态设置multiple属性
-    document.getElementById('file-input')?.addEventListener('click', () => {
+                    // 动态设置文件输入框的multiple属性
         this.updateFileInputMultiple();
-    });
+        
+        // 添加文件输入框点击事件，动态设置multiple属性
+        document.getElementById('file-input')?.addEventListener('click', () => {
+            this.updateFileInputMultiple();
+        });
+        
+        // URL上传模态框事件监听器
+        document.getElementById('close-url-upload-btn')?.addEventListener('click', () => {
+            this.hideUrlUploadModal();
+        });
+        
+        document.getElementById('cancel-url-upload-btn')?.addEventListener('click', () => {
+            this.hideUrlUploadModal();
+        });
+        
+        document.getElementById('submit-url-upload-btn')?.addEventListener('click', () => {
+            this.submitUrlUpload();
+        });
 
         // 拖拽区域事件
         const dropArea = document.getElementById('drop-area');
@@ -352,6 +395,12 @@ class UIManager {
                 e.preventDefault();
                 dropArea.classList.remove('border-purple-light/60');
                 const files = e.dataTransfer.files;
+                
+                // URL类型不允许拖拽上传文件
+                if (this.currentCategory === 'url') {
+                    this.showMessage('URL类型不支持文件拖拽上传，请使用"添加链接"按钮', 'warning');
+                    return;
+                }
                 
                 // 检查是否为图片文件，如果是图片则允许多文件上传
                 const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
@@ -438,24 +487,8 @@ class UIManager {
                         
                         // 如果有缓存的数据，直接使用
                         if (this.allFiles.length > 0) {
-                            // 立即隐藏所有文件卡片，避免残留显示
-                            const fileCards = document.querySelectorAll('#files-grid > div');
-                            fileCards.forEach(card => {
-                                card.style.transition = 'opacity 0.2s ease-in-out';
-                                card.style.opacity = '0';
-                            });
-                            
-                            // 短暂延迟后显示所有文件
-                            setTimeout(() => {
-                                let visibleCount = 0;
-                                fileCards.forEach(card => {
-                                    card.classList.remove('hidden');
-                                    card.style.opacity = '1';
-                                    visibleCount++;
-                                });
-                                this.updateFileCount(visibleCount);
-                                this.toggleEmptyState(visibleCount);
-                            }, 200);
+                            // 重新渲染文件列表，确保显示所有文件
+                            this.renderFileList(this.allFiles);
                         } else {
                             // 如果没有缓存，才请求数据
                             const files = await this.api.getFiles();
@@ -511,7 +544,14 @@ class UIManager {
                         // 显示上传按钮（非外站文档分类）
                         const uploadBtn = document.getElementById('upload-btn');
                         if (uploadBtn) {
-                            uploadBtn.style.display = 'flex';
+                            if (type === 'url') {
+                                // URL类型显示特殊的"添加链接"按钮
+                                uploadBtn.innerHTML = '<i class="fa fa-link mr-2"></i>添加链接';
+                                uploadBtn.style.display = 'flex';
+                            } else {
+                                uploadBtn.innerHTML = '<i class="fa fa-upload mr-2"></i>上传文件';
+                                uploadBtn.style.display = 'flex';
+                            }
                         }
                         
                         // 重新渲染文件夹列表（只显示当前分类的文件夹）
@@ -699,16 +739,17 @@ class UIManager {
             await this.initUserProfile();
             
             // 从后端获取数据
-            const [files, folders] = await Promise.all([
+            const [files, urlFiles, folders] = await Promise.all([
                 this.api.getFiles(), // 不传folderId，获取所有文件
+                this.api.getUrlFiles(), // 获取URL文件
                 this.api.getFolders()
             ]);
 
             // 保存文件夹数据
             this.folders = folders;
             
-            // 缓存所有文件数据
-            this.allFiles = files;
+            // 合并普通文件和URL文件，并缓存所有文件数据
+            this.allFiles = [...files, ...urlFiles];
 
             // 更新界面
             this.updateFileCount(files.length);
@@ -844,9 +885,14 @@ class UIManager {
                     <button class="file-preview-btn text-blue-400 hover:text-blue-300 transition-colors p-2 rounded-lg hover:bg-blue-500/10" title="预览">
                         <i class="fa fa-eye text-sm"></i>
                     </button>
-                    <button class="file-download-btn text-green-400 hover:text-green-300 transition-colors p-2 rounded-lg hover:bg-green-500/10" title="下载">
-                        <i class="fa fa-download text-sm"></i>
-                    </button>
+                    ${file.type === 'url' ? 
+                        `<button class="file-copy-btn text-green-400 hover:text-green-300 transition-colors p-2 rounded-lg hover:bg-green-500/10" title="复制链接">
+                            <i class="fa fa-copy text-sm"></i>
+                        </button>` : 
+                        `<button class="file-download-btn text-green-400 hover:text-green-300 transition-colors p-2 rounded-lg hover:bg-green-500/10" title="下载">
+                            <i class="fa fa-download text-sm"></i>
+                        </button>`
+                    }
                     <button class="file-delete-btn text-red-400 hover:text-red-300 transition-colors p-2 rounded-lg hover:bg-red-500/10" title="删除">
                         <i class="fa fa-trash text-sm"></i>
                     </button>
@@ -905,6 +951,11 @@ class UIManager {
                 iconClass = 'fa-file-powerpoint-o';
                 iconColor = 'text-orange-500';
                 bgColor = 'from-orange-500/20 to-red-500/20';
+                break;
+            case 'url':
+                iconClass = 'fa-link';
+                iconColor = 'text-blue-400';
+                bgColor = 'from-blue-500/20 to-indigo-500/20';
                 break;
             default:
                 iconClass = 'fa-file-o';
@@ -984,6 +1035,12 @@ class UIManager {
         fileCard.querySelector('.file-download-btn')?.addEventListener('click', (e) => {
             e.stopPropagation();
             this.downloadFile(file);
+        });
+        
+        // 复制按钮（URL类型）
+        fileCard.querySelector('.file-copy-btn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.copyUrl(file);
         });
 
         // 删除按钮
@@ -1317,6 +1374,9 @@ class UIManager {
                 break;
             case 'pdf':
                 this.previewPDF(file);
+                break;
+            case 'url':
+                this.previewUrl(file);
                 break;
             default:
                 this.showMessage('不支持预览此类型的文件', 'warning');
@@ -2776,23 +2836,32 @@ class UIManager {
         if (!confirmed) return;
 
         try {
-            await this.api.deleteFile(file.id);
+            // 根据文件类型调用不同的删除API
+            if (file.type === 'url') {
+                await this.api.deleteUrlFile(file.id);
+            } else {
+                await this.api.deleteFile(file.id);
+            }
             this.showMessage('文件删除成功', 'success');
-            // 重新加载文件列表
-            const files = await this.api.getFiles(this.currentFolderId);
+            
+            // 重新加载文件列表（包括普通文件和URL文件）
+            const [files, urlFiles] = await Promise.all([
+                this.api.getFiles(this.currentFolderId),
+                this.api.getUrlFiles(this.currentFolderId)
+            ]);
             
             // 更新缓存
-            this.allFiles = files;
+            this.allFiles = [...files, ...urlFiles];
             
             // 根据当前类别过滤文件
             if (this.currentCategory && this.currentCategory !== 'all') {
-                const filteredFiles = files.filter(file => file.type === this.currentCategory);
+                const filteredFiles = this.allFiles.filter(file => file.type === this.currentCategory);
                 this.updateFileCount(filteredFiles.length);
                 this.renderFileList(filteredFiles);
             } else {
                 // 全部文件类别，显示所有文件
-                this.updateFileCount(files.length);
-                this.renderFileList(files);
+                this.updateFileCount(this.allFiles.length);
+                this.renderFileList(this.allFiles);
             }
         } catch (error) {
             this.showMessage(error.message, 'error');
@@ -2807,17 +2876,23 @@ class UIManager {
             // 设置当前文件夹ID
             this.currentFolderId = folderId;
             
-            // 获取文件夹中的文件
-            const files = await this.api.getFiles(folderId);
+            // 获取文件夹中的文件（包括普通文件和URL文件）
+            const [files, urlFiles] = await Promise.all([
+                this.api.getFiles(folderId),
+                this.api.getUrlFiles(folderId)
+            ]);
+            
+            // 合并文件列表
+            const allFiles = [...files, ...urlFiles];
             
             // 渲染文件列表
-            this.renderFileList(files);
+            this.renderFileList(allFiles);
             
             // 显示面包屑导航
             this.showBreadcrumb(folderName);
             
             // 更新面包屑中的文件数量
-            this.updateFolderFileCount(files.length);
+            this.updateFolderFileCount(allFiles.length);
             
             // 更新文件类型标签状态 - 在文件夹中时禁用分类切换
             this.disableCategoryButtons();
@@ -2990,9 +3065,12 @@ class UIManager {
             // 清理外站文档样式
             this.cleanupExternalDocsStyles();
             
-            // 重新获取根目录的文件（不传folderId，获取根目录文件）
-            const files = await this.api.getFiles();
-                this.allFiles = files; // 更新缓存
+            // 重新获取根目录的文件（包括普通文件和URL文件）
+            const [files, urlFiles] = await Promise.all([
+                this.api.getFiles(),
+                this.api.getUrlFiles()
+            ]);
+            this.allFiles = [...files, ...urlFiles]; // 更新缓存
             
             // 清空外站文档内容
             const externalDocsEmptyState = document.querySelector('#files-grid .col-span-full');
@@ -3080,6 +3158,12 @@ class UIManager {
 
     // 显示上传区域
     showUploadArea() {
+        // URL类型不允许显示文件上传区域
+        if (this.currentCategory === 'url') {
+            this.showMessage('URL类型不支持文件上传，请使用"添加链接"按钮', 'warning');
+            return;
+        }
+        
         const uploadArea = document.getElementById('upload-area');
         const emptyState = document.getElementById('empty-state');
         const fileGrid = document.getElementById('files-grid');
@@ -3147,6 +3231,10 @@ class UIManager {
                 supportedFormats = 'PDF';
                 multiFileHint = '💡 提示: 请单个选择PDF文件';
                 break;
+            case 'url':
+                supportedFormats = '网站链接';
+                multiFileHint = '💡 提示: 点击上传按钮添加URL链接';
+                break;
             case 'other':
                 supportedFormats = 'ZIP, RAR, 7Z, TAR, GZ, ISO, EXE, APK';
                 multiFileHint = '💡 提示: 请单个选择文件';
@@ -3193,6 +3281,10 @@ class UIManager {
                     break;
                 case 'pdf':
                     fileInput.accept = '.pdf';
+                    break;
+                case 'url':
+                    // URL类型不需要文件输入框
+                    fileInput.accept = '';
                     break;
                 default:
                     // 全部文件类别，接受所有文件类型
@@ -3329,38 +3421,50 @@ class UIManager {
             // 如果缓存为空且是全部文件分类，重新获取数据
             if (type === 'all' && this.allFiles.length === 0) {
                 try {
-                    const files = await this.api.getFiles();
-                    this.allFiles = files; // 更新缓存
-                    this.renderFileList(files);
+                    const [files, urlFiles] = await Promise.all([
+                        this.api.getFiles(),
+                        this.api.getUrlFiles()
+                    ]);
+                    this.allFiles = [...files, ...urlFiles]; // 更新缓存
+                    this.renderFileList(this.allFiles);
                     return;
                 } catch (error) {
                     console.error('重新获取文件数据失败:', error);
                 }
             }
             
-            fileCards.forEach(card => {
-                const fileData = card.getAttribute('data-type');
-                
-                // 特殊处理：PDF文件在document分类下也应该显示
-                let shouldShow = false;
-                if (type === 'document') {
-                    // document分类显示所有文档类型：document, word, excel, powerpoint, pdf
-                    shouldShow = ['document', 'word', 'excel', 'powerpoint', 'pdf'].includes(fileData);
-                } else {
-                    shouldShow = fileData === type;
-                }
-                
-                if (shouldShow) {
-                    // 显示匹配的文件卡片
+            // 如果是全部文件分类，显示所有文件
+            if (type === 'all') {
+                fileCards.forEach(card => {
                     card.classList.remove('hidden');
                     card.style.opacity = '1';
                     visibleCount++;
-                } else {
-                    // 隐藏不匹配的文件卡片
-                    card.classList.add('hidden');
-                    card.style.opacity = '0';
-                }
-            });
+                });
+            } else {
+                fileCards.forEach(card => {
+                    const fileData = card.getAttribute('data-type');
+                    
+                    // 特殊处理：PDF文件在document分类下也应该显示
+                    let shouldShow = false;
+                    if (type === 'document') {
+                        // document分类显示所有文档类型：document, word, excel, powerpoint, pdf
+                        shouldShow = ['document', 'word', 'excel', 'powerpoint', 'pdf'].includes(fileData);
+                    } else {
+                        shouldShow = fileData === type;
+                    }
+                    
+                    if (shouldShow) {
+                        // 显示匹配的文件卡片
+                        card.classList.remove('hidden');
+                        card.style.opacity = '1';
+                        visibleCount++;
+                    } else {
+                        // 隐藏不匹配的文件卡片
+                        card.classList.add('hidden');
+                        card.style.opacity = '0';
+                    }
+                });
+            }
 
             // 更新计数和状态
             this.updateFileCount(visibleCount);
@@ -3422,6 +3526,20 @@ class UIManager {
                 return;
             }
             
+            // URL类型特殊处理：更新空状态按钮和提示
+            if (this.currentCategory === 'url') {
+                const emptyUploadBtn = document.getElementById('empty-upload-btn');
+                const emptyStateText = emptyState.querySelector('p');
+                
+                if (emptyUploadBtn) {
+                    emptyUploadBtn.innerHTML = '<i class="fa fa-link mr-2"></i>添加链接';
+                }
+                
+                if (emptyStateText) {
+                    emptyStateText.textContent = '暂无URL链接。点击"添加链接"按钮添加网站链接。';
+                }
+            }
+            
             // 确保移除外站文档分类CSS类
             document.body.classList.remove('external-docs-category');
             
@@ -3467,7 +3585,7 @@ class UIManager {
                 const totalCount = this.totalFileCount || count;
                 fileCountElement.textContent = totalCount;
             } else {
-            fileCountElement.textContent = count;
+                fileCountElement.textContent = count;
             }
         }
 
@@ -3718,7 +3836,9 @@ class UIManager {
             const fileCard = e.target.closest('.file-card');
             if (fileCard) {
                 const fileId = fileCard.getAttribute('data-file-id');
+                const fileType = fileCard.getAttribute('data-type');
                 e.dataTransfer.setData('text/plain', fileId);
+                e.dataTransfer.setData('application/json', JSON.stringify({ type: fileType }));
                 e.dataTransfer.effectAllowed = 'move';
                 fileCard.classList.add('opacity-50');
             }
@@ -3759,14 +3879,31 @@ class UIManager {
                 
                 if (fileId && folderId) {
                     try {
-                
-                        await this.api.moveFile(fileId, parseInt(folderId));
+                        // 从拖拽数据中获取文件类型信息
+                        const fileType = e.dataTransfer.getData('application/json');
+                        let fileTypeData = null;
+                        try {
+                            fileTypeData = fileType ? JSON.parse(fileType) : null;
+                        } catch (e) {
+                            // 如果解析失败，使用默认的普通文件移动
+                        }
+                        
+                        // 根据文件类型调用不同的移动API
+                        if (fileTypeData && fileTypeData.type === 'url') {
+                            await this.api.moveUrlFile(fileId, parseInt(folderId));
+                        } else {
+                            await this.api.moveFile(fileId, parseInt(folderId));
+                        }
                         this.showMessage('文件移动成功', 'success');
                         
-                        // 重新加载文件列表，保持当前分类状态
-                        const files = await this.api.getFiles(this.currentFolderId);
-                        this.updateFileCount(files.length);
-                        this.renderFileList(files);
+                        // 重新加载文件列表，保持当前分类状态（包括普通文件和URL文件）
+                        const [files, urlFiles] = await Promise.all([
+                            this.api.getFiles(this.currentFolderId),
+                            this.api.getUrlFiles(this.currentFolderId)
+                        ]);
+                        const allFiles = [...files, ...urlFiles];
+                        this.updateFileCount(allFiles.length);
+                        this.renderFileList(allFiles);
                         
                         // 重新加载文件夹列表以更新文件数量
                         const folders = await this.api.getFolders();
@@ -3887,25 +4024,26 @@ class UIManager {
 
             if (uploadedFiles.success) {
                 this.showMessage(uploadedFiles.message, 'success');
-                // 重新加载文件列表和总文件数
-                const [files, totalFileCount] = await Promise.all([
+                // 重新加载文件列表和总文件数（包括普通文件和URL文件）
+                const [files, urlFiles, totalFileCount] = await Promise.all([
                     this.api.getFiles(this.currentFolderId),
+                    this.api.getUrlFiles(this.currentFolderId),
                     this.api.getTotalFileCount()
                 ]);
                 
                 // 更新缓存
-                this.allFiles = files;
+                this.allFiles = [...files, ...urlFiles];
                 this.totalFileCount = totalFileCount;
                 
                 // 根据当前类别过滤文件
                 if (this.currentCategory && this.currentCategory !== 'all') {
-                    const filteredFiles = files.filter(file => file.type === this.currentCategory);
+                    const filteredFiles = this.allFiles.filter(file => file.type === this.currentCategory);
                     this.updateFileCount(filteredFiles.length);
                     this.renderFileList(filteredFiles);
                 } else {
                     // 全部文件类别，显示所有文件
-                    this.updateFileCount(files.length);
-                    this.renderFileList(files);
+                    this.updateFileCount(this.allFiles.length);
+                    this.renderFileList(this.allFiles);
                 }
                 
                 // 更新存储信息
@@ -3916,7 +4054,7 @@ class UIManager {
                 if (uploadArea) {
                     uploadArea.classList.add('hidden');
                 }
-                if (files.length > 0) {
+                if (this.allFiles.length > 0) {
                     const fileGrid = document.getElementById('files-grid');
                     if (fileGrid) {
                         fileGrid.classList.remove('hidden');
@@ -3970,6 +4108,7 @@ class UIManager {
             'word': 'text-blue-400',
             'excel': 'text-green-400',
             'powerpoint': 'text-orange-400',
+            'url': 'text-blue-400',
             'other': 'text-slate-400'
         };
         return colors[category] || 'text-slate-400';
@@ -3986,6 +4125,7 @@ class UIManager {
             'word': 'bg-blue-400/10',
             'excel': 'bg-green-400/10',
             'powerpoint': 'bg-orange-400/10',
+            'url': 'bg-blue-400/10',
             'other': 'bg-slate-400/10'
         };
         return backgrounds[category] || 'bg-slate-400/10';
@@ -4002,6 +4142,7 @@ class UIManager {
             'word': 'Word',
             'excel': 'Excel',
             'powerpoint': 'PowerPoint',
+            'url': 'URL',
             'other': '其他'
         };
         return labels[category] || '其他';
@@ -4018,6 +4159,7 @@ class UIManager {
             word: 'blue',
             excel: 'green',
             powerpoint: 'orange',
+            url: 'blue',
             other: 'slate' 
         };
         return map[category] || 'emerald';
@@ -5354,6 +5496,202 @@ order: ${order}
         
         // 更新提示信息
         this.updateUploadAreaHint();
+    }
+    
+    // 显示URL上传模态框
+    showUrlUploadModal() {
+        const modal = document.getElementById('url-upload-modal');
+        if (modal) {
+            modal.classList.remove('opacity-0', 'invisible');
+            modal.classList.add('opacity-100', 'visible');
+            
+            const container = modal.querySelector('.glass-effect');
+            container.classList.remove('scale-95');
+            container.classList.add('scale-100');
+        }
+    }
+    
+    // 隐藏URL上传模态框
+    hideUrlUploadModal() {
+        const modal = document.getElementById('url-upload-modal');
+        if (modal) {
+            modal.classList.remove('opacity-100', 'visible');
+            modal.classList.add('opacity-0', 'invisible');
+            
+            const container = modal.querySelector('.glass-effect');
+            container.classList.remove('scale-100');
+            container.classList.add('scale-95');
+            
+            // 清空表单
+            document.getElementById('url-upload-form').reset();
+        }
+    }
+    
+    // 提交URL上传
+    async submitUrlUpload() {
+        const title = document.getElementById('url-title').value.trim();
+        const url = document.getElementById('url-link').value.trim();
+        const description = document.getElementById('url-description').value.trim();
+        
+        if (!title || !url) {
+            this.showMessage('请填写标题和URL链接', 'error');
+            return;
+        }
+        
+        // 验证URL格式
+        try {
+            new URL(url);
+        } catch (error) {
+            this.showMessage('请输入有效的URL格式', 'error');
+            return;
+        }
+        
+        try {
+            const result = await this.api.createUrlFile({
+                title: title,
+                url: url,
+                description: description
+            });
+            
+            if (result.success) {
+                this.showMessage('URL链接添加成功', 'success');
+                this.hideUrlUploadModal();
+                
+                // 重新加载文件列表（包括普通文件和URL文件）
+                const [files, urlFiles] = await Promise.all([
+                    this.api.getFiles(this.currentFolderId),
+                    this.api.getUrlFiles(this.currentFolderId)
+                ]);
+                this.allFiles = [...files, ...urlFiles];
+                this.renderFileList(this.allFiles);
+                
+                // 更新文件计数
+                this.updateFileCount(this.allFiles.length);
+            } else {
+                this.showMessage(result.error || '添加失败', 'error');
+            }
+        } catch (error) {
+            this.showMessage('添加失败: ' + error.message, 'error');
+        }
+    }
+    
+    // 复制URL到剪贴板
+    async copyUrl(file) {
+        try {
+            await navigator.clipboard.writeText(file.url);
+            this.showMessage('URL已复制到剪贴板', 'success');
+        } catch (error) {
+            // 降级方案：使用传统方法复制
+            const textArea = document.createElement('textarea');
+            textArea.value = file.url;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            this.showMessage('URL已复制到剪贴板', 'success');
+        }
+    }
+    
+    // 预览URL链接
+    previewUrl(file) {
+        // 强制隐藏html和body滚动条
+        document.body.style.overflow = 'hidden';
+        document.body.style.height = '100%';
+        document.documentElement.style.overflow = 'hidden';
+        document.documentElement.style.height = '100%';
+        
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
+        modal.style.overflow = 'hidden';
+        
+        modal.innerHTML = `
+            <div class="relative w-full h-full" style="overflow: hidden;">
+                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fa fa-times"></i>
+                </button>
+                <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-20">
+                    <h3 class="text-lg font-semibold">${file.title || 'URL链接'}</h3>
+                    <p class="text-sm text-gray-300">${file.url}</p>
+                </div>
+                <iframe id="url-preview-iframe" src="${file.url}" class="w-full h-full" style="border: none;"></iframe>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // 监听iframe加载错误
+        const iframe = modal.querySelector('#url-preview-iframe');
+        iframe.onload = function() {
+            // iframe加载成功，检查是否被阻止
+            try {
+                // 尝试访问iframe内容，如果被阻止会抛出错误
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                if (!iframeDoc) {
+                    // 无法访问iframe内容，说明被阻止了
+                    showBlockedMessage();
+                }
+            } catch (error) {
+                // 出现错误，说明iframe被阻止
+                showBlockedMessage();
+            }
+        };
+        
+        iframe.onerror = function() {
+            // iframe加载失败
+            showBlockedMessage();
+        };
+        
+        // 显示被阻止的提示
+        function showBlockedMessage() {
+            modal.innerHTML = `
+                <div class="relative w-full h-full" style="overflow: hidden;">
+                    <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fa fa-times"></i>
+                    </button>
+                    <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-20">
+                        <h3 class="text-lg font-semibold">${file.title || 'URL链接'}</h3>
+                        <p class="text-sm text-gray-300">${file.url}</p>
+                    </div>
+                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+                        <div class="bg-white/95 backdrop-blur-sm rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl border border-white/20">
+                            <div class="w-20 h-20 bg-gradient-to-br from-red-400 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                                <i class="fa fa-shield-alt text-3xl text-white"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-3 text-gray-800">安全限制</h3>
+                            <p class="text-gray-600 mb-8 leading-relaxed">该网站设置了安全策略，不允许在框架中显示。为了您的安全，我们需要跳转到新页面。</p>
+                            
+                            <div class="space-y-4">
+                                <button class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg" onclick="window.open('${file.url}', '_blank')">
+                                    <i class="fa fa-external-link mr-3"></i>在新标签页打开
+                                </button>
+                                <button class="w-full bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg" onclick="navigator.clipboard.writeText('${file.url}').then(() => { this.parentElement.parentElement.parentElement.parentElement.remove(); this.showMessage('链接已复制到剪贴板', 'success'); })">
+                                    <i class="fa fa-copy mr-3"></i>复制链接
+                                </button>
+                            </div>
+                            
+                            <div class="mt-6 pt-4 border-t border-gray-200">
+                                <p class="text-xs text-gray-500">这是网站的安全保护机制，确保您的浏览安全</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 点击背景关闭
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+        
+        // 恢复滚动条
+        modal.addEventListener('remove', () => {
+            document.body.style.overflow = '';
+            document.body.style.height = '';
+            document.documentElement.style.overflow = '';
+            document.documentElement.style.height = '';
+        });
     }
 }
 

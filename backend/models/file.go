@@ -31,3 +31,11 @@ type FileResponse struct {
 type MoveFileRequest struct {
 	FolderID int `json:"folder_id"`
 }
+
+// CreateUrlRequest URL创建请求结构体
+type CreateUrlRequest struct {
+	Title       string `json:"title"`
+	URL         string `json:"url"`
+	Description string `json:"description"`
+	UserID      string `json:"user_id"`
+}

@@ -56,6 +56,11 @@ func (h *FileHandler) GetFiles(c *gin.Context) {
 		return
 	}
 
+	// 确保files不为nil，如果为nil则初始化为空数组
+	if files == nil {
+		files = []models.File{}
+	}
+
 	response := models.FileListResponse{
 		Success: true,
 		Files:   files,

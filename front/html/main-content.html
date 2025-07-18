@@ -203,6 +203,9 @@
         <button class="file-type-btn bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]" data-type="audio">
             <i class="fa fa-file-audio-o mr-1"></i> 音频
         </button>
+        <button class="file-type-btn bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]" data-type="url">
+            <i class="fa fa-link mr-1"></i> URL
+        </button>
         <button class="file-type-btn bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]" data-type="other">
             <i class="fa fa-file-o mr-1"></i> 其他
         </button>
@@ -373,6 +376,50 @@
             </button>
             <button id="save-settings-btn" class="px-4 py-2 bg-gradient-to-r from-primary/80 to-secondary/80 hover:from-primary to-secondary text-white rounded-lg shadow-md shadow-primary/20 transition-all duration-300 transform hover:scale-[1.03]">
                 <i class="fa fa-save mr-1"></i> 保存设置
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- URL上传模态框 -->
+<div id="url-upload-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300">
+    <div class="glass-effect rounded-2xl max-w-2xl w-full mx-4 border border-blue-light/20 shadow-2xl transform scale-95 transition-all duration-300">
+        <div class="p-6 border-b border-blue-light/20 flex justify-between items-center">
+            <h3 class="text-xl font-semibold text-white">添加URL链接</h3>
+            <button id="close-url-upload-btn" class="text-gray-400 hover:text-white transition-colors">
+                <i class="fa fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <form id="url-upload-form" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">标题 <span class="text-red-400">*</span></label>
+                    <input type="text" id="url-title" name="title" required
+                           class="w-full bg-dark-light border border-blue-light/30 text-gray-100 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-light/50 focus:border-blue-light transition-all duration-300"
+                           placeholder="请输入链接标题">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">URL链接 <span class="text-red-400">*</span></label>
+                    <input type="url" id="url-link" name="url" required
+                           class="w-full bg-dark-light border border-blue-light/30 text-gray-100 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-light/50 focus:border-blue-light transition-all duration-300"
+                           placeholder="请输入网站URL，例如：https://www.example.com">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">备注</label>
+                    <textarea id="url-description" name="description" rows="3"
+                              class="w-full bg-dark-light border border-blue-light/30 text-gray-100 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-light/50 focus:border-blue-light transition-all duration-300"
+                              placeholder="请输入备注信息（可选）"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="p-6 border-t border-blue-light/20 flex justify-end space-x-3">
+            <button id="cancel-url-upload-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors">
+                取消
+            </button>
+            <button id="submit-url-upload-btn" class="px-4 py-2 bg-gradient-to-r from-blue-light/80 to-purple-light/80 hover:from-blue-light hover:to-purple-light text-white rounded-lg shadow-md shadow-blue-light/20 transition-all duration-300 transform hover:scale-[1.03]">
+                <i class="fa fa-link mr-1"></i> 添加链接
             </button>
         </div>
     </div>

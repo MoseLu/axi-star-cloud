@@ -29,6 +29,11 @@ func MigrateDatabase(db *sql.DB) error {
 		return err
 	}
 
+	// 添加URL字段（如果不存在）
+	if err := addUrlFields(db); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -248,6 +253,39 @@ func MigrateFileTypes(db *sql.DB) error {
 	}
 	if rowsAffected > 0 {
 		log.Printf("成功迁移 %d 个PowerPoint文件为presentation类型", rowsAffected)
+	}
+
+	return nil
+}
+
+// addUrlFields 添加URL相关字段
+func addUrlFields(db *sql.DB) error {
+	// 检查 title 字段是否存在
+	var columnExists int
+	err := db.QueryRow(`
+		SELECT COUNT(*) 
+		FROM information_schema.columns 
+		WHERE table_name = 'files' AND column_name = 'title'
+	`).Scan(&columnExists)
+
+	if err != nil {
+		return err
+	}
+
+	if columnExists == 0 {
+		// 添加URL相关字段
+		_, err := db.Exec("ALTER TABLE files ADD COLUMN title VARCHAR(255)")
+		if err != nil {
+			return err
+		}
+		_, err = db.Exec("ALTER TABLE files ADD COLUMN url TEXT")
+		if err != nil {
+			return err
+		}
+		_, err = db.Exec("ALTER TABLE files ADD COLUMN description TEXT")
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

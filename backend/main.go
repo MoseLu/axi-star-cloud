@@ -47,6 +47,11 @@ func main() {
 		log.Printf("迁移文件类型分类失败: %v", err)
 	}
 
+	// 创建URL文件表
+	if err := database.MigrateUrlFiles(db); err != nil {
+		log.Fatalf("创建URL文件表失败: %v", err)
+	}
+
 	// 只在第一次启动时设置默认存储限制
 	if err := database.SetDefaultStorageLimitsIfNeeded(db); err != nil {
 		// 静默处理，不打印错误
@@ -62,6 +67,7 @@ func main() {
 	fileRepo := database.NewFileRepository(db)
 	folderRepo := database.NewFolderRepository(db)
 	docRepo := database.NewDocumentRepository(db)
+	urlFileRepo := database.NewUrlFileRepository(db)
 
 	// 初始化处理器层
 	authHandler := handlers.NewAuthHandler(userRepo)
@@ -70,6 +76,7 @@ func main() {
 	storageHandler := handlers.NewStorageHandler(userRepo)
 	profileHandler := handlers.NewProfileHandler(userRepo)
 	documentHandler := handlers.NewDocumentHandler(docRepo)
+	urlFileHandler := handlers.NewUrlFileHandler(urlFileRepo, userRepo, folderRepo)
 
 	// 创建Gin引擎
 	router := gin.Default()
@@ -95,7 +102,7 @@ func main() {
 	routerManager := routes.NewRouter(router)
 
 	// 设置所有路由
-	routerManager.SetupRoutes(authHandler, fileHandler, folderHandler, storageHandler, profileHandler, documentHandler)
+	routerManager.SetupRoutes(authHandler, fileHandler, folderHandler, storageHandler, profileHandler, documentHandler, urlFileHandler)
 
 	// 构建服务器地址
 	host := cfg.Server.Host

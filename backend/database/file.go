@@ -25,13 +25,13 @@ func (r *FileRepository) GetFilesByUserID(userID string, folderID *int) ([]model
 	if folderID == nil {
 		// 查询该用户的所有文件（包括文件夹中的文件）
 		rows, err = r.db.Query(`
-			SELECT id, name, size, type, path, user_id, folder_id, created_at, updated_at 
+			SELECT id, name, size, type, path, user_id, folder_id, created_at, updated_at
 			FROM files WHERE user_id = ? 
 			ORDER BY created_at DESC`, userID)
 	} else {
 		// 查询指定文件夹的文件
 		rows, err = r.db.Query(`
-			SELECT id, name, size, type, path, user_id, folder_id, created_at, updated_at 
+			SELECT id, name, size, type, path, user_id, folder_id, created_at, updated_at
 			FROM files WHERE user_id = ? AND folder_id = ? 
 			ORDER BY created_at DESC`, userID, *folderID)
 	}
@@ -58,7 +58,7 @@ func (r *FileRepository) GetFilesByUserID(userID string, folderID *int) ([]model
 // GetFileByID 根据ID获取文件
 func (r *FileRepository) GetFileByID(fileID int, userID string) (*models.File, error) {
 	var file models.File
-	query := `SELECT id, name, size, type, path, user_id, folder_id, created_at, updated_at 
+	query := `SELECT id, name, size, type, path, user_id, folder_id, created_at, updated_at
 			  FROM files WHERE id = ? AND user_id = ?`
 
 	err := r.db.QueryRow(query, fileID, userID).Scan(
