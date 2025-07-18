@@ -1333,7 +1333,172 @@ class UIManager {
     }
 
     // 预览Excel文档
-    previewExcel(file) {
+    async previewExcel(file) {
+        try {
+            // 构建文件URL
+            let fileUrl = file.path || `/uploads/${file.type}/${file.name}`;
+            
+            // 尝试多种路径格式
+            const possibleUrls = [
+                fileUrl,
+                file.path,
+                `/uploads/${file.type}/${file.name}`,
+                `/static/uploads/${file.type}/${file.name}`
+            ];
+            
+            let response = null;
+            let successfulUrl = null;
+            
+            for (const url of possibleUrls) {
+                if (!url) continue;
+                
+                try {
+                    response = await fetch(url);
+                    if (response.ok) {
+                        successfulUrl = url;
+                        break;
+                    }
+                } catch (e) {
+                    // 静默处理错误
+                }
+            }
+            
+            if (!response || !response.ok) {
+                throw new Error(`HTTP ${response?.status || 'unknown'}: ${response?.statusText || 'Failed to fetch'}`);
+            }
+            
+            const arrayBuffer = await response.arrayBuffer();
+            
+            // 检查是否加载了SheetJS库
+            if (typeof XLSX === 'undefined') {
+                // 如果没有SheetJS库，显示下载选项
+                this.showExcelDownloadOptions(file);
+                return;
+            }
+            
+            // 使用SheetJS解析Excel文件
+            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+            
+            // 获取第一个工作表
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            
+            // 转换为JSON数据
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            
+            // 显示表格预览
+            this.showExcelTablePreview(file, jsonData, workbook.SheetNames);
+            
+        } catch (error) {
+            console.error('Excel预览失败:', error);
+            // 如果预览失败，显示下载选项
+            this.showExcelDownloadOptions(file);
+        }
+    }
+
+    // 显示Excel表格预览
+    showExcelTablePreview(file, data, sheetNames) {
+        document.body.classList.add('modal-open');
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
+        modal.style.overflow = 'hidden';
+        
+        // 生成表格HTML
+        const tableHTML = this.generateTableHTML(data);
+        
+        modal.innerHTML = `
+            <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
+                <!-- 关闭按钮 -->
+                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fa fa-times"></i>
+                </button>
+                
+                <!-- 文件信息 -->
+                <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
+                            <i class="fa fa-file-excel-o text-green-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold">${file.name}</h3>
+                            <p class="text-gray-300 text-sm">Excel表格 • ${sheetNames.length} 个工作表</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 表格内容容器 -->
+                <div class="bg-white rounded-lg w-full h-full max-w-7xl max-h-[90vh] preview-content modal-scrollbar" style="overflow: auto;">
+                    <div class="p-6">
+                        <div class="mb-4">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-2">工作表: ${sheetNames[0]}</h4>
+                            <p class="text-sm text-gray-600">共 ${data.length} 行数据</p>
+                        </div>
+                        <div class="overflow-x-auto">
+                            ${tableHTML}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // 点击背景关闭
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+                document.body.classList.remove('modal-open');
+            }
+        });
+        
+        // ESC键关闭
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+                document.body.classList.remove('modal-open');
+            }
+        });
+    }
+
+    // 生成表格HTML
+    generateTableHTML(data) {
+        if (!data || data.length === 0) {
+            return '<div class="text-center text-gray-500 py-8">表格为空</div>';
+        }
+        
+        let tableHTML = '<table class="min-w-full border border-gray-300 bg-white">';
+        
+        // 添加表头
+        if (data.length > 0) {
+            tableHTML += '<thead class="bg-gray-50">';
+            tableHTML += '<tr>';
+            const headers = data[0];
+            headers.forEach((header, index) => {
+                tableHTML += `<th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b border-gray-300">${header || `列${index + 1}`}</th>`;
+            });
+            tableHTML += '</tr>';
+            tableHTML += '</thead>';
+        }
+        
+        // 添加数据行
+        tableHTML += '<tbody>';
+        for (let i = 1; i < data.length; i++) {
+            const row = data[i];
+            tableHTML += '<tr class="hover:bg-gray-50">';
+            row.forEach((cell, index) => {
+                const cellValue = cell !== undefined && cell !== null ? cell.toString() : '';
+                tableHTML += `<td class="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">${cellValue}</td>`;
+            });
+            tableHTML += '</tr>';
+        }
+        tableHTML += '</tbody>';
+        tableHTML += '</table>';
+        
+        return tableHTML;
+    }
+
+    // 显示Excel下载选项（当无法预览时）
+    showExcelDownloadOptions(file) {
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 bg-black/80 z-50 flex items-center justify-center';
         modal.innerHTML = `
