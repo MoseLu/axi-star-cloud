@@ -1443,7 +1443,6 @@ class UIManager {
                         <!-- 表格标题 -->
                         <div class="text-center mb-6">
                             <h4 class="text-2xl font-bold text-gray-800 mb-2">工作表: ${sheetNames[0]}</h4>
-                            <p class="text-sm text-gray-600">共 ${data.length - 1} 行数据</p>
                         </div>
                         
                         <!-- 表格容器 -->
@@ -1463,11 +1462,11 @@ class UIManager {
                                 <!-- 每页显示数量控制 -->
                                 <div class="flex items-center space-x-2">
                                     <span class="text-sm text-gray-600">每页</span>
-                                    <select id="page-size-select" class="text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 w-16">
-                                        <option value="10">10</option>
-                                        <option value="20" selected>20</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
+                                    <select id="page-size-select" class="text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 w-16">
+                                        <option value="10" class="text-gray-700">10</option>
+                                        <option value="20" selected class="text-gray-700">20</option>
+                                        <option value="50" class="text-gray-700">50</option>
+                                        <option value="100" class="text-gray-700">100</option>
                                     </select>
                                     <span class="text-sm text-gray-600">条</span>
                                 </div>
