@@ -1,0 +1,49 @@
+<!-- 文件列表 -->
+<div class="bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-2xl p-6 border border-purple-400/30 shadow-xl relative overflow-hidden backdrop-blur-sm">
+    <!-- 背景装饰 -->
+    <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-blue-500/5 to-cyan-500/5"></div>
+    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
+    <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-cyan-500/10 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
+    
+    <div class="relative z-10">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400">文件列表</h3>
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-xl px-4 py-2 border border-purple-400/30 hover:border-purple-400/50 transition-all duration-300 shadow-lg">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-lg flex items-center justify-center">
+                            <i class="fa fa-files-o text-purple-300 text-sm"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-300" id="file-count-desc">
+                            共 <span id="file-count-display" class="text-purple-300 font-bold">0</span> 个文件
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 面包屑导航容器 -->
+        <div id="breadcrumb-container" class="hidden mb-4 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-xl p-4 border border-purple-400/30 shadow-lg backdrop-blur-sm">
+            <!-- 面包屑导航将通过JavaScript动态生成 -->
+        </div>
+        
+        <!-- 文件网格容器 -->
+        <div id="files-container">
+            <div id="files-grid" class="files-grid">
+                <!-- 文件卡片将通过JavaScript动态生成 -->
+            </div>
+        </div>
+        
+        <!-- 空状态 -->
+        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-24 h-24 mb-6 rounded-full bg-purple-light/10 flex items-center justify-center animate-pulse-slow">
+                <i class="fa fa-folder-open-o text-4xl text-purple-light/70"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300 mb-2">暂无文件</h2>
+            <p class="text-gray-400 max-w-md mb-6">你的云盘是空的。点击上传按钮添加文件，或拖放文件到此处。</p>
+            <button id="empty-upload-btn" class="bg-gradient-to-r from-primary/80 to-secondary/80 hover:from-primary to-secondary text-white px-6 py-3 rounded-lg shadow-md shadow-primary/20 transition-all duration-300 transform hover:scale-[1.03]">
+                <i class="fa fa-upload mr-2"></i>上传文件
+            </button>
+        </div>
+    </div>
+</div> 
