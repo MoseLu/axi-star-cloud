@@ -828,8 +828,8 @@ class UIManager {
         const day = String(date.getDate()).padStart(2, '0');
         const formattedDate = `${year}-${month}-${day}`;
 
-        // 获取文件大小
-        const fileSize = file.size ? this.formatStorageSize(file.size) : '0 B';
+        // 获取文件大小 - URL文件不显示大小
+        const fileSize = file.type === 'url' ? 'URL链接' : (file.size ? this.formatStorageSize(file.size) : '0 B');
 
         // 生成缩略图或图标
         const thumbnailContent = this.generateThumbnailContent(file);
@@ -871,7 +871,7 @@ class UIManager {
                 <!-- 第二排：文件大小和日期（带图标） -->
                 <div class="file-info flex items-center justify-center space-x-1 mb-2 text-xs text-gray-400">
                     <div class="flex items-center space-x-1 flex-shrink-0">
-                        <i class="fa fa-hdd-o text-blue-400 flex-shrink-0 text-xs"></i>
+                        <i class="fa ${file.type === 'url' ? 'fa-link' : 'fa-hdd-o'} text-blue-400 flex-shrink-0 text-xs"></i>
                         <span class="bg-gray-800/50 px-1 py-0.5 rounded-full font-medium truncate max-w-[60px] text-blue-300" title="${fileSize}">${fileSize}</span>
                     </div>
                     <div class="flex items-center space-x-1 flex-shrink-0">
@@ -5621,6 +5621,8 @@ order: ${order}
         
         // 监听iframe加载错误
         const iframe = modal.querySelector('#url-preview-iframe');
+        let hasShownBlockedMessage = false;
+        
         iframe.onload = function() {
             // iframe加载成功，检查是否被阻止
             try {
@@ -5628,17 +5630,26 @@ order: ${order}
                 const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
                 if (!iframeDoc) {
                     // 无法访问iframe内容，说明被阻止了
-                    showBlockedMessage();
+                    if (!hasShownBlockedMessage) {
+                        hasShownBlockedMessage = true;
+                        showBlockedMessage();
+                    }
                 }
             } catch (error) {
                 // 出现错误，说明iframe被阻止
-                showBlockedMessage();
+                if (!hasShownBlockedMessage) {
+                    hasShownBlockedMessage = true;
+                    showBlockedMessage();
+                }
             }
         };
         
         iframe.onerror = function() {
             // iframe加载失败
-            showBlockedMessage();
+            if (!hasShownBlockedMessage) {
+                hasShownBlockedMessage = true;
+                showBlockedMessage();
+            }
         };
         
         // 显示被阻止的提示
@@ -5664,7 +5675,7 @@ order: ${order}
                                 <button class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg" onclick="window.open('${file.url}', '_blank')">
                                     <i class="fa fa-external-link mr-3"></i>在新标签页打开
                                 </button>
-                                <button class="w-full bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg" onclick="navigator.clipboard.writeText('${file.url}').then(() => { this.parentElement.parentElement.parentElement.parentElement.remove(); this.showMessage('链接已复制到剪贴板', 'success'); })">
+                                <button class="w-full bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg copy-url-btn" data-url="${file.url}">
                                     <i class="fa fa-copy mr-3"></i>复制链接
                                 </button>
                             </div>
@@ -5674,8 +5685,35 @@ order: ${order}
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
+                `;
+            
+            // 添加复制按钮事件监听器
+            const copyBtn = modal.querySelector('.copy-url-btn');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', async function() {
+                    const url = this.getAttribute('data-url');
+                    try {
+                        await navigator.clipboard.writeText(url);
+                        // 使用全局的showMessage方法
+                        if (window.uiManager) {
+                            window.uiManager.showMessage('链接已复制到剪贴板', 'success');
+                        }
+                        modal.remove();
+                    } catch (error) {
+                        // 降级方案
+                        const textArea = document.createElement('textarea');
+                        textArea.value = url;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        if (window.uiManager) {
+                            window.uiManager.showMessage('链接已复制到剪贴板', 'success');
+                        }
+                        modal.remove();
+                    }
+                });
+            }
         }
         
         // 点击背景关闭
