@@ -799,10 +799,15 @@ class UIManager {
         const uploadArea = document.getElementById('upload-area');
         
         if (!fileGrid) {
+            console.log('⏳ 文件网格容器未找到，等待组件加载...');
+            // 等待组件加载完成后再重试
+            setTimeout(() => {
+                this.renderFileList(files);
+            }, 500);
             return;
         }
 
-
+        console.log('✅ 开始渲染文件列表，文件数量:', files ? files.length : 0);
 
         fileGrid.innerHTML = '';
 
