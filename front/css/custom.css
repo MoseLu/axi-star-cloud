@@ -403,25 +403,12 @@
     animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* 文件卡片悬停效果 */
-.file-card {
-    transition: all 0.3s ease, opacity 0.3s ease-in-out;
-}
-
-.file-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
 /* 文件网格过渡效果 */
 #files-grid {
     transition: opacity 0.3s ease-in-out;
 }
 
-/* 空状态过渡效果 */
-#empty-state {
-    transition: opacity 0.3s ease-in-out;
-}
+
 
 /* 按钮发光效果 */
 .btn-glow {

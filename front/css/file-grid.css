@@ -10,31 +10,30 @@
   gap: 1.5rem;
   padding: 1rem 0;
   min-height: 200px;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* 空状态过渡效果 */
+#empty-state {
+  transition: opacity 0.3s ease-in-out;
 }
 
 /* 文件卡片样式 */
-.file-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
 .file-card {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(139, 92, 246, 0.1);
   border-radius: 1rem;
   padding: 1.5rem;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease, opacity 0.3s ease-in-out;
   cursor: pointer;
   position: relative;
   overflow: hidden;
+}
+
+.file-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* 文件夹网格布局 */
@@ -53,10 +52,15 @@
   border: 1px solid rgba(139, 92, 246, 0.1);
   border-radius: 1rem;
   padding: 1.5rem;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease, opacity 0.3s ease-in-out;
   cursor: pointer;
   position: relative;
   overflow: hidden;
+}
+
+.folder-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* 响应式网格布局 */
