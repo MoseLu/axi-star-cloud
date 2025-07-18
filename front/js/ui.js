@@ -458,6 +458,7 @@ class UIManager {
 
     // 登录成功回调
     async onLoginSuccess(userData) {
+        console.log('UIManager.onLoginSuccess 开始处理，用户:', userData.username);
 
         try {
             // 首先更新用户显示（使用登录时获取的基本信息）
@@ -518,7 +519,10 @@ class UIManager {
             // 初始化拖拽功能
             this.setupDragAndDrop();
 
+            console.log('UIManager.onLoginSuccess 处理完成，文件数量:', files.length);
+
         } catch (error) {
+            console.error('UIManager.onLoginSuccess 处理失败:', error);
             this.showMessage('数据加载失败', 'error');
         }
 

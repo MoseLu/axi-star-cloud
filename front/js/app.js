@@ -44,32 +44,29 @@ class App {
 
     // 检查登录状态
     checkLoginStatus() {
-        
+        console.log('App.checkLoginStatus 开始检查登录状态');
         
         // 从localStorage获取用户信息
         const savedUser = localStorage.getItem('currentUser');
         if (savedUser) {
             try {
                 const userData = JSON.parse(savedUser);
-    
+                console.log('找到已保存的用户信息:', userData.username);
                 
                 // 更新API管理器的用户信息
                 if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
                     this.apiManager.setCurrentUser(userData);
-    
                 } else {
-
                     // 延迟重试
                     setTimeout(() => {
                         if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
                             this.apiManager.setCurrentUser(userData);
-        
                         }
                     }, 100);
                 }
                 
                 // 显示主界面
-            this.showMainInterface();
+                this.showMainInterface();
                 this.updateUserDisplay(userData);
                 
                 // 检查并显示管理员菜单
@@ -77,16 +74,20 @@ class App {
                     this.uiManager.checkAndShowAdminMenu();
                 }
                 
-                // 加载用户数据
-                this.loadUserData(userData);
+                // 延迟加载用户数据，确保UI管理器已初始化
+                setTimeout(async () => {
+                    if (this.uiManager) {
+                        await this.uiManager.onLoginSuccess(userData);
+                    }
+                }, 100);
                 
             } catch (error) {
-    
+                console.error('解析用户信息失败:', error);
                 localStorage.removeItem('currentUser');
                 this.showLoginInterface();
             }
         } else {
-
+            console.log('没有找到已保存的用户信息');
             this.showLoginInterface();
         }
     }
@@ -214,14 +215,11 @@ class App {
 
     // 登录成功处理
     async onLoginSuccess(userData) {
-        
+        console.log('App.onLoginSuccess 开始处理登录成功');
         
         // 同步用户信息到API管理器
         if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
             this.apiManager.setCurrentUser(userData);
-
-        } else {
-            
         }
         
         // 更新用户显示
@@ -235,16 +233,12 @@ class App {
             this.uiManager.checkAndShowAdminMenu();
         }
         
-        // 调用UIManager的onLoginSuccess方法
+        // 只调用UIManager的onLoginSuccess方法，避免重复加载数据
         if (this.uiManager) {
-
             await this.uiManager.onLoginSuccess(userData);
         }
         
-        // 加载用户数据
-        await this.loadUserData(userData);
-        
-        
+        console.log('App.onLoginSuccess 处理完成');
     }
 
     // 退出登录
