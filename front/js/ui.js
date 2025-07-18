@@ -2325,8 +2325,6 @@ class UIManager {
             return;
         }
 
-
-
         const totalElement = document.getElementById('total-storage');
         const usedElement = document.getElementById('used-storage');
         const percentageElement = document.getElementById('usage-percentage');
@@ -2340,24 +2338,19 @@ class UIManager {
         if (totalElement) {
             const totalFormatted = this.formatStorageSize(storageInfo.total_space);
             totalElement.textContent = totalFormatted;
-    
         }
         if (usedElement) {
             const usedFormatted = this.formatStorageSize(storageInfo.used_space);
             usedElement.textContent = usedFormatted;
-    
         }
         if (percentageElement) {
             percentageElement.textContent = `${clampedPercentage.toFixed(2)}%`;
-    
         }
         if (progressBar) {
             progressBar.style.width = `${clampedPercentage}%`;
-    
         }
         if (progressText) {
             progressText.textContent = `${clampedPercentage.toFixed(2)}% 已使用`;
-    
         }
     }
 

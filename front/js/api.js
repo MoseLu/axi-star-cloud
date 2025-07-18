@@ -158,7 +158,28 @@ class ApiManager {
             if (!response.ok) {
                 throw new Error(data.error || '获取文件列表失败');
             }
-            return data.files || [];
+            
+            // 转换后端数据格式为前端格式
+            const files = data.files.map(file => {
+                return {
+                    id: file.id,
+                    name: file.name,
+                    size: file.size, // 保持原始数字，让UI层处理格式化
+                    date: (() => {
+                        const date = new Date(file.created_at);
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        return `${year}-${month}-${day}`;
+                    })(),
+                    type: file.type,
+                    icon: this.getFileIcon(file.type),
+                    iconColor: this.getFileIconColor(file.type),
+                    previewUrl: file.path, // 使用后端返回的路径
+                    folder_id: file.folder_id // 添加文件夹ID字段
+                };
+            });
+            return files;
         } catch (error) {
             throw new Error(error.message || '获取文件列表失败');
         }
