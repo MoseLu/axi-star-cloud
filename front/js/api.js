@@ -407,7 +407,7 @@ class ApiManager {
             // 构建下载URL - 确保使用服务器URL而不是文件路径
             const downloadUrl = this.buildApiUrl(`/api/files/${fileId}/download?user_id=${userId}`);
             
-            // 使用fetch先检查文件是否存在，然后触发下载
+            // 使用fetch先检查文件是否存在
             const response = await fetch(downloadUrl, {
                 method: 'HEAD',
                 headers: {
@@ -419,8 +419,14 @@ class ApiManager {
                 throw new Error('文件不存在或下载失败');
             }
             
-            // 使用window.open在新窗口打开下载链接，避免在当前页面打开
-            window.open(downloadUrl, '_blank');
+            // 创建隐藏的下载链接并触发下载
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = ''; // 让浏览器使用服务器返回的文件名
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
             
             return { success: true };
         } catch (error) {
