@@ -257,6 +257,12 @@
 
 
 
+/* 可展开分类封装样式 */
+.expandable-category-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
 /* 可展开标签样式 */
 .expandable {
   position: relative;
@@ -269,24 +275,47 @@
 .expandable[data-expanded="true"] {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3)) !important;
   border-color: rgba(59, 130, 246, 0.5) !important;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
 }
 
-/* 子分类容器样式 */
-#sub-categories-container {
-  transition: all 0.3s ease;
+/* 子分类下拉容器样式 */
+.sub-categories-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 50;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 1rem;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(59, 130, 246, 0.2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-width: 200px;
   opacity: 0;
-  transform: translateX(-10px);
+  transform: translateY(-10px) scale(0.95);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
 }
 
-#sub-categories-container.show {
+.sub-categories-dropdown.show {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
 }
 
 /* 子分类按钮样式 */
 .sub-file-type-btn {
   position: relative;
   overflow: hidden;
+  border-radius: 9999px !important;
+  font-size: 0.875rem;
+  white-space: nowrap;
 }
 
 .sub-file-type-btn::before {
@@ -304,10 +333,70 @@
   left: 100%;
 }
 
+.sub-file-type-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 .sub-file-type-btn.active {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(139, 92, 246, 0.4)) !important;
   border-color: rgba(59, 130, 246, 0.6) !important;
   box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+}
+
+/* 添加小箭头指示器 */
+.sub-categories-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 20px;
+  width: 12px;
+  height: 12px;
+  background: rgba(15, 23, 42, 0.95);
+  border-left: 1px solid rgba(59, 130, 246, 0.3);
+  border-top: 1px solid rgba(59, 130, 246, 0.3);
+  transform: rotate(45deg);
+  z-index: -1;
+}
+
+/* 动画关键帧 */
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dropdownFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+}
+
+/* 子分类按钮进入动画 */
+.sub-categories-dropdown.show .sub-file-type-btn {
+  animation: buttonSlideIn 0.3s ease forwards;
+  animation-delay: calc(var(--btn-index) * 0.1s);
+}
+
+@keyframes buttonSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* 禁用状态的分类按钮 */

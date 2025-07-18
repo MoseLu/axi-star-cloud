@@ -130,23 +130,99 @@ class UIManager {
     // 切换可展开分类的展开/收起
     toggleExpandableCategory(btn) {
         const isExpanded = btn.getAttribute('data-expanded') === 'true';
-        const subContainer = document.getElementById('sub-categories-container');
+        const subContainer = btn.parentElement.querySelector('.sub-categories-dropdown');
         
         if (isExpanded) {
             // 收起子分类
-            btn.setAttribute('data-expanded', 'false');
-            subContainer.classList.remove('show');
-            setTimeout(() => {
-                subContainer.classList.add('hidden');
-            }, 300);
+            this.collapseSubCategories(btn, subContainer);
         } else {
             // 展开子分类
-            btn.setAttribute('data-expanded', 'true');
-            subContainer.classList.remove('hidden');
-            setTimeout(() => {
-                subContainer.classList.add('show');
-            }, 10);
+            this.expandSubCategories(btn, subContainer);
         }
+    }
+
+    // 展开子分类
+    expandSubCategories(btn, subContainer) {
+        btn.setAttribute('data-expanded', 'true');
+        subContainer.classList.remove('hidden');
+        
+        // 设置按钮动画延迟
+        const subButtons = subContainer.querySelectorAll('.sub-file-type-btn');
+        subButtons.forEach((button, index) => {
+            button.style.setProperty('--btn-index', index);
+        });
+        
+        // 触发展开动画
+        requestAnimationFrame(() => {
+            subContainer.classList.add('show');
+        });
+    }
+
+    // 收起子分类
+    collapseSubCategories(btn, subContainer) {
+        btn.setAttribute('data-expanded', 'false');
+        subContainer.classList.remove('show');
+        
+        // 延迟隐藏容器
+        setTimeout(() => {
+            subContainer.classList.add('hidden');
+        }, 300);
+    }
+
+    // 封装创建可展开分类的方法
+    createExpandableCategory(config) {
+        const {
+            type,
+            label,
+            icon,
+            subCategories = []
+        } = config;
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'expandable-category-wrapper relative';
+        
+        const mainBtn = document.createElement('button');
+        mainBtn.className = 'file-type-btn expandable bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]';
+        mainBtn.setAttribute('data-type', type);
+        mainBtn.setAttribute('data-expanded', 'false');
+        mainBtn.innerHTML = `
+            <i class="fa ${icon} mr-1"></i> ${label}
+            <i class="fa fa-chevron-right ml-1 text-xs transition-transform duration-300"></i>
+        `;
+        
+        const dropdown = document.createElement('div');
+        dropdown.className = 'sub-categories-dropdown hidden';
+        
+        // 添加子分类按钮
+        subCategories.forEach(subCategory => {
+            const subBtn = document.createElement('button');
+            subBtn.className = `sub-file-type-btn ${subCategory.classes || ''}`;
+            subBtn.setAttribute('data-type', subCategory.type);
+            subBtn.innerHTML = `
+                <i class="fa ${subCategory.icon} mr-1"></i> ${subCategory.label}
+            `;
+            
+            // 绑定点击事件
+            subBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleSubFileTypeFilter(subBtn);
+            });
+            
+            dropdown.appendChild(subBtn);
+        });
+        
+        // 绑定双击事件
+        mainBtn.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.toggleExpandableCategory(mainBtn);
+        });
+        
+        wrapper.appendChild(mainBtn);
+        wrapper.appendChild(dropdown);
+        
+        return wrapper;
     }
 
     // 处理子分类按钮点击
