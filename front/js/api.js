@@ -174,10 +174,20 @@ class ApiManager {
         }
 
         try {
+            console.log('🔍 获取文件列表 - URL:', url);
+            console.log('🔍 用户ID:', userId);
+            console.log('🔍 API基础URL:', this.baseUrl);
+            
             const response = await fetch(url);
+            console.log('📡 响应状态:', response.status, response.statusText);
+            console.log('📡 响应头:', Object.fromEntries(response.headers.entries()));
+            
             const data = await response.json();
             
+            console.log('📄 API响应数据:', data);
+            
             if (data.success && data.files) {
+                console.log('✅ 文件数据:', data.files);
                 // 转换后端数据格式为前端格式
                 const files = data.files.map(file => {
                     return {
@@ -198,12 +208,14 @@ class ApiManager {
                         folder_id: file.folder_id // 添加文件夹ID字段
                     };
                 });
+                console.log('🔄 转换后的文件数据:', files);
                 return files;
             } else {
+                console.log('❌ API响应异常:', data);
                 return [];
             }
         } catch (error) {
-            console.error('获取文件列表失败:', error);
+            console.error('❌ 获取文件列表失败:', error);
             return [];
         }
     }
@@ -525,6 +537,7 @@ class ApiManager {
 		if (!userId) return 0;
 
 		try {
+			console.log('🔍 获取文件总数 - 用户ID:', userId);
 			const [filesResponse, urlFilesResponse] = await Promise.all([
 				fetch(`${this.baseUrl}/api/files/count?user_id=${userId}`),
 				fetch(`${this.baseUrl}/api/url-files/count?user_id=${userId}`)
@@ -533,11 +546,18 @@ class ApiManager {
 			const filesData = await filesResponse.json();
 			const urlFilesData = await urlFilesResponse.json();
 			
+			console.log('📄 普通文件计数响应:', filesData);
+			console.log('📄 URL文件计数响应:', urlFilesData);
+			
 			const filesCount = filesData.success ? filesData.count : 0;
 			const urlFilesCount = urlFilesData.success ? urlFilesData.count : 0;
 			
-			return filesCount + urlFilesCount;
+			const totalCount = filesCount + urlFilesCount;
+			console.log('📊 文件总数统计:', { filesCount, urlFilesCount, totalCount });
+			
+			return totalCount;
 		} catch (error) {
+			console.error('❌ 获取文件总数失败:', error);
 			return 0;
 		}
 	}
@@ -775,10 +795,14 @@ class ApiManager {
         }
 
         try {
+            console.log('🔍 获取URL文件列表 - URL:', url);
             const response = await fetch(url);
             const data = await response.json();
             
+            console.log('📄 URL文件API响应数据:', data);
+            
             if (data.success && data.files) {
+                console.log('✅ URL文件数据:', data.files);
                 // 转换后端数据格式为前端格式
                 const files = data.files.map(file => {
                     return {
@@ -800,12 +824,14 @@ class ApiManager {
                         folder_id: file.folder_id
                     };
                 });
+                console.log('🔄 转换后的URL文件数据:', files);
                 return files;
             } else {
+                console.log('❌ URL文件API响应异常:', data);
                 return [];
             }
         } catch (error) {
-            console.error('获取URL文件列表失败:', error);
+            console.error('❌ 获取URL文件列表失败:', error);
             return [];
         }
     }

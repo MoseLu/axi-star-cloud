@@ -94,6 +94,7 @@ class App {
     // 加载用户数据
     async loadUserData(userData) {
         try {
+            console.log('🔄 开始加载用户数据:', userData);
 
             
             // 并行加载文件列表、文件夹列表和总文件数（包括普通文件和URL文件）
@@ -104,6 +105,12 @@ class App {
                 this.apiManager.getTotalFileCount()
             ]);
             
+            console.log('📊 加载的数据:', {
+                files: files.length,
+                urlFiles: urlFiles.length,
+                folders: folders.length,
+                totalFileCount
+            });
 
             
             // 更新UI管理器的数据
@@ -111,6 +118,12 @@ class App {
                 this.uiManager.allFiles = [...files, ...urlFiles];
                 this.uiManager.folders = folders;
                 this.uiManager.totalFileCount = totalFileCount; // 保存总文件数
+                
+                console.log('📋 UI管理器数据更新:', {
+                    allFilesCount: this.uiManager.allFiles.length,
+                    foldersCount: this.uiManager.folders.length,
+                    totalFileCount: this.uiManager.totalFileCount
+                });
                 
                 // 更新文件列表显示
                 this.uiManager.updateFileCount(this.uiManager.allFiles.length);
@@ -121,13 +134,14 @@ class App {
                 
                 // 更新存储信息
                 const storageInfo = await this.apiManager.getStorageInfo();
+                console.log('💾 存储信息:', storageInfo);
                 this.uiManager.updateStorageDisplay(storageInfo);
             }
             
 
             
         } catch (error) {
-
+            console.error('❌ 加载用户数据失败:', error);
         }
     }
 
