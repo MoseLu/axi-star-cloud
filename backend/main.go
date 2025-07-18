@@ -41,6 +41,11 @@ func main() {
 		log.Printf("迁移archive文件类型失败: %v", err)
 	}
 
+	// 迁移文件类型分类
+	if err := database.MigrateFileTypes(db); err != nil {
+		log.Printf("迁移文件类型分类失败: %v", err)
+	}
+
 	// 只在第一次启动时设置默认存储限制
 	if err := database.SetDefaultStorageLimitsIfNeeded(db); err != nil {
 		// 静默处理，不打印错误

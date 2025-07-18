@@ -205,3 +205,36 @@ func MigrateArchiveToOther(db *sql.DB) error {
 
 	return nil
 }
+
+// MigrateFileTypes 迁移文件类型分类
+func MigrateFileTypes(db *sql.DB) error {
+	// 更新Excel文件类型
+	query := `UPDATE files SET type = 'spreadsheet' WHERE type = 'document' AND (name LIKE '%.xls' OR name LIKE '%.xlsx')`
+	result, err := db.Exec(query)
+	if err != nil {
+		return fmt.Errorf("迁移Excel文件类型失败: %v", err)
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("获取影响行数失败: %v", err)
+	}
+	if rowsAffected > 0 {
+		log.Printf("成功迁移 %d 个Excel文件为spreadsheet类型", rowsAffected)
+	}
+
+	// 更新PowerPoint文件类型
+	query = `UPDATE files SET type = 'presentation' WHERE type = 'document' AND (name LIKE '%.ppt' OR name LIKE '%.pptx')`
+	result, err = db.Exec(query)
+	if err != nil {
+		return fmt.Errorf("迁移PowerPoint文件类型失败: %v", err)
+	}
+	rowsAffected, err = result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("获取影响行数失败: %v", err)
+	}
+	if rowsAffected > 0 {
+		log.Printf("成功迁移 %d 个PowerPoint文件为presentation类型", rowsAffected)
+	}
+
+	return nil
+}

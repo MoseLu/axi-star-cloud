@@ -218,6 +218,9 @@ func (h *FileHandler) UploadFile(c *gin.Context) {
 	fileType := utils.GetFileType(header.Filename)
 	uploadPath := utils.GetUploadPath(header.Filename, fileType)
 
+	// 添加调试日志
+	log.Printf("🔍 文件上传 - 文件名: %s, 识别类型: %s", header.Filename, fileType)
+
 	// 创建上传目录 - 使用统一的路径处理
 	uploadDir := utils.GetFileUploadDir(fileType)
 
@@ -450,13 +453,13 @@ func (h *FileHandler) DownloadFileRedirect(c *gin.Context) {
 
 	// 构建静态文件URL - 修复重复路径问题
 	staticURL := file.Path
-	
+
 	// 生成一次性token（简化版本，实际可以使用JWT）
 	token := fmt.Sprintf("token_%d_%s", fileID, userID)
-	
+
 	// 重定向到静态文件URL
 	redirectURL := fmt.Sprintf("%s?token=%s", staticURL, token)
-	
+
 	log.Printf("🔄 重定向到静态文件: %s", redirectURL)
 	c.Redirect(http.StatusFound, redirectURL)
 }
