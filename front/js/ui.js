@@ -1577,15 +1577,19 @@ class UIManager {
             // 使用重定向下载API，更高效
             const downloadUrl = this.api.buildApiUrl(`/api/download?id=${file.id}&user_id=${this.api.getCurrentUserId()}`);
             
-            // 创建隐藏的下载链接并触发下载
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            // 移除 download 属性，让浏览器使用默认下载行为
-            // link.download = file.name || ''; // 注释掉这行
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            // 使用window.open在新窗口打开下载链接，避免影响当前页面
+            const downloadWindow = window.open(downloadUrl, '_blank');
+            
+            // 如果window.open被阻止，回退到传统方法
+            if (!downloadWindow) {
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.target = '_blank'; // 在新标签页打开
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
             
             this.showMessage('文件下载已开始', 'success');
         } catch (error) {
