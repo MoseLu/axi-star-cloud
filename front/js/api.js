@@ -407,19 +407,7 @@ class ApiManager {
             // 构建下载URL - 确保使用服务器URL而不是文件路径
             const downloadUrl = this.buildApiUrl(`/api/files/${fileId}/download?user_id=${userId}`);
             
-            // 使用fetch先检查文件是否存在
-            const response = await fetch(downloadUrl, {
-                method: 'HEAD',
-                headers: {
-                    'Accept': 'application/octet-stream'
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error('文件不存在或下载失败');
-            }
-            
-            // 创建隐藏的下载链接并触发下载
+            // 直接创建隐藏的下载链接并触发下载，不发送HEAD请求
             const link = document.createElement('a');
             link.href = downloadUrl;
             link.download = ''; // 让浏览器使用服务器返回的文件名
