@@ -205,7 +205,24 @@ func (r *Router) registerStaticRoutes() {
 	fmt.Printf("🔍 尝试uploads路径:\n")
 	for _, path := range uploadsPaths {
 		if _, err := os.Stat(path); err == nil {
-			r.engine.Static("/uploads", path)
+						// 使用自定义的静态文件处理器，添加下载响应头
+			r.engine.GET("/uploads/*filepath", func(c *gin.Context) {
+				filepathParam := c.Param("filepath")
+				fullPath := filepath.Join(path, filepathParam)
+				
+				// 检查文件是否存在
+				if _, err := os.Stat(fullPath); os.IsNotExist(err) {
+					c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
+					return
+				}
+				
+				// 设置下载响应头
+				c.Header("Content-Disposition", "attachment")
+				c.Header("Cache-Control", "no-cache")
+				
+				// 提供文件
+				c.File(fullPath)
+			})
 			fmt.Printf("✅ 找到uploads路径: %s\n", path)
 			uploadsFound = true
 			break
