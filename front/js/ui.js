@@ -1403,8 +1403,19 @@ class UIManager {
         modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
         modal.style.overflow = 'hidden';
         
-        // 生成表格HTML
-        const tableHTML = this.generateTableHTML(data);
+        // 保存数据到全局变量，供分页更新使用
+        window.currentExcelData = data;
+        
+        // 分页配置
+        const paginationConfig = {
+            currentPage: 1,
+            pageSize: 20,
+            totalRows: data.length - 1, // 减去表头
+            totalPages: Math.ceil((data.length - 1) / 20)
+        };
+        
+        // 生成分页后的表格HTML
+        const tableHTML = this.generatePaginatedTableHTML(data, paginationConfig);
         
         modal.innerHTML = `
             <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
@@ -1429,12 +1440,50 @@ class UIManager {
                 <!-- 表格内容容器 -->
                 <div class="bg-white rounded-lg w-full h-full max-w-7xl max-h-[90vh] preview-content modal-scrollbar" style="overflow: auto;">
                     <div class="p-6">
-                        <div class="mb-4">
-                            <h4 class="text-lg font-semibold text-gray-800 mb-2">工作表: ${sheetNames[0]}</h4>
-                            <p class="text-sm text-gray-600">共 ${data.length} 行数据</p>
+                        <!-- 表格标题和控制栏 -->
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h4 class="text-xl font-semibold text-gray-800 text-center">工作表: ${sheetNames[0]}</h4>
+                                <p class="text-sm text-gray-600 text-center mt-1">共 ${data.length - 1} 行数据</p>
+                            </div>
+                            
+                            <!-- 每页显示数量控制 -->
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-600">每页显示:</span>
+                                <select id="page-size-select" class="text-sm border border-gray-300 rounded px-2 py-1">
+                                    <option value="10">10</option>
+                                    <option value="20" selected>20</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                                <span class="text-sm text-gray-600">行</span>
+                            </div>
                         </div>
+                        
+                        <!-- 表格容器 -->
                         <div class="overflow-x-auto">
                             ${tableHTML}
+                        </div>
+                        
+                        <!-- 分页控制 -->
+                        <div class="flex items-center justify-between mt-6">
+                            <div class="text-sm text-gray-600">
+                                显示第 <span id="current-range">1-${Math.min(paginationConfig.pageSize, data.length - 1)}</span> 行，共 ${data.length - 1} 行
+                            </div>
+                            
+                            <div class="flex items-center space-x-2" id="pagination-controls">
+                                <button class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" id="prev-page" disabled>
+                                    <i class="fa fa-chevron-left mr-1"></i>上一页
+                                </button>
+                                
+                                <div class="flex items-center space-x-1" id="page-numbers">
+                                    <!-- 页码将通过JavaScript动态生成 -->
+                                </div>
+                                
+                                <button class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" id="next-page">
+                                    下一页<i class="fa fa-chevron-right ml-1"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1442,6 +1491,9 @@ class UIManager {
         `;
         
         document.body.appendChild(modal);
+        
+        // 初始化分页控制
+        this.initializePaginationControls(modal, data, paginationConfig);
         
         // 点击背景关闭
         modal.addEventListener('click', (e) => {
@@ -1458,6 +1510,205 @@ class UIManager {
                 document.body.classList.remove('modal-open');
             }
         });
+    }
+
+    // 初始化分页控制
+    initializePaginationControls(modal, data, config) {
+        const pageSizeSelect = modal.querySelector('#page-size-select');
+        const prevPageBtn = modal.querySelector('#prev-page');
+        const nextPageBtn = modal.querySelector('#next-page');
+        const pageNumbers = modal.querySelector('#page-numbers');
+        const currentRange = modal.querySelector('#current-range');
+        
+        // 保存配置到模态框，供分页更新使用
+        modal.paginationConfig = config;
+        
+        // 更新分页配置
+        const updatePagination = (newConfig) => {
+            modal.paginationConfig = { ...modal.paginationConfig, ...newConfig };
+            modal.paginationConfig.totalPages = Math.ceil(modal.paginationConfig.totalRows / modal.paginationConfig.pageSize);
+            
+            // 更新表格内容
+            const tableContainer = modal.querySelector('.overflow-x-auto');
+            tableContainer.innerHTML = this.generatePaginatedTableHTML(data, modal.paginationConfig);
+            
+            // 更新页码显示
+            this.updatePageNumbers(pageNumbers, modal.paginationConfig);
+            
+            // 更新按钮状态
+            prevPageBtn.disabled = modal.paginationConfig.currentPage === 1;
+            nextPageBtn.disabled = modal.paginationConfig.currentPage === modal.paginationConfig.totalPages;
+            
+            // 更新当前范围显示
+            const start = (modal.paginationConfig.currentPage - 1) * modal.paginationConfig.pageSize + 1;
+            const end = Math.min(modal.paginationConfig.currentPage * modal.paginationConfig.pageSize, modal.paginationConfig.totalRows);
+            currentRange.textContent = `${start}-${end}`;
+        };
+        
+        // 每页显示数量变化事件
+        pageSizeSelect.addEventListener('change', (e) => {
+            const newPageSize = parseInt(e.target.value);
+            updatePagination({
+                pageSize: newPageSize,
+                currentPage: 1
+            });
+        });
+        
+        // 上一页按钮事件
+        prevPageBtn.addEventListener('click', () => {
+            if (config.currentPage > 1) {
+                updatePagination({ currentPage: config.currentPage - 1 });
+            }
+        });
+        
+        // 下一页按钮事件
+        nextPageBtn.addEventListener('click', () => {
+            if (config.currentPage < config.totalPages) {
+                updatePagination({ currentPage: config.currentPage + 1 });
+            }
+        });
+        
+        // 初始化页码显示
+        this.updatePageNumbers(pageNumbers, config);
+    }
+
+    // 更新页码显示
+    updatePageNumbers(container, config) {
+        container.innerHTML = '';
+        
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, config.currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(config.totalPages, startPage + maxVisiblePages - 1);
+        
+        // 调整起始页
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+        
+        // 添加第一页
+        if (startPage > 1) {
+            const firstPageBtn = document.createElement('button');
+            firstPageBtn.className = 'px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50';
+            firstPageBtn.textContent = '1';
+            firstPageBtn.addEventListener('click', () => {
+                this.updatePagination(config, 1);
+            });
+            container.appendChild(firstPageBtn);
+            
+            if (startPage > 2) {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'px-2 text-gray-400';
+                ellipsis.textContent = '...';
+                container.appendChild(ellipsis);
+            }
+        }
+        
+        // 添加页码按钮
+        for (let i = startPage; i <= endPage; i++) {
+            const pageBtn = document.createElement('button');
+            pageBtn.className = `px-3 py-1 text-sm border rounded ${
+                i === config.currentPage 
+                    ? 'bg-blue-500 text-white border-blue-500' 
+                    : 'border-gray-300 hover:bg-gray-50'
+            }`;
+            pageBtn.textContent = i;
+            pageBtn.addEventListener('click', () => {
+                this.updatePagination(config, i);
+            });
+            container.appendChild(pageBtn);
+        }
+        
+        // 添加最后一页
+        if (endPage < config.totalPages) {
+            if (endPage < config.totalPages - 1) {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'px-2 text-gray-400';
+                ellipsis.textContent = '...';
+                container.appendChild(ellipsis);
+            }
+            
+            const lastPageBtn = document.createElement('button');
+            lastPageBtn.className = 'px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50';
+            lastPageBtn.textContent = config.totalPages;
+            lastPageBtn.addEventListener('click', () => {
+                this.updatePagination(config, config.totalPages);
+            });
+            container.appendChild(lastPageBtn);
+        }
+    }
+
+    // 更新分页
+    updatePagination(config, newPage) {
+        // 查找当前打开的Excel预览模态框
+        const modal = document.querySelector('.fixed.inset-0.bg-black\\/95');
+        if (modal && window.currentExcelData && modal.paginationConfig) {
+            // 更新配置
+            modal.paginationConfig.currentPage = newPage;
+            
+            const tableContainer = modal.querySelector('.overflow-x-auto');
+            const pageNumbers = modal.querySelector('#page-numbers');
+            const prevPageBtn = modal.querySelector('#prev-page');
+            const nextPageBtn = modal.querySelector('#next-page');
+            const currentRange = modal.querySelector('#current-range');
+            
+            // 更新表格内容
+            tableContainer.innerHTML = this.generatePaginatedTableHTML(window.currentExcelData, modal.paginationConfig);
+            
+            // 更新页码显示
+            this.updatePageNumbers(pageNumbers, modal.paginationConfig);
+            
+            // 更新按钮状态
+            prevPageBtn.disabled = modal.paginationConfig.currentPage === 1;
+            nextPageBtn.disabled = modal.paginationConfig.currentPage === modal.paginationConfig.totalPages;
+            
+            // 更新当前范围显示
+            const start = (modal.paginationConfig.currentPage - 1) * modal.paginationConfig.pageSize + 1;
+            const end = Math.min(modal.paginationConfig.currentPage * modal.paginationConfig.pageSize, modal.paginationConfig.totalRows);
+            currentRange.textContent = `${start}-${end}`;
+        }
+    }
+
+    // 生成分页表格HTML
+    generatePaginatedTableHTML(data, config) {
+        if (!data || data.length === 0) {
+            return '<div class="text-center text-gray-500 py-8">表格为空</div>';
+        }
+        
+        // 计算当前页的数据范围
+        const startIndex = (config.currentPage - 1) * config.pageSize + 1; // +1 跳过表头
+        const endIndex = Math.min(startIndex + config.pageSize - 1, data.length - 1);
+        
+        let tableHTML = '<table class="min-w-full border border-gray-300 bg-white mx-auto">';
+        
+        // 添加表头
+        if (data.length > 0) {
+            tableHTML += '<thead class="bg-gray-50">';
+            tableHTML += '<tr>';
+            const headers = data[0];
+            headers.forEach((header, index) => {
+                tableHTML += `<th class="px-4 py-3 text-center text-sm font-medium text-gray-700 border-b border-gray-300">${header || `列${index + 1}`}</th>`;
+            });
+            tableHTML += '</tr>';
+            tableHTML += '</thead>';
+        }
+        
+        // 添加数据行
+        tableHTML += '<tbody>';
+        for (let i = startIndex; i <= endIndex; i++) {
+            const row = data[i];
+            if (row) {
+                tableHTML += '<tr class="hover:bg-gray-50">';
+                row.forEach((cell, index) => {
+                    const cellValue = cell !== undefined && cell !== null ? cell.toString() : '';
+                    tableHTML += `<td class="px-4 py-3 text-sm text-gray-900 border-b border-gray-200 text-center">${cellValue}</td>`;
+                });
+                tableHTML += '</tr>';
+            }
+        }
+        tableHTML += '</tbody>';
+        tableHTML += '</table>';
+        
+        return tableHTML;
     }
 
     // 生成表格HTML
