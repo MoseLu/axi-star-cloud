@@ -1466,8 +1466,8 @@ class UIManager {
                                 <button onclick="window.open('${pdfUrl}', '_blank')" class="w-full bg-gradient-to-r from-blue-500/80 to-indigo-500/80 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
                                     <i class="fa fa-external-link mr-2"></i>在新窗口打开
                                 </button>
-                                <button onclick="window.open('https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(window.location.origin + pdfUrl)}', '_blank')" class="w-full bg-gradient-to-r from-purple-500/80 to-pink-500/80 hover:from-purple-500 hover:to-pink-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
-                                    <i class="fa fa-eye mr-2"></i>PDF.js预览
+                                <button onclick="this.downloadPDF('${pdfUrl}', '${file.name}')" class="w-full bg-gradient-to-r from-purple-500/80 to-pink-500/80 hover:from-purple-500 hover:to-pink-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                                    <i class="fa fa-eye mr-2"></i>直接预览
                                 </button>
                                 <button class="download-pdf-btn w-full bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-500 hover:to-emerald-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
                                     <i class="fa fa-download mr-2"></i>下载文件
@@ -1489,6 +1489,40 @@ class UIManager {
                 this.downloadFile(file);
             });
         }
+        
+        // 添加PDF预览方法到window对象
+        window.downloadPDF = async (pdfUrl, fileName) => {
+            try {
+                // 使用fetch下载PDF内容
+                const response = await fetch(pdfUrl);
+                if (!response.ok) {
+                    throw new Error('PDF下载失败');
+                }
+                
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                
+                // 在新窗口打开PDF
+                const newWindow = window.open(url, '_blank');
+                if (!newWindow) {
+                    // 如果弹窗被阻止，直接下载
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = fileName;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+                
+                // 清理URL对象
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            } catch (error) {
+                console.error('PDF预览失败:', error);
+                // 如果预览失败，直接在新窗口打开原始URL
+                window.open(pdfUrl, '_blank');
+            }
+        };
         
         // 点击背景关闭
         modal.addEventListener('click', (e) => {
