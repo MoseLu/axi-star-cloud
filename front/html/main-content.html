@@ -167,56 +167,45 @@
         </div>
     </div>
 
-    <!-- 文件类型标签 - 手风琴效果 -->
-    <div class="mb-8">
-        <div class="flex flex-wrap gap-3 overflow-x-auto pb-2">
-            <button class="file-type-btn active bg-gradient-to-r from-primary to-secondary text-white px-5 py-2 rounded-full shadow-md shadow-primary/20 transition-all duration-300 transform hover:scale-[1.02]" data-type="all">
-                全部文件
-            </button>
-            <button class="file-type-btn bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]" data-type="image">
-                <i class="fa fa-file-image-o mr-1"></i> 图片
-            </button>
-            <button class="file-type-btn bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]" data-type="video">
-                <i class="fa fa-file-video-o mr-1"></i> 视频
-            </button>
-            <button class="file-type-btn bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]" data-type="audio">
-                <i class="fa fa-file-audio-o mr-1"></i> 音频
-            </button>
-            <button class="file-type-btn bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]" data-type="other">
-                <i class="fa fa-file-o mr-1"></i> 其他
-            </button>
-            <button class="file-type-btn bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]" data-type="external-docs">
-                <i class="fa fa-book mr-1"></i> 外站文档
-            </button>
-        </div>
+    <!-- 文件类型标签 -->
+    <div class="flex flex-wrap gap-3 mb-8 overflow-x-auto pb-2" id="file-type-container">
+        <button class="file-type-btn active bg-gradient-to-r from-primary to-secondary text-white px-5 py-2 rounded-full shadow-md shadow-primary/20 transition-all duration-300 transform hover:scale-[1.02]" data-type="all">
+            全部文件
+        </button>
+        <button class="file-type-btn bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]" data-type="image">
+            <i class="fa fa-file-image-o mr-1"></i> 图片
+        </button>
+        <button class="file-type-btn bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]" data-type="video">
+            <i class="fa fa-file-video-o mr-1"></i> 视频
+        </button>
+        <button class="file-type-btn expandable bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]" data-type="document" data-expanded="false">
+            <i class="fa fa-file-text-o mr-1"></i> 文档
+            <i class="fa fa-chevron-right ml-1 text-xs transition-transform duration-300"></i>
+        </button>
+        <button class="file-type-btn bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]" data-type="audio">
+            <i class="fa fa-file-audio-o mr-1"></i> 音频
+        </button>
+        <button class="file-type-btn bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]" data-type="other">
+            <i class="fa fa-file-o mr-1"></i> 其他
+        </button>
+        <button class="file-type-btn bg-dark-light hover:bg-dark-light/70 text-white px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-[1.02]" data-type="external-docs">
+            <i class="fa fa-book mr-1"></i> 外站文档
+        </button>
         
-        <!-- 文档分类手风琴 -->
-        <div class="mt-4 accordion-container">
-            <div class="accordion-item bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-400/30 overflow-hidden">
-                <button class="accordion-header w-full px-5 py-3 text-left bg-gradient-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 transition-all duration-300 flex items-center justify-between" data-type="document">
-                    <div class="flex items-center">
-                        <i class="fa fa-file-text-o mr-2 text-blue-400"></i>
-                        <span class="font-medium text-white">文档</span>
-                    </div>
-                    <i class="fa fa-chevron-down text-blue-400 transition-transform duration-300"></i>
-                </button>
-                <div class="accordion-content hidden bg-gradient-to-r from-blue-500/5 to-purple-500/5 border-t border-blue-400/20">
-                    <div class="p-4 flex flex-wrap gap-2">
-                        <button class="sub-file-type-btn bg-gradient-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-[1.02] border border-blue-400/30" data-type="document">
-                            <i class="fa fa-file-text-o mr-1"></i> 所有文档
-                        </button>
-                        <button class="sub-file-type-btn bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-[1.02] border border-green-400/30" data-type="word">
-                            <i class="fa fa-file-word-o mr-1"></i> Word
-                        </button>
-                        <button class="sub-file-type-btn bg-gradient-to-r from-orange-500/20 to-amber-500/20 hover:from-orange-500/30 hover:to-amber-500/30 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-[1.02] border border-orange-400/30" data-type="excel">
-                            <i class="fa fa-file-excel-o mr-1"></i> Excel
-                        </button>
-                        <button class="sub-file-type-btn bg-gradient-to-r from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-[1.02] border border-red-400/30" data-type="powerpoint">
-                            <i class="fa fa-file-powerpoint-o mr-1"></i> PowerPoint
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <!-- 子分类标签容器 -->
+        <div id="sub-categories-container" class="hidden flex flex-wrap gap-2 ml-2 pl-4 border-l-2 border-blue-400/30">
+            <button class="sub-file-type-btn bg-gradient-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-[1.02] border border-blue-400/30" data-type="document">
+                <i class="fa fa-file-text-o mr-1"></i> 所有文档
+            </button>
+            <button class="sub-file-type-btn bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-[1.02] border border-green-400/30" data-type="word">
+                <i class="fa fa-file-word-o mr-1"></i> Word
+            </button>
+            <button class="sub-file-type-btn bg-gradient-to-r from-orange-500/20 to-amber-500/20 hover:from-orange-500/30 hover:to-amber-500/30 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-[1.02] border border-orange-400/30" data-type="excel">
+                <i class="fa fa-file-excel-o mr-1"></i> Excel
+            </button>
+            <button class="sub-file-type-btn bg-gradient-to-r from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-[1.02] border border-red-400/30" data-type="powerpoint">
+                <i class="fa fa-file-powerpoint-o mr-1"></i> PowerPoint
+            </button>
         </div>
     </div>
 

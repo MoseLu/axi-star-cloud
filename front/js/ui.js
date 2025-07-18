@@ -127,23 +127,25 @@ class UIManager {
         }
     }
 
-    // 切换手风琴展开/收起
-    toggleAccordion(header) {
-        const content = header.nextElementSibling;
-        const isActive = header.classList.contains('active');
+    // 切换可展开分类的展开/收起
+    toggleExpandableCategory(btn) {
+        const isExpanded = btn.getAttribute('data-expanded') === 'true';
+        const subContainer = document.getElementById('sub-categories-container');
         
-        // 移除所有手风琴的活动状态
-        document.querySelectorAll('.accordion-header').forEach(h => {
-            h.classList.remove('active');
-        });
-        document.querySelectorAll('.accordion-content').forEach(c => {
-            c.classList.remove('show');
-        });
-        
-        // 如果当前手风琴未激活，则激活它
-        if (!isActive) {
-            header.classList.add('active');
-            content.classList.add('show');
+        if (isExpanded) {
+            // 收起子分类
+            btn.setAttribute('data-expanded', 'false');
+            subContainer.classList.remove('show');
+            setTimeout(() => {
+                subContainer.classList.add('hidden');
+            }, 300);
+        } else {
+            // 展开子分类
+            btn.setAttribute('data-expanded', 'true');
+            subContainer.classList.remove('hidden');
+            setTimeout(() => {
+                subContainer.classList.add('show');
+            }, 10);
         }
     }
 
@@ -244,11 +246,12 @@ class UIManager {
             // });
         }
 
-        // 手风琴头部点击事件
-        document.querySelectorAll('.accordion-header').forEach(header => {
-            header.addEventListener('click', (e) => {
+        // 可展开标签双击事件
+        document.querySelectorAll('.expandable').forEach(btn => {
+            btn.addEventListener('dblclick', (e) => {
                 e.preventDefault();
-                this.toggleAccordion(header);
+                e.stopPropagation();
+                this.toggleExpandableCategory(btn);
             });
         });
 

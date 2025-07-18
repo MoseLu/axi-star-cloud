@@ -257,42 +257,30 @@
 
 
 
-/* 手风琴效果样式 */
-.accordion-container {
+/* 可展开标签样式 */
+.expandable {
   position: relative;
 }
 
-.accordion-item {
-  transition: all 0.3s ease;
+.expandable[data-expanded="true"] .fa-chevron-right {
+  transform: rotate(90deg);
 }
 
-.accordion-header {
-  position: relative;
-  cursor: pointer;
-  user-select: none;
-}
-
-.accordion-header:hover {
-  transform: translateY(-1px);
-}
-
-.accordion-header.active {
+.expandable[data-expanded="true"] {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3)) !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
 }
 
-.accordion-header.active .fa-chevron-down {
-  transform: rotate(180deg);
+/* 子分类容器样式 */
+#sub-categories-container {
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateX(-10px);
 }
 
-.accordion-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease, padding 0.3s ease;
-}
-
-.accordion-content.show {
-  max-height: 200px;
-  padding: 1rem;
+#sub-categories-container.show {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 /* 子分类按钮样式 */
@@ -320,22 +308,6 @@
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(139, 92, 246, 0.4)) !important;
   border-color: rgba(59, 130, 246, 0.6) !important;
   box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
-}
-
-/* 悬浮展开效果 */
-.accordion-item:hover .accordion-content:not(.show) {
-  max-height: 200px;
-  padding: 1rem;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 0.5rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
 /* 禁用状态的分类按钮 */
