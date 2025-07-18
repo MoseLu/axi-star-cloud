@@ -1574,23 +1574,17 @@ class UIManager {
     // 下载文件
     async downloadFile(file) {
         try {
-            const userId = this.api.getCurrentUserId();
-            const downloadUrl = this.api.buildApiUrl(`/api/files/${file.id}/download?user_id=${userId}`);
+            // 直接使用文件的静态路径进行下载
+            const downloadUrl = this.api.buildApiUrl(file.previewUrl);
             
-            // 使用fetch先检查文件是否存在
-            const checkResponse = await fetch(downloadUrl, { method: 'HEAD' });
-            
-            if (!checkResponse.ok) {
-                if (checkResponse.status === 404) {
-                    this.showMessage('文件不存在', 'error');
-                } else {
-                    this.showMessage(`下载失败: ${checkResponse.status} ${checkResponse.statusText}`, 'error');
-                }
-                return;
-            }
-            
-            // 使用window.open直接下载
-            window.open(downloadUrl, '_blank');
+            // 创建隐藏的下载链接并触发下载
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = file.name || ''; // 使用文件名
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
             
             this.showMessage('文件下载已开始', 'success');
         } catch (error) {
