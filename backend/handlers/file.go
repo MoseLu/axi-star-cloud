@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 
 	"backend/database"
 	"backend/models"
@@ -148,45 +147,9 @@ func (h *FileHandler) DownloadFile(c *gin.Context) {
 		return
 	}
 
-	// 根据文件类型决定响应头
-	fileType := utils.GetFileType(file.Name)
-	var disposition string
-	var contentType string
-
-	// 根据文件类型设置不同的响应头
-	switch fileType {
-	case "image":
-		// 图片文件下载，但设置正确的MIME类型
-		disposition = "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
-		contentType = "image/" + strings.ToLower(filepath.Ext(file.Name)[1:]) // 如 image/png, image/jpeg
-	case "video":
-		// 视频文件下载
-		disposition = "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
-		contentType = "video/" + strings.ToLower(filepath.Ext(file.Name)[1:]) // 如 video/mp4
-	case "audio":
-		// 音频文件下载
-		disposition = "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
-		contentType = "audio/" + strings.ToLower(filepath.Ext(file.Name)[1:]) // 如 audio/mp3
-	case "document":
-		// 文档文件根据类型决定
-		ext := strings.ToLower(filepath.Ext(file.Name))
-		switch ext {
-		case ".pdf":
-			disposition = "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
-			contentType = "application/pdf"
-		case ".txt", ".md":
-			disposition = "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
-			contentType = "text/plain"
-		default:
-			// 其他文档类型下载
-			disposition = "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
-			contentType = "application/octet-stream"
-		}
-	default:
-		// 其他文件类型（如zip、exe等）强制下载
-		disposition = "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
-		contentType = "application/octet-stream"
-	}
+	// 强制所有文件都下载，不区分类型
+	disposition := "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
+	contentType := "application/octet-stream"
 
 	c.Header("Content-Disposition", disposition)
 	c.Header("Content-Type", contentType)

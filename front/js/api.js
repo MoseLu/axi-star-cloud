@@ -404,11 +404,23 @@ class ApiManager {
         if (!userId) return { success: false, error: '请先登录' };
 
         try {
-            // 构建下载URL
+            // 构建下载URL - 确保使用服务器URL而不是文件路径
             const downloadUrl = this.buildApiUrl(`/api/files/${fileId}/download?user_id=${userId}`);
             
-            // 使用window.open直接触发下载，避免在当前页面打开
-            window.open(downloadUrl, '_self');
+            // 使用fetch先检查文件是否存在，然后触发下载
+            const response = await fetch(downloadUrl, {
+                method: 'HEAD',
+                headers: {
+                    'Accept': 'application/octet-stream'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('文件不存在或下载失败');
+            }
+            
+            // 使用window.open在新窗口打开下载链接，避免在当前页面打开
+            window.open(downloadUrl, '_blank');
             
             return { success: true };
         } catch (error) {
