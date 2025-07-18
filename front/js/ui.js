@@ -1580,7 +1580,8 @@ class UIManager {
             // 创建隐藏的下载链接并触发下载
             const link = document.createElement('a');
             link.href = downloadUrl;
-            link.download = file.name || ''; // 使用文件名
+            // 移除 download 属性，让浏览器使用默认下载行为
+            // link.download = file.name || ''; // 注释掉这行
             link.style.display = 'none';
             document.body.appendChild(link);
             link.click();
