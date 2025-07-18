@@ -113,9 +113,9 @@ class ApiManager {
             let apiUrl;
             if (this.baseUrl) {
                 // 本地环境：使用完整URL
-                const url = new URL(`${this.baseUrl}/api/admin/users`);
-                url.searchParams.set('page', page.toString());
-                url.searchParams.set('page_size', pageSize.toString());
+            const url = new URL(`${this.baseUrl}/api/admin/users`);
+            url.searchParams.set('page', page.toString());
+            url.searchParams.set('page_size', pageSize.toString());
                 apiUrl = url.toString();
             } else {
                 // 云端环境：使用相对路径
@@ -422,7 +422,7 @@ class ApiManager {
             link.click();
             document.body.removeChild(link);
             
-            return { success: true };
+                return { success: true };
         } catch (error) {
             console.error('下载失败:', error);
             return { success: false, error: '下载失败' };

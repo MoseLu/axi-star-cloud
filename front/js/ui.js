@@ -1425,9 +1425,9 @@ class UIManager {
     previewPDF(file) {
         // 强制隐藏html和body滚动条
         document.body.style.overflow = 'hidden';
-        document.body.style.height = '100%';
+        document.body.style.overflowY = 'hidden';
         document.documentElement.style.overflow = 'hidden';
-        document.documentElement.style.height = '100%';
+        document.documentElement.style.overflowY = 'hidden';
         
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
@@ -1454,26 +1454,9 @@ class UIManager {
                     <p class="text-gray-300 text-sm">${file.size} • PDF文档</p>
                 </div>
                 <div class="relative w-full h-full flex items-center justify-center preview-pdf-container" style="overflow: hidden;">
-                    <!-- 加载状态 -->
-                    <div class="pdf-loading flex items-center justify-center w-full h-full">
-                        <div class="text-center text-white max-w-md">
-                            <div class="w-24 h-24 bg-gradient-to-br from-red-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <i class="fa fa-file-pdf-o text-4xl text-red-400"></i>
-                            </div>
-                            <h3 class="text-xl font-semibold mb-2">${file.name}</h3>
-                            <p class="text-gray-300 mb-6">${file.size} • PDF文档</p>
-                            <p class="text-sm text-gray-400 mb-6">正在加载PDF预览...</p>
-                            <div class="space-y-3">
-                                <button class="download-pdf-btn w-full bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-500 hover:to-emerald-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
-                                    <i class="fa fa-download mr-2"></i>下载文件
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
                     <!-- PDF预览区域 -->
-                    <div class="pdf-viewer hidden w-full h-full">
-                        <iframe id="pdf-iframe" class="w-full h-full border-0" style="background: white;" allowfullscreen></iframe>
+                    <div class="pdf-viewer w-full h-full">
+                        <iframe id="pdf-iframe" class="w-full h-full border-0" style="background: white;"></iframe>
                     </div>
                 </div>
             </div>
@@ -1481,48 +1464,46 @@ class UIManager {
         
         document.body.appendChild(modal);
         
-        // 绑定下载按钮事件
-        const downloadBtn = modal.querySelector('.download-pdf-btn');
-        if (downloadBtn) {
-            downloadBtn.addEventListener('click', () => {
-                modal.remove();
-                this.downloadFile(file);
-            });
-        }
-        
-        // 自动执行PDF预览
+        // 立即开始加载PDF预览
         setTimeout(async () => {
             try {
-                // 隐藏加载状态，显示PDF预览区域
-                const loadingDiv = modal.querySelector('.pdf-loading');
-                const viewerDiv = modal.querySelector('.pdf-viewer');
-                const iframe = modal.querySelector('#pdf-iframe');
+                // 使用fetch下载PDF内容并创建blob URL
+                const response = await fetch(pdfUrl);
+                if (!response.ok) {
+                    throw new Error('PDF下载失败');
+                }
                 
-                if (loadingDiv && viewerDiv && iframe) {
-                    loadingDiv.classList.add('hidden');
-                    viewerDiv.classList.remove('hidden');
-                    
-                    // 使用PDF.js查看器
-                    const pdfJsUrl = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(window.location.origin + pdfUrl)}`;
-                    iframe.src = pdfJsUrl;
+                // 创建blob URL
+                const blob = new Blob([await response.arrayBuffer()], { 
+                    type: 'application/pdf' 
+                });
+                const blobUrl = URL.createObjectURL(blob);
+                
+                // 设置iframe的src为blob URL
+                const iframe = modal.querySelector('#pdf-iframe');
+                if (iframe) {
+                    iframe.src = blobUrl;
                     
                     // 添加iframe加载完成事件
                     iframe.onload = () => {
-                        console.log('PDF.js加载完成');
+                        console.log('PDF加载完成');
                     };
                     
                     iframe.onerror = () => {
-                        console.error('PDF.js加载失败');
-                        // 如果PDF.js加载失败，回退到新窗口打开
-                        window.open(pdfUrl, '_blank');
+                        console.error('PDF加载失败');
+                        // 如果iframe加载失败，回退到新窗口打开
+                        window.open(blobUrl, '_blank');
                     };
+                    
+                    // 清理blob URL
+                    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000); // 1分钟后清理
                 }
             } catch (error) {
                 console.error('PDF预览失败:', error);
                 // 如果预览失败，直接在新窗口打开原始URL
                 window.open(pdfUrl, '_blank');
             }
-        }, 500); // 延迟500ms执行，让用户看到加载提示
+        }, 100); // 延迟100ms执行，让模态框先显示
         
         // 点击背景关闭
         modal.addEventListener('click', (e) => {
@@ -1530,9 +1511,9 @@ class UIManager {
                 modal.remove();
                 // 恢复html和body滚动条
                 document.body.style.overflow = '';
-                document.body.style.height = '';
+                document.body.style.overflowY = '';
                 document.documentElement.style.overflow = '';
-                document.documentElement.style.height = '';
+                document.documentElement.style.overflowY = '';
             }
         });
         
@@ -1542,9 +1523,9 @@ class UIManager {
                 modal.remove();
                 // 恢复html和body滚动条
                 document.body.style.overflow = '';
-                document.body.style.height = '';
+                document.body.style.overflowY = '';
                 document.documentElement.style.overflow = '';
-                document.documentElement.style.height = '';
+                document.documentElement.style.overflowY = '';
             }
         });
     }
@@ -1629,39 +1610,67 @@ class UIManager {
     }
 
     // 预览Word文档
+    // 预览Word文档
     previewWord(file) {
+        // 强制隐藏html和body滚动条
+        document.body.style.overflow = 'hidden';
+        document.body.style.overflowY = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+        document.documentElement.style.overflowY = 'hidden';
+        
         const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 bg-black/80 z-50 flex items-center justify-center';
+        modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
+        modal.style.overflow = 'hidden';
+        
+        // 构建文件URL
+        let fileUrl = file.path || `/uploads/${file.type}/${file.name}`;
+        if (fileUrl && !fileUrl.startsWith('http') && !fileUrl.startsWith('/')) {
+            fileUrl = `/uploads/${file.type}/${file.name}`;
+        }
+        
+        // 确保URL是绝对路径
+        if (fileUrl && !fileUrl.startsWith('http')) {
+            fileUrl = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
+        }
+        
+        // 构建完整的文件URL（包含域名）
+        const fullFileUrl = window.location.origin + fileUrl;
+        const encodedFileUrl = encodeURIComponent(fullFileUrl);
+        const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodedFileUrl}`;
+        
         modal.innerHTML = `
-            <div class="relative max-w-md p-6 bg-dark-light rounded-xl border border-purple-light/20">
-                <button class="absolute top-2 right-2 text-gray-400 hover:text-white" onclick="this.parentElement.parentElement.remove()">
+            <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
+                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
                     <i class="fa fa-times"></i>
                 </button>
-                <div class="text-center">
-                    <div class="w-24 h-24 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fa fa-file-word-o text-4xl text-blue-400"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold text-white mb-2">${file.name}</h3>
-                    <p class="text-gray-300 mb-6">${file.size} • Word文档</p>
-                    <div class="space-y-3">
-                        <button onclick="window.open('${file.path || `/uploads/${file.type}/${file.name}`}', '_blank')" class="w-full bg-gradient-to-r from-blue-500/80 to-indigo-500/80 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
-                            <i class="fa fa-external-link mr-2"></i>在新窗口打开
-                        </button>
-                        <button class="download-word-btn w-full bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-500 hover:to-emerald-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
-                            <i class="fa fa-download mr-2"></i>下载文件
-                        </button>
+                <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
+                    <h3 class="text-xl font-semibold">${file.name}</h3>
+                    <p class="text-gray-300 text-sm">${file.size} • Word文档</p>
+                </div>
+                <div class="relative w-full h-full flex items-center justify-center preview-word-container" style="overflow: hidden;">
+                    <!-- Word预览区域 -->
+                    <div class="word-viewer w-full h-full">
+                        <iframe id="word-iframe" class="w-full h-full border-0" style="background: white;" src="${officeViewerUrl}"></iframe>
                     </div>
                 </div>
             </div>
         `;
+        
         document.body.appendChild(modal);
         
-        // 绑定下载按钮事件
-        const downloadBtn = modal.querySelector('.download-word-btn');
-        downloadBtn.addEventListener('click', () => {
-            modal.remove();
-            this.downloadFile(file);
-        });
+        // 添加iframe加载完成事件
+        const iframe = modal.querySelector('#word-iframe');
+        if (iframe) {
+            iframe.onload = () => {
+                console.log('Word文档加载完成');
+            };
+            
+            iframe.onerror = () => {
+                console.error('Word文档加载失败');
+                // 如果iframe加载失败，回退到新窗口打开
+                window.open(officeViewerUrl, '_blank');
+            };
+        }
         
         // 点击背景关闭
         modal.addEventListener('click', (e) => {
@@ -1669,9 +1678,9 @@ class UIManager {
                 modal.remove();
                 // 恢复html和body滚动条
                 document.body.style.overflow = '';
-                document.body.style.height = '';
+                document.body.style.overflowY = '';
                 document.documentElement.style.overflow = '';
-                document.documentElement.style.height = '';
+                document.documentElement.style.overflowY = '';
             }
         });
         
@@ -1681,9 +1690,9 @@ class UIManager {
                 modal.remove();
                 // 恢复html和body滚动条
                 document.body.style.overflow = '';
-                document.body.style.height = '';
+                document.body.style.overflowY = '';
                 document.documentElement.style.overflow = '';
-                document.documentElement.style.height = '';
+                document.documentElement.style.overflowY = '';
             }
         });
     }
@@ -2195,39 +2204,67 @@ class UIManager {
     }
 
     // 预览PowerPoint文档
+    // 预览PowerPoint文档
     previewPowerPoint(file) {
+        // 强制隐藏html和body滚动条
+        document.body.style.overflow = 'hidden';
+        document.body.style.overflowY = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+        document.documentElement.style.overflowY = 'hidden';
+        
         const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 bg-black/80 z-50 flex items-center justify-center';
+        modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
+        modal.style.overflow = 'hidden';
+        
+        // 构建文件URL
+        let fileUrl = file.path || `/uploads/${file.type}/${file.name}`;
+        if (fileUrl && !fileUrl.startsWith('http') && !fileUrl.startsWith('/')) {
+            fileUrl = `/uploads/${file.type}/${file.name}`;
+        }
+        
+        // 确保URL是绝对路径
+        if (fileUrl && !fileUrl.startsWith('http')) {
+            fileUrl = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
+        }
+        
+        // 构建完整的文件URL（包含域名）
+        const fullFileUrl = window.location.origin + fileUrl;
+        const encodedFileUrl = encodeURIComponent(fullFileUrl);
+        const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodedFileUrl}`;
+        
         modal.innerHTML = `
-            <div class="relative max-w-md p-6 bg-dark-light rounded-xl border border-purple-light/20">
-                <button class="absolute top-2 right-2 text-gray-400 hover:text-white" onclick="this.parentElement.parentElement.remove()">
+            <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
+                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
                     <i class="fa fa-times"></i>
                 </button>
-                <div class="text-center">
-                    <div class="w-24 h-24 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fa fa-file-powerpoint-o text-4xl text-orange-400"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold text-white mb-2">${file.name}</h3>
-                    <p class="text-gray-300 mb-6">${file.size} • PowerPoint演示文稿</p>
-                    <div class="space-y-3">
-                        <button onclick="window.open('${file.path || `/uploads/${file.type}/${file.name}`}', '_blank')" class="w-full bg-gradient-to-r from-orange-500/80 to-red-500/80 hover:from-orange-500 hover:to-red-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
-                            <i class="fa fa-external-link mr-2"></i>在新窗口打开
-                        </button>
-                        <button class="download-powerpoint-btn w-full bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-500 hover:to-emerald-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
-                            <i class="fa fa-download mr-2"></i>下载文件
-                        </button>
+                <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
+                    <h3 class="text-xl font-semibold">${file.name}</h3>
+                    <p class="text-gray-300 text-sm">${file.size} • PowerPoint演示文稿</p>
+                </div>
+                <div class="relative w-full h-full flex items-center justify-center preview-powerpoint-container" style="overflow: hidden;">
+                    <!-- PowerPoint预览区域 -->
+                    <div class="powerpoint-viewer w-full h-full">
+                        <iframe id="powerpoint-iframe" class="w-full h-full border-0" style="background: white;" src="${officeViewerUrl}"></iframe>
                     </div>
                 </div>
             </div>
         `;
+        
         document.body.appendChild(modal);
         
-        // 绑定下载按钮事件
-        const downloadBtn = modal.querySelector('.download-powerpoint-btn');
-        downloadBtn.addEventListener('click', () => {
-            modal.remove();
-            this.downloadFile(file);
-        });
+        // 添加iframe加载完成事件
+        const iframe = modal.querySelector('#powerpoint-iframe');
+        if (iframe) {
+            iframe.onload = () => {
+                console.log('PowerPoint文档加载完成');
+            };
+            
+            iframe.onerror = () => {
+                console.error('PowerPoint文档加载失败');
+                // 如果iframe加载失败，回退到新窗口打开
+                window.open(officeViewerUrl, '_blank');
+            };
+        }
         
         // 点击背景关闭
         modal.addEventListener('click', (e) => {
@@ -2235,9 +2272,9 @@ class UIManager {
                 modal.remove();
                 // 恢复html和body滚动条
                 document.body.style.overflow = '';
-                document.body.style.height = '';
+                document.body.style.overflowY = '';
                 document.documentElement.style.overflow = '';
-                document.documentElement.style.height = '';
+                document.documentElement.style.overflowY = '';
             }
         });
         
@@ -2247,9 +2284,9 @@ class UIManager {
                 modal.remove();
                 // 恢复html和body滚动条
                 document.body.style.overflow = '';
-                document.body.style.height = '';
+                document.body.style.overflowY = '';
                 document.documentElement.style.overflow = '';
-                document.documentElement.style.height = '';
+                document.documentElement.style.overflowY = '';
             }
         });
     }
@@ -2608,7 +2645,7 @@ class UIManager {
                 if (fileResponse.ok) {
                     const blob = await fileResponse.blob();
                     const url = URL.createObjectURL(blob);
-                    
+            
                     // 创建下载链接并强制下载
                     const link = document.createElement('a');
                     link.href = url;
@@ -2629,7 +2666,7 @@ class UIManager {
                 if (fileResponse.ok) {
                     const blob = await fileResponse.blob();
                     const url = URL.createObjectURL(blob);
-                    
+            
                     // 创建下载链接并强制下载
                     const link = document.createElement('a');
                     link.href = url;
@@ -3119,7 +3156,7 @@ class UIManager {
         document.querySelectorAll('.file-type-btn, .sub-file-type-btn').forEach(b => {
             b.classList.remove('active', 'bg-gradient-to-r', 'from-primary', 'to-secondary', 'text-white', 'shadow-md', 'shadow-primary/20');
             if (b.classList.contains('file-type-btn')) {
-                b.classList.add('bg-dark-light', 'hover:bg-dark-light/70', 'text-white');
+            b.classList.add('bg-dark-light', 'hover:bg-dark-light/70', 'text-white');
             } else {
                 // 恢复子按钮的默认样式
                 b.classList.remove('active');
@@ -4339,11 +4376,11 @@ class UIManager {
                         <div class="flex items-center justify-center space-x-3">
                             <button id="prev-page-btn" class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-dark-light border border-blue-400/30 rounded-lg hover:bg-blue-600/20 hover:border-blue-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
                                 <i class="fa fa-chevron-left mr-2"></i>上一页
-                            </button>
+                        </button>
                             
                             <button id="next-page-btn" class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-dark-light border border-blue-400/30 rounded-lg hover:bg-blue-600/20 hover:border-blue-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
                                 下一页<i class="fa fa-chevron-right ml-2"></i>
-                            </button>
+                        </button>
                         </div>
                     </div>
                 </div>
