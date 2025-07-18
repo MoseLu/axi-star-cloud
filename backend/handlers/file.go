@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -410,4 +411,52 @@ func (h *FileHandler) GetTotalFileCount(c *gin.Context) {
 		"success": true,
 		"count":   count,
 	})
+}
+
+// DownloadFileRedirect 下载文件重定向（优化版本）
+func (h *FileHandler) DownloadFileRedirect(c *gin.Context) {
+	fileIDStr := c.Query("id")
+	userID := c.Query("user_id")
+
+	// 添加调试日志
+	log.Printf("🔍 下载重定向请求 - 文件ID: %s, 用户ID: %s", fileIDStr, userID)
+
+	if userID == "" {
+		log.Printf("❌ 未授权访问 - 缺少用户ID")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权访问"})
+		return
+	}
+
+	fileID, err := strconv.Atoi(fileIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的文件ID"})
+		return
+	}
+
+	// 查询文件信息
+	file, err := h.fileRepo.GetFileByID(fileID, userID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("❌ 文件不存在 - ID: %d, 用户: %s", fileID, userID)
+			c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
+		} else {
+			log.Printf("❌ 获取文件信息失败 - ID: %d, 用户: %s, 错误: %v", fileID, userID, err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文件信息失败"})
+		}
+		return
+	}
+
+	log.Printf("✅ 找到文件 - ID: %d, 名称: %s, 路径: %s", fileID, file.Name, file.Path)
+
+	// 构建静态文件URL
+	staticURL := fmt.Sprintf("/uploads%s", file.Path)
+	
+	// 生成一次性token（简化版本，实际可以使用JWT）
+	token := fmt.Sprintf("token_%d_%s", fileID, userID)
+	
+	// 重定向到静态文件URL
+	redirectURL := fmt.Sprintf("%s?token=%s", staticURL, token)
+	
+	log.Printf("🔄 重定向到静态文件: %s", redirectURL)
+	c.Redirect(http.StatusFound, redirectURL)
 }

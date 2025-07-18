@@ -1574,8 +1574,8 @@ class UIManager {
     // 下载文件
     async downloadFile(file) {
         try {
-            // 直接使用文件的静态路径进行下载
-            const downloadUrl = this.api.buildApiUrl(file.previewUrl);
+            // 使用重定向下载API，更高效
+            const downloadUrl = this.api.buildApiUrl(`/api/download?id=${file.id}&user_id=${this.api.getCurrentUserId()}`);
             
             // 创建隐藏的下载链接并触发下载
             const link = document.createElement('a');
