@@ -2034,7 +2034,13 @@ class UIManager {
                 supportedFormats = 'MP3, WAV, OGG, FLAC, AAC, WMA, M4A';
                 break;
             case 'document':
-                supportedFormats = 'PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, MD, RTF';
+                supportedFormats = 'PDF, DOC, DOCX, TXT, MD, RTF';
+                break;
+            case 'spreadsheet':
+                supportedFormats = 'XLS, XLSX, CSV';
+                break;
+            case 'presentation':
+                supportedFormats = 'PPT, PPTX';
                 break;
             case 'other':
                 supportedFormats = 'ZIP, RAR, 7Z, TAR, GZ, ISO, EXE, APK';
@@ -2635,9 +2641,12 @@ class UIManager {
             'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/wma',
             // 文档
             'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
             'text/plain', 'text/markdown', 'text/x-markdown', 'application/x-markdown',
+            // 电子表格
+            'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'text/csv',
+            // 演示文稿
+            'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
             // 压缩文件
             'application/zip', 'application/x-zip-compressed', 'application/x-rar-compressed',
             'application/x-7z-compressed', 'application/x-tar', 'application/gzip'
@@ -2658,6 +2667,7 @@ class UIManager {
                                fileName.endsWith('.docx') ||
                                fileName.endsWith('.xls') ||
                                fileName.endsWith('.xlsx') ||
+                               fileName.endsWith('.csv') ||
                                fileName.endsWith('.ppt') ||
                                fileName.endsWith('.pptx') ||
                                fileName.endsWith('.jpg') ||
@@ -2773,6 +2783,8 @@ class UIManager {
             'video': 'text-pink-400',
             'audio': 'text-cyan-400',
             'document': 'text-orange-400',
+            'spreadsheet': 'text-green-400',
+            'presentation': 'text-purple-400',
             'other': 'text-slate-400'
         };
         return colors[category] || 'text-slate-400';
@@ -2785,6 +2797,8 @@ class UIManager {
             'video': 'bg-pink-400/10',
             'audio': 'bg-cyan-400/10',
             'document': 'bg-orange-400/10',
+            'spreadsheet': 'bg-green-400/10',
+            'presentation': 'bg-purple-400/10',
             'other': 'bg-slate-400/10'
         };
         return backgrounds[category] || 'bg-slate-400/10';
@@ -2797,6 +2811,8 @@ class UIManager {
             'video': '视频',
             'audio': '音频',
             'document': '文档',
+            'spreadsheet': '电子表格',
+            'presentation': '演示文稿',
             'other': '其他'
         };
         return labels[category] || '其他';
@@ -2804,7 +2820,15 @@ class UIManager {
 
     // 新增：获取分类色彩
     getCategoryColor(category) {
-        const map = { image: 'emerald', video: 'pink', audio: 'cyan', document: 'orange', other: 'slate' };
+        const map = { 
+            image: 'emerald', 
+            video: 'pink', 
+            audio: 'cyan', 
+            document: 'orange', 
+            spreadsheet: 'green',
+            presentation: 'purple',
+            other: 'slate' 
+        };
         return map[category] || 'emerald';
     }
 
