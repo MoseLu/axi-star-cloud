@@ -1,0 +1,269 @@
+/**
+ * 文件卡片样式
+ * 包含文件和文件夹卡片的网格布局、样式和响应式设计
+ */
+
+/* 文件卡片网格布局 */
+#files-grid, .files-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 240px));
+  gap: 24px;
+  align-items: start;
+  justify-items: start;
+  justify-content: start;
+}
+
+.file-card {
+  max-width: 240px;
+  width: 100%;
+}
+
+/* 文件卡片样式优化 */
+.file-card {
+    width: 100%;
+    max-width: 320px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+/* 文件夹网格布局 */
+#folders-grid, .folders-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 240px));
+    gap: 24px;
+    align-items: start;
+    justify-items: start;
+    justify-content: start;
+}
+
+/* 文件夹卡片样式 */
+.folder-card {
+    width: 100%;
+    max-width: 240px;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+/* 响应式布局优化 */
+@media (max-width: 640px) {
+    .files-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    #folders-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .files-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+    
+    #folders-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 2rem;
+    }
+}
+
+/* 确保卡片内容居中对齐 */
+.file-card .card-content,
+.folder-card .card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+    text-align: center;
+}
+
+/* 文件卡片第一行（图标和文件名） */
+.file-card .file-icon-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+/* 文件名和类型容器 */
+.file-card .file-icon-container > div:last-child {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+/* 文件名样式 */
+.file-card h4 {
+    text-align: center;
+    margin: 0;
+    width: auto;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+/* 文件类型标签样式 */
+.file-card .file-icon-container > div:last-child span {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* 文件夹卡片第一行（图标和文件夹名） */
+.folder-card .folder-icon-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+/* 文件夹名和类型容器 */
+.folder-card .folder-icon-container > div:last-child {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+/* 文件夹名样式 */
+.folder-card h4 {
+    text-align: center;
+    margin: 0;
+    width: auto;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+/* 文件夹类型标签样式 */
+.folder-card .folder-icon-container > div:last-child span {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* 文件信息文本对齐 */
+.file-info,
+.folder-info {
+    text-align: center;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* 文件信息中的单个项目 */
+.file-info > div,
+.folder-info > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+/* 文件大小和日期标签 */
+.file-info span,
+.folder-info span {
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}
+
+/* 网格列跨度类 - 默认垂直布局 */
+.col-span-full {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: none !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+/* 外站文档空状态特殊样式 - 只在外部文档分类下生效 */
+.external-docs-category .col-span-full .text-center {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 0;
+}
+
+/* 确保外站文档空状态在网格中居中 - 只在外部文档分类下生效 */
+.external-docs-category #files-grid .col-span-full {
+    justify-self: center;
+    align-self: center;
+    padding: 0;
+    margin: 0;
+}
+
+/* 外站文档分类下的文件网格居中布局 */
+.external-docs-category #files-grid {
+    justify-items: center;
+    justify-content: center;
+}
+
+/* 外站文档分类下的空状态使用垂直布局 */
+.external-docs-category .col-span-full {
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
+}
+
+/* 确保外站文档空状态内容完全居中 */
+.external-docs-category .col-span-full > div {
+    display: block;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+
+/* 文件图标容器优化 */
+.file-icon-container,
+.folder-icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 0.75rem;
+}
+
+/* 文件操作按钮容器 */
+.file-actions,
+.folder-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.75rem;
+} 

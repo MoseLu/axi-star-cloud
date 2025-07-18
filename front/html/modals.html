@@ -1,29 +1,31 @@
 <!-- 设置模态框 -->
-<div id="settings-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300">
-    <div class="glass-effect rounded-2xl max-w-2xl w-full mx-4 border border-purple-light/20 shadow-2xl transform scale-95 transition-all duration-300">
-        <div class="p-6 border-b border-purple-light/20 flex justify-between items-center">
-            <h3 class="text-xl font-semibold text-white">存储空间设置</h3>
+<div id="settings-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300 p-4">
+    <div class="glass-effect rounded-2xl max-w-2xl w-full mx-4 border border-purple-light/20 shadow-2xl transform scale-95 transition-all duration-300 max-h-[90vh] overflow-y-auto">
+        <div class="p-4 md:p-6 border-b border-purple-light/20 flex justify-between items-center">
+            <h3 class="text-lg md:text-xl font-semibold text-white">存储空间设置</h3>
             <button id="close-settings-btn" class="text-gray-400 hover:text-white transition-colors">
-                <i class="fa fa-times text-xl"></i>
+                <i class="fa fa-times text-lg md:text-xl"></i>
             </button>
         </div>
-        <div class="p-6">
-            <div class="space-y-6">
+        <div class="p-4 md:p-6">
+            <div class="space-y-4 md:space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">存储空间限制</label>
-                    <div class="flex items-center space-x-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                         <input type="range" id="storage-slider" min="1" max="20" value="5" 
                                class="flex-1 h-2 bg-dark-light rounded-lg appearance-none cursor-pointer slider">
-                        <input type="number" id="storage-input" min="1" max="20" value="5" 
-                               class="w-20 bg-dark-light border border-purple-light/30 text-gray-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-light/50 focus:border-purple-light transition-all duration-300">
-                        <span class="text-gray-400 text-sm">GB</span>
+                        <div class="flex items-center space-x-2">
+                            <input type="number" id="storage-input" min="1" max="20" value="5" 
+                                   class="w-20 bg-dark-light border border-purple-light/30 text-gray-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-light/50 focus:border-purple-light transition-all duration-300">
+                            <span class="text-gray-400 text-sm">GB</span>
+                        </div>
                     </div>
                     <p class="text-xs text-gray-500 mt-1">设置范围：1GB - 20GB</p>
                 </div>
                 
-                <div class="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl p-4 border border-blue-400/20">
+                <div class="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl p-3 md:p-4 border border-blue-400/20">
                     <h4 class="text-sm font-medium text-gray-300 mb-2">当前存储状态</h4>
-                    <div class="grid grid-cols-3 gap-4 text-sm">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 text-sm">
                         <div>
                             <div class="text-gray-400">总空间</div>
                             <div id="settings-total-storage" class="text-blue-300 font-medium">5 GB</div>
@@ -40,11 +42,11 @@
                 </div>
             </div>
         </div>
-        <div class="p-6 border-t border-purple-light/20 flex justify-end space-x-3">
-            <button id="cancel-settings-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors">
+        <div class="p-4 md:p-6 border-t border-purple-light/20 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+            <button id="cancel-settings-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors text-sm md:text-base">
                 取消
             </button>
-            <button id="save-settings-btn" class="px-4 py-2 bg-gradient-to-r from-primary/80 to-secondary/80 hover:from-primary to-secondary text-white rounded-lg shadow-md shadow-primary/20 transition-all duration-300 transform hover:scale-[1.03]">
+            <button id="save-settings-btn" class="px-4 py-2 bg-gradient-to-r from-primary/80 to-secondary/80 hover:from-primary to-secondary text-white rounded-lg shadow-md shadow-primary/20 transition-all duration-300 transform hover:scale-[1.03] text-sm md:text-base">
                 <i class="fa fa-save mr-1"></i> 保存设置
             </button>
         </div>
@@ -52,43 +54,43 @@
 </div>
 
 <!-- URL上传模态框 -->
-<div id="url-upload-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300">
-    <div class="glass-effect rounded-2xl max-w-2xl w-full mx-4 border border-blue-light/20 shadow-2xl transform scale-95 transition-all duration-300">
-        <div class="p-6 border-b border-blue-light/20 flex justify-between items-center">
-            <h3 class="text-xl font-semibold text-white">添加URL链接</h3>
+<div id="url-upload-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300 p-4">
+    <div class="glass-effect rounded-2xl max-w-2xl w-full mx-4 border border-blue-light/20 shadow-2xl transform scale-95 transition-all duration-300 max-h-[90vh] overflow-y-auto">
+        <div class="p-4 md:p-6 border-b border-blue-light/20 flex justify-between items-center">
+            <h3 class="text-lg md:text-xl font-semibold text-white">添加URL链接</h3>
             <button id="close-url-upload-btn" class="text-gray-400 hover:text-white transition-colors">
-                <i class="fa fa-times text-xl"></i>
+                <i class="fa fa-times text-lg md:text-xl"></i>
             </button>
         </div>
-        <div class="p-6">
-            <form id="url-upload-form" class="space-y-6">
+        <div class="p-4 md:p-6">
+            <form id="url-upload-form" class="space-y-4 md:space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">标题 <span class="text-red-400">*</span></label>
                     <input type="text" id="url-title" name="title" required
-                           class="w-full bg-dark-light border border-blue-light/30 text-gray-100 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-light/50 focus:border-blue-light transition-all duration-300"
+                           class="w-full bg-dark-light border border-blue-light/30 text-gray-100 rounded-lg px-3 md:px-4 py-2 md:py-3 focus:ring-2 focus:ring-blue-light/50 focus:border-blue-light transition-all duration-300 text-sm md:text-base"
                            placeholder="请输入链接标题">
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">URL链接 <span class="text-red-400">*</span></label>
                     <input type="url" id="url-link" name="url" required
-                           class="w-full bg-dark-light border border-blue-light/30 text-gray-100 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-light/50 focus:border-blue-light transition-all duration-300"
+                           class="w-full bg-dark-light border border-blue-light/30 text-gray-100 rounded-lg px-3 md:px-4 py-2 md:py-3 focus:ring-2 focus:ring-blue-light/50 focus:border-blue-light transition-all duration-300 text-sm md:text-base"
                            placeholder="请输入网站URL，例如：https://www.example.com">
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">备注</label>
                     <textarea id="url-description" name="description" rows="3"
-                              class="w-full bg-dark-light border border-blue-light/30 text-gray-100 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-light/50 focus:border-blue-light transition-all duration-300"
+                              class="w-full bg-dark-light border border-blue-light/30 text-gray-100 rounded-lg px-3 md:px-4 py-2 md:py-3 focus:ring-2 focus:ring-blue-light/50 focus:border-blue-light transition-all duration-300 text-sm md:text-base"
                               placeholder="请输入备注信息（可选）"></textarea>
                 </div>
             </form>
         </div>
-        <div class="p-6 border-t border-blue-light/20 flex justify-end space-x-3">
-            <button id="cancel-url-upload-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors">
+        <div class="p-4 md:p-6 border-t border-blue-light/20 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+            <button id="cancel-url-upload-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors text-sm md:text-base">
                 取消
             </button>
-            <button id="submit-url-upload-btn" class="px-4 py-2 bg-gradient-to-r from-blue-light/80 to-purple-light/80 hover:from-blue-light hover:to-purple-light text-white rounded-lg shadow-md shadow-blue-light/20 transition-all duration-300 transform hover:scale-[1.03]">
+            <button id="submit-url-upload-btn" class="px-4 py-2 bg-gradient-to-r from-blue-light/80 to-purple-light/80 hover:from-blue-light hover:to-purple-light text-white rounded-lg shadow-md shadow-blue-light/20 transition-all duration-300 transform hover:scale-[1.03] text-sm md:text-base">
                 <i class="fa fa-link mr-1"></i> 添加链接
             </button>
         </div>
@@ -96,48 +98,48 @@
 </div>
 
 <!-- 同步文档模态框 -->
-<div id="sync-docs-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300">
-    <div class="glass-effect rounded-2xl max-w-2xl w-full mx-4 border border-emerald-light/20 shadow-2xl transform scale-95 transition-all duration-300">
-        <div class="p-6 border-b border-emerald-light/20 flex justify-between items-center">
-            <h3 class="text-xl font-semibold text-white">同步文档</h3>
+<div id="sync-docs-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300 p-4">
+    <div class="glass-effect rounded-2xl max-w-2xl w-full mx-4 border border-emerald-light/20 shadow-2xl transform scale-95 transition-all duration-300 max-h-[90vh] overflow-y-auto">
+        <div class="p-4 md:p-6 border-b border-emerald-light/20 flex justify-between items-center">
+            <h3 class="text-lg md:text-xl font-semibold text-white">同步文档</h3>
             <button id="close-sync-docs-btn" class="text-gray-400 hover:text-white transition-colors">
-                <i class="fa fa-times text-xl"></i>
+                <i class="fa fa-times text-lg md:text-xl"></i>
             </button>
         </div>
-        <div class="p-6">
-            <form id="sync-docs-form" class="space-y-6">
+        <div class="p-4 md:p-6">
+            <form id="sync-docs-form" class="space-y-4 md:space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">文档标题 <span class="text-red-400">*</span></label>
                     <input type="text" id="doc-title" name="title" required
-                           class="w-full bg-dark-light border border-emerald-light/30 text-gray-100 rounded-lg px-4 py-3 focus:ring-2 focus:ring-emerald-light/50 focus:border-emerald-light transition-all duration-300"
+                           class="w-full bg-dark-light border border-emerald-light/30 text-gray-100 rounded-lg px-3 md:px-4 py-2 md:py-3 focus:ring-2 focus:ring-emerald-light/50 focus:border-emerald-light transition-all duration-300 text-sm md:text-base"
                            placeholder="请输入文档标题">
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">文档分类 <span class="text-red-400">*</span></label>
                     <input type="text" id="doc-category" name="category" required
-                           class="w-full bg-dark-light border border-emerald-light/30 text-gray-100 rounded-lg px-4 py-3 focus:ring-2 focus:ring-emerald-light/50 focus:border-emerald-light transition-all duration-300"
+                           class="w-full bg-dark-light border border-emerald-light/30 text-gray-100 rounded-lg px-3 md:px-4 py-2 md:py-3 focus:ring-2 focus:ring-emerald-light/50 focus:border-emerald-light transition-all duration-300 text-sm md:text-base"
                            placeholder="请输入文档分类">
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">排序序号</label>
                     <input type="number" id="doc-order" name="order" min="0"
-                           class="w-full bg-dark-light border border-emerald-light/30 text-gray-100 rounded-lg px-4 py-3 focus:ring-2 focus:ring-emerald-light/50 focus:border-emerald-light transition-all duration-300"
+                           class="w-full bg-dark-light border border-emerald-light/30 text-gray-100 rounded-lg px-3 md:px-4 py-2 md:py-3 focus:ring-2 focus:ring-emerald-light/50 focus:border-emerald-light transition-all duration-300 text-sm md:text-base"
                            placeholder="请输入排序序号（可选）">
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Markdown文件 <span class="text-red-400">*</span></label>
-                    <div class="border-2 border-dashed border-emerald-light/30 rounded-lg p-6 text-center cursor-pointer hover:border-emerald-light/60 transition-colors" id="doc-drop-area">
-                        <i class="fa fa-file-text-o text-3xl text-emerald-light/60 mb-3"></i>
-                        <p class="text-gray-300 mb-2">点击选择或拖放.md文件</p>
-                        <p class="text-emerald-light text-sm">仅支持.md格式文件</p>
+                    <div class="border-2 border-dashed border-emerald-light/30 rounded-lg p-4 md:p-6 text-center cursor-pointer hover:border-emerald-light/60 transition-colors" id="doc-drop-area">
+                        <i class="fa fa-file-text-o text-2xl md:text-3xl text-emerald-light/60 mb-2 md:mb-3"></i>
+                        <p class="text-gray-300 mb-2 text-sm md:text-base">点击选择或拖放.md文件</p>
+                        <p class="text-emerald-light text-xs md:text-sm">仅支持.md格式文件</p>
                         <input type="file" id="doc-file-input" class="hidden" accept=".md" required>
                     </div>
                     <div id="doc-file-info" class="hidden mt-3 p-3 bg-emerald-500/10 rounded-lg border border-emerald-400/30">
                         <div class="flex items-center justify-between">
-                            <span class="text-emerald-300 text-sm" id="doc-file-name"></span>
+                            <span class="text-emerald-300 text-xs md:text-sm" id="doc-file-name"></span>
                             <button type="button" id="doc-remove-file" class="text-red-400 hover:text-red-300">
                                 <i class="fa fa-times"></i>
                             </button>
@@ -146,11 +148,11 @@
                 </div>
             </form>
         </div>
-        <div class="p-6 border-t border-emerald-light/20 flex justify-end space-x-3">
-            <button id="cancel-sync-docs-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors">
+        <div class="p-4 md:p-6 border-t border-emerald-light/20 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+            <button id="cancel-sync-docs-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors text-sm md:text-base">
                 取消
             </button>
-            <button id="submit-sync-docs-btn" class="px-4 py-2 bg-gradient-to-r from-emerald-500/80 to-teal-500/80 hover:from-emerald-500 to-teal-500 text-white rounded-lg shadow-md shadow-emerald-500/20 transition-all duration-300 transform hover:scale-[1.03]">
+            <button id="submit-sync-docs-btn" class="px-4 py-2 bg-gradient-to-r from-emerald-500/80 to-teal-500/80 hover:from-emerald-500 to-teal-500 text-white rounded-lg shadow-md shadow-emerald-500/20 transition-all duration-300 transform hover:scale-[1.03] text-sm md:text-base">
                 <i class="fa fa-sync mr-1"></i> 同步文档
             </button>
         </div>
@@ -158,23 +160,23 @@
 </div>
 
 <!-- 新建分组模态框 -->
-<div id="create-folder-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300">
-    <div class="bg-dark-light rounded-xl p-8 max-w-md w-full mx-4 border border-purple-light/20 shadow-2xl">
-        <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xl font-semibold text-white">新建分组</h3>
+<div id="create-folder-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300 p-4">
+    <div class="bg-dark-light rounded-xl p-4 md:p-8 max-w-md w-full mx-4 border border-purple-light/20 shadow-2xl">
+        <div class="flex items-center justify-between mb-4 md:mb-6">
+            <h3 class="text-lg md:text-xl font-semibold text-white">新建分组</h3>
             <button id="close-create-folder-btn" class="text-gray-400 hover:text-white transition-colors">
-                <i class="fa fa-times text-xl"></i>
+                <i class="fa fa-times text-lg md:text-xl"></i>
             </button>
         </div>
-        <div class="mb-6">
+        <div class="mb-4 md:mb-6">
             <label for="folder-name-input" class="block text-sm font-medium text-gray-300 mb-2">分组名称</label>
-            <input type="text" id="folder-name-input" class="w-full px-4 py-3 bg-dark-light/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-purple-light/50 focus:outline-none transition-colors" placeholder="请输入分组名称">
+            <input type="text" id="folder-name-input" class="w-full px-3 md:px-4 py-2 md:py-3 bg-dark-light/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-purple-light/50 focus:outline-none transition-colors text-sm md:text-base" placeholder="请输入分组名称">
         </div>
-        <div class="flex justify-end space-x-3">
-            <button id="cancel-create-folder-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors">
+        <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+            <button id="cancel-create-folder-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors text-sm md:text-base">
                 取消
             </button>
-            <button id="confirm-create-folder-btn" class="px-4 py-2 bg-gradient-to-r from-blue-500/80 to-cyan-500/80 hover:from-blue-500 to-cyan-500 text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-[1.02]">
+            <button id="confirm-create-folder-btn" class="px-4 py-2 bg-gradient-to-r from-blue-500/80 to-cyan-500/80 hover:from-blue-500 to-cyan-500 text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-[1.02] text-sm md:text-base">
                 创建分组
             </button>
         </div>
@@ -182,29 +184,29 @@
 </div>
 
 <!-- 个人资料编辑模态框 -->
-<div id="profile-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300">
-    <div class="glass-effect rounded-2xl max-w-md w-full mx-4 border border-purple-light/20 shadow-2xl transform scale-95 transition-all duration-300">
-        <div class="p-6 border-b border-purple-light/20 flex justify-between items-center">
-            <h3 class="text-xl font-semibold text-white">编辑个人资料</h3>
+<div id="profile-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300 p-4">
+    <div class="glass-effect rounded-2xl max-w-md w-full mx-4 border border-purple-light/20 shadow-2xl transform scale-95 transition-all duration-300 max-h-[90vh] overflow-y-auto">
+        <div class="p-4 md:p-6 border-b border-purple-light/20 flex justify-between items-center">
+            <h3 class="text-lg md:text-xl font-semibold text-white">编辑个人资料</h3>
             <button id="close-profile-btn" class="text-gray-400 hover:text-white transition-colors">
-                <i class="fa fa-times text-xl"></i>
+                <i class="fa fa-times text-lg md:text-xl"></i>
             </button>
         </div>
-        <div class="p-6">
-            <div class="space-y-6">
+        <div class="p-4 md:p-6">
+            <div class="space-y-4 md:space-y-6">
                 <!-- 头像上传区域 -->
-                <div class="flex flex-col items-center space-y-4">
+                <div class="flex flex-col items-center space-y-3 md:space-y-4">
                     <div class="relative group">
-                        <div class="w-24 h-24 bg-gradient-to-br from-purple-light to-blue-light rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:scale-105 transition-transform duration-300" id="profile-avatar-upload">
-                            <i class="fa fa-user-circle text-4xl text-white" id="profile-avatar-icon"></i>
+                        <div class="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-purple-light to-blue-light rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:scale-105 transition-transform duration-300" id="profile-avatar-upload">
+                            <i class="fa fa-user-circle text-3xl md:text-4xl text-white" id="profile-avatar-icon"></i>
                             <img id="profile-avatar-image" class="w-full h-full rounded-full object-cover hidden" alt="头像">
                         </div>
                         <!-- 悬停时显示的编辑遮罩 -->
                         <div class="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                            <i class="fa fa-camera text-white text-lg"></i>
+                            <i class="fa fa-camera text-white text-sm md:text-lg"></i>
                         </div>
                         <!-- 点击上传按钮 -->
-                        <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-r from-purple-500/80 to-blue-500/80 hover:from-purple-500 hover:to-blue-500 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-all duration-300 shadow-lg" id="avatar-upload-btn" title="更换头像">
+                        <div class="absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 bg-gradient-to-r from-purple-500/80 to-blue-500/80 hover:from-purple-500 hover:to-blue-500 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-all duration-300 shadow-lg" id="avatar-upload-btn" title="更换头像">
                             <i class="fa fa-pencil text-white text-xs"></i>
                         </div>
                     </div>
@@ -215,27 +217,27 @@
                 <!-- 用户名输入 -->
                 <div>
                     <label for="profile-username-input" class="block text-sm font-medium text-gray-300 mb-2">用户名</label>
-                    <input type="text" id="profile-username-input" class="w-full px-4 py-3 bg-dark-light/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-purple-light/50 focus:outline-none transition-colors" placeholder="请输入用户名">
+                    <input type="text" id="profile-username-input" class="w-full px-3 md:px-4 py-2 md:py-3 bg-dark-light/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-purple-light/50 focus:outline-none transition-colors text-sm md:text-base" placeholder="请输入用户名">
                 </div>
                 
                 <!-- 邮箱输入 -->
                 <div>
                     <label for="profile-email-input" class="block text-sm font-medium text-gray-300 mb-2">邮箱</label>
-                    <input type="email" id="profile-email-input" class="w-full px-4 py-3 bg-dark-light/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-purple-light/50 focus:outline-none transition-colors" placeholder="请输入邮箱">
+                    <input type="email" id="profile-email-input" class="w-full px-3 md:px-4 py-2 md:py-3 bg-dark-light/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-purple-light/50 focus:outline-none transition-colors text-sm md:text-base" placeholder="请输入邮箱">
                 </div>
                 
                 <!-- 个人简介 -->
                 <div>
                     <label for="profile-bio-input" class="block text-sm font-medium text-gray-300 mb-2">个人简介</label>
-                    <textarea id="profile-bio-input" rows="3" class="w-full px-4 py-3 bg-dark-light/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-purple-light/50 focus:outline-none transition-colors resize-none" placeholder="请输入个人简介（可选）"></textarea>
+                    <textarea id="profile-bio-input" rows="3" class="w-full px-3 md:px-4 py-2 md:py-3 bg-dark-light/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-purple-light/50 focus:outline-none transition-colors resize-none text-sm md:text-base" placeholder="请输入个人简介（可选）"></textarea>
                 </div>
             </div>
         </div>
-        <div class="p-6 border-t border-purple-light/20 flex justify-end space-x-3">
-            <button id="cancel-profile-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors">
+        <div class="p-4 md:p-6 border-t border-purple-light/20 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+            <button id="cancel-profile-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors text-sm md:text-base">
                 取消
             </button>
-            <button id="save-profile-btn" class="px-4 py-2 bg-gradient-to-r from-primary/80 to-secondary/80 hover:from-primary to-secondary text-white rounded-lg shadow-md shadow-primary/20 transition-all duration-300 transform hover:scale-[1.03]">
+            <button id="save-profile-btn" class="px-4 py-2 bg-gradient-to-r from-primary/80 to-secondary/80 hover:from-primary to-secondary text-white rounded-lg shadow-md shadow-primary/20 transition-all duration-300 transform hover:scale-[1.03] text-sm md:text-base">
                 <i class="fa fa-save mr-1"></i> 保存资料
             </button>
         </div>
