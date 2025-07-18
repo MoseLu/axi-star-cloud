@@ -130,7 +130,7 @@ class UIManager {
     // 切换可展开分类的展开/收起
     toggleExpandableCategory(btn) {
         const isExpanded = btn.getAttribute('data-expanded') === 'true';
-        const subContainer = btn.parentElement.querySelector('.sub-categories-dropdown');
+        const subContainer = document.getElementById('sub-categories-container');
         
         if (isExpanded) {
             // 收起子分类
