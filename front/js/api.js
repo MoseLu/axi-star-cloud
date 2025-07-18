@@ -404,13 +404,19 @@ class ApiManager {
         if (!userId) return { success: false, error: '请先登录' };
 
         try {
-            // 构建下载URL - 确保使用服务器URL而不是文件路径
-            const downloadUrl = this.buildApiUrl(`/api/files/${fileId}/download?user_id=${userId}`);
+            // 先获取文件信息，获取静态路径
+            const file = await this.getFile(fileId);
+            if (!file || !file.path) {
+                throw new Error('文件不存在');
+            }
             
-            // 直接创建隐藏的下载链接并触发下载，不发送HEAD请求
+            // 直接使用文件的静态路径进行下载
+            const downloadUrl = this.buildApiUrl(file.path);
+            
+            // 创建隐藏的下载链接并触发下载
             const link = document.createElement('a');
             link.href = downloadUrl;
-            link.download = ''; // 让浏览器使用服务器返回的文件名
+            link.download = file.name || ''; // 使用文件名
             link.style.display = 'none';
             document.body.appendChild(link);
             link.click();
