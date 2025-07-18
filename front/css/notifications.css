@@ -1,0 +1,167 @@
+/**
+ * 通知和消息框样式文件
+ * 包含全局消息框、通知容器等样式
+ */
+
+/* 全局消息框样式 */
+#global-message-box {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 10000;
+  max-width: 400px;
+  min-width: 300px;
+  pointer-events: none;
+}
+
+#global-message-box > div {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.95), rgba(59, 130, 246, 0.95));
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 0.5rem;
+  transform: translateX(100%);
+  animation: slideIn 0.3s ease-out forwards;
+  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+}
+
+#global-message-box > div::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6, #f59e0b);
+  animation: progress 3s linear forwards;
+}
+
+#global-message-box .glow-effect {
+  position: relative;
+}
+
+#global-message-box .glow-effect::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #10b981, #3b82f6, #8b5cf6, #f59e0b);
+  border-radius: 0.75rem;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#global-message-box .glow-effect:hover::before {
+  opacity: 0.5;
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 全局通知容器样式 */
+#global-notify-container {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 10000;
+  max-width: 400px;
+  min-width: 300px;
+  pointer-events: none;
+}
+
+#global-notify-container > div {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(34, 197, 94, 0.95));
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 0.5rem;
+  transform: translateX(100%);
+  animation: slideIn 0.3s ease-out forwards;
+  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+}
+
+#global-notify-container > div::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981, #22c55e);
+  animation: progress 3s linear forwards;
+}
+
+/* 动画定义 */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+  #global-message-box {
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
+    max-width: none;
+    min-width: auto;
+  }
+  
+  #global-message-box > div {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  #global-message-box > div::before {
+    height: 2px;
+  }
+  
+  #global-notify-container {
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
+    max-width: none;
+    min-width: auto;
+  }
+  
+  #global-notify-container > div {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  #global-notify-container > div::before {
+    height: 2px;
+  }
+} 

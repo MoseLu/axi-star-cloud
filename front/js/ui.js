@@ -3619,39 +3619,48 @@ class UIManager {
         // 更新文件列表区域的文件数量（右上角）
         const fileCountDisplay = document.getElementById('file-count-display');
         const fileCountDesc = document.getElementById('file-count-desc');
-        if (fileCountDisplay && fileCountDesc) {
-            let displayCount = count;
-            let desc = '文件';
-            
-            // 外站文档分类特殊处理
-            if (this.currentCategory === 'external-docs') {
-                displayCount = count;
-                desc = '文档';
-            } else if (this.currentCategory && this.currentCategory !== 'all') {
-                const fileCards = document.querySelectorAll('#files-grid > div');
-                displayCount = 0;
-                fileCards.forEach(card => {
-                    if (!card.classList.contains('hidden') && card.getAttribute('data-type') === this.currentCategory) {
-                        displayCount++;
-                    }
-                });
-            } else if (this.currentCategory === 'all' || !this.currentCategory) {
-                // 全部文件分类，使用总文件数
-                displayCount = this.totalFileCount || count;
-            }
-            
-            fileCountDisplay.textContent = displayCount;
-            fileCountDesc.innerHTML = `共 <span id="file-count-display" class="text-purple-300 font-bold">${displayCount}</span> 个${desc}`;
+        
+        // 如果元素不存在，等待组件加载完成后再重试
+        if (!fileCountDisplay || !fileCountDesc) {
+            console.log('⏳ 文件数量显示元素未找到，等待组件加载...');
+            setTimeout(() => {
+                this.updateFileCount(count);
+            }, 500);
+            return;
         }
+        
+        let displayCount = count;
+        let desc = '文件';
+        
+        // 外站文档分类特殊处理
+        if (this.currentCategory === 'external-docs') {
+            displayCount = count;
+            desc = '文档';
+        } else if (this.currentCategory && this.currentCategory !== 'all') {
+            const fileCards = document.querySelectorAll('#files-grid > div');
+            displayCount = 0;
+            fileCards.forEach(card => {
+                if (!card.classList.contains('hidden') && card.getAttribute('data-type') === this.currentCategory) {
+                    displayCount++;
+                }
+            });
+        } else if (this.currentCategory === 'all' || !this.currentCategory) {
+            // 全部文件分类，使用总文件数
+            displayCount = this.totalFileCount || count;
+        }
+        
+        fileCountDisplay.textContent = displayCount;
+        fileCountDesc.innerHTML = `共 <span id="file-count-display" class="text-purple-300 font-bold">${displayCount}</span> 个${desc}`;
     }
 
     // 更新存储显示
     updateStorageDisplay(storageInfo) {
         if (!storageInfo) {
+            console.log('❌ 存储信息为空');
             return;
         }
 
-
+        console.log('📊 更新存储显示:', storageInfo);
 
         const totalElement = document.getElementById('total-storage');
         const usedElement = document.getElementById('used-storage');
@@ -3659,31 +3668,49 @@ class UIManager {
         const progressBar = document.getElementById('storage-progress-bar');
         const progressText = document.getElementById('storage-progress-text');
 
+        // 如果元素不存在，等待组件加载完成后再重试
+        if (!totalElement || !usedElement || !percentageElement || !progressBar || !progressText) {
+            console.log('⏳ 存储显示元素未找到，等待组件加载...');
+            setTimeout(() => {
+                this.updateStorageDisplay(storageInfo);
+            }, 500);
+            return;
+        }
+
+        console.log('✅ 找到存储显示元素，开始更新');
+
         // 计算百分比
         const percentage = storageInfo.total_space > 0 ? (storageInfo.used_space / storageInfo.total_space) * 100 : 0;
         const clampedPercentage = Math.min(percentage, 100);
 
+        console.log('📈 存储统计:', {
+            usedSpace: storageInfo.used_space,
+            totalSpace: storageInfo.total_space,
+            percentage: percentage,
+            clampedPercentage: clampedPercentage
+        });
+
         if (totalElement) {
             const totalFormatted = this.formatStorageSize(storageInfo.total_space);
             totalElement.textContent = totalFormatted;
-    
+            console.log('✅ 更新总空间显示:', totalFormatted);
         }
         if (usedElement) {
             const usedFormatted = this.formatStorageSize(storageInfo.used_space);
             usedElement.textContent = usedFormatted;
-    
+            console.log('✅ 更新已用空间显示:', usedFormatted);
         }
         if (percentageElement) {
             percentageElement.textContent = `${clampedPercentage.toFixed(2)}%`;
-    
+            console.log('✅ 更新使用率显示:', `${clampedPercentage.toFixed(2)}%`);
         }
         if (progressBar) {
             progressBar.style.width = `${clampedPercentage}%`;
-    
+            console.log('✅ 更新进度条:', `${clampedPercentage}%`);
         }
         if (progressText) {
             progressText.textContent = `${clampedPercentage.toFixed(2)}% 已使用`;
-    
+            console.log('✅ 更新进度文本:', `${clampedPercentage.toFixed(2)}% 已使用`);
         }
     }
 

@@ -1,0 +1,113 @@
+/**
+ * 面包屑导航样式文件
+ * 包含面包屑容器、按钮和文件夹名称样式
+ */
+
+/* 面包屑导航样式 */
+#breadcrumb-container {
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  max-width: 100%;
+}
+
+#breadcrumb-container:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.breadcrumb-back-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.breadcrumb-back-btn:hover {
+  background: rgba(139, 92, 246, 0.1);
+  transform: translateX(-2px);
+}
+
+/* 面包屑文件夹名称样式 */
+.expandable {
+  cursor: pointer;
+}
+
+.expandable[data-expanded="true"] .fa-chevron-right {
+  transform: rotate(90deg);
+}
+
+.expandable[data-expanded="true"] {
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* 子分类展开样式 */
+.sub-categories-expand {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+  background: rgba(15, 23, 42, 0.05);
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.sub-categories-expand.show {
+  max-height: 200px;
+  padding: 0.5rem;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* 子文件类型按钮样式 */
+.sub-file-type-btn {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.sub-file-type-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.sub-file-type-btn:hover::before {
+  left: 100%;
+}
+
+.sub-file-type-btn.active {
+  background: rgba(139, 92, 246, 0.2);
+  color: #8b5cf6;
+  font-weight: 600;
+}
+
+.sub-categories-expand.show .sub-file-type-btn {
+  animation: buttonSlideIn 0.3s ease-out;
+}
+
+@keyframes buttonSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.file-type-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+} 
