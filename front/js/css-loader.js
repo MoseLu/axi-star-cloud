@@ -6,15 +6,18 @@
 class CSSLoader {
     constructor() {
         this.loadedStylesheets = new Set();
-        this.cssFiles = [
-            '/static/css/base.css',
-            '/static/css/scrollbar.css',
-            '/static/css/breadcrumb.css',
-            '/static/css/file-filters.css',
-            '/static/css/preview.css',
-            '/static/css/file-grid.css',
-            '/static/css/notifications.css'
-        ];
+            this.cssFiles = [
+        '/static/css/base.css',
+        '/static/css/scrollbar.css',
+        '/static/css/breadcrumb.css',
+        '/static/css/file-filters.css',
+        '/static/css/preview.css',
+        '/static/css/file-grid.css',
+        '/static/css/notifications.css'
+    ];
+    
+    // 添加版本号防止缓存
+    this.version = '20250718';
     }
 
     /**
@@ -50,7 +53,7 @@ class CSSLoader {
             const link = document.createElement('link');
             link.rel = 'stylesheet';
             link.type = 'text/css';
-            link.href = href + '?v=' + new Date().getTime(); // 添加版本号防止缓存
+            link.href = href + '?v=' + this.version; // 使用固定版本号防止缓存
 
             link.onload = () => {
                 console.log(`✅ CSS 文件加载成功: ${href}`);

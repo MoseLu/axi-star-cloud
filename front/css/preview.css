@@ -138,18 +138,7 @@
   min-height: 200px;
 }
 
-/* 模态框打开时的body样式 */
-body.modal-open {
-  overflow: hidden;
-}
 
-body:not(.modal-open) {
-  overflow: auto;
-}
-
-html:not(.modal-open) {
-  overflow: auto;
-}
 
 /* 预览文件信息样式 */
 .preview-file-info {

@@ -1,6 +1,6 @@
 /**
  * 文件网格样式文件
- * 包含文件卡片、文件夹卡片、网格布局等样式
+ * 包含文件网格布局、响应式设计等样式
  */
 
 /* 文件网格布局 */
@@ -13,12 +13,96 @@
   transition: opacity 0.3s ease-in-out;
 }
 
-/* 空状态过渡效果 */
-#empty-state {
-  transition: opacity 0.3s ease-in-out;
+/* 文件夹网格布局 */
+#folders-grid, .folders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 0;
+  min-height: 200px;
 }
 
-/* 文件卡片样式 */
+/* 存储空间样式 */
+.storage-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.storage-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.storage-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.storage-label {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.storage-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.storage-progress {
+  width: 100%;
+  height: 0.5rem;
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 0.25rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.storage-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6);
+  border-radius: 0.25rem;
+  transition: width 0.3s ease;
+}
+
+/* 文件类型分类卡片样式 */
+.file-type-category {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.file-type-category:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.file-type-category h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f8fafc;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.file-type-category .category-icon {
+  font-size: 1.5rem;
+}
+
+/* 文件卡片基础样式 */
 .file-card {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
@@ -36,16 +120,7 @@
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-/* 文件夹网格布局 */
-#folders-grid, .folders-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  padding: 1rem 0;
-  min-height: 200px;
-}
-
-/* 文件夹卡片样式 */
+/* 文件夹卡片基础样式 */
 .folder-card {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
@@ -61,31 +136,6 @@
 .folder-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* 响应式网格布局 */
-@media (max-width: 640px) {
-    .files-grid {
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 1rem;
-    }
-    
-    #folders-grid {
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 1rem;
-    }
-}
-
-@media (min-width: 1024px) {
-    .files-grid {
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 2rem;
-    }
-    
-    #folders-grid {
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 2rem;
-    }
 }
 
 /* 文件卡片内容样式 */
@@ -190,6 +240,24 @@
   gap: 0.25rem;
 }
 
+/* 文件图标容器和操作按钮 */
+.file-icon-container,
+.folder-icon-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.file-actions,
+.folder-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(139, 92, 246, 0.1);
+}
+
 /* 全宽列样式 */
 .col-span-full {
   grid-column: 1 / -1;
@@ -239,22 +307,34 @@
   color: #f8fafc;
 }
 
-/* 文件图标容器和操作按钮 */
-.file-icon-container,
-.folder-icon-container {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
+/* 响应式网格布局 */
+@media (max-width: 640px) {
+    .files-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1rem;
+    }
+    
+    #folders-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1rem;
+    }
 }
 
-.file-actions,
-.folder-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: auto;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(139, 92, 246, 0.1);
+@media (min-width: 1024px) {
+    .files-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2rem;
+    }
+    
+    #folders-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2rem;
+    }
+}
+
+/* 空状态过渡效果 */
+#empty-state {
+  transition: opacity 0.3s ease-in-out;
 }
 
 /* 模态框背景样式 */
