@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -100,7 +101,11 @@ func (h *FileHandler) DownloadFile(c *gin.Context) {
 	fileIDStr := c.Param("id")
 	userID := c.Query("user_id")
 
+	// 添加调试日志
+	log.Printf("🔍 下载请求 - 文件ID: %s, 用户ID: %s", fileIDStr, userID)
+
 	if userID == "" {
+		log.Printf("❌ 未授权访问 - 缺少用户ID")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权访问"})
 		return
 	}
@@ -115,12 +120,16 @@ func (h *FileHandler) DownloadFile(c *gin.Context) {
 	file, err := h.fileRepo.GetFileByID(fileID, userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			log.Printf("❌ 文件不存在 - ID: %d, 用户: %s", fileID, userID)
 			c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
 		} else {
+			log.Printf("❌ 获取文件信息失败 - ID: %d, 用户: %s, 错误: %v", fileID, userID, err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文件信息失败"})
 		}
 		return
 	}
+
+	log.Printf("✅ 找到文件 - ID: %d, 名称: %s, 路径: %s", fileID, file.Name, file.Path)
 
 	// 构建绝对路径 - 使用统一的路径处理
 	absolutePath := utils.GetFileAbsolutePath(file.Path)
@@ -409,7 +418,11 @@ func (h *FileHandler) DownloadFileRedirect(c *gin.Context) {
 	fileIDStr := c.Query("id")
 	userID := c.Query("user_id")
 
+	// 添加调试日志
+	log.Printf("🔍 下载重定向请求 - 文件ID: %s, 用户ID: %s", fileIDStr, userID)
+
 	if userID == "" {
+		log.Printf("❌ 未授权访问 - 缺少用户ID")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权访问"})
 		return
 	}
@@ -424,20 +437,26 @@ func (h *FileHandler) DownloadFileRedirect(c *gin.Context) {
 	file, err := h.fileRepo.GetFileByID(fileID, userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			log.Printf("❌ 文件不存在 - ID: %d, 用户: %s", fileID, userID)
 			c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
 		} else {
+			log.Printf("❌ 获取文件信息失败 - ID: %d, 用户: %s, 错误: %v", fileID, userID, err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文件信息失败"})
 		}
 		return
 	}
 
+	log.Printf("✅ 找到文件 - ID: %d, 名称: %s, 路径: %s", fileID, file.Name, file.Path)
+
 	// 构建静态文件URL - 修复重复路径问题
 	staticURL := file.Path
-
+	
 	// 生成一次性token（简化版本，实际可以使用JWT）
 	token := fmt.Sprintf("token_%d_%s", fileID, userID)
-
+	
 	// 重定向到静态文件URL
 	redirectURL := fmt.Sprintf("%s?token=%s", staticURL, token)
+	
+	log.Printf("🔄 重定向到静态文件: %s", redirectURL)
 	c.Redirect(http.StatusFound, redirectURL)
 }

@@ -35,11 +35,11 @@ func (h *StorageHandler) GetStorageInfo(c *gin.Context) {
 		return
 	}
 
-	// 防御性处理，确保为数字
-	if storageInfo.UsedSpace < 0 || storageInfo.UsedSpace == 0 {
+	// 防御性处理，只在真正异常时才重置
+	if storageInfo.UsedSpace < 0 {
 		storageInfo.UsedSpace = 0
 	}
-	if storageInfo.TotalSpace < 0 || storageInfo.TotalSpace == 0 {
+	if storageInfo.TotalSpace < 0 {
 		storageInfo.TotalSpace = 0
 	}
 

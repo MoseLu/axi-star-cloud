@@ -498,18 +498,12 @@ class AuthManager {
 
     // 显示消息
     showMessage(message, type = 'info') {
-        // 使用UI管理器的消息显示功能
-        if (window.uiManager && window.uiManager.showMessage) {
-            window.uiManager.showMessage(message, type);
+        // 使用全局的Notify系统
+        if (window.Notify) {
+            window.Notify.show({ message: message, type: type });
         } else {
-            // 备用方案：使用简单的alert
-            if (type === 'error') {
-                console.error(message);
-            } else if (type === 'warning') {
-                console.warn(message);
-            } else {
-                console.log(message);
-            }
+            // 备用方案：使用alert
+            alert(message);
         }
     }
 }

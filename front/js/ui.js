@@ -458,15 +458,8 @@ class UIManager {
 
     // 登录成功回调
     async onLoginSuccess(userData) {
-        console.log('UIManager.onLoginSuccess 开始处理，用户:', userData.username);
 
         try {
-            // 验证API管理器是否有用户信息
-            if (!this.api.getCurrentUserId()) {
-                console.error('API管理器没有用户ID，无法获取数据');
-                throw new Error('用户未登录');
-            }
-
             // 首先更新用户显示（使用登录时获取的基本信息）
             this.updateProfileDisplay(userData);
             
@@ -490,14 +483,13 @@ class UIManager {
                     this.updateProfileDisplay(completeUserData);
                 }
             } catch (error) {
-                console.warn('获取用户资料失败:', error);
+
                 // 如果获取失败，继续使用登录时的基本信息
             }
             
             // 初始化用户头像显示
             await this.initUserProfile();
             
-            console.log('开始获取文件列表...');
             // 从后端获取数据
             const [files, folders] = await Promise.all([
                 this.api.getFiles(), // 不传folderId，获取所有文件
@@ -510,66 +502,43 @@ class UIManager {
             // 缓存所有文件数据
             this.allFiles = files;
 
-            // 调试信息
-            console.log('获取到的文件列表:', files);
-            console.log('获取到的文件夹列表:', folders);
-
             // 更新界面
             this.updateFileCount(files.length);
             this.renderFileList(files);
             await this.renderFolderList(folders);
 
-            console.log('开始获取存储信息...');
             // 获取并更新存储信息
             const storageInfo = await this.api.getStorageInfo();
-            console.log('获取到的存储信息:', storageInfo);
     
             this.updateStorageDisplay(storageInfo);
 
             // 初始化拖拽功能
             this.setupDragAndDrop();
 
-            console.log('UIManager.onLoginSuccess 处理完成，文件数量:', files.length);
-
         } catch (error) {
-            console.error('UIManager.onLoginSuccess 处理失败:', error);
-            this.showMessage('数据加载失败: ' + error.message, 'error');
+            this.showMessage('数据加载失败', 'error');
         }
 
     }
 
     // 渲染文件列表
     renderFileList(files) {
-        console.log('开始渲染文件列表，文件数量:', files ? files.length : 0);
-        
         const fileGrid = document.getElementById('files-grid');
         const emptyState = document.getElementById('empty-state');
         const uploadArea = document.getElementById('upload-area');
         
         if (!fileGrid) {
-            console.error('找不到files-grid元素');
             return;
         }
 
-        console.log('找到files-grid元素，开始清空内容');
-        console.log('files-grid元素:', fileGrid);
-        console.log('files-grid的display样式:', window.getComputedStyle(fileGrid).display);
-        console.log('files-grid的visibility样式:', window.getComputedStyle(fileGrid).visibility);
-        
+
+
         fileGrid.innerHTML = '';
 
         if (files && files.length > 0) {
-            console.log('开始渲染文件卡片，文件列表:', files);
-            files.forEach((file, index) => {
-                console.log(`渲染第${index + 1}个文件:`, file);
-                try {
-                    const fileCard = this.createFileCard(file);
-                    console.log(`创建的文件卡片:`, fileCard);
-                    fileGrid.appendChild(fileCard);
-                    console.log(`成功添加第${index + 1}个文件卡片到DOM`);
-                } catch (error) {
-                    console.error(`创建第${index + 1}个文件卡片时出错:`, error);
-                }
+            files.forEach(file => {
+                const fileCard = this.createFileCard(file);
+                fileGrid.appendChild(fileCard);
             });
             
             // 显示文件网格，隐藏空状态和上传区域
@@ -580,10 +549,7 @@ class UIManager {
             if (uploadArea) {
                 uploadArea.classList.add('hidden');
             }
-            console.log('文件渲染完成，显示文件网格');
-            console.log('files-grid的最终子元素数量:', fileGrid.children.length);
         } else {
-            console.log('没有文件，显示空状态');
             // 隐藏文件网格，显示空状态，隐藏上传区域
             fileGrid.classList.add('hidden');
             if (emptyState) {
@@ -600,16 +566,11 @@ class UIManager {
 
     // 创建文件卡片
     createFileCard(file) {
-        console.log('创建文件卡片，文件信息:', file);
-        
         const fileCard = document.createElement('div');
         fileCard.className = 'glass-effect rounded-xl p-2 border border-purple-light/20 hover:border-purple-light/40 transition-all duration-300 cursor-pointer group file-card relative hover:shadow-lg hover:shadow-purple-500/10 min-h-[140px] w-full max-w-[200px]';
         fileCard.setAttribute('data-type', file.type);
         fileCard.setAttribute('data-file-id', file.id);
         fileCard.setAttribute('draggable', 'true');
-        
-        console.log('创建的文件卡片元素:', fileCard);
-        console.log('文件卡片类名:', fileCard.className);
 
         // 格式化日期为 yyyy-mm-dd 格式
         const date = new Date(file.date || file.created_at || Date.now());
@@ -1667,6 +1628,7 @@ class UIManager {
             
             this.showMessage('文件下载已开始', 'success');
         } catch (error) {
+            console.error('下载错误:', error);
             this.showMessage(`下载失败: ${error.message}`, 'error');
         }
     }
@@ -2188,21 +2150,6 @@ class UIManager {
         const fileCards = document.querySelectorAll('#files-grid > div');
         let visibleCount = 0;
 
-        // 如果是切换到外站文档分类，检查权限并加载文档
-        if (type === 'external-docs') {
-            // 检查用户是否为管理员
-            const currentUser = this.api.getCurrentUser();
-            if (currentUser && currentUser.isAdmin) {
-                this.loadExternalDocs();
-            } else {
-                // 非管理员用户显示权限提示
-                this.showMessage('需要管理员权限才能访问外站文档', 'warning');
-                // 显示权限提示的空状态
-                this.renderExternalDocs([]);
-                return;
-            }
-        }
-
         // 如果是切换到非外站文档分类，清空外站文档内容
         if (type !== 'external-docs') {
             // 检查是否有外站文档的空状态内容，如果有则清空
@@ -2219,7 +2166,19 @@ class UIManager {
         });
 
         // 短暂延迟后重新显示匹配的文件
-        setTimeout(() => {
+        setTimeout(async () => {
+            // 如果缓存为空且是全部文件分类，重新获取数据
+            if (type === 'all' && this.allFiles.length === 0) {
+                try {
+                    const files = await this.api.getFiles();
+                    this.allFiles = files; // 更新缓存
+                    this.renderFileList(files);
+                    return;
+                } catch (error) {
+                    console.error('重新获取文件数据失败:', error);
+                }
+            }
+            
             fileCards.forEach(card => {
                 const fileData = card.getAttribute('data-type');
                 
@@ -2379,6 +2338,8 @@ class UIManager {
             return;
         }
 
+
+
         const totalElement = document.getElementById('total-storage');
         const usedElement = document.getElementById('used-storage');
         const percentageElement = document.getElementById('usage-percentage');
@@ -2392,19 +2353,24 @@ class UIManager {
         if (totalElement) {
             const totalFormatted = this.formatStorageSize(storageInfo.total_space);
             totalElement.textContent = totalFormatted;
+    
         }
         if (usedElement) {
             const usedFormatted = this.formatStorageSize(storageInfo.used_space);
             usedElement.textContent = usedFormatted;
+    
         }
         if (percentageElement) {
             percentageElement.textContent = `${clampedPercentage.toFixed(2)}%`;
+    
         }
         if (progressBar) {
             progressBar.style.width = `${clampedPercentage}%`;
+    
         }
         if (progressText) {
             progressText.textContent = `${clampedPercentage.toFixed(2)}% 已使用`;
+    
         }
     }
 
@@ -3785,10 +3751,8 @@ class UIManager {
         } catch (error) {
             console.error('加载外站文档失败:', error);
             // 如果是权限问题，显示特殊提示
-            if (error.message && (error.message.includes('权限') || error.message.includes('Unauthorized'))) {
+            if (error.message && error.message.includes('权限')) {
                 this.showMessage('需要管理员权限才能访问外站文档', 'warning');
-                // 显示权限提示的空状态
-                this.renderExternalDocs([]);
             } else {
                 this.showMessage('加载外站文档失败', 'error');
             }
@@ -4175,20 +4139,6 @@ order: ${order}
         
         // 默认返回文档图标
         return `/static/public/docs.png`;
-    }
-
-    // 下载文件
-    downloadFile(fileId) {
-        const userId = this.getCurrentUserId();
-        if (!userId) {
-            this.showMessage('请先登录', 'error');
-            return;
-        }
-
-        const downloadUrl = `${window.APP_CONFIG.API_BASE_URL}/api/download?id=${fileId}&user_id=${userId}`;
-        
-        // 使用window.open打开下载链接
-        window.open(downloadUrl, '_blank');
     }
 }
 

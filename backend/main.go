@@ -38,7 +38,7 @@ func main() {
 
 	// 迁移archive类型文件为other类型
 	if err := database.MigrateArchiveToOther(db); err != nil {
-		// 静默处理，不打印错误
+		log.Printf("迁移archive文件类型失败: %v", err)
 	}
 
 	// 只在第一次启动时设置默认存储限制
