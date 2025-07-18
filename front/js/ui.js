@@ -1583,21 +1583,11 @@ class UIManager {
                 // 获取重定向后的URL
                 const finalUrl = response.url;
                 
-                // 创建隐藏的下载链接并触发下载
-                const link = document.createElement('a');
-                link.href = finalUrl;
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                // 使用window.open直接打开下载链接，避免"另存为"弹窗
+                window.open(finalUrl, '_blank');
             } else {
                 // 如果没有重定向，直接使用原URL
-                const link = document.createElement('a');
-                link.href = downloadUrl;
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                window.open(downloadUrl, '_blank');
             }
             
             this.showMessage('文件下载已开始', 'success');

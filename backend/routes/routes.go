@@ -207,8 +207,10 @@ func (r *Router) registerStaticRoutes() {
 		if _, err := os.Stat(path); err == nil {
 			// 使用自定义的静态文件处理器，添加下载响应头
 			fmt.Printf("🔧 注册自定义uploads处理器，路径: %s\n", path)
-			r.engine.GET("/uploads/*filepath", func(c *gin.Context) {
-				fmt.Printf("🎯 收到uploads请求: %s\n", c.Request.URL.Path)
+
+			// 创建通用的文件处理函数
+			fileHandler := func(c *gin.Context) {
+				fmt.Printf("🎯 收到uploads请求: %s, 方法: %s\n", c.Request.URL.Path, c.Request.Method)
 				filepathParam := c.Param("filepath")
 
 				// 获取绝对路径，确保路径正确
@@ -233,13 +235,23 @@ func (r *Router) registerStaticRoutes() {
 
 				fmt.Printf("✅ 文件存在，提供下载: %s\n", fullPath)
 
-				// 设置下载响应头
-				c.Header("Content-Disposition", "attachment")
-				c.Header("Cache-Control", "no-cache")
+				// 获取文件名
+				fileName := filepath.Base(fullPath)
+
+				// 设置完整的下载响应头
+				c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", fileName))
+				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+				c.Header("Pragma", "no-cache")
+				c.Header("Expires", "0")
+				c.Header("X-Content-Type-Options", "nosniff")
 
 				// 提供文件
 				c.File(fullPath)
-			})
+			}
+
+			// 注册GET和HEAD路由
+			r.engine.GET("/uploads/*filepath", fileHandler)
+			r.engine.HEAD("/uploads/*filepath", fileHandler)
 			fmt.Printf("✅ 找到uploads路径: %s\n", path)
 			uploadsFound = true
 			break
@@ -262,30 +274,42 @@ func (r *Router) registerStaticRoutes() {
 			if _, err := os.Stat(absPath); err == nil {
 				// 使用自定义的静态文件处理器，添加下载响应头
 				fmt.Printf("🔧 注册自定义uploads处理器（绝对路径）: %s\n", absPath)
-				r.engine.GET("/uploads/*filepath", func(c *gin.Context) {
-					fmt.Printf("🎯 收到uploads请求（绝对路径）: %s\n", c.Request.URL.Path)
+
+				// 创建通用的文件处理函数
+				fileHandler := func(c *gin.Context) {
+					fmt.Printf("🎯 收到uploads请求（绝对路径）: %s, 方法: %s\n", c.Request.URL.Path, c.Request.Method)
 					filepathParam := c.Param("filepath")
 					fullPath := filepath.Join(absPath, filepathParam)
-					
+
 					// 添加调试日志
 					fmt.Printf("🔍 静态文件请求（绝对路径） - 路径: %s, 参数: %s, 完整路径: %s\n", absPath, filepathParam, fullPath)
-					
+
 					// 检查文件是否存在
 					if _, err := os.Stat(fullPath); os.IsNotExist(err) {
 						fmt.Printf("❌ 文件不存在: %s\n", fullPath)
 						c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
 						return
 					}
-					
+
 					fmt.Printf("✅ 文件存在，提供下载: %s\n", fullPath)
+
+					// 获取文件名
+					fileName := filepath.Base(fullPath)
 					
-					// 设置下载响应头
-					c.Header("Content-Disposition", "attachment")
-					c.Header("Cache-Control", "no-cache")
-					
+					// 设置完整的下载响应头
+					c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", fileName))
+					c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+					c.Header("Pragma", "no-cache")
+					c.Header("Expires", "0")
+					c.Header("X-Content-Type-Options", "nosniff")
+
 					// 提供文件
 					c.File(fullPath)
-				})
+				}
+
+				// 注册GET和HEAD路由
+				r.engine.GET("/uploads/*filepath", fileHandler)
+				r.engine.HEAD("/uploads/*filepath", fileHandler)
 				fmt.Printf("✅ 找到uploads绝对路径: %s\n", absPath)
 				uploadsFound = true
 				break
