@@ -1139,7 +1139,7 @@ class UIManager {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
-                document.body.classList.remove('modal-open');
+                this.cleanupModalScroll();
             }
         });
     }
@@ -1175,7 +1175,7 @@ class UIManager {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
-                document.body.classList.remove('modal-open');
+                this.cleanupModalScroll();
             }
         });
     }
@@ -1214,7 +1214,7 @@ class UIManager {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
-                document.body.classList.remove('modal-open');
+                this.cleanupModalScroll();
             }
         });
     }
@@ -1504,7 +1504,7 @@ class UIManager {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
-                document.body.classList.remove('modal-open');
+                this.cleanupModalScroll();
             }
         });
         
@@ -1512,7 +1512,7 @@ class UIManager {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 modal.remove();
-                document.body.classList.remove('modal-open');
+                this.cleanupModalScroll();
             }
         });
     }
@@ -1702,6 +1702,19 @@ class UIManager {
         tableHTML += '</table>';
         
         return tableHTML;
+    }
+
+    // 清理模态框滚动状态
+    cleanupModalScroll() {
+        // 检查是否还有其他模态框存在
+        const remainingModals = document.querySelectorAll('.fixed.inset-0.bg-black\\/95');
+        if (remainingModals.length === 0) {
+            // 没有其他模态框时，恢复页面滚动
+            document.body.classList.remove('modal-open');
+            // 确保body可以滚动
+            document.body.style.overflow = '';
+            document.body.style.overflowY = '';
+        }
     }
 
     // 生成表格HTML
