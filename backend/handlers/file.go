@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -147,11 +146,11 @@ func (h *FileHandler) DownloadFile(c *gin.Context) {
 		return
 	}
 
-	// 强制所有文件都下载，不区分类型
-	disposition := "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
+	// 不设置Content-Disposition，让浏览器使用默认下载行为
+	// disposition := "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
 	contentType := "application/octet-stream"
 
-	c.Header("Content-Disposition", disposition)
+	// c.Header("Content-Disposition", disposition) // 注释掉这行
 	c.Header("Content-Type", contentType)
 	c.Header("Content-Length", strconv.FormatInt(fileInfo.Size(), 10))
 
