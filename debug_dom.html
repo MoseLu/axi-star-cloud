@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOM调试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .debug-section {
+            background: #2a2a2a;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .success { background: #28a745; }
+        .error { background: #dc3545; }
+        .warning { background: #ffc107; color: #000; }
+        .info { background: #17a2b8; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #333;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .test-card {
+            background: #333;
+            border: 1px solid #555;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>DOM元素调试工具</h1>
+    
+    <div class="debug-section">
+        <h3>1. 检查files-grid元素</h3>
+        <div id="files-grid-status"></div>
+        <button onclick="checkFilesGrid()">检查files-grid</button>
+    </div>
+    
+    <div class="debug-section">
+        <h3>2. 测试添加文件卡片</h3>
+        <div id="test-card-status"></div>
+        <button onclick="testAddCard()">测试添加卡片</button>
+    </div>
+    
+    <div class="debug-section">
+        <h3>3. 检查CSS样式</h3>
+        <div id="css-status"></div>
+        <button onclick="checkCSS()">检查CSS</button>
+    </div>
+    
+    <div class="debug-section">
+        <h3>4. 模拟文件数据</h3>
+        <div id="simulate-status"></div>
+        <button onclick="simulateFiles()">模拟文件数据</button>
+    </div>
+
+    <!-- 测试用的files-grid容器 -->
+    <div id="files-grid" class="files-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 240px)); gap: 24px; padding: 20px; border: 2px dashed #555;">
+        <!-- 测试卡片将在这里显示 -->
+    </div>
+
+    <script>
+        function checkFilesGrid() {
+            const statusDiv = document.getElementById('files-grid-status');
+            statusDiv.innerHTML = '';
+            
+            const filesGrid = document.getElementById('files-grid');
+            if (filesGrid) {
+                statusDiv.innerHTML += `<div class="status success">✓ 找到files-grid元素</div>`;
+                statusDiv.innerHTML += `<div class="status info">元素ID: ${filesGrid.id}</div>`;
+                statusDiv.innerHTML += `<div class="status info">元素类名: ${filesGrid.className}</div>`;
+                statusDiv.innerHTML += `<div class="status info">显示样式: ${window.getComputedStyle(filesGrid).display}</div>`;
+                statusDiv.innerHTML += `<div class="status info">可见性: ${window.getComputedStyle(filesGrid).visibility}</div>`;
+                statusDiv.innerHTML += `<div class="status info">高度: ${window.getComputedStyle(filesGrid).height}</div>`;
+                statusDiv.innerHTML += `<div class="status info">宽度: ${window.getComputedStyle(filesGrid).width}</div>`;
+            } else {
+                statusDiv.innerHTML += `<div class="status error">✗ 未找到files-grid元素</div>`;
+            }
+        }
+        
+        function testAddCard() {
+            const statusDiv = document.getElementById('test-card-status');
+            statusDiv.innerHTML = '';
+            
+            const filesGrid = document.getElementById('files-grid');
+            if (!filesGrid) {
+                statusDiv.innerHTML += `<div class="status error">✗ files-grid元素不存在</div>`;
+                return;
+            }
+            
+            // 创建测试卡片
+            const testCard = document.createElement('div');
+            testCard.className = 'test-card';
+            testCard.innerHTML = `
+                <h4>测试文件</h4>
+                <p>这是一个测试文件卡片</p>
+                <p>大小: 1.2 MB</p>
+                <p>类型: 图片</p>
+            `;
+            
+            filesGrid.appendChild(testCard);
+            statusDiv.innerHTML += `<div class="status success">✓ 成功添加测试卡片</div>`;
+            statusDiv.innerHTML += `<div class="status info">当前子元素数量: ${filesGrid.children.length}</div>`;
+        }
+        
+        function checkCSS() {
+            const statusDiv = document.getElementById('css-status');
+            statusDiv.innerHTML = '';
+            
+            const filesGrid = document.getElementById('files-grid');
+            if (!filesGrid) {
+                statusDiv.innerHTML += `<div class="status error">✗ files-grid元素不存在</div>`;
+                return;
+            }
+            
+            const computedStyle = window.getComputedStyle(filesGrid);
+            statusDiv.innerHTML += `<div class="status info">display: ${computedStyle.display}</div>`;
+            statusDiv.innerHTML += `<div class="status info">grid-template-columns: ${computedStyle.gridTemplateColumns}</div>`;
+            statusDiv.innerHTML += `<div class="status info">gap: ${computedStyle.gap}</div>`;
+            statusDiv.innerHTML += `<div class="status info">align-items: ${computedStyle.alignItems}</div>`;
+            statusDiv.innerHTML += `<div class="status info">justify-items: ${computedStyle.justifyItems}</div>`;
+            statusDiv.innerHTML += `<div class="status info">justify-content: ${computedStyle.justifyContent}</div>`;
+        }
+        
+        function simulateFiles() {
+            const statusDiv = document.getElementById('simulate-status');
+            statusDiv.innerHTML = '';
+            
+            const filesGrid = document.getElementById('files-grid');
+            if (!filesGrid) {
+                statusDiv.innerHTML += `<div class="status error">✗ files-grid元素不存在</div>`;
+                return;
+            }
+            
+            // 清空现有内容
+            filesGrid.innerHTML = '';
+            
+            // 模拟文件数据
+            const mockFiles = [
+                { id: 1, name: 'test1.jpg', size: 1024000, type: 'image', date: '2024-01-01' },
+                { id: 2, name: 'test2.pdf', size: 2048000, type: 'document', date: '2024-01-02' },
+                { id: 3, name: 'test3.mp4', size: 5120000, type: 'video', date: '2024-01-03' }
+            ];
+            
+            mockFiles.forEach((file, index) => {
+                const fileCard = document.createElement('div');
+                fileCard.className = 'test-card';
+                fileCard.innerHTML = `
+                    <h4>${file.name}</h4>
+                    <p>大小: ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p>类型: ${file.type}</p>
+                    <p>日期: ${file.date}</p>
+                `;
+                filesGrid.appendChild(fileCard);
+            });
+            
+            statusDiv.innerHTML += `<div class="status success">✓ 成功添加 ${mockFiles.length} 个模拟文件卡片</div>`;
+        }
+        
+        // 页面加载时自动检查
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                checkFilesGrid();
+                checkCSS();
+            }, 100);
+        });
+    </script>
+</body>
+</html> 

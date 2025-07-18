@@ -546,14 +546,24 @@ class UIManager {
         }
 
         console.log('找到files-grid元素，开始清空内容');
+        console.log('files-grid元素:', fileGrid);
+        console.log('files-grid的display样式:', window.getComputedStyle(fileGrid).display);
+        console.log('files-grid的visibility样式:', window.getComputedStyle(fileGrid).visibility);
+        
         fileGrid.innerHTML = '';
 
         if (files && files.length > 0) {
             console.log('开始渲染文件卡片，文件列表:', files);
             files.forEach((file, index) => {
                 console.log(`渲染第${index + 1}个文件:`, file);
-                const fileCard = this.createFileCard(file);
-                fileGrid.appendChild(fileCard);
+                try {
+                    const fileCard = this.createFileCard(file);
+                    console.log(`创建的文件卡片:`, fileCard);
+                    fileGrid.appendChild(fileCard);
+                    console.log(`成功添加第${index + 1}个文件卡片到DOM`);
+                } catch (error) {
+                    console.error(`创建第${index + 1}个文件卡片时出错:`, error);
+                }
             });
             
             // 显示文件网格，隐藏空状态和上传区域
@@ -565,6 +575,7 @@ class UIManager {
                 uploadArea.classList.add('hidden');
             }
             console.log('文件渲染完成，显示文件网格');
+            console.log('files-grid的最终子元素数量:', fileGrid.children.length);
         } else {
             console.log('没有文件，显示空状态');
             // 隐藏文件网格，显示空状态，隐藏上传区域
@@ -590,6 +601,9 @@ class UIManager {
         fileCard.setAttribute('data-type', file.type);
         fileCard.setAttribute('data-file-id', file.id);
         fileCard.setAttribute('draggable', 'true');
+        
+        console.log('创建的文件卡片元素:', fileCard);
+        console.log('文件卡片类名:', fileCard.className);
 
         // 格式化日期为 yyyy-mm-dd 格式
         const date = new Date(file.date || file.created_at || Date.now());
