@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -136,13 +135,6 @@ func (r *Router) SetupRoutes(
 
 // registerStaticRoutes 注册静态文件路由
 func (r *Router) registerStaticRoutes() {
-	// 打印当前工作目录
-	if currentDir, err := os.Getwd(); err == nil {
-		fmt.Printf("🔍 当前工作目录: %s\n", currentDir)
-	} else {
-		fmt.Printf("❌ 无法获取当前工作目录: %v\n", err)
-	}
-
 	// 尝试多个可能的路径
 	staticPaths := []string{
 		"../front",
@@ -168,15 +160,11 @@ func (r *Router) registerStaticRoutes() {
 
 	// 设置静态文件路由
 	staticFound := false
-	fmt.Printf("🔍 尝试静态文件路径:\n")
 	for _, path := range staticPaths {
 		if _, err := os.Stat(path); err == nil {
 			r.engine.Static("/static", path)
-			fmt.Printf("✅ 找到静态文件路径: %s\n", path)
 			staticFound = true
 			break
-		} else {
-			fmt.Printf("❌ 未找到静态文件路径: %s, 错误: %v\n", path, err)
 		}
 	}
 
@@ -187,53 +175,39 @@ func (r *Router) registerStaticRoutes() {
 			"/www/wwwroot/redamancy.com.cn/front",
 		}
 
-		fmt.Printf("🔍 尝试静态文件绝对路径:\n")
 		for _, absPath := range absoluteStaticPaths {
 			if _, err := os.Stat(absPath); err == nil {
 				r.engine.Static("/static", absPath)
-				fmt.Printf("✅ 找到静态文件绝对路径: %s\n", absPath)
 				staticFound = true
 				break
-			} else {
-				fmt.Printf("❌ 未找到静态文件绝对路径: %s, 错误: %v\n", absPath, err)
 			}
 		}
 	}
 
 	// 设置上传文件路由
 	uploadsFound := false
-	fmt.Printf("🔍 尝试uploads路径:\n")
 	for _, path := range uploadsPaths {
 		if _, err := os.Stat(path); err == nil {
 			// 使用自定义的静态文件处理器，添加下载响应头
-			fmt.Printf("🔧 注册自定义uploads处理器，路径: %s\n", path)
 
 			// 创建通用的文件处理函数
 			fileHandler := func(c *gin.Context) {
-				fmt.Printf("🎯 收到uploads请求: %s, 方法: %s\n", c.Request.URL.Path, c.Request.Method)
 				filepathParam := c.Param("filepath")
 
 				// 获取绝对路径，确保路径正确
 				absPath, err := filepath.Abs(path)
 				if err != nil {
-					fmt.Printf("❌ 无法获取绝对路径: %v\n", err)
 					c.JSON(http.StatusInternalServerError, gin.H{"error": "路径错误"})
 					return
 				}
 
 				fullPath := filepath.Join(absPath, filepathParam)
 
-				// 添加调试日志
-				fmt.Printf("🔍 静态文件请求 - 相对路径: %s, 绝对路径: %s, 参数: %s, 完整路径: %s\n", path, absPath, filepathParam, fullPath)
-
 				// 检查文件是否存在
 				if _, err := os.Stat(fullPath); os.IsNotExist(err) {
-					fmt.Printf("❌ 文件不存在: %s\n", fullPath)
 					c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
 					return
 				}
-
-				fmt.Printf("✅ 文件存在，提供下载: %s\n", fullPath)
 
 				// 设置响应头，但不强制attachment，让前端完全控制下载行为
 				c.Header("Content-Type", "application/octet-stream") // 关键：强制二进制流
@@ -249,11 +223,8 @@ func (r *Router) registerStaticRoutes() {
 			// 注册GET和HEAD路由
 			r.engine.GET("/uploads/*filepath", fileHandler)
 			r.engine.HEAD("/uploads/*filepath", fileHandler)
-			fmt.Printf("✅ 找到uploads路径: %s\n", path)
 			uploadsFound = true
 			break
-		} else {
-			fmt.Printf("❌ 未找到uploads路径: %s, 错误: %v\n", path, err)
 		}
 	}
 
@@ -266,29 +237,20 @@ func (r *Router) registerStaticRoutes() {
 			"/www/wwwroot/redamancy.com.cn/front/uploads",
 		}
 
-		fmt.Printf("🔍 尝试uploads绝对路径:\n")
 		for _, absPath := range absolutePaths {
 			if _, err := os.Stat(absPath); err == nil {
 				// 使用自定义的静态文件处理器，添加下载响应头
-				fmt.Printf("🔧 注册自定义uploads处理器（绝对路径）: %s\n", absPath)
 
 				// 创建通用的文件处理函数
 				fileHandler := func(c *gin.Context) {
-					fmt.Printf("🎯 收到uploads请求（绝对路径）: %s, 方法: %s\n", c.Request.URL.Path, c.Request.Method)
 					filepathParam := c.Param("filepath")
 					fullPath := filepath.Join(absPath, filepathParam)
 
-					// 添加调试日志
-					fmt.Printf("🔍 静态文件请求（绝对路径） - 路径: %s, 参数: %s, 完整路径: %s\n", absPath, filepathParam, fullPath)
-
 					// 检查文件是否存在
 					if _, err := os.Stat(fullPath); os.IsNotExist(err) {
-						fmt.Printf("❌ 文件不存在: %s\n", fullPath)
 						c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
 						return
 					}
-
-					fmt.Printf("✅ 文件存在，提供下载: %s\n", fullPath)
 
 					// 设置响应头，但不强制attachment，让前端完全控制下载行为
 					c.Header("Content-Type", "application/octet-stream") // 关键：强制二进制流
@@ -304,18 +266,10 @@ func (r *Router) registerStaticRoutes() {
 				// 注册GET和HEAD路由
 				r.engine.GET("/uploads/*filepath", fileHandler)
 				r.engine.HEAD("/uploads/*filepath", fileHandler)
-				fmt.Printf("✅ 找到uploads绝对路径: %s\n", absPath)
 				uploadsFound = true
 				break
-			} else {
-				fmt.Printf("❌ 未找到uploads绝对路径: %s, 错误: %v\n", absPath, err)
 			}
 		}
-	}
-
-	// 如果所有路径都失败，打印警告
-	if !uploadsFound {
-		fmt.Printf("⚠️  警告: 未找到任何uploads路径，文件访问可能失败\n")
 	}
 }
 
@@ -350,15 +304,11 @@ func (r *Router) registerPageRoutes() {
 			"/www/wwwroot/redamancy.com.cn/index.html",
 		}
 
-		fmt.Printf("🔍 尝试首页绝对路径:\n")
 		for _, absPath := range absoluteIndexPaths {
 			if _, err := os.Stat(absPath); err == nil {
 				r.engine.StaticFile("/", absPath)
-				fmt.Printf("✅ 找到首页绝对路径: %s\n", absPath)
 				indexFound = true
 				break
-			} else {
-				fmt.Printf("❌ 未找到首页绝对路径: %s, 错误: %v\n", absPath, err)
 			}
 		}
 	}

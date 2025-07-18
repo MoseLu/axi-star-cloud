@@ -99,6 +99,4 @@ window.APP_UTILS = {
         }
         return '/uploads/' + filePath;
     }
-};
-
-console.log('🔧 应用配置已加载:', window.APP_CONFIG); 
+}; 

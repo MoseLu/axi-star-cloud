@@ -1628,7 +1628,6 @@ class UIManager {
             
             this.showMessage('文件下载已开始', 'success');
         } catch (error) {
-            console.error('下载错误:', error);
             this.showMessage(`下载失败: ${error.message}`, 'error');
         }
     }
@@ -3737,7 +3736,6 @@ class UIManager {
             const documents = await this.api.getDocuments();
             this.renderExternalDocs(documents);
         } catch (error) {
-            console.error('加载外站文档失败:', error);
             // 如果是权限问题，显示特殊提示
             if (error.message && error.message.includes('权限')) {
                 this.showMessage('需要管理员权限才能访问外站文档', 'warning');
@@ -4127,6 +4125,20 @@ order: ${order}
         
         // 默认返回文档图标
         return `/static/public/docs.png`;
+    }
+
+    // 下载文件
+    downloadFile(fileId) {
+        const userId = this.getCurrentUserId();
+        if (!userId) {
+            this.showMessage('请先登录', 'error');
+            return;
+        }
+
+        const downloadUrl = `${window.APP_CONFIG.API_BASE_URL}/api/download?id=${fileId}&user_id=${userId}`;
+        
+        // 使用window.open打开下载链接
+        window.open(downloadUrl, '_blank');
     }
 }
 
