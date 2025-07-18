@@ -1088,6 +1088,15 @@ class UIManager {
             case 'document':
                 this.previewDocument(file);
                 break;
+            case 'word':
+                this.previewWord(file);
+                break;
+            case 'excel':
+                this.previewExcel(file);
+                break;
+            case 'powerpoint':
+                this.previewPowerPoint(file);
+                break;
             default:
                 this.showMessage('不支持预览此类型的文件', 'warning');
         }
@@ -1253,6 +1262,156 @@ class UIManager {
         
         // 绑定下载按钮事件
         const downloadBtn = modal.querySelector('.download-doc-btn');
+        downloadBtn.addEventListener('click', () => {
+            modal.remove();
+            this.downloadFile(file);
+        });
+        
+        // 点击背景关闭
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+        
+        // ESC键关闭
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+            }
+        });
+    }
+
+    // 预览Word文档
+    previewWord(file) {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/80 z-50 flex items-center justify-center';
+        modal.innerHTML = `
+            <div class="relative max-w-md p-6 bg-dark-light rounded-xl border border-purple-light/20">
+                <button class="absolute top-2 right-2 text-gray-400 hover:text-white" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fa fa-times"></i>
+                </button>
+                <div class="text-center">
+                    <div class="w-24 h-24 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fa fa-file-word-o text-4xl text-blue-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-2">${file.name}</h3>
+                    <p class="text-gray-300 mb-6">${file.size} • Word文档</p>
+                    <div class="space-y-3">
+                        <button onclick="window.open('${file.path || `/uploads/${file.type}/${file.name}`}', '_blank')" class="w-full bg-gradient-to-r from-blue-500/80 to-indigo-500/80 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                            <i class="fa fa-external-link mr-2"></i>在新窗口打开
+                        </button>
+                        <button class="download-word-btn w-full bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-500 hover:to-emerald-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                            <i class="fa fa-download mr-2"></i>下载文件
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // 绑定下载按钮事件
+        const downloadBtn = modal.querySelector('.download-word-btn');
+        downloadBtn.addEventListener('click', () => {
+            modal.remove();
+            this.downloadFile(file);
+        });
+        
+        // 点击背景关闭
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+        
+        // ESC键关闭
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+            }
+        });
+    }
+
+    // 预览Excel文档
+    previewExcel(file) {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/80 z-50 flex items-center justify-center';
+        modal.innerHTML = `
+            <div class="relative max-w-md p-6 bg-dark-light rounded-xl border border-purple-light/20">
+                <button class="absolute top-2 right-2 text-gray-400 hover:text-white" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fa fa-times"></i>
+                </button>
+                <div class="text-center">
+                    <div class="w-24 h-24 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fa fa-file-excel-o text-4xl text-green-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-2">${file.name}</h3>
+                    <p class="text-gray-300 mb-6">${file.size} • Excel表格</p>
+                    <div class="space-y-3">
+                        <button onclick="window.open('${file.path || `/uploads/${file.type}/${file.name}`}', '_blank')" class="w-full bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-500 hover:to-emerald-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                            <i class="fa fa-external-link mr-2"></i>在新窗口打开
+                        </button>
+                        <button class="download-excel-btn w-full bg-gradient-to-r from-blue-500/80 to-indigo-500/80 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                            <i class="fa fa-download mr-2"></i>下载文件
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // 绑定下载按钮事件
+        const downloadBtn = modal.querySelector('.download-excel-btn');
+        downloadBtn.addEventListener('click', () => {
+            modal.remove();
+            this.downloadFile(file);
+        });
+        
+        // 点击背景关闭
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+        
+        // ESC键关闭
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+            }
+        });
+    }
+
+    // 预览PowerPoint文档
+    previewPowerPoint(file) {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/80 z-50 flex items-center justify-center';
+        modal.innerHTML = `
+            <div class="relative max-w-md p-6 bg-dark-light rounded-xl border border-purple-light/20">
+                <button class="absolute top-2 right-2 text-gray-400 hover:text-white" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fa fa-times"></i>
+                </button>
+                <div class="text-center">
+                    <div class="w-24 h-24 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fa fa-file-powerpoint-o text-4xl text-orange-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-2">${file.name}</h3>
+                    <p class="text-gray-300 mb-6">${file.size} • PowerPoint演示文稿</p>
+                    <div class="space-y-3">
+                        <button onclick="window.open('${file.path || `/uploads/${file.type}/${file.name}`}', '_blank')" class="w-full bg-gradient-to-r from-orange-500/80 to-red-500/80 hover:from-orange-500 hover:to-red-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                            <i class="fa fa-external-link mr-2"></i>在新窗口打开
+                        </button>
+                        <button class="download-powerpoint-btn w-full bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-500 hover:to-emerald-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                            <i class="fa fa-download mr-2"></i>下载文件
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // 绑定下载按钮事件
+        const downloadBtn = modal.querySelector('.download-powerpoint-btn');
         downloadBtn.addEventListener('click', () => {
             modal.remove();
             this.downloadFile(file);
