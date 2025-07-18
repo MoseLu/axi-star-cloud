@@ -1454,7 +1454,8 @@ class UIManager {
                     <p class="text-gray-300 text-sm">${file.size} • PDF文档</p>
                 </div>
                 <div class="relative w-full h-full flex items-center justify-center preview-pdf-container" style="overflow: hidden;">
-                    <div class="flex items-center justify-center w-full h-full">
+                    <!-- 加载状态 -->
+                    <div class="pdf-loading flex items-center justify-center w-full h-full">
                         <div class="text-center text-white max-w-md">
                             <div class="w-24 h-24 bg-gradient-to-br from-red-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <i class="fa fa-file-pdf-o text-4xl text-red-400"></i>
@@ -1468,6 +1469,11 @@ class UIManager {
                                 </button>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- PDF预览区域 -->
+                    <div class="pdf-viewer hidden w-full h-full">
+                        <iframe id="pdf-iframe" class="w-full h-full border-0" style="background: white;"></iframe>
                     </div>
                 </div>
             </div>
@@ -1487,42 +1493,33 @@ class UIManager {
         // 自动执行PDF预览
         setTimeout(async () => {
             try {
-                // 使用fetch下载PDF内容
-                const response = await fetch(pdfUrl);
-                if (!response.ok) {
-                    throw new Error('PDF下载失败');
+                // 隐藏加载状态，显示PDF预览区域
+                const loadingDiv = modal.querySelector('.pdf-loading');
+                const viewerDiv = modal.querySelector('.pdf-viewer');
+                const iframe = modal.querySelector('#pdf-iframe');
+                
+                if (loadingDiv && viewerDiv && iframe) {
+                    loadingDiv.classList.add('hidden');
+                    viewerDiv.classList.remove('hidden');
+                    
+                    // 直接设置iframe的src为PDF URL
+                    iframe.src = pdfUrl;
+                    
+                    // 添加iframe加载完成事件
+                    iframe.onload = () => {
+                        console.log('PDF加载完成');
+                    };
+                    
+                    iframe.onerror = () => {
+                        console.error('PDF加载失败');
+                        // 如果iframe加载失败，回退到新窗口打开
+                        window.open(pdfUrl, '_blank');
+                    };
                 }
-                
-                // 确保blob有正确的MIME类型
-                const blob = new Blob([await response.arrayBuffer()], { 
-                    type: 'application/pdf' 
-                });
-                const url = URL.createObjectURL(blob);
-                
-                // 在新窗口打开PDF
-                const newWindow = window.open(url, '_blank');
-                if (!newWindow) {
-                    // 如果弹窗被阻止，直接下载
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = file.name || 'document.pdf';
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }
-                
-                // 清理URL对象
-                setTimeout(() => URL.revokeObjectURL(url), 1000);
-                
-                // 关闭预览对话框
-                modal.remove();
             } catch (error) {
                 console.error('PDF预览失败:', error);
                 // 如果预览失败，直接在新窗口打开原始URL
                 window.open(pdfUrl, '_blank');
-                // 关闭预览对话框
-                modal.remove();
             }
         }, 500); // 延迟500ms执行，让用户看到加载提示
         
