@@ -1439,6 +1439,11 @@ class UIManager {
             pdfUrl = `/uploads/${file.type}/${file.name}`;
         }
         
+        // 确保URL是绝对路径
+        if (pdfUrl && !pdfUrl.startsWith('http')) {
+            pdfUrl = pdfUrl.startsWith('/') ? pdfUrl : `/${pdfUrl}`;
+        }
+        
         modal.innerHTML = `
             <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
                 <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
@@ -1449,21 +1454,22 @@ class UIManager {
                     <p class="text-gray-300 text-sm">${file.size} • PDF文档</p>
                 </div>
                 <div class="relative w-full h-full flex items-center justify-center preview-pdf-container" style="overflow: hidden;">
-                    <iframe src="${pdfUrl}" 
-                            class="w-full h-full rounded-lg" 
-                            style="border: none; background: white;"
-                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    </iframe>
-                    <div class="hidden flex items-center justify-center w-full h-full">
-                        <div class="text-center text-white">
-                            <i class="fa fa-file-pdf-o text-6xl mb-4 opacity-50"></i>
-                            <p class="text-lg">PDF加载失败</p>
-                            <p class="text-sm opacity-75">文件可能不存在或格式不支持</p>
-                            <div class="mt-4 space-y-2">
-                                <button onclick="window.open('${pdfUrl}', '_blank')" class="bg-gradient-to-r from-red-500/80 to-pink-500/80 hover:from-red-500 hover:to-pink-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                    <div class="flex items-center justify-center w-full h-full">
+                        <div class="text-center text-white max-w-md">
+                            <div class="w-24 h-24 bg-gradient-to-br from-red-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i class="fa fa-file-pdf-o text-4xl text-red-400"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-2">${file.name}</h3>
+                            <p class="text-gray-300 mb-6">${file.size} • PDF文档</p>
+                            <p class="text-sm text-gray-400 mb-6">请选择预览方式：</p>
+                            <div class="space-y-3">
+                                <button onclick="window.open('${pdfUrl}', '_blank')" class="w-full bg-gradient-to-r from-blue-500/80 to-indigo-500/80 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
                                     <i class="fa fa-external-link mr-2"></i>在新窗口打开
                                 </button>
-                                <button class="download-pdf-btn bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-500 hover:to-emerald-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                                <button onclick="window.open('https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(window.location.origin + pdfUrl)}', '_blank')" class="w-full bg-gradient-to-r from-purple-500/80 to-pink-500/80 hover:from-purple-500 hover:to-pink-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                                    <i class="fa fa-eye mr-2"></i>PDF.js预览
+                                </button>
+                                <button class="download-pdf-btn w-full bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-500 hover:to-emerald-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
                                     <i class="fa fa-download mr-2"></i>下载文件
                                 </button>
                             </div>
@@ -3170,7 +3176,16 @@ class UIManager {
             fileCards.forEach(card => {
                 const fileData = card.getAttribute('data-type');
                 
-                if (fileData === type) {
+                // 特殊处理：PDF文件在document分类下也应该显示
+                let shouldShow = false;
+                if (type === 'document') {
+                    // document分类显示所有文档类型：document, word, excel, powerpoint, pdf
+                    shouldShow = ['document', 'word', 'excel', 'powerpoint', 'pdf'].includes(fileData);
+                } else {
+                    shouldShow = fileData === type;
+                }
+                
+                if (shouldShow) {
                     // 显示匹配的文件卡片
                     card.classList.remove('hidden');
                     card.style.opacity = '1';
