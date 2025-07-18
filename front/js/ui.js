@@ -1440,25 +1440,10 @@ class UIManager {
                 <!-- 表格内容容器 -->
                 <div class="bg-white rounded-xl w-full h-full max-w-7xl max-h-[90vh] preview-content modal-scrollbar shadow-2xl border border-gray-200" style="overflow: auto;">
                     <div class="p-6">
-                        <!-- 表格标题和控制栏 -->
-                        <div class="flex flex-col items-center justify-between mb-8 space-y-4">
-                            <!-- 标题居中显示 -->
-                            <div class="text-center">
-                                <h4 class="text-2xl font-bold text-gray-800 mb-2">工作表: ${sheetNames[0]}</h4>
-                                <p class="text-sm text-gray-600">共 ${data.length - 1} 行数据</p>
-                            </div>
-                            
-                            <!-- 每页显示数量控制 -->
-                            <div class="flex items-center space-x-3 bg-gray-50 rounded-lg px-4 py-2">
-                                <span class="text-sm text-gray-600 font-medium">每页显示:</span>
-                                <select id="page-size-select" class="text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
-                                    <option value="10">10</option>
-                                    <option value="20" selected>20</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
-                                </select>
-                                <span class="text-sm text-gray-600 font-medium">行</span>
-                            </div>
+                        <!-- 表格标题 -->
+                        <div class="text-center mb-6">
+                            <h4 class="text-2xl font-bold text-gray-800 mb-2">工作表: ${sheetNames[0]}</h4>
+                            <p class="text-sm text-gray-600">共 ${data.length - 1} 行数据</p>
                         </div>
                         
                         <!-- 表格容器 -->
@@ -1466,29 +1451,44 @@ class UIManager {
                             ${tableHTML}
                         </div>
                         
-                        <!-- 美化的分页控制 -->
-                        <div class="flex flex-col items-center justify-between mt-8 space-y-4">
-                            <!-- 数据范围信息 -->
-                            <div class="text-sm text-gray-600 bg-gray-50 rounded-lg px-4 py-2">
-                                显示第 <span class="font-semibold text-blue-600" id="current-range">1-${Math.min(paginationConfig.pageSize, data.length - 1)}</span> 行，共 <span class="font-semibold text-gray-800">${data.length - 1}</span> 行
+                        <!-- 分页控制栏 - 参考主流组件库布局 -->
+                        <div class="flex items-center justify-between mt-6">
+                            <!-- 左侧：总数信息 -->
+                            <div class="text-sm text-gray-600">
+                                共 <span class="font-semibold text-gray-800">${data.length - 1}</span> 条数据
                             </div>
                             
-                            <!-- 分页控件 -->
-                            <div class="flex items-center justify-center space-x-2" id="pagination-controls">
-                                <!-- 上一页按钮 -->
-                                <button class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm" id="prev-page" disabled>
-                                    <i class="fa fa-chevron-left mr-2"></i>上一页
-                                </button>
-                                
-                                <!-- 页码按钮 -->
-                                <div class="flex items-center space-x-1" id="page-numbers">
-                                    <!-- 页码将通过JavaScript动态生成 -->
+                            <!-- 右侧：分页控件和每页显示 -->
+                            <div class="flex items-center space-x-4">
+                                <!-- 每页显示数量控制 -->
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-600">每页</span>
+                                    <select id="page-size-select" class="text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 w-16">
+                                        <option value="10">10</option>
+                                        <option value="20" selected>20</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                    <span class="text-sm text-gray-600">条</span>
                                 </div>
                                 
-                                <!-- 下一页按钮 -->
-                                <button class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm" id="next-page">
-                                    下一页<i class="fa fa-chevron-right ml-2"></i>
-                                </button>
+                                <!-- 分页控件 -->
+                                <div class="flex items-center space-x-2" id="pagination-controls">
+                                    <!-- 上一页按钮 -->
+                                    <button class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm" id="prev-page" disabled>
+                                        <i class="fa fa-chevron-left mr-1"></i>上一页
+                                    </button>
+                                    
+                                    <!-- 页码按钮 -->
+                                    <div class="flex items-center space-x-1" id="page-numbers">
+                                        <!-- 页码将通过JavaScript动态生成 -->
+                                    </div>
+                                    
+                                    <!-- 下一页按钮 -->
+                                    <button class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm" id="next-page">
+                                        下一页<i class="fa fa-chevron-right ml-1"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1524,7 +1524,6 @@ class UIManager {
         const prevPageBtn = modal.querySelector('#prev-page');
         const nextPageBtn = modal.querySelector('#next-page');
         const pageNumbers = modal.querySelector('#page-numbers');
-        const currentRange = modal.querySelector('#current-range');
         
         // 保存配置到模态框，供分页更新使用
         modal.paginationConfig = config;
@@ -1544,11 +1543,6 @@ class UIManager {
             // 更新按钮状态
             prevPageBtn.disabled = modal.paginationConfig.currentPage === 1;
             nextPageBtn.disabled = modal.paginationConfig.currentPage === modal.paginationConfig.totalPages;
-            
-            // 更新当前范围显示
-            const start = (modal.paginationConfig.currentPage - 1) * modal.paginationConfig.pageSize + 1;
-            const end = Math.min(modal.paginationConfig.currentPage * modal.paginationConfig.pageSize, modal.paginationConfig.totalRows);
-            currentRange.textContent = `${start}-${end}`;
         };
         
         // 每页显示数量变化事件
@@ -1655,7 +1649,6 @@ class UIManager {
             const pageNumbers = modal.querySelector('#page-numbers');
             const prevPageBtn = modal.querySelector('#prev-page');
             const nextPageBtn = modal.querySelector('#next-page');
-            const currentRange = modal.querySelector('#current-range');
             
             // 更新表格内容
             tableContainer.innerHTML = this.generatePaginatedTableHTML(window.currentExcelData, modal.paginationConfig);
@@ -1666,11 +1659,6 @@ class UIManager {
             // 更新按钮状态
             prevPageBtn.disabled = modal.paginationConfig.currentPage === 1;
             nextPageBtn.disabled = modal.paginationConfig.currentPage === modal.paginationConfig.totalPages;
-            
-            // 更新当前范围显示
-            const start = (modal.paginationConfig.currentPage - 1) * modal.paginationConfig.pageSize + 1;
-            const end = Math.min(modal.paginationConfig.currentPage * modal.paginationConfig.pageSize, modal.paginationConfig.totalRows);
-            currentRange.textContent = `${start}-${end}`;
         }
     }
 
