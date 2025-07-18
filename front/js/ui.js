@@ -1104,7 +1104,7 @@ class UIManager {
 
     // 预览图片
     previewImage(file) {
-        document.body.classList.add('modal-open');
+        // document.body.classList.add('modal-open'); // 删除
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
         modal.style.overflow = 'hidden';
@@ -1139,14 +1139,14 @@ class UIManager {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
-                this.cleanupModalScroll();
+                // this.cleanupModalScroll(); // 删除
             }
         });
     }
 
     // 预览视频
     previewVideo(file) {
-        document.body.classList.add('modal-open');
+        // document.body.classList.add('modal-open'); // 删除
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
         modal.style.overflow = 'hidden';
@@ -1175,14 +1175,14 @@ class UIManager {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
-                this.cleanupModalScroll();
+                // this.cleanupModalScroll(); // 删除
             }
         });
     }
 
     // 预览音频
     previewAudio(file) {
-        document.body.classList.add('modal-open');
+        // document.body.classList.add('modal-open'); // 删除
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
         modal.style.overflow = 'hidden';
@@ -1214,7 +1214,7 @@ class UIManager {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
-                this.cleanupModalScroll();
+                // this.cleanupModalScroll(); // 删除
             }
         });
     }
@@ -1398,7 +1398,7 @@ class UIManager {
 
     // 显示Excel表格预览
     showExcelTablePreview(file, data, sheetNames) {
-        document.body.classList.add('modal-open');
+        // document.body.classList.add('modal-open'); // 删除
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
         modal.style.overflow = 'hidden';
@@ -1504,7 +1504,7 @@ class UIManager {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
-                this.cleanupModalScroll();
+                // this.cleanupModalScroll(); // 删除
             }
         });
         
@@ -1512,7 +1512,7 @@ class UIManager {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 modal.remove();
-                this.cleanupModalScroll();
+                // this.cleanupModalScroll(); // 删除
             }
         });
     }
@@ -1869,7 +1869,7 @@ class UIManager {
             const fullContent = content;
             
             // 给body添加类防止滚动
-            document.body.classList.add('modal-open');
+            // document.body.classList.add('modal-open'); // 删除
             
             // 创建预览模态框
             const modal = document.createElement('div');
@@ -1911,7 +1911,7 @@ class UIManager {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     modal.remove();
-                    document.body.classList.remove('modal-open');
+                    // document.body.classList.remove('modal-open'); // 删除
                 }
             });
             
@@ -1919,7 +1919,7 @@ class UIManager {
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     modal.remove();
-                    document.body.classList.remove('modal-open');
+                    // document.body.classList.remove('modal-open'); // 删除
                 }
             });
             
@@ -2001,7 +2001,7 @@ class UIManager {
             const textContent = await response.text();
             
             // 给body添加类防止滚动
-            document.body.classList.add('modal-open');
+            // document.body.classList.add('modal-open'); // 删除
             
             // 创建预览模态框
             const modal = document.createElement('div');
@@ -2034,7 +2034,7 @@ class UIManager {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     modal.remove();
-                    document.body.classList.remove('modal-open');
+                    // document.body.classList.remove('modal-open'); // 删除
                 }
             });
             
@@ -2042,7 +2042,7 @@ class UIManager {
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     modal.remove();
-                    document.body.classList.remove('modal-open');
+                    // document.body.classList.remove('modal-open'); // 删除
                 }
             });
             
@@ -2113,7 +2113,7 @@ class UIManager {
                 const htmlContent = marked.parse(markdownText);
                 
                 // 给body添加类防止滚动
-                document.body.classList.add('modal-open');
+                // document.body.classList.add('modal-open'); // 删除
                 
                 // 创建预览模态框
                 const modal = document.createElement('div');
@@ -2146,7 +2146,7 @@ class UIManager {
                 modal.addEventListener('click', (e) => {
                     if (e.target === modal) {
                         modal.remove();
-                        document.body.classList.remove('modal-open');
+                        // document.body.classList.remove('modal-open'); // 删除
                     }
                 });
                 
@@ -2154,7 +2154,7 @@ class UIManager {
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
                         modal.remove();
-                        document.body.classList.remove('modal-open');
+                        // document.body.classList.remove('modal-open'); // 删除
                     }
                 });
             } else {
