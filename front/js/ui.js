@@ -526,20 +526,24 @@ class UIManager {
 
     // 渲染文件列表
     renderFileList(files) {
+        console.log('开始渲染文件列表，文件数量:', files ? files.length : 0);
+        
         const fileGrid = document.getElementById('files-grid');
         const emptyState = document.getElementById('empty-state');
         const uploadArea = document.getElementById('upload-area');
         
         if (!fileGrid) {
+            console.error('找不到files-grid元素');
             return;
         }
 
-
-
+        console.log('找到files-grid元素，开始清空内容');
         fileGrid.innerHTML = '';
 
         if (files && files.length > 0) {
-            files.forEach(file => {
+            console.log('开始渲染文件卡片，文件列表:', files);
+            files.forEach((file, index) => {
+                console.log(`渲染第${index + 1}个文件:`, file);
                 const fileCard = this.createFileCard(file);
                 fileGrid.appendChild(fileCard);
             });
@@ -552,7 +556,9 @@ class UIManager {
             if (uploadArea) {
                 uploadArea.classList.add('hidden');
             }
+            console.log('文件渲染完成，显示文件网格');
         } else {
+            console.log('没有文件，显示空状态');
             // 隐藏文件网格，显示空状态，隐藏上传区域
             fileGrid.classList.add('hidden');
             if (emptyState) {
@@ -569,6 +575,8 @@ class UIManager {
 
     // 创建文件卡片
     createFileCard(file) {
+        console.log('创建文件卡片，文件信息:', file);
+        
         const fileCard = document.createElement('div');
         fileCard.className = 'glass-effect rounded-xl p-2 border border-purple-light/20 hover:border-purple-light/40 transition-all duration-300 cursor-pointer group file-card relative hover:shadow-lg hover:shadow-purple-500/10 min-h-[140px] w-full max-w-[200px]';
         fileCard.setAttribute('data-type', file.type);

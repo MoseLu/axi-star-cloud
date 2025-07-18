@@ -159,6 +159,11 @@ class ApiManager {
                 throw new Error(data.error || '获取文件列表失败');
             }
             
+            // 检查响应格式
+            if (!data.success) {
+                throw new Error(data.error || '获取文件列表失败');
+            }
+            
             // 转换后端数据格式为前端格式
             const files = data.files.map(file => {
                 return {
@@ -221,9 +226,11 @@ class ApiManager {
             if (data.success) {
                 return data.folders;
             } else {
+                console.error('获取文件夹失败:', data.error);
                 return [];
             }
         } catch (error) {
+            console.error('获取文件夹请求失败:', error);
             return [];
         }
     }
