@@ -453,22 +453,30 @@
   overflow: hidden !important;
 }
 
-/* 强制隐藏模态框滚动条 */
-.fixed.inset-0 {
-  overflow: hidden !important;
-}
-
-/* 确保模态框内容不会溢出 */
-.fixed.inset-0 > div {
-  overflow: hidden !important;
-}
-
-/* 强制隐藏所有模态框相关的滚动条 */
+/* 强制隐藏模态框滚动条 - 只针对模态框 */
 .fixed.inset-0.bg-black\/95 {
   overflow: hidden !important;
 }
 
 .fixed.inset-0.bg-black\/95 > div {
+  overflow: hidden !important;
+}
+
+/* 确保模态框内容不会溢出 */
+.fixed.inset-0.bg-black\/70 {
+  overflow: hidden !important;
+}
+
+.fixed.inset-0.bg-black\/70 > div {
+  overflow: hidden !important;
+}
+
+/* 强制隐藏所有模态框相关的滚动条 */
+.fixed.inset-0.bg-black\/80 {
+  overflow: hidden !important;
+}
+
+.fixed.inset-0.bg-black\/80 > div {
   overflow: hidden !important;
 }
 
@@ -507,6 +515,24 @@
 /* 隐藏body滚动条当模态框打开时 */
 body.modal-open {
   overflow: hidden !important;
+}
+
+/* 确保主页面正常显示滚动条 */
+body:not(.modal-open) {
+  overflow: auto !important;
+}
+
+html:not(.modal-open) {
+  overflow: auto !important;
+}
+
+/* 确保主内容区域可以正常滚动 */
+main {
+  overflow: visible !important;
+}
+
+.container {
+  overflow: visible !important;
 }
 
 /* 预览文件信息样式 */

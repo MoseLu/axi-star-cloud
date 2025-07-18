@@ -16,6 +16,9 @@ class UIManager {
         // 确保移除外站文档分类CSS类
         document.body.classList.remove('external-docs-category');
         
+        // 确保页面滚动条正常显示
+        this.ensureScrollbarVisibility();
+        
         // 延迟设置事件监听器，确保DOM元素已加载
         setTimeout(async () => {
             this.setupEventListeners();
@@ -46,6 +49,37 @@ class UIManager {
             this.checkAndShowAdminMenu();
     
         }, 100);
+        
+        // 页面加载完成后再次确保滚动条可见
+        window.addEventListener('load', () => {
+            this.ensureScrollbarVisibility();
+        });
+    }
+
+    // 确保滚动条可见
+    ensureScrollbarVisibility() {
+        // 确保body和html的overflow设置正确
+        document.body.style.overflow = '';
+        document.body.style.overflowY = '';
+        document.documentElement.style.overflow = '';
+        document.documentElement.style.overflowY = '';
+        
+        // 移除可能影响滚动条的CSS类
+        document.body.classList.remove('modal-open');
+        document.documentElement.classList.remove('modal-open');
+        
+        // 确保主内容区域可以正常滚动
+        const mainElement = document.querySelector('main');
+        if (mainElement) {
+            mainElement.style.overflow = '';
+            mainElement.style.overflowY = '';
+        }
+        
+        const containerElement = document.querySelector('.container');
+        if (containerElement) {
+            containerElement.style.overflow = '';
+            containerElement.style.overflowY = '';
+        }
     }
 
     // 清理外站文档样式
@@ -1895,13 +1929,29 @@ class UIManager {
     // 清理模态框滚动状态
     cleanupModalScroll() {
         // 检查是否还有其他模态框存在
-        const remainingModals = document.querySelectorAll('.fixed.inset-0.bg-black\\/95');
+        const remainingModals = document.querySelectorAll('.fixed.inset-0.bg-black\\/95, .fixed.inset-0.bg-black\\/80, .fixed.inset-0.bg-black\\/70');
         if (remainingModals.length === 0) {
             // 没有其他模态框时，恢复页面滚动
             document.body.classList.remove('modal-open');
-            // 确保body可以滚动
+            document.documentElement.classList.remove('modal-open');
+            // 确保body和html可以滚动
             document.body.style.overflow = '';
             document.body.style.overflowY = '';
+            document.documentElement.style.overflow = '';
+            document.documentElement.style.overflowY = '';
+            
+            // 确保主内容区域可以正常滚动
+            const mainElement = document.querySelector('main');
+            if (mainElement) {
+                mainElement.style.overflow = '';
+                mainElement.style.overflowY = '';
+            }
+            
+            const containerElement = document.querySelector('.container');
+            if (containerElement) {
+                containerElement.style.overflow = '';
+                containerElement.style.overflowY = '';
+            }
         }
     }
 
