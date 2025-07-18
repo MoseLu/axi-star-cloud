@@ -645,8 +645,9 @@ class ApiManager {
             'video': 'fa-file-video-o',
             'audio': 'fa-file-audio-o',
             'document': 'fa-file-text-o',
-            'spreadsheet': 'fa-file-excel-o',
-            'presentation': 'fa-file-powerpoint-o',
+            'word': 'fa-file-word-o',
+            'excel': 'fa-file-excel-o',
+            'powerpoint': 'fa-file-powerpoint-o',
             'other': 'fa-file-o'
         };
         return iconMap[type] || 'fa-file-o';
@@ -659,8 +660,9 @@ class ApiManager {
             'video': 'text-red-400',
             'audio': 'text-purple-400',
             'document': 'text-blue-400',
-            'spreadsheet': 'text-green-500',
-            'presentation': 'text-orange-500',
+            'word': 'text-blue-500',
+            'excel': 'text-green-500',
+            'powerpoint': 'text-orange-500',
             'other': 'text-gray-400'
         };
         return colorMap[type] || 'text-gray-400';

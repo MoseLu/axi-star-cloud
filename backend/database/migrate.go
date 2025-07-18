@@ -208,18 +208,32 @@ func MigrateArchiveToOther(db *sql.DB) error {
 
 // MigrateFileTypes 迁移文件类型分类
 func MigrateFileTypes(db *sql.DB) error {
-	// 更新Excel文件类型
-	query := `UPDATE files SET type = 'spreadsheet' WHERE type = 'document' AND (name LIKE '%.xls' OR name LIKE '%.xlsx')`
+	// 将spreadsheet类型重新归类为document
+	query := `UPDATE files SET type = 'document' WHERE type = 'spreadsheet'`
 	result, err := db.Exec(query)
 	if err != nil {
-		return fmt.Errorf("迁移Excel文件类型失败: %v", err)
+		return fmt.Errorf("迁移spreadsheet文件类型失败: %v", err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return fmt.Errorf("获取影响行数失败: %v", err)
 	}
 	if rowsAffected > 0 {
-		log.Printf("成功迁移 %d 个Excel文件为spreadsheet类型", rowsAffected)
+		log.Printf("成功迁移 %d 个spreadsheet文件为document类型", rowsAffected)
+	}
+
+	// 更新Excel文件类型（如果之前被错误分类为other）
+	query = `UPDATE files SET type = 'document' WHERE type = 'other' AND (name LIKE '%.xls' OR name LIKE '%.xlsx')`
+	result, err = db.Exec(query)
+	if err != nil {
+		return fmt.Errorf("迁移Excel文件类型失败: %v", err)
+	}
+	rowsAffected, err = result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("获取影响行数失败: %v", err)
+	}
+	if rowsAffected > 0 {
+		log.Printf("成功迁移 %d 个Excel文件为document类型", rowsAffected)
 	}
 
 	// 更新PowerPoint文件类型

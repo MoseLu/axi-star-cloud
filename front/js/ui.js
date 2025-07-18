@@ -678,6 +678,21 @@ class UIManager {
                 iconColor = 'text-orange-400';
                 bgColor = 'from-orange-500/20 to-amber-500/20';
                 break;
+            case 'word':
+                iconClass = 'fa-file-word-o';
+                iconColor = 'text-blue-500';
+                bgColor = 'from-blue-500/20 to-indigo-500/20';
+                break;
+            case 'excel':
+                iconClass = 'fa-file-excel-o';
+                iconColor = 'text-green-500';
+                bgColor = 'from-green-500/20 to-emerald-500/20';
+                break;
+            case 'powerpoint':
+                iconClass = 'fa-file-powerpoint-o';
+                iconColor = 'text-orange-500';
+                bgColor = 'from-orange-500/20 to-red-500/20';
+                break;
             default:
                 iconClass = 'fa-file-o';
                 iconColor = 'text-slate-400';
@@ -2034,10 +2049,7 @@ class UIManager {
                 supportedFormats = 'MP3, WAV, OGG, FLAC, AAC, WMA, M4A';
                 break;
             case 'document':
-                supportedFormats = 'PDF, DOC, DOCX, TXT, MD, RTF';
-                break;
-            case 'spreadsheet':
-                supportedFormats = 'XLS, XLSX, CSV';
+                supportedFormats = 'PDF, DOC, DOCX, XLS, XLSX, TXT, MD, RTF, CSV';
                 break;
             case 'presentation':
                 supportedFormats = 'PPT, PPTX';
@@ -2783,8 +2795,9 @@ class UIManager {
             'video': 'text-pink-400',
             'audio': 'text-cyan-400',
             'document': 'text-orange-400',
-            'spreadsheet': 'text-green-400',
-            'presentation': 'text-purple-400',
+            'word': 'text-blue-400',
+            'excel': 'text-green-400',
+            'powerpoint': 'text-orange-400',
             'other': 'text-slate-400'
         };
         return colors[category] || 'text-slate-400';
@@ -2797,8 +2810,9 @@ class UIManager {
             'video': 'bg-pink-400/10',
             'audio': 'bg-cyan-400/10',
             'document': 'bg-orange-400/10',
-            'spreadsheet': 'bg-green-400/10',
-            'presentation': 'bg-purple-400/10',
+            'word': 'bg-blue-400/10',
+            'excel': 'bg-green-400/10',
+            'powerpoint': 'bg-orange-400/10',
             'other': 'bg-slate-400/10'
         };
         return backgrounds[category] || 'bg-slate-400/10';
@@ -2811,8 +2825,9 @@ class UIManager {
             'video': '视频',
             'audio': '音频',
             'document': '文档',
-            'spreadsheet': '电子表格',
-            'presentation': '演示文稿',
+            'word': 'Word',
+            'excel': 'Excel',
+            'powerpoint': 'PowerPoint',
             'other': '其他'
         };
         return labels[category] || '其他';
@@ -2825,8 +2840,9 @@ class UIManager {
             video: 'pink', 
             audio: 'cyan', 
             document: 'orange', 
-            spreadsheet: 'green',
-            presentation: 'purple',
+            word: 'blue',
+            excel: 'green',
+            powerpoint: 'orange',
             other: 'slate' 
         };
         return map[category] || 'emerald';
