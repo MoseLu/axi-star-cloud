@@ -587,8 +587,30 @@ class UIManager {
         // });
 
         // 搜索功能
-        document.getElementById('search-input')?.addEventListener('input', (e) => {
-            this.handleSearch(e.target.value);
+        const searchInput = document.getElementById('search-input');
+        const searchClearBtn = document.getElementById('search-clear-btn');
+        
+        searchInput?.addEventListener('input', (e) => {
+            const value = e.target.value;
+            this.handleSearch(value);
+            
+            // 显示/隐藏清空按钮
+            if (searchClearBtn) {
+                if (value.length > 0) {
+                    searchClearBtn.classList.remove('hidden');
+                } else {
+                    searchClearBtn.classList.add('hidden');
+                }
+            }
+        });
+        
+        // 清空搜索按钮
+        searchClearBtn?.addEventListener('click', () => {
+            if (searchInput) {
+                searchInput.value = '';
+                this.handleSearch('');
+                searchClearBtn.classList.add('hidden');
+            }
         });
 
         // 新建分组按钮
@@ -4141,7 +4163,7 @@ class UIManager {
             'pdf': 'PDF',
             'word': 'Word',
             'excel': 'Excel',
-            'powerpoint': 'PowerPoint',
+            'powerpoint': 'PPT',
             'url': 'URL',
             'other': '其他'
         };
