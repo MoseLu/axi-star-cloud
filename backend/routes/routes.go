@@ -235,7 +235,11 @@ func (r *Router) registerStaticRoutes() {
 
 				fmt.Printf("✅ 文件存在，提供下载: %s\n", fullPath)
 
-				// 设置响应头，但不强制attachment，让前端控制下载行为
+				// 获取文件名
+				fileName := filepath.Base(fullPath)
+
+				// 设置完整的下载响应头，强制attachment
+				c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", fileName))
 				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 				c.Header("Pragma", "no-cache")
 				c.Header("Expires", "0")
@@ -289,7 +293,11 @@ func (r *Router) registerStaticRoutes() {
 
 					fmt.Printf("✅ 文件存在，提供下载: %s\n", fullPath)
 
-					// 设置响应头，但不强制attachment，让前端控制下载行为
+					// 获取文件名
+					fileName := filepath.Base(fullPath)
+
+					// 设置完整的下载响应头，强制attachment
+					c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", fileName))
 					c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 					c.Header("Pragma", "no-cache")
 					c.Header("Expires", "0")

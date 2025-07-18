@@ -1583,47 +1583,11 @@ class UIManager {
                 // 获取重定向后的URL
                 const finalUrl = response.url;
                 
-                // 使用fetch下载文件到内存，然后通过Blob触发下载
-                const fileResponse = await fetch(finalUrl);
-                if (fileResponse.ok) {
-                    const blob = await fileResponse.blob();
-                    const url = URL.createObjectURL(blob);
-                    
-                    // 创建下载链接
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = file.name; // 设置下载文件名
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    // 清理URL对象
-                    setTimeout(() => URL.revokeObjectURL(url), 100);
-                } else {
-                    throw new Error('文件下载失败');
-                }
+                // 直接使用window.location.href触发下载，这通常能避免"另存为"弹窗
+                window.location.href = finalUrl;
             } else {
                 // 如果没有重定向，直接使用原URL
-                const fileResponse = await fetch(downloadUrl);
-                if (fileResponse.ok) {
-                    const blob = await fileResponse.blob();
-                    const url = URL.createObjectURL(blob);
-                    
-                    // 创建下载链接
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = file.name; // 设置下载文件名
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    // 清理URL对象
-                    setTimeout(() => URL.revokeObjectURL(url), 100);
-                } else {
-                    throw new Error('文件下载失败');
-                }
+                window.location.href = downloadUrl;
             }
             
             this.showMessage('文件下载已开始', 'success');
