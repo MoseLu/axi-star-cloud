@@ -506,8 +506,13 @@ class ApiManager {
 
     // 获取所有文档
     async getDocuments() {
+        const userId = this.getCurrentUserId();
+        if (!userId) {
+            throw new Error('未提供用户信息');
+        }
+
         try {
-            const response = await fetch(`${this.baseUrl}/api/documents`);
+            const response = await fetch(`${this.baseUrl}/api/documents?user_id=${userId}`);
             const data = await response.json();
             
             if (data.success) {

@@ -2173,7 +2173,8 @@ class UIManager {
             } else {
                 // 非管理员用户显示权限提示
                 this.showMessage('需要管理员权限才能访问外站文档', 'warning');
-                this.toggleEmptyState(0);
+                // 显示权限提示的空状态
+                this.renderExternalDocs([]);
                 return;
             }
         }
