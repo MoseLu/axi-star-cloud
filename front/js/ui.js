@@ -5622,29 +5622,42 @@ order: ${order}
         // 监听iframe加载错误
         const iframe = modal.querySelector('#url-preview-iframe');
         let hasShownBlockedMessage = false;
+        let loadTimeout;
+        
+        // 设置超时检测
+        loadTimeout = setTimeout(() => {
+            if (!hasShownBlockedMessage) {
+                hasShownBlockedMessage = true;
+                showBlockedMessage();
+            }
+        }, 3000); // 3秒超时
         
         iframe.onload = function() {
+            clearTimeout(loadTimeout);
             // iframe加载成功，检查是否被阻止
-            try {
-                // 尝试访问iframe内容，如果被阻止会抛出错误
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                if (!iframeDoc) {
-                    // 无法访问iframe内容，说明被阻止了
+            setTimeout(() => {
+                try {
+                    // 尝试访问iframe内容，如果被阻止会抛出错误
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    if (!iframeDoc || iframeDoc.body.innerHTML === '') {
+                        // 无法访问iframe内容或内容为空，说明被阻止了
+                        if (!hasShownBlockedMessage) {
+                            hasShownBlockedMessage = true;
+                            showBlockedMessage();
+                        }
+                    }
+                } catch (error) {
+                    // 出现错误，说明iframe被阻止
                     if (!hasShownBlockedMessage) {
                         hasShownBlockedMessage = true;
                         showBlockedMessage();
                     }
                 }
-            } catch (error) {
-                // 出现错误，说明iframe被阻止
-                if (!hasShownBlockedMessage) {
-                    hasShownBlockedMessage = true;
-                    showBlockedMessage();
-                }
-            }
+            }, 1000); // 延迟1秒检查
         };
         
         iframe.onerror = function() {
+            clearTimeout(loadTimeout);
             // iframe加载失败
             if (!hasShownBlockedMessage) {
                 hasShownBlockedMessage = true;
