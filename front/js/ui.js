@@ -484,12 +484,14 @@ class UIManager {
                     this.updateProfileDisplay(completeUserData);
                 }
             } catch (error) {
+                console.warn('获取用户资料失败:', error);
                 // 如果获取失败，继续使用登录时的基本信息
             }
             
             // 初始化用户头像显示
             await this.initUserProfile();
             
+            console.log('开始获取文件列表...');
             // 从后端获取数据
             const [files, folders] = await Promise.all([
                 this.api.getFiles(), // 不传folderId，获取所有文件
@@ -511,8 +513,10 @@ class UIManager {
             this.renderFileList(files);
             await this.renderFolderList(folders);
 
+            console.log('开始获取存储信息...');
             // 获取并更新存储信息
             const storageInfo = await this.api.getStorageInfo();
+            console.log('获取到的存储信息:', storageInfo);
     
             this.updateStorageDisplay(storageInfo);
 
@@ -523,7 +527,7 @@ class UIManager {
 
         } catch (error) {
             console.error('UIManager.onLoginSuccess 处理失败:', error);
-            this.showMessage('数据加载失败', 'error');
+            this.showMessage('数据加载失败: ' + error.message, 'error');
         }
 
     }

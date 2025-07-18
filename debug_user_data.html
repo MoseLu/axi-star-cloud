@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户数据调试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .debug-section {
+            background: #2a2a2a;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .success { background: #28a745; }
+        .error { background: #dc3545; }
+        .warning { background: #ffc107; color: #000; }
+        .info { background: #17a2b8; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #333;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>用户数据调试工具</h1>
+    
+    <div class="debug-section">
+        <h3>1. 检查localStorage</h3>
+        <div id="localStorage-status"></div>
+        <button onclick="checkLocalStorage()">检查localStorage</button>
+    </div>
+    
+    <div class="debug-section">
+        <h3>2. 检查API管理器</h3>
+        <div id="api-status"></div>
+        <button onclick="checkApiManager()">检查API管理器</button>
+    </div>
+    
+    <div class="debug-section">
+        <h3>3. 测试API请求</h3>
+        <div id="api-test-status"></div>
+        <button onclick="testApiRequests()">测试API请求</button>
+    </div>
+    
+    <div class="debug-section">
+        <h3>4. 检查UI管理器</h3>
+        <div id="ui-status"></div>
+        <button onclick="checkUIManager()">检查UI管理器</button>
+    </div>
+    
+    <div class="debug-section">
+        <h3>5. 强制重新加载数据</h3>
+        <div id="reload-status"></div>
+        <button onclick="forceReloadData()">强制重新加载</button>
+    </div>
+
+    <script>
+        function checkLocalStorage() {
+            const statusDiv = document.getElementById('localStorage-status');
+            statusDiv.innerHTML = '';
+            
+            try {
+                const currentUser = localStorage.getItem('currentUser');
+                const userData = localStorage.getItem('userData');
+                
+                if (currentUser) {
+                    const user = JSON.parse(currentUser);
+                    statusDiv.innerHTML += `<div class="status success">✓ 找到用户信息: ${user.username}</div>`;
+                    statusDiv.innerHTML += `<pre>${JSON.stringify(user, null, 2)}</pre>`;
+                } else {
+                    statusDiv.innerHTML += `<div class="status error">✗ 未找到currentUser</div>`;
+                }
+                
+                if (userData) {
+                    const data = JSON.parse(userData);
+                    statusDiv.innerHTML += `<div class="status success">✓ 找到用户数据</div>`;
+                    statusDiv.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    statusDiv.innerHTML += `<div class="status warning">⚠ 未找到userData</div>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML += `<div class="status error">✗ 解析localStorage失败: ${error.message}</div>`;
+            }
+        }
+        
+        function checkApiManager() {
+            const statusDiv = document.getElementById('api-status');
+            statusDiv.innerHTML = '';
+            
+            if (window.apiManager) {
+                statusDiv.innerHTML += `<div class="status success">✓ API管理器存在</div>`;
+                
+                const currentUser = window.apiManager.getCurrentUser();
+                if (currentUser) {
+                    statusDiv.innerHTML += `<div class="status success">✓ API管理器有用户信息: ${currentUser.username}</div>`;
+                    statusDiv.innerHTML += `<pre>${JSON.stringify(currentUser, null, 2)}</pre>`;
+                } else {
+                    statusDiv.innerHTML += `<div class="status error">✗ API管理器没有用户信息</div>`;
+                }
+                
+                const userId = window.apiManager.getCurrentUserId();
+                if (userId) {
+                    statusDiv.innerHTML += `<div class="status success">✓ 用户ID: ${userId}</div>`;
+                } else {
+                    statusDiv.innerHTML += `<div class="status error">✗ 没有用户ID</div>`;
+                }
+            } else {
+                statusDiv.innerHTML += `<div class="status error">✗ API管理器不存在</div>`;
+            }
+        }
+        
+        async function testApiRequests() {
+            const statusDiv = document.getElementById('api-test-status');
+            statusDiv.innerHTML = '';
+            
+            if (!window.apiManager) {
+                statusDiv.innerHTML += `<div class="status error">✗ API管理器不存在</div>`;
+                return;
+            }
+            
+            try {
+                // 测试获取文件列表
+                statusDiv.innerHTML += `<div class="status info">正在测试获取文件列表...</div>`;
+                const files = await window.apiManager.getFiles();
+                statusDiv.innerHTML += `<div class="status success">✓ 获取文件列表成功: ${files.length} 个文件</div>`;
+                
+                // 测试获取文件夹列表
+                statusDiv.innerHTML += `<div class="status info">正在测试获取文件夹列表...</div>`;
+                const folders = await window.apiManager.getFolders();
+                statusDiv.innerHTML += `<div class="status success">✓ 获取文件夹列表成功: ${folders.length} 个文件夹</div>`;
+                
+                // 测试获取存储信息
+                statusDiv.innerHTML += `<div class="status info">正在测试获取存储信息...</div>`;
+                const storage = await window.apiManager.getStorageInfo();
+                statusDiv.innerHTML += `<div class="status success">✓ 获取存储信息成功</div>`;
+                statusDiv.innerHTML += `<pre>${JSON.stringify(storage, null, 2)}</pre>`;
+                
+            } catch (error) {
+                statusDiv.innerHTML += `<div class="status error">✗ API请求失败: ${error.message}</div>`;
+            }
+        }
+        
+        function checkUIManager() {
+            const statusDiv = document.getElementById('ui-status');
+            statusDiv.innerHTML = '';
+            
+            if (window.uiManager) {
+                statusDiv.innerHTML += `<div class="status success">✓ UI管理器存在</div>`;
+                
+                if (window.uiManager.allFiles) {
+                    statusDiv.innerHTML += `<div class="status success">✓ 文件数据: ${window.uiManager.allFiles.length} 个文件</div>`;
+                } else {
+                    statusDiv.innerHTML += `<div class="status warning">⚠ 没有文件数据</div>`;
+                }
+                
+                if (window.uiManager.folders) {
+                    statusDiv.innerHTML += `<div class="status success">✓ 文件夹数据: ${window.uiManager.folders.length} 个文件夹</div>`;
+                } else {
+                    statusDiv.innerHTML += `<div class="status warning">⚠ 没有文件夹数据</div>`;
+                }
+            } else {
+                statusDiv.innerHTML += `<div class="status error">✗ UI管理器不存在</div>`;
+            }
+        }
+        
+        async function forceReloadData() {
+            const statusDiv = document.getElementById('reload-status');
+            statusDiv.innerHTML = '';
+            
+            if (!window.uiManager || !window.apiManager) {
+                statusDiv.innerHTML += `<div class="status error">✗ 管理器不存在</div>`;
+                return;
+            }
+            
+            try {
+                // 获取当前用户
+                const currentUser = window.apiManager.getCurrentUser();
+                if (!currentUser) {
+                    statusDiv.innerHTML += `<div class="status error">✗ 没有用户信息</div>`;
+                    return;
+                }
+                
+                statusDiv.innerHTML += `<div class="status info">正在强制重新加载数据...</div>`;
+                
+                // 强制重新加载数据
+                await window.uiManager.onLoginSuccess(currentUser);
+                
+                statusDiv.innerHTML += `<div class="status success">✓ 数据重新加载完成</div>`;
+                
+            } catch (error) {
+                statusDiv.innerHTML += `<div class="status error">✗ 重新加载失败: ${error.message}</div>`;
+            }
+        }
+        
+        // 页面加载时自动检查
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                checkLocalStorage();
+                checkApiManager();
+                checkUIManager();
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 

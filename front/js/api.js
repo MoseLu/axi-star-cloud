@@ -144,6 +144,7 @@ class ApiManager {
     async getFiles(folderId = null) {
         try {
             const userId = this.getCurrentUserId();
+            console.log('API.getFiles - 用户ID:', userId);
             if (!userId) {
                 throw new Error('用户未登录');
             }
@@ -152,9 +153,13 @@ class ApiManager {
             if (folderId) {
                 url += `&folder_id=${folderId}`;
             }
+            console.log('API.getFiles - 请求URL:', url);
 
             const response = await fetch(url);
             const data = await response.json();
+            console.log('API.getFiles - 响应状态:', response.status);
+            console.log('API.getFiles - 响应数据:', data);
+            
             if (!response.ok) {
                 throw new Error(data.error || '获取文件列表失败');
             }
@@ -184,8 +189,10 @@ class ApiManager {
                     folder_id: file.folder_id // 添加文件夹ID字段
                 };
             });
+            console.log('API.getFiles - 转换后的文件列表:', files);
             return files;
         } catch (error) {
+            console.error('API.getFiles - 错误:', error);
             throw new Error(error.message || '获取文件列表失败');
         }
     }
@@ -238,18 +245,27 @@ class ApiManager {
     // 获取存储信息
     async getStorageInfo() {
         const userId = this.getCurrentUserId();
+        console.log('API.getStorageInfo - 用户ID:', userId);
         if (!userId) return null;
 
         try {
-            const response = await fetch(`${this.baseUrl}/api/storage?user_id=${userId}`);
+            const url = `${this.baseUrl}/api/storage?user_id=${userId}`;
+            console.log('API.getStorageInfo - 请求URL:', url);
+            
+            const response = await fetch(url);
             const data = await response.json();
+            console.log('API.getStorageInfo - 响应状态:', response.status);
+            console.log('API.getStorageInfo - 响应数据:', data);
             
             if (data.success) {
+                console.log('API.getStorageInfo - 返回存储信息:', data.storage);
                 return data.storage;
             } else {
+                console.warn('API.getStorageInfo - 请求失败:', data.error);
                 return null;
             }
         } catch (error) {
+            console.error('API.getStorageInfo - 错误:', error);
             return null;
         }
     }

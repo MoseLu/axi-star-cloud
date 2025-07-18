@@ -77,9 +77,11 @@ class App {
                 // 延迟加载用户数据，确保UI管理器已初始化
                 setTimeout(async () => {
                     if (this.uiManager) {
+                        console.log('开始加载用户数据...');
                         await this.uiManager.onLoginSuccess(userData);
+                        console.log('用户数据加载完成');
                     }
-                }, 100);
+                }, 200); // 增加延迟时间，确保所有组件都已初始化
                 
             } catch (error) {
                 console.error('解析用户信息失败:', error);
