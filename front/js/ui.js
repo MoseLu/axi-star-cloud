@@ -127,6 +127,54 @@ class UIManager {
         }
     }
 
+    // 切换手风琴展开/收起
+    toggleAccordion(header) {
+        const content = header.nextElementSibling;
+        const isActive = header.classList.contains('active');
+        
+        // 移除所有手风琴的活动状态
+        document.querySelectorAll('.accordion-header').forEach(h => {
+            h.classList.remove('active');
+        });
+        document.querySelectorAll('.accordion-content').forEach(c => {
+            c.classList.remove('show');
+        });
+        
+        // 如果当前手风琴未激活，则激活它
+        if (!isActive) {
+            header.classList.add('active');
+            content.classList.add('show');
+        }
+    }
+
+    // 处理子分类按钮点击
+    handleSubFileTypeFilter(btn) {
+        const type = btn.getAttribute('data-type');
+        
+        // 移除所有按钮的活动状态
+        document.querySelectorAll('.file-type-btn, .sub-file-type-btn').forEach(b => {
+            b.classList.remove('active', 'bg-gradient-to-r', 'from-primary', 'to-secondary', 'text-white', 'shadow-md', 'shadow-primary/20');
+            if (b.classList.contains('file-type-btn')) {
+                b.classList.add('bg-dark-light', 'hover:bg-dark-light/70', 'text-white');
+            } else {
+                // 恢复子按钮的默认样式
+                b.classList.remove('active');
+            }
+        });
+        
+        // 设置当前按钮为激活状态
+        btn.classList.add('active');
+        
+        // 更新当前分类
+        this.currentCategory = type;
+        
+        // 过滤文件
+        this.filterFiles(type);
+        
+        // 更新上传按钮显示状态
+        this.forceUpdateCreateFolderButton();
+    }
+
     // 设置事件监听器
     setupEventListeners() {
         // 移除重复的登录成功事件监听，由App统一处理
@@ -195,6 +243,23 @@ class UIManager {
             //     }
             // });
         }
+
+        // 手风琴头部点击事件
+        document.querySelectorAll('.accordion-header').forEach(header => {
+            header.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.toggleAccordion(header);
+            });
+        });
+
+        // 子分类按钮点击事件
+        document.querySelectorAll('.sub-file-type-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleSubFileTypeFilter(btn);
+            });
+        });
 
         // 文件类型标签点击事件
         document.querySelectorAll('.file-type-btn').forEach(btn => {
@@ -1104,7 +1169,11 @@ class UIManager {
 
     // 预览图片
     previewImage(file) {
-        // document.body.classList.add('modal-open'); // 删除
+        // 强制隐藏html和body滚动条
+        document.body.style.overflow = 'hidden';
+        document.body.style.height = '100%';
+        document.documentElement.style.overflow = 'hidden';
+        document.documentElement.style.height = '100%';
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
         modal.style.overflow = 'hidden';
@@ -1139,7 +1208,11 @@ class UIManager {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
-                // this.cleanupModalScroll(); // 删除
+                // 恢复html和body滚动条
+                document.body.style.overflow = '';
+                document.body.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.documentElement.style.height = '';
             }
         });
     }
@@ -1175,7 +1248,11 @@ class UIManager {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
-                // this.cleanupModalScroll(); // 删除
+                // 恢复html和body滚动条
+                document.body.style.overflow = '';
+                document.body.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.documentElement.style.height = '';
             }
         });
     }
@@ -1214,7 +1291,11 @@ class UIManager {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
-                // this.cleanupModalScroll(); // 删除
+                // 恢复html和body滚动条
+                document.body.style.overflow = '';
+                document.body.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.documentElement.style.height = '';
             }
         });
     }
@@ -1271,6 +1352,11 @@ class UIManager {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
+                // 恢复html和body滚动条
+                document.body.style.overflow = '';
+                document.body.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.documentElement.style.height = '';
             }
         });
         
@@ -1278,6 +1364,11 @@ class UIManager {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 modal.remove();
+                // 恢复html和body滚动条
+                document.body.style.overflow = '';
+                document.body.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.documentElement.style.height = '';
             }
         });
     }
@@ -1321,6 +1412,11 @@ class UIManager {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
+                // 恢复html和body滚动条
+                document.body.style.overflow = '';
+                document.body.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.documentElement.style.height = '';
             }
         });
         
@@ -1328,6 +1424,11 @@ class UIManager {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 modal.remove();
+                // 恢复html和body滚动条
+                document.body.style.overflow = '';
+                document.body.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.documentElement.style.height = '';
             }
         });
     }
@@ -1504,7 +1605,11 @@ class UIManager {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
-                // this.cleanupModalScroll(); // 删除
+                // 恢复html和body滚动条
+                document.body.style.overflow = '';
+                document.body.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.documentElement.style.height = '';
             }
         });
         
@@ -1512,7 +1617,11 @@ class UIManager {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 modal.remove();
-                // this.cleanupModalScroll(); // 删除
+                // 恢复html和body滚动条
+                document.body.style.overflow = '';
+                document.body.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.documentElement.style.height = '';
             }
         });
     }
@@ -1793,6 +1902,11 @@ class UIManager {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
+                // 恢复html和body滚动条
+                document.body.style.overflow = '';
+                document.body.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.documentElement.style.height = '';
             }
         });
         
@@ -1800,6 +1914,11 @@ class UIManager {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 modal.remove();
+                // 恢复html和body滚动条
+                document.body.style.overflow = '';
+                document.body.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.documentElement.style.height = '';
             }
         });
     }
@@ -1843,6 +1962,11 @@ class UIManager {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
+                // 恢复html和body滚动条
+                document.body.style.overflow = '';
+                document.body.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.documentElement.style.height = '';
             }
         });
         
@@ -1850,6 +1974,11 @@ class UIManager {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 modal.remove();
+                // 恢复html和body滚动条
+                document.body.style.overflow = '';
+                document.body.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.documentElement.style.height = '';
             }
         });
     }
@@ -1911,7 +2040,11 @@ class UIManager {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     modal.remove();
-                    // document.body.classList.remove('modal-open'); // 删除
+                    // 恢复html和body滚动条
+                    document.body.style.overflow = '';
+                    document.body.style.height = '';
+                    document.documentElement.style.overflow = '';
+                    document.documentElement.style.height = '';
                 }
             });
             
@@ -1919,7 +2052,11 @@ class UIManager {
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     modal.remove();
-                    // document.body.classList.remove('modal-open'); // 删除
+                    // 恢复html和body滚动条
+                    document.body.style.overflow = '';
+                    document.body.style.height = '';
+                    document.documentElement.style.overflow = '';
+                    document.documentElement.style.height = '';
                 }
             });
             
@@ -2034,7 +2171,11 @@ class UIManager {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     modal.remove();
-                    // document.body.classList.remove('modal-open'); // 删除
+                    // 恢复html和body滚动条
+                    document.body.style.overflow = '';
+                    document.body.style.height = '';
+                    document.documentElement.style.overflow = '';
+                    document.documentElement.style.height = '';
                 }
             });
             
@@ -2042,7 +2183,11 @@ class UIManager {
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     modal.remove();
-                    // document.body.classList.remove('modal-open'); // 删除
+                    // 恢复html和body滚动条
+                    document.body.style.overflow = '';
+                    document.body.style.height = '';
+                    document.documentElement.style.overflow = '';
+                    document.documentElement.style.height = '';
                 }
             });
             
@@ -2146,7 +2291,11 @@ class UIManager {
                 modal.addEventListener('click', (e) => {
                     if (e.target === modal) {
                         modal.remove();
-                        // document.body.classList.remove('modal-open'); // 删除
+                        // 恢复html和body滚动条
+                        document.body.style.overflow = '';
+                        document.body.style.height = '';
+                        document.documentElement.style.overflow = '';
+                        document.documentElement.style.height = '';
                     }
                 });
                 
@@ -2154,7 +2303,11 @@ class UIManager {
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
                         modal.remove();
-                        // document.body.classList.remove('modal-open'); // 删除
+                        // 恢复html和body滚动条
+                        document.body.style.overflow = '';
+                        document.body.style.height = '';
+                        document.documentElement.style.overflow = '';
+                        document.documentElement.style.height = '';
                     }
                 });
             } else {
@@ -2692,9 +2845,14 @@ class UIManager {
 
         
         // 移除所有标签的活动状态
-        document.querySelectorAll('.file-type-btn').forEach(b => {
+        document.querySelectorAll('.file-type-btn, .sub-file-type-btn').forEach(b => {
             b.classList.remove('active', 'bg-gradient-to-r', 'from-primary', 'to-secondary', 'text-white', 'shadow-md', 'shadow-primary/20');
-            b.classList.add('bg-dark-light', 'hover:bg-dark-light/70', 'text-white');
+            if (b.classList.contains('file-type-btn')) {
+                b.classList.add('bg-dark-light', 'hover:bg-dark-light/70', 'text-white');
+            } else {
+                // 恢复子按钮的默认样式
+                b.classList.remove('active');
+            }
         });
 
         // 添加当前标签的活动状态
