@@ -483,7 +483,6 @@ class UIManager {
                     this.updateProfileDisplay(completeUserData);
                 }
             } catch (error) {
-
                 // 如果获取失败，继续使用登录时的基本信息
             }
             
@@ -501,6 +500,10 @@ class UIManager {
             
             // 缓存所有文件数据
             this.allFiles = files;
+
+            // 调试信息
+            console.log('获取到的文件列表:', files);
+            console.log('获取到的文件夹列表:', folders);
 
             // 更新界面
             this.updateFileCount(files.length);
