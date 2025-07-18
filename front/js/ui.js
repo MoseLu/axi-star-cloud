@@ -1583,11 +1583,47 @@ class UIManager {
                 // 获取重定向后的URL
                 const finalUrl = response.url;
                 
-                // 使用window.open直接打开下载链接，避免"另存为"弹窗
-                window.open(finalUrl, '_blank');
+                // 使用fetch下载文件到内存，然后通过Blob触发下载
+                const fileResponse = await fetch(finalUrl);
+                if (fileResponse.ok) {
+                    const blob = await fileResponse.blob();
+                    const url = URL.createObjectURL(blob);
+                    
+                    // 创建下载链接
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = file.name; // 设置下载文件名
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // 清理URL对象
+                    setTimeout(() => URL.revokeObjectURL(url), 100);
+                } else {
+                    throw new Error('文件下载失败');
+                }
             } else {
                 // 如果没有重定向，直接使用原URL
-                window.open(downloadUrl, '_blank');
+                const fileResponse = await fetch(downloadUrl);
+                if (fileResponse.ok) {
+                    const blob = await fileResponse.blob();
+                    const url = URL.createObjectURL(blob);
+                    
+                    // 创建下载链接
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = file.name; // 设置下载文件名
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // 清理URL对象
+                    setTimeout(() => URL.revokeObjectURL(url), 100);
+                } else {
+                    throw new Error('文件下载失败');
+                }
             }
             
             this.showMessage('文件下载已开始', 'success');
