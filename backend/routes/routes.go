@@ -210,11 +210,17 @@ func (r *Router) registerStaticRoutes() {
 				filepathParam := c.Param("filepath")
 				fullPath := filepath.Join(path, filepathParam)
 				
+				// 添加调试日志
+				fmt.Printf("🔍 静态文件请求 - 路径: %s, 参数: %s, 完整路径: %s\n", path, filepathParam, fullPath)
+				
 				// 检查文件是否存在
 				if _, err := os.Stat(fullPath); os.IsNotExist(err) {
+					fmt.Printf("❌ 文件不存在: %s\n", fullPath)
 					c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
 					return
 				}
+				
+				fmt.Printf("✅ 文件存在，提供下载: %s\n", fullPath)
 				
 				// 设置下载响应头
 				c.Header("Content-Disposition", "attachment")
