@@ -448,8 +448,8 @@ func (h *FileHandler) DownloadFileRedirect(c *gin.Context) {
 
 	log.Printf("✅ 找到文件 - ID: %d, 名称: %s, 路径: %s", fileID, file.Name, file.Path)
 
-	// 构建静态文件URL
-	staticURL := fmt.Sprintf("/uploads%s", file.Path)
+	// 构建静态文件URL - 修复重复路径问题
+	staticURL := file.Path
 	
 	// 生成一次性token（简化版本，实际可以使用JWT）
 	token := fmt.Sprintf("token_%d_%s", fileID, userID)
