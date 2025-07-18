@@ -1461,14 +1461,8 @@ class UIManager {
                             </div>
                             <h3 class="text-xl font-semibold mb-2">${file.name}</h3>
                             <p class="text-gray-300 mb-6">${file.size} • PDF文档</p>
-                            <p class="text-sm text-gray-400 mb-6">请选择预览方式：</p>
+                            <p class="text-sm text-gray-400 mb-6">正在加载PDF预览...</p>
                             <div class="space-y-3">
-                                <button onclick="window.open('${pdfUrl}', '_blank')" class="w-full bg-gradient-to-r from-blue-500/80 to-indigo-500/80 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
-                                    <i class="fa fa-external-link mr-2"></i>在新窗口打开
-                                </button>
-                                <button class="preview-pdf-btn w-full bg-gradient-to-r from-purple-500/80 to-pink-500/80 hover:from-purple-500 hover:to-pink-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
-                                    <i class="fa fa-eye mr-2"></i>直接预览
-                                </button>
                                 <button class="download-pdf-btn w-full bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-500 hover:to-emerald-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
                                     <i class="fa fa-download mr-2"></i>下载文件
                                 </button>
@@ -1490,45 +1484,47 @@ class UIManager {
             });
         }
         
-        // 绑定PDF预览按钮事件
-        const previewBtn = modal.querySelector('.preview-pdf-btn');
-        if (previewBtn) {
-            previewBtn.addEventListener('click', async () => {
-                try {
-                    // 使用fetch下载PDF内容
-                    const response = await fetch(pdfUrl);
-                    if (!response.ok) {
-                        throw new Error('PDF下载失败');
-                    }
-                    
-                    // 确保blob有正确的MIME类型
-                    const blob = new Blob([await response.arrayBuffer()], { 
-                        type: 'application/pdf' 
-                    });
-                    const url = URL.createObjectURL(blob);
-                    
-                    // 在新窗口打开PDF
-                    const newWindow = window.open(url, '_blank');
-                    if (!newWindow) {
-                        // 如果弹窗被阻止，直接下载
-                        const link = document.createElement('a');
-                        link.href = url;
-                        link.download = file.name || 'document.pdf';
-                        link.style.display = 'none';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    }
-                    
-                    // 清理URL对象
-                    setTimeout(() => URL.revokeObjectURL(url), 1000);
-                } catch (error) {
-                    console.error('PDF预览失败:', error);
-                    // 如果预览失败，直接在新窗口打开原始URL
-                    window.open(pdfUrl, '_blank');
+        // 自动执行PDF预览
+        setTimeout(async () => {
+            try {
+                // 使用fetch下载PDF内容
+                const response = await fetch(pdfUrl);
+                if (!response.ok) {
+                    throw new Error('PDF下载失败');
                 }
-            });
-        }
+                
+                // 确保blob有正确的MIME类型
+                const blob = new Blob([await response.arrayBuffer()], { 
+                    type: 'application/pdf' 
+                });
+                const url = URL.createObjectURL(blob);
+                
+                // 在新窗口打开PDF
+                const newWindow = window.open(url, '_blank');
+                if (!newWindow) {
+                    // 如果弹窗被阻止，直接下载
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = file.name || 'document.pdf';
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+                
+                // 清理URL对象
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                
+                // 关闭预览对话框
+                modal.remove();
+            } catch (error) {
+                console.error('PDF预览失败:', error);
+                // 如果预览失败，直接在新窗口打开原始URL
+                window.open(pdfUrl, '_blank');
+                // 关闭预览对话框
+                modal.remove();
+            }
+        }, 500); // 延迟500ms执行，让用户看到加载提示
         
         // 点击背景关闭
         modal.addEventListener('click', (e) => {
