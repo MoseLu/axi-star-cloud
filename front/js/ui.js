@@ -1493,6 +1493,18 @@ class UIManager {
         // 自动执行PDF预览
         setTimeout(async () => {
             try {
+                // 使用fetch下载PDF内容并创建blob URL
+                const response = await fetch(pdfUrl);
+                if (!response.ok) {
+                    throw new Error('PDF下载失败');
+                }
+                
+                // 创建blob URL
+                const blob = new Blob([await response.arrayBuffer()], { 
+                    type: 'application/pdf' 
+                });
+                const blobUrl = URL.createObjectURL(blob);
+                
                 // 隐藏加载状态，显示PDF预览区域
                 const loadingDiv = modal.querySelector('.pdf-loading');
                 const viewerDiv = modal.querySelector('.pdf-viewer');
@@ -1502,8 +1514,8 @@ class UIManager {
                     loadingDiv.classList.add('hidden');
                     viewerDiv.classList.remove('hidden');
                     
-                    // 直接设置iframe的src为PDF URL
-                    iframe.src = pdfUrl;
+                    // 设置iframe的src为blob URL
+                    iframe.src = blobUrl;
                     
                     // 添加iframe加载完成事件
                     iframe.onload = () => {
@@ -1513,8 +1525,11 @@ class UIManager {
                     iframe.onerror = () => {
                         console.error('PDF加载失败');
                         // 如果iframe加载失败，回退到新窗口打开
-                        window.open(pdfUrl, '_blank');
+                        window.open(blobUrl, '_blank');
                     };
+                    
+                    // 清理blob URL
+                    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000); // 1分钟后清理
                 }
             } catch (error) {
                 console.error('PDF预览失败:', error);
