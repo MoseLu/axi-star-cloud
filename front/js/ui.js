@@ -1420,7 +1420,7 @@ class UIManager {
         modal.innerHTML = `
             <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
                 <!-- 关闭按钮 -->
-                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
+                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn transition-all duration-300 hover:scale-110" onclick="this.parentElement.parentElement.remove()">
                     <i class="fa fa-times"></i>
                 </button>
                 
@@ -1438,50 +1438,56 @@ class UIManager {
                 </div>
                 
                 <!-- 表格内容容器 -->
-                <div class="bg-white rounded-lg w-full h-full max-w-7xl max-h-[90vh] preview-content modal-scrollbar" style="overflow: auto;">
+                <div class="bg-white rounded-xl w-full h-full max-w-7xl max-h-[90vh] preview-content modal-scrollbar shadow-2xl border border-gray-200" style="overflow: auto;">
                     <div class="p-6">
                         <!-- 表格标题和控制栏 -->
-                        <div class="flex items-center justify-between mb-6">
-                            <div>
-                                <h4 class="text-xl font-semibold text-gray-800 text-center">工作表: ${sheetNames[0]}</h4>
-                                <p class="text-sm text-gray-600 text-center mt-1">共 ${data.length - 1} 行数据</p>
+                        <div class="flex flex-col items-center justify-between mb-8 space-y-4">
+                            <!-- 标题居中显示 -->
+                            <div class="text-center">
+                                <h4 class="text-2xl font-bold text-gray-800 mb-2">工作表: ${sheetNames[0]}</h4>
+                                <p class="text-sm text-gray-600">共 ${data.length - 1} 行数据</p>
                             </div>
                             
                             <!-- 每页显示数量控制 -->
-                            <div class="flex items-center space-x-2">
-                                <span class="text-sm text-gray-600">每页显示:</span>
-                                <select id="page-size-select" class="text-sm border border-gray-300 rounded px-2 py-1">
+                            <div class="flex items-center space-x-3 bg-gray-50 rounded-lg px-4 py-2">
+                                <span class="text-sm text-gray-600 font-medium">每页显示:</span>
+                                <select id="page-size-select" class="text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
                                     <option value="10">10</option>
                                     <option value="20" selected>20</option>
                                     <option value="50">50</option>
                                     <option value="100">100</option>
                                 </select>
-                                <span class="text-sm text-gray-600">行</span>
+                                <span class="text-sm text-gray-600 font-medium">行</span>
                             </div>
                         </div>
                         
                         <!-- 表格容器 -->
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
                             ${tableHTML}
                         </div>
                         
-                        <!-- 分页控制 -->
-                        <div class="flex items-center justify-between mt-6">
-                            <div class="text-sm text-gray-600">
-                                显示第 <span id="current-range">1-${Math.min(paginationConfig.pageSize, data.length - 1)}</span> 行，共 ${data.length - 1} 行
+                        <!-- 美化的分页控制 -->
+                        <div class="flex flex-col items-center justify-between mt-8 space-y-4">
+                            <!-- 数据范围信息 -->
+                            <div class="text-sm text-gray-600 bg-gray-50 rounded-lg px-4 py-2">
+                                显示第 <span class="font-semibold text-blue-600" id="current-range">1-${Math.min(paginationConfig.pageSize, data.length - 1)}</span> 行，共 <span class="font-semibold text-gray-800">${data.length - 1}</span> 行
                             </div>
                             
-                            <div class="flex items-center space-x-2" id="pagination-controls">
-                                <button class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" id="prev-page" disabled>
-                                    <i class="fa fa-chevron-left mr-1"></i>上一页
+                            <!-- 分页控件 -->
+                            <div class="flex items-center justify-center space-x-2" id="pagination-controls">
+                                <!-- 上一页按钮 -->
+                                <button class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm" id="prev-page" disabled>
+                                    <i class="fa fa-chevron-left mr-2"></i>上一页
                                 </button>
                                 
+                                <!-- 页码按钮 -->
                                 <div class="flex items-center space-x-1" id="page-numbers">
                                     <!-- 页码将通过JavaScript动态生成 -->
                                 </div>
                                 
-                                <button class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" id="next-page">
-                                    下一页<i class="fa fa-chevron-right ml-1"></i>
+                                <!-- 下一页按钮 -->
+                                <button class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm" id="next-page">
+                                    下一页<i class="fa fa-chevron-right ml-2"></i>
                                 </button>
                             </div>
                         </div>
@@ -1588,7 +1594,7 @@ class UIManager {
         // 添加第一页
         if (startPage > 1) {
             const firstPageBtn = document.createElement('button');
-            firstPageBtn.className = 'px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50';
+            firstPageBtn.className = 'px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm min-w-[40px]';
             firstPageBtn.textContent = '1';
             firstPageBtn.addEventListener('click', () => {
                 this.updatePagination(config, 1);
@@ -1597,7 +1603,7 @@ class UIManager {
             
             if (startPage > 2) {
                 const ellipsis = document.createElement('span');
-                ellipsis.className = 'px-2 text-gray-400';
+                ellipsis.className = 'px-3 text-gray-400 font-medium';
                 ellipsis.textContent = '...';
                 container.appendChild(ellipsis);
             }
@@ -1606,10 +1612,10 @@ class UIManager {
         // 添加页码按钮
         for (let i = startPage; i <= endPage; i++) {
             const pageBtn = document.createElement('button');
-            pageBtn.className = `px-3 py-1 text-sm border rounded ${
+            pageBtn.className = `px-4 py-2 text-sm font-medium border rounded-lg transition-all duration-200 shadow-sm min-w-[40px] ${
                 i === config.currentPage 
-                    ? 'bg-blue-500 text-white border-blue-500' 
-                    : 'border-gray-300 hover:bg-gray-50'
+                    ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:border-blue-700' 
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400'
             }`;
             pageBtn.textContent = i;
             pageBtn.addEventListener('click', () => {
@@ -1622,13 +1628,13 @@ class UIManager {
         if (endPage < config.totalPages) {
             if (endPage < config.totalPages - 1) {
                 const ellipsis = document.createElement('span');
-                ellipsis.className = 'px-2 text-gray-400';
+                ellipsis.className = 'px-3 text-gray-400 font-medium';
                 ellipsis.textContent = '...';
                 container.appendChild(ellipsis);
             }
             
             const lastPageBtn = document.createElement('button');
-            lastPageBtn.className = 'px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50';
+            lastPageBtn.className = 'px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm min-w-[40px]';
             lastPageBtn.textContent = config.totalPages;
             lastPageBtn.addEventListener('click', () => {
                 this.updatePagination(config, config.totalPages);
@@ -1678,15 +1684,15 @@ class UIManager {
         const startIndex = (config.currentPage - 1) * config.pageSize + 1; // +1 跳过表头
         const endIndex = Math.min(startIndex + config.pageSize - 1, data.length - 1);
         
-        let tableHTML = '<table class="min-w-full border border-gray-300 bg-white mx-auto">';
+        let tableHTML = '<table class="min-w-full bg-white mx-auto rounded-lg overflow-hidden shadow-sm">';
         
         // 添加表头
         if (data.length > 0) {
-            tableHTML += '<thead class="bg-gray-50">';
+            tableHTML += '<thead class="bg-gradient-to-r from-blue-50 to-indigo-50">';
             tableHTML += '<tr>';
             const headers = data[0];
             headers.forEach((header, index) => {
-                tableHTML += `<th class="px-4 py-3 text-center text-sm font-medium text-gray-700 border-b border-gray-300">${header || `列${index + 1}`}</th>`;
+                tableHTML += `<th class="px-6 py-4 text-center text-sm font-semibold text-gray-700 border-b border-gray-200">${header || `列${index + 1}`}</th>`;
             });
             tableHTML += '</tr>';
             tableHTML += '</thead>';
@@ -1697,10 +1703,10 @@ class UIManager {
         for (let i = startIndex; i <= endIndex; i++) {
             const row = data[i];
             if (row) {
-                tableHTML += '<tr class="hover:bg-gray-50">';
+                tableHTML += '<tr class="hover:bg-blue-50/50 transition-colors duration-200 border-b border-gray-100">';
                 row.forEach((cell, index) => {
                     const cellValue = cell !== undefined && cell !== null ? cell.toString() : '';
-                    tableHTML += `<td class="px-4 py-3 text-sm text-gray-900 border-b border-gray-200 text-center">${cellValue}</td>`;
+                    tableHTML += `<td class="px-6 py-4 text-sm text-gray-900 text-center">${cellValue}</td>`;
                 });
                 tableHTML += '</tr>';
             }
@@ -3880,15 +3886,23 @@ class UIManager {
                         </div>
                     </div>
                     
-                    <!-- 分页控件 -->
-                    <div id="pagination-controls" class="mt-6 flex items-center justify-center space-x-2 hidden">
-                        <button id="prev-page-btn" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                            <i class="fa fa-chevron-left mr-1"></i>上一页
-                        </button>
-                        <span id="page-info" class="text-gray-300 text-sm"></span>
-                        <button id="next-page-btn" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                            下一页<i class="fa fa-chevron-right ml-1"></i>
-                        </button>
+                    <!-- 美化的分页控件 -->
+                    <div id="pagination-controls" class="mt-8 flex flex-col items-center justify-center space-y-4 hidden">
+                        <!-- 分页信息 -->
+                        <div class="text-sm text-gray-300 bg-dark-light/50 rounded-lg px-4 py-2 border border-blue-400/30">
+                            <span id="page-info" class="font-medium"></span>
+                        </div>
+                        
+                        <!-- 分页按钮 -->
+                        <div class="flex items-center justify-center space-x-3">
+                            <button id="prev-page-btn" class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-dark-light border border-blue-400/30 rounded-lg hover:bg-blue-600/20 hover:border-blue-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+                                <i class="fa fa-chevron-left mr-2"></i>上一页
+                            </button>
+                            
+                            <button id="next-page-btn" class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-dark-light border border-blue-400/30 rounded-lg hover:bg-blue-600/20 hover:border-blue-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+                                下一页<i class="fa fa-chevron-right ml-2"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
