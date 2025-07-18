@@ -1610,7 +1610,6 @@ class UIManager {
     }
 
     // 预览Word文档
-    // 预览Word文档
     previewWord(file) {
         // 强制隐藏html和body滚动条
         document.body.style.overflow = 'hidden';
@@ -1667,7 +1666,7 @@ class UIManager {
             
             iframe.onerror = () => {
                 console.error('Word文档加载失败');
-                // 如果iframe加载失败，回退到新窗口打开
+                // 如果iframe加载失败，直接在新窗口打开
                 window.open(officeViewerUrl, '_blank');
             };
         }
@@ -2204,7 +2203,6 @@ class UIManager {
     }
 
     // 预览PowerPoint文档
-    // 预览PowerPoint文档
     previewPowerPoint(file) {
         // 强制隐藏html和body滚动条
         document.body.style.overflow = 'hidden';
@@ -2261,7 +2259,7 @@ class UIManager {
             
             iframe.onerror = () => {
                 console.error('PowerPoint文档加载失败');
-                // 如果iframe加载失败，回退到新窗口打开
+                // 如果iframe加载失败，直接在新窗口打开
                 window.open(officeViewerUrl, '_blank');
             };
         }
