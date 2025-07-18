@@ -205,27 +205,36 @@ func (r *Router) registerStaticRoutes() {
 	fmt.Printf("🔍 尝试uploads路径:\n")
 	for _, path := range uploadsPaths {
 		if _, err := os.Stat(path); err == nil {
-						// 使用自定义的静态文件处理器，添加下载响应头
+			// 使用自定义的静态文件处理器，添加下载响应头
 			r.engine.GET("/uploads/*filepath", func(c *gin.Context) {
 				filepathParam := c.Param("filepath")
-				fullPath := filepath.Join(path, filepathParam)
-				
+
+				// 获取绝对路径，确保路径正确
+				absPath, err := filepath.Abs(path)
+				if err != nil {
+					fmt.Printf("❌ 无法获取绝对路径: %v\n", err)
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "路径错误"})
+					return
+				}
+
+				fullPath := filepath.Join(absPath, filepathParam)
+
 				// 添加调试日志
-				fmt.Printf("🔍 静态文件请求 - 路径: %s, 参数: %s, 完整路径: %s\n", path, filepathParam, fullPath)
-				
+				fmt.Printf("🔍 静态文件请求 - 相对路径: %s, 绝对路径: %s, 参数: %s, 完整路径: %s\n", path, absPath, filepathParam, fullPath)
+
 				// 检查文件是否存在
 				if _, err := os.Stat(fullPath); os.IsNotExist(err) {
 					fmt.Printf("❌ 文件不存在: %s\n", fullPath)
 					c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
 					return
 				}
-				
+
 				fmt.Printf("✅ 文件存在，提供下载: %s\n", fullPath)
-				
+
 				// 设置下载响应头
 				c.Header("Content-Disposition", "attachment")
 				c.Header("Cache-Control", "no-cache")
-				
+
 				// 提供文件
 				c.File(fullPath)
 			})
