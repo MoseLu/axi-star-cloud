@@ -10,7 +10,7 @@ func MigrateUrlFiles(db *sql.DB) error {
 	// 创建表
 	createTableQuery := `
 	CREATE TABLE IF NOT EXISTS url_files (
-		id INTEGER PRIMARY KEY AUTO_INCREMENT,
+		id INTEGER AUTO_INCREMENT PRIMARY KEY,
 		title VARCHAR(255) NOT NULL,
 		url TEXT NOT NULL,
 		description TEXT,
