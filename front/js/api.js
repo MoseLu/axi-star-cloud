@@ -322,13 +322,14 @@ class ApiManager {
         const userId = this.getCurrentUserId();
         if (!userId) throw new Error('请先登录');
 
-
+        console.log(`API: 开始批量上传 ${files.length} 个文件`);
 
         const results = [];
         const errors = [];
 
         // 逐个上传文件
         for (let i = 0; i < files.length; i++) {
+            console.log(`API: 正在上传第 ${i + 1}/${files.length} 个文件: ${files[i].name}`);
             try {
     
                 
@@ -350,9 +351,11 @@ class ApiManager {
 
                 
                 if (data.success) {
+                    console.log(`API: 文件 ${files[i].name} 上传成功`);
                     results.push(data.file);
 
                 } else {
+                    console.log(`API: 文件 ${files[i].name} 上传失败:`, data.error);
                     errors.push({
                         file: files[i].name,
                         error: data.error || '上传失败'
@@ -374,6 +377,7 @@ class ApiManager {
         }
 
 
+        console.log(`API: 批量上传完成，成功上传 ${results.length} 个文件`);
         return {
             success: true,
             message: `成功上传 ${results.length} 个文件`,

@@ -326,6 +326,14 @@ class UIManager {
         document.getElementById('file-input')?.addEventListener('change', (e) => {
             this.handleFileSelect(e);
         });
+        
+            // 动态设置文件输入框的multiple属性
+    this.updateFileInputMultiple();
+    
+    // 添加文件输入框点击事件，动态设置multiple属性
+    document.getElementById('file-input')?.addEventListener('click', () => {
+        this.updateFileInputMultiple();
+    });
 
         // 拖拽区域事件
         const dropArea = document.getElementById('drop-area');
@@ -344,6 +352,25 @@ class UIManager {
                 e.preventDefault();
                 dropArea.classList.remove('border-purple-light/60');
                 const files = e.dataTransfer.files;
+                
+                // 检查是否为图片文件，如果是图片则允许多文件上传
+                const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
+                const isImageFile = (file) => {
+                    const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+                    return imageExtensions.includes(extension);
+                };
+                
+                // 如果拖拽了多个文件，检查是否都是图片
+                if (files.length > 1) {
+                    const nonImageFiles = Array.from(files).filter(file => !isImageFile(file));
+                    if (nonImageFiles.length > 0) {
+                        this.showMessage('只有图片文件支持多文件上传，其他格式请单个上传', 'warning');
+                        // 只上传第一个非图片文件
+                        this.handleFileUpload([files[0]]);
+                        return;
+                    }
+                }
+                
                 this.handleFileUpload(files);
             });
 
@@ -446,8 +473,9 @@ class UIManager {
                         this.forceUpdateCreateFolderButton();
                         // 重新渲染文件夹列表（隐藏所有文件夹）
                         await this.renderFolderList(this.folders || []);
-                        // 更新上传区域提示信息
+                        // 更新上传区域提示信息和文件输入框设置
                         this.updateUploadAreaHint();
+                        this.updateFileInputMultiple();
                     } else if (type === 'external-docs') {
                         this.currentCategory = 'external-docs';
                         this.currentFolderId = null;
@@ -473,8 +501,9 @@ class UIManager {
                         // 加载外站文档
                         await this.loadExternalDocs();
                         
-                        // 更新上传区域提示信息
+                        // 更新上传区域提示信息和文件输入框设置
                         this.updateUploadAreaHint();
+                        this.updateFileInputMultiple();
                     } else {
                         this.currentCategory = type;
                         this.filterFiles(type);
@@ -487,8 +516,9 @@ class UIManager {
                         
                         // 重新渲染文件夹列表（只显示当前分类的文件夹）
                         await this.renderFolderList(this.folders || []);
-                        // 更新上传区域提示信息
+                        // 更新上传区域提示信息和文件输入框设置
                         this.updateUploadAreaHint();
+                        this.updateFileInputMultiple();
                     }
                         } catch (error) {
             // 切换文件类型时出错
@@ -926,6 +956,11 @@ class UIManager {
             const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
             
             if (imageExtensions.includes(fileExtension)) {
+                // 使用文件的实际路径，如果后端返回了路径的话
+                if (file.previewUrl) {
+                    return file.previewUrl;
+                }
+                // 否则使用默认的图片路径
                 return `/uploads/image/${file.name}`;
             } else {
                 // 非图片文件使用默认图标
@@ -1304,7 +1339,7 @@ class UIManager {
             imgUrl = `/uploads/${file.type}/${file.name}`;
         }
         modal.innerHTML = `
-            <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
+            <div class="relative w-full h-full" style="overflow: hidden;">
                 <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
                     <i class="fa fa-times"></i>
                 </button>
@@ -1349,7 +1384,7 @@ class UIManager {
             videoUrl = `/uploads/video/${file.name}`;
         }
         modal.innerHTML = `
-            <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
+            <div class="relative w-full h-full" style="overflow: hidden;">
                 <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
                     <i class="fa fa-times"></i>
                 </button>
@@ -1389,7 +1424,7 @@ class UIManager {
             audioUrl = `/uploads/audio/${file.name}`;
         }
         modal.innerHTML = `
-            <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
+            <div class="relative w-full h-full" style="overflow: hidden;">
                 <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
                     <i class="fa fa-times"></i>
                 </button>
@@ -1445,7 +1480,7 @@ class UIManager {
         }
         
         modal.innerHTML = `
-            <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
+            <div class="relative w-full h-full" style="overflow: hidden;">
                 <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
                     <i class="fa fa-times"></i>
                 </button>
@@ -1453,7 +1488,7 @@ class UIManager {
                     <h3 class="text-xl font-semibold">${file.name}</h3>
                     <p class="text-gray-300 text-sm">${file.size} • PDF文档</p>
                 </div>
-                <div class="relative w-full h-full flex items-center justify-center preview-pdf-container" style="overflow: hidden;">
+                <div class="relative w-full h-full preview-pdf-container" style="overflow: hidden;">
                     <!-- PDF预览区域 -->
                     <div class="pdf-viewer w-full h-full">
                         <iframe id="pdf-iframe" class="w-full h-full border-0" style="background: white;"></iframe>
@@ -1638,7 +1673,7 @@ class UIManager {
         const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodedFileUrl}`;
         
         modal.innerHTML = `
-            <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
+            <div class="relative w-full h-full" style="overflow: hidden;">
                 <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
                     <i class="fa fa-times"></i>
                 </button>
@@ -1646,7 +1681,7 @@ class UIManager {
                     <h3 class="text-xl font-semibold">${file.name}</h3>
                     <p class="text-gray-300 text-sm">${file.size} • Word文档</p>
                 </div>
-                <div class="relative w-full h-full flex items-center justify-center preview-word-container" style="overflow: hidden;">
+                <div class="relative w-full h-full preview-word-container" style="overflow: hidden;">
                     <!-- Word预览区域 -->
                     <div class="word-viewer w-full h-full">
                         <iframe id="word-iframe" class="w-full h-full border-0" style="background: white;" src="${officeViewerUrl}"></iframe>
@@ -2231,7 +2266,7 @@ class UIManager {
         const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodedFileUrl}`;
         
         modal.innerHTML = `
-            <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
+            <div class="relative w-full h-full" style="overflow: hidden;">
                 <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
                     <i class="fa fa-times"></i>
                 </button>
@@ -2239,7 +2274,7 @@ class UIManager {
                     <h3 class="text-xl font-semibold">${file.name}</h3>
                     <p class="text-gray-300 text-sm">${file.size} • PowerPoint演示文稿</p>
                 </div>
-                <div class="relative w-full h-full flex items-center justify-center preview-powerpoint-container" style="overflow: hidden;">
+                <div class="relative w-full h-full preview-powerpoint-container" style="overflow: hidden;">
                     <!-- PowerPoint预览区域 -->
                     <div class="powerpoint-viewer w-full h-full">
                         <iframe id="powerpoint-iframe" class="w-full h-full border-0" style="background: white;" src="${officeViewerUrl}"></iframe>
@@ -3076,34 +3111,95 @@ class UIManager {
         if (!dropAreaFileTypes) return;
 
         let supportedFormats = '';
+        let multiFileHint = '';
         
         // 根据当前类别显示不同的支持格式
         switch (this.currentCategory) {
             case 'image':
                 supportedFormats = 'JPG, PNG, GIF, BMP, WEBP, SVG, ICO';
+                multiFileHint = '💡 提示: 可以同时选择或拖拽多个图片文件';
                 break;
             case 'video':
                 supportedFormats = 'MP4, AVI, MOV, MKV, WEBM, WMV, FLV, 3GP';
+                multiFileHint = '💡 提示: 请单个选择视频文件';
                 break;
             case 'audio':
                 supportedFormats = 'MP3, WAV, OGG, FLAC, AAC, WMA, M4A';
+                multiFileHint = '💡 提示: 请单个选择音频文件';
                 break;
             case 'document':
                 supportedFormats = 'PDF, DOC, DOCX, XLS, XLSX, TXT, MD, RTF, CSV';
+                multiFileHint = '💡 提示: 请单个选择文档文件';
                 break;
-            case 'presentation':
+            case 'word':
+                supportedFormats = 'DOC, DOCX';
+                multiFileHint = '💡 提示: 请单个选择Word文档';
+                break;
+            case 'excel':
+                supportedFormats = 'XLS, XLSX, CSV';
+                multiFileHint = '💡 提示: 请单个选择Excel文件';
+                break;
+            case 'powerpoint':
                 supportedFormats = 'PPT, PPTX';
+                multiFileHint = '💡 提示: 请单个选择PowerPoint文件';
+                break;
+            case 'pdf':
+                supportedFormats = 'PDF';
+                multiFileHint = '💡 提示: 请单个选择PDF文件';
                 break;
             case 'other':
                 supportedFormats = 'ZIP, RAR, 7Z, TAR, GZ, ISO, EXE, APK';
+                multiFileHint = '💡 提示: 请单个选择文件';
                 break;
             default:
                 // 全部文件类别显示所有格式
                 supportedFormats = 'JPG, PNG, GIF, MP4, AVI, MP3, WAV, PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, MD, ZIP, RAR 等';
+                multiFileHint = '💡 提示: 只有图片文件支持多文件上传，其他格式请单个上传';
                 break;
         }
         
         dropAreaFileTypes.textContent = `支持的格式: ${supportedFormats}`;
+        
+        // 更新多文件提示
+        const multiFileHintElement = document.querySelector('#drop-area .text-emerald-light');
+        if (multiFileHintElement) {
+            multiFileHintElement.textContent = multiFileHint;
+        }
+        
+        // 根据当前类别更新文件输入框的accept属性
+        const fileInput = document.getElementById('file-input');
+        if (fileInput) {
+            switch (this.currentCategory) {
+                case 'image':
+                    fileInput.accept = 'image/*,.jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.ico';
+                    break;
+                case 'video':
+                    fileInput.accept = 'video/*,.mp4,.avi,.mov,.mkv,.webm,.wmv,.flv,.3gp';
+                    break;
+                case 'audio':
+                    fileInput.accept = 'audio/*,.mp3,.wav,.ogg,.flac,.aac,.wma,.m4a';
+                    break;
+                case 'document':
+                    fileInput.accept = '.pdf,.doc,.docx,.xls,.xlsx,.txt,.md,.rtf,.csv';
+                    break;
+                case 'word':
+                    fileInput.accept = '.doc,.docx';
+                    break;
+                case 'excel':
+                    fileInput.accept = '.xls,.xlsx,.csv';
+                    break;
+                case 'powerpoint':
+                    fileInput.accept = '.ppt,.pptx';
+                    break;
+                case 'pdf':
+                    fileInput.accept = '.pdf';
+                    break;
+                default:
+                    // 全部文件类别，接受所有文件类型
+                    fileInput.accept = '';
+                    break;
+            }
+        }
     }
 
     // 格式化日期为 yyyy-mm-dd 格式
@@ -3694,8 +3790,12 @@ class UIManager {
     // 处理文件上传
     async handleFileUpload(files) {
         if (!files || files.length === 0) return;
-
-
+        
+        // 确保files是数组类型
+        const fileArray = Array.from(files);
+        
+        // 添加调试信息
+        console.log(`准备上传 ${fileArray.length} 个文件:`, fileArray.map(f => f.name));
 
         // 验证文件类型
         const allowedTypes = [
@@ -3719,8 +3819,8 @@ class UIManager {
         ];
 
         const invalidFiles = [];
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
+        for (let i = 0; i < fileArray.length; i++) {
+            const file = fileArray[i];
             const fileName = file.name.toLowerCase();
             
             // 检查文件类型
@@ -3783,7 +3883,7 @@ class UIManager {
 
         try {
             const folderId = this.currentFolderId || null; // 当前文件夹ID
-            const uploadedFiles = await this.api.uploadFiles(files, folderId);
+            const uploadedFiles = await this.api.uploadFiles(fileArray, folderId);
 
             if (uploadedFiles.success) {
                 this.showMessage(uploadedFiles.message, 'success');
@@ -3834,6 +3934,23 @@ class UIManager {
     handleFileSelect(event) {
         const files = event.target.files;
         if (files && files.length > 0) {
+            // 检查是否为图片文件，如果是图片则允许多文件上传
+            const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
+            const isImageFile = (file) => {
+                const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+                return imageExtensions.includes(extension);
+            };
+            
+            // 如果选择了多个文件，检查是否都是图片
+            if (files.length > 1) {
+                const nonImageFiles = Array.from(files).filter(file => !isImageFile(file));
+                if (nonImageFiles.length > 0) {
+                    this.showMessage('只有图片文件支持多文件上传，其他格式请单个上传', 'warning');
+                    // 只上传第一个非图片文件
+                    this.handleFileUpload([files[0]]);
+                    return;
+                }
+            }
             
             this.handleFileUpload(files);
         } else {
@@ -5219,32 +5336,24 @@ order: ${order}
             this.onerror = null; // 防止无限循环
         };
     }
-
-    // 获取缩略图URL
-    getThumbnailUrl(file) {
-        // 使用默认的静态文件列表
-        const staticImages = ['cloud.png', 'docs.png', 'favicon.png', 'avatar.png'];
+    
+    // 更新文件输入框的multiple属性
+    updateFileInputMultiple() {
+        const fileInput = document.getElementById('file-input');
+        if (!fileInput) return;
         
-        if (file && file.name && staticImages.includes(file.name)) {
-            return `/static/public/${file.name}`;
+        // 根据当前分类决定是否允许多文件选择
+        const imageCategories = ['image', 'all'];
+        const allowMultiple = imageCategories.includes(this.currentCategory);
+        
+        if (allowMultiple) {
+            fileInput.setAttribute('multiple', '');
+        } else {
+            fileInput.removeAttribute('multiple');
         }
         
-        // 用户上传图片 - 添加错误处理
-        if (file && file.name) {
-            // 检查文件扩展名，如果是图片文件才返回路径
-            const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
-            const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-            
-            if (imageExtensions.includes(fileExtension)) {
-                return `/uploads/image/${file.name}`;
-            } else {
-                // 非图片文件使用默认图标
-                return `/static/public/docs.png`;
-            }
-        }
-        
-        // 默认返回文档图标
-        return `/static/public/docs.png`;
+        // 更新提示信息
+        this.updateUploadAreaHint();
     }
 }
 
