@@ -1,0 +1,471 @@
+/* 响应式布局优化 */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1400px !important;
+    }
+}
+
+@media (min-width: 1600px) {
+    .container {
+        max-width: 1600px !important;
+    }
+}
+
+@media (min-width: 1920px) {
+    .container {
+        max-width: 1800px !important;
+    }
+}
+
+@media (min-width: 2560px) {
+    .container {
+        max-width: 2400px !important;
+    }
+}
+
+@media (min-width: 3200px) {
+    .container {
+        max-width: 3000px !important;
+    }
+}
+
+@media (min-width: 3840px) {
+    .container {
+        max-width: 3600px !important;
+    }
+}
+
+@media (min-width: 4096px) {
+    .container {
+        max-width: 3800px !important;
+    }
+}
+
+/* 自定义滑块样式 */
+.slider {
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(to right, #3B82F6, #7B61FF);
+    outline: none;
+    border-radius: 8px;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #7B61FF;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #7B61FF;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Markdown 样式 */
+.markdown-preview {
+    color: #e5e7eb;
+    line-height: 1.6;
+}
+
+.markdown-preview h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #60a5fa;
+    margin: 1.5rem 0 1rem 0;
+    border-bottom: 2px solid #374151;
+    padding-bottom: 0.5rem;
+}
+
+.markdown-preview h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #60a5fa;
+    margin: 1.25rem 0 0.75rem 0;
+    border-bottom: 1px solid #374151;
+    padding-bottom: 0.25rem;
+}
+
+.markdown-preview h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #818cf8;
+    margin: 1rem 0 0.5rem 0;
+}
+
+.markdown-preview h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #a78bfa;
+    margin: 0.75rem 0 0.5rem 0;
+}
+
+.markdown-preview h5, .markdown-preview h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #c4b5fd;
+    margin: 0.5rem 0 0.25rem 0;
+}
+
+.markdown-preview p {
+    margin: 0.75rem 0;
+}
+
+.markdown-preview ul, .markdown-preview ol {
+    margin: 0.75rem 0;
+    padding-left: 1.5rem;
+}
+
+.markdown-preview li {
+    margin: 0.25rem 0;
+}
+
+.markdown-preview blockquote {
+    border-left: 4px solid #60a5fa;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.markdown-preview code {
+    background-color: #374151;
+    color: #fbbf24;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+}
+
+.markdown-preview pre {
+    background-color: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+}
+
+.markdown-preview pre code {
+    background-color: transparent;
+    color: #e5e7eb;
+    padding: 0;
+}
+
+.markdown-preview strong {
+    color: #fbbf24;
+    font-weight: 600;
+}
+
+.markdown-preview em {
+    color: #a78bfa;
+    font-style: italic;
+}
+
+.markdown-preview a {
+    color: #60a5fa;
+    text-decoration: underline;
+}
+
+.markdown-preview a:hover {
+    color: #93c5fd;
+}
+
+.markdown-preview hr {
+    border: none;
+    border-top: 1px solid #374151;
+    margin: 2rem 0;
+}
+
+.markdown-preview table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1rem 0;
+}
+
+.markdown-preview th, .markdown-preview td {
+    border: 1px solid #374151;
+    padding: 0.5rem;
+    text-align: left;
+}
+
+.markdown-preview th {
+    background-color: #374151;
+    color: #60a5fa;
+    font-weight: 600;
+}
+
+/* 拖拽样式 */
+.drop-zone {
+    position: relative;
+}
+
+.drop-zone.drag-over {
+    border-color: #3b82f6 !important;
+    background-color: rgba(59, 130, 246, 0.1) !important;
+    transform: scale(1.02);
+}
+
+.drop-zone::before {
+    content: '拖拽文件到这里';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(59, 130, 246, 0.9);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.drop-zone.drag-over::before {
+    opacity: 1;
+}
+
+/* 自定义确认对话框样式 */
+.custom-confirm {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.custom-confirm-content {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: slideIn 0.3s ease;
+}
+
+.custom-confirm-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 1rem;
+}
+
+.custom-confirm-message {
+    color: #94a3b8;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.custom-confirm-buttons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.custom-confirm-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    font-size: 0.875rem;
+}
+
+.custom-confirm-btn-cancel {
+    background: #374151;
+    color: #d1d5db;
+}
+
+.custom-confirm-btn-cancel:hover {
+    background: #4b5563;
+}
+
+.custom-confirm-btn-confirm {
+    background: #dc2626;
+    color: white;
+}
+
+.custom-confirm-btn-confirm:hover {
+    background: #b91c1c;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { 
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* 文件类型标签样式 */
+.file-type-tag {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.file-type-image {
+    background: rgba(52, 211, 153, 0.2);
+    color: #34d399;
+}
+
+.file-type-video {
+    background: rgba(248, 113, 113, 0.2);
+    color: #f87171;
+}
+
+.file-type-audio {
+    background: rgba(139, 92, 246, 0.2);
+    color: #8b5cf6;
+}
+
+.file-type-document {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+}
+
+.file-type-other {
+    background: rgba(148, 163, 184, 0.2);
+    color: #94a3b8;
+}
+
+/* 文件类型按钮激活状态样式 */
+.file-type-btn.active {
+    background: linear-gradient(to right, #165DFF, #7B61FF) !important;
+    color: white !important;
+    box-shadow: 0 4px 14px 0 rgba(22, 93, 255, 0.3) !important;
+    transform: scale(1.02);
+    border: 1px solid rgba(123, 97, 255, 0.3) !important;
+}
+
+.file-type-btn:not(.active) {
+    background: #1E293B !important;
+    color: white !important;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(75, 85, 99, 0.3) !important;
+}
+
+.file-type-btn:not(.active):hover {
+    background: rgba(30, 41, 59, 0.8) !important;
+    transform: scale(1.02);
+    border-color: rgba(123, 97, 255, 0.3) !important;
+}
+
+/* 进度条动画 */
+@keyframes progress-animation {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+.animate-progress {
+    animation: progress-animation 1.5s ease-out forwards;
+}
+
+/* 音频波形脉冲动画 */
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+.animate-pulse {
+    animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 文件卡片悬停效果 */
+.file-card {
+    transition: all 0.3s ease, opacity 0.3s ease-in-out;
+}
+
+.file-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* 文件网格过渡效果 */
+#files-grid {
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* 空状态过渡效果 */
+#empty-state {
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* 按钮发光效果 */
+.btn-glow {
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+}
+
+.btn-glow:hover {
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.7);
+}
+
+/* 滚动条样式 */
+.scrollbar-thin {
+    scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 2px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background-color: rgba(75, 85, 99, 0.1);
+    border-radius: 2px;
+}
+
+/* 星空背景样式 */
+.bg-stars {
+    background-image: 
+        radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+        radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+        radial-gradient(2px 2px at 160px 30px, #ddd, transparent);
+    background-repeat: repeat;
+    background-size: 200px 100px;
+    animation: twinkle 4s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+} 

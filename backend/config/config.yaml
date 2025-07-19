@@ -1,0 +1,26 @@
+server:
+  port: '8080'
+  # 宝塔面板部署时的配置
+  host: '0.0.0.0'  # 允许外部访问
+  cors_origins: 
+    - 'http://localhost:3000'
+    - 'http://localhost:8080'
+    - 'https://redamancy.com.cn'
+    - 'http://redamancy.com.cn'
+
+database:
+  host: '127.0.0.1'
+  port: '3306'
+  user: 'root'
+  password: '123456'
+  name: 'docs'
+
+jwt:
+  secret: 'your-secret-key'
+
+# 宝塔面板部署配置
+deployment:
+  type: 'baota'  # baota, local, prod
+  domain: 'redamancy.com.cn'
+  static_path: '/www/wwwroot/axi-star-cloud/front'
+  upload_path: '/www/wwwroot/axi-star-cloud/uploads' 

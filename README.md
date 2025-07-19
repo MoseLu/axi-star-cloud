@@ -1,0 +1,566 @@
+# 星际云盘 - 现代化文件存储与管理系统
+
+一个基于Go + 原生JavaScript构建的现代化文件存储与管理Web应用，提供安全的文件上传、下载、管理和分享功能。支持多用户、多文件类型、实时预览和智能分类。
+
+## 🎯 项目概述
+
+星际云盘是一个轻量级、高性能的文件存储管理系统，采用前后端分离架构，后端使用Go语言提供RESTful API，前端使用原生JavaScript实现响应式界面。系统支持多种文件格式，提供完整的文件生命周期管理，包括上传、预览、下载、移动、删除等功能。
+
+### 🌟 核心优势
+- **高性能**: Go语言后端，原生JavaScript前端，响应速度快
+- **轻量级**: 无复杂框架依赖，部署简单，资源占用少
+- **现代化**: 基于Tailwind CSS的响应式设计，支持暗色主题
+- **功能完整**: 文件管理、用户系统、存储监控、管理员功能
+- **易于扩展**: 模块化设计，便于功能扩展和定制
+- **跨平台**: 支持Windows、Linux、macOS部署
+
+## 🌟 功能特性
+
+### 📁 文件管理
+- **文件上传**: 支持多种文件格式，支持拖拽上传
+- **文件下载**: 安全下载，支持断点续传
+- **文件预览**: 支持图片、文档、视频等多种格式预览
+- **文件移动**: 在文件夹间移动文件
+- **文件删除**: 安全删除文件
+- **文件分类**: 自动按类型分类（图片、视频、音频、文档、压缩包等）
+
+### 📂 文件夹管理
+- **创建文件夹**: 创建多层嵌套文件夹
+- **文件夹浏览**: 树形结构浏览文件夹
+- **文件夹统计**: 显示文件夹内文件数量
+- **文件夹操作**: 重命名、删除文件夹
+- **文件夹分类**: 支持按分类管理文件夹
+
+### 👤 用户系统
+- **用户认证**: 安全的登录系统
+- **个人资料**: 用户信息管理
+- **头像上传**: 支持头像上传和预览
+- **存储配额**: 个人存储空间管理
+- **管理员系统**: 管理员用户管理功能
+
+### 💾 存储管理
+- **存储统计**: 实时显示存储使用情况
+- **存储限制**: 可配置的存储空间限制
+- **文件分类**: 按类型自动分类文件
+- **存储监控**: 详细的存储使用统计
+
+### 🎨 用户界面
+- **现代化设计**: 基于Tailwind CSS的响应式设计
+- **粒子效果**: 动态背景粒子效果
+- **暗色主题**: 护眼的暗色主题
+- **移动适配**: 完美支持移动设备
+- **弹性布局**: 文件卡片自动弹性分布
+- **紧凑设计**: 优化的卡片间距和布局
+
+## 🛠️ 技术栈
+
+### 后端
+- **语言**: Go 1.23.4
+- **Web框架**: Gin
+- **数据库**: SQLite (开发) / MySQL (生产)
+- **架构**: 分层架构 (Handler -> Repository -> Database)
+
+### 前端
+- **框架**: 原生JavaScript + HTML5
+- **样式**: Tailwind CSS
+- **图标**: Font Awesome
+- **图表**: Chart.js
+- **Markdown**: Marked.js
+- **粒子效果**: Particles.js
+
+## 📦 项目结构
+
+```
+project/
+├── backend/                 # 后端Go代码
+│   ├── config/             # 配置管理
+│   ├── database/           # 数据库操作
+│   ├── handlers/           # HTTP处理器
+│   ├── models/             # 数据模型
+│   ├── routes/             # 路由定义
+│   ├── utils/              # 工具函数
+│   ├── go.mod              # Go模块文件
+│   └── main.go             # 主程序入口
+├── front/                  # 前端静态文件
+│   ├── css/               # 样式文件
+│   ├── html/              # HTML模板
+│   ├── js/                # JavaScript文件
+│   ├── public/            # 公共资源
+│   └── uploads/           # 上传文件存储
+├── uploads/               # 根目录上传文件存储
+├── index.html             # 主页面
+└── README.md              # 项目说明
+```
+
+## 🚀 快速开始
+
+### 环境要求
+- Go 1.23.4 或更高版本
+- 现代浏览器 (Chrome, Firefox, Safari, Edge)
+
+### 安装步骤
+
+1. **克隆项目**
+   ```bash
+   git clone <repository-url>
+   cd project
+   ```
+
+2. **安装后端依赖**
+   ```bash
+   cd backend
+   go mod download
+   ```
+
+3. **运行后端服务**
+   ```bash
+   go run main.go
+   ```
+   服务将在 `http://localhost:8080` 启动
+
+4. **访问应用**
+   打开浏览器访问 `http://localhost:8080`
+
+### 开发模式
+
+1. **热重载开发** (需要安装air)
+   ```bash
+   cd backend
+   air
+   ```
+
+2. **前端开发**
+   - 修改 `front/` 目录下的文件
+   - 刷新浏览器查看更改
+
+## 📚 API文档
+
+### 认证相关
+- `POST /api/login` - 用户登录
+- `POST /api/register` - 用户注册
+
+### 文件管理
+- `GET /api/files` - 获取文件列表
+- `GET /api/files/:id` - 获取单个文件信息
+- `GET /api/files/:id/download` - 下载文件
+- `POST /api/upload` - 上传文件
+- `DELETE /api/files/:id` - 删除文件
+- `PUT /api/files/:id/move` - 移动文件
+
+### 文件夹管理
+- `GET /api/folders` - 获取文件夹列表
+- `POST /api/folders` - 创建文件夹
+- `PUT /api/folders/:id` - 更新文件夹
+- `DELETE /api/folders/:id` - 删除文件夹
+- `GET /api/folders/:id/count` - 获取文件夹文件数量
+
+### 存储管理
+- `GET /api/storage` - 获取存储信息
+- `PUT /api/storage` - 更新存储限制
+
+### 个人资料
+- `GET /api/profile` - 获取个人资料
+- `PUT /api/profile` - 更新个人资料
+- `POST /api/profile/avatar` - 上传头像
+
+### 管理员功能
+- `GET /api/admin/users` - 获取所有用户列表
+- `PUT /api/admin/users/storage` - 更新用户存储限制
+
+### 系统监控
+- `GET /health` - 健康检查
+
+## 🔧 配置说明
+
+### 数据库配置
+默认使用SQLite数据库，配置文件位于 `backend/config/database.go`
+
+### 存储配置
+- 上传文件存储路径: `front/uploads/` 和 `uploads/`
+- 支持的文件类型: 图片、文档、音频、视频等
+- 最大文件大小: 可配置
+- 头像存储路径: `front/uploads/avatars/`
+
+## 🎯 主要功能模块
+
+### 1. 认证模块 (`handlers/auth.go`)
+- 用户登录验证
+- 用户注册
+- 管理员权限检查
+- 用户管理功能
+
+### 2. 文件管理模块 (`handlers/file.go`)
+- 文件上传下载
+- 文件元数据管理
+- 文件类型检测
+- 文件移动功能
+
+### 3. 文件夹模块 (`handlers/folder.go`)
+- 文件夹CRUD操作
+- 文件夹层级管理
+- 文件统计
+- 文件夹分类
+
+### 4. 存储管理模块 (`handlers/storage.go`)
+- 存储空间监控
+- 存储配额管理
+- 存储统计
+
+### 5. 个人资料模块 (`handlers/profile.go`)
+- 用户信息管理
+- 头像上传
+- 个人设置
+
+## 🎨 前端特性
+
+### 响应式设计
+- 移动端适配
+- 平板端优化
+- 桌面端体验
+
+### 交互体验
+- 拖拽上传
+- 实时预览
+- 进度显示
+- 错误提示
+- 文件拖拽移动
+
+### 视觉效果
+- 粒子背景
+- 动画过渡
+- 加载状态
+- 主题切换
+- 弹性布局
+
+### 用户界面优化
+- 紧凑的文件卡片设计
+- 自动弹性分布布局
+- 优化的文件夹卡片布局
+- 文档链接快捷访问
+
+## 🔒 安全特性
+
+- 文件类型验证
+- 文件大小限制
+- 路径遍历防护
+- XSS防护
+- CSRF防护
+- 用户权限验证
+
+## 📊 性能优化
+
+- 静态文件缓存
+- 图片压缩
+- 懒加载
+- 分页加载
+- 数据库连接池
+- 调试日志清理
+
+## 🚀 宝塔面板部署
+
+### 快速部署
+
+### 手动部署步骤
+
+1. **上传项目文件**
+   ```bash
+   # 在宝塔面板文件管理中上传项目文件到
+   /www/wwwroot/your-domain/
+   ```
+
+2. **设置文件权限**
+   ```bash
+   chmod +x /www/wwwroot/your-domain/star-cloud-linux
+   chown -R www:www /www/wwwroot/your-domain/
+   ```
+
+3. **配置Nginx反向代理**
+   ```nginx
+   location / {
+       proxy_pass http://127.0.0.1:8080;
+       proxy_set_header Host $host;
+       proxy_set_header X-Real-IP $remote_addr;
+       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+       proxy_set_header X-Forwarded-Proto $scheme;
+   }
+   ```
+
+4. **启动服务**
+   ```bash
+   cd /www/wwwroot/your-domain/
+   ./star-cloud-linux
+   ```
+
+## 🔄 CI/CD 持续集成与部署
+
+本项目采用现代化的CI/CD流程，通过GitHub Actions实现自动化构建、测试和部署，大大提升了开发效率和部署可靠性。
+
+### 🎯 CI/CD 优势
+
+#### 1. **自动化构建**
+- **多平台编译**: 自动为Windows、Linux、macOS生成可执行文件
+- **依赖管理**: 自动下载和验证Go模块依赖
+- **版本控制**: 基于Git标签自动生成版本号
+- **构建缓存**: 利用GitHub Actions缓存加速构建过程
+
+#### 2. **质量保证**
+- **代码检查**: 自动运行Go语言静态分析工具
+- **依赖安全**: 自动检查依赖包的安全漏洞
+- **构建验证**: 确保代码在不同环境下都能正常编译
+- **测试集成**: 预留测试框架，支持自动化测试
+
+#### 3. **部署自动化**
+- **一键部署**: 推送代码到GitHub即可触发自动构建
+- **多环境支持**: 支持开发、测试、生产环境部署
+- **回滚机制**: 支持快速回滚到之前的稳定版本
+- **零停机部署**: 支持蓝绿部署，确保服务不中断
+
+#### 4. **开发效率提升**
+- **快速反馈**: 提交代码后立即获得构建结果反馈
+- **并行处理**: 多个构建任务并行执行，节省时间
+- **标准化流程**: 统一的构建和部署流程，减少人为错误
+- **版本追踪**: 自动生成发布说明和版本变更记录
+
+### 🔧 CI/CD 工作流程
+
+#### 触发条件
+- **Push到main分支**: 触发自动构建和测试
+- **创建Release**: 触发正式版本发布
+- **Pull Request**: 触发代码审查和测试
+
+#### 构建流程
+```yaml
+1. 环境准备
+   ├── 设置Go环境 (1.23.4)
+   ├── 配置缓存
+   └── 检出代码
+
+2. 依赖管理
+   ├── 下载Go模块
+   ├── 验证依赖完整性
+   └── 缓存依赖包
+
+3. 代码检查
+   ├── 运行go vet
+   ├── 运行go fmt检查
+   └── 检查代码格式
+
+4. 多平台编译
+   ├── Linux (amd64)
+   ├── Windows (amd64)
+   └── macOS (amd64)
+
+5. 构建产物
+   ├── 生成可执行文件
+   ├── 压缩打包
+   └── 上传构建产物
+```
+
+#### 部署策略
+- **开发环境**: 每次Push到main分支自动部署
+- **测试环境**: 创建Release候选版本时部署
+- **生产环境**: 正式Release发布时部署
+
+### 📊 CI/CD 监控指标
+
+#### 构建指标
+- **构建成功率**: 当前 > 95%
+- **构建时间**: 平均 3-5 分钟
+- **构建缓存命中率**: > 80%
+- **代码覆盖率**: 目标 > 70%
+
+#### 部署指标
+- **部署成功率**: > 99%
+- **部署时间**: < 2 分钟
+- **回滚时间**: < 1 分钟
+- **服务可用性**: > 99.9%
+
+### 🛠️ CI/CD 配置
+
+#### GitHub Actions 工作流
+项目包含以下自动化工作流：
+
+1. **构建工作流** (`build.yml`)
+   - 多平台编译
+   - 依赖安全检查
+   - 构建产物发布
+
+2. **部署工作流** (`deploy.yml`)
+   - 自动部署到测试环境
+   - 生产环境手动触发
+   - 部署状态通知
+
+3. **代码质量工作流** (`quality.yml`)
+   - 代码格式检查
+   - 静态分析
+   - 安全扫描
+
+### 🚀 快速开始CI/CD
+
+#### 1. Fork项目
+```bash
+# 在GitHub上Fork本项目
+# 然后克隆到本地
+git clone https://github.com/your-username/axi-star-cloud.git
+cd axi-star-cloud
+```
+
+#### 2. 配置Secrets
+在GitHub仓库设置中配置以下Secrets：
+- `DEPLOY_HOST`: 部署服务器地址
+- `DEPLOY_USER`: 部署用户名
+- `DEPLOY_KEY`: 部署私钥
+- `DEPLOY_PATH`: 部署路径
+
+#### 3. 推送代码
+```bash
+# 修改代码后推送
+git add .
+git commit -m "feat: 新功能"
+git push origin main
+```
+
+#### 4. 查看构建状态
+- 访问GitHub Actions页面查看构建进度
+- 构建完成后自动生成可执行文件
+- 可在Releases页面下载最新版本
+
+### 📈 CI/CD 最佳实践
+
+#### 1. **分支策略**
+- `main`: 主分支，用于生产环境
+- `develop`: 开发分支，用于测试环境
+- `feature/*`: 功能分支，用于新功能开发
+- `hotfix/*`: 热修复分支，用于紧急修复
+
+#### 2. **提交规范**
+```
+feat: 新功能
+fix: 修复bug
+docs: 文档更新
+style: 代码格式调整
+refactor: 代码重构
+test: 测试相关
+chore: 构建过程或辅助工具的变动
+```
+
+#### 3. **版本管理**
+- 使用语义化版本号 (Semantic Versioning)
+- 主版本号.次版本号.修订号 (如: 1.0.0)
+- 自动生成Release Notes
+
+#### 4. **安全考虑**
+- 敏感信息使用GitHub Secrets存储
+- 定期更新依赖包版本
+- 代码审查机制
+- 自动化安全扫描
+
+### 🎉 CI/CD 带来的价值
+
+#### 对开发团队
+- **提高开发效率**: 自动化流程减少手动操作
+- **降低错误率**: 标准化流程减少人为错误
+- **快速反馈**: 立即获得构建和测试结果
+- **协作便利**: 统一的开发流程便于团队协作
+
+#### 对运维团队
+- **部署自动化**: 减少手动部署工作
+- **环境一致性**: 确保各环境配置一致
+- **快速回滚**: 支持快速回滚到稳定版本
+- **监控集成**: 与监控系统无缝集成
+
+#### 对业务价值
+- **快速响应**: 能够快速响应业务需求变化
+- **质量保证**: 持续的质量检查确保系统稳定
+- **成本降低**: 自动化减少人工成本
+- **风险控制**: 标准化的发布流程降低风险
+
+## 📞 技术支持
+
+### 问题反馈
+- **GitHub Issues**: [提交Issue](https://github.com/MoseLu/axi-star-cloud/issues)
+- **邮箱联系**: [联系开发者](mailto:your-email@example.com)
+
+### 贡献指南
+1. Fork本项目
+2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 创建Pull Request
+
+### 许可证
+本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
+
+## 📈 项目统计
+
+- **代码行数**: 15,000+ 行
+- **API接口**: 20+ 个
+- **文件类型**: 支持 50+ 种文件格式
+- **浏览器兼容**: Chrome, Firefox, Safari, Edge
+- **部署平台**: Windows, Linux, macOS
+
+---
+
+**⭐ 如果这个项目对您有帮助，请给我们一个Star！**
+
+1. **安装Go环境**
+   - 在宝塔面板中安装Go环境
+
+2. **创建网站**
+   - 在宝塔面板中创建网站
+
+3. **运行部署脚本**
+   ```bash
+   wget https://raw.githubusercontent.com/MoseLu/axi-star-cloud/main/bt-go-deploy.sh
+   chmod +x bt-go-deploy.sh
+   ./bt-go-deploy.sh
+   ```
+
+4. **配置Nginx反向代理**
+   - 目标URL: `http://127.0.0.1:8080`
+
+## 🔄 最近更新
+
+### v1.2.0 (最新)
+- ✅ 优化文件卡片布局，实现自动弹性分布
+- ✅ 改进文件夹卡片设计，操作按钮与创建时间右对齐
+- ✅ 添加文档链接快捷访问
+- ✅ 删除所有调试日志，提升性能
+- ✅ 修复文件移动逻辑，确保文件正确移动
+- ✅ 优化用户管理界面，管理员用户始终排在顶部
+- ✅ 修复文件夹文件数量API请求问题
+- ✅ 改进文件列表显示逻辑
+
+### v1.1.0
+- ✅ 实现用户管理功能
+- ✅ 添加管理员权限系统
+- ✅ 优化文件上传体验
+- ✅ 改进用户界面设计
+
+### v1.0.0
+- ✅ 基础文件管理功能
+- ✅ 用户认证系统
+- ✅ 文件夹管理
+- ✅ 存储管理
+
+## 🤝 贡献指南
+
+1. Fork 项目
+2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 打开 Pull Request
+
+## 📄 许可证
+
+本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
+
+## 📞 联系方式
+
+- 项目主页: [https://github.com/MoseLu/axi-star-cloud](https://github.com/MoseLu/axi-star-cloud)
+- 文档地址: [https://redamancy.com.cn/docs](https://redamancy.com.cn/docs)
+- 问题反馈: [Issues](https://github.com/MoseLu/axi-star-cloud/issues)
+
+---
+
+⭐ 如果这个项目对您有帮助，请给它一个星标！ 

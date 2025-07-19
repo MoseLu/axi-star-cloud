@@ -1,0 +1,438 @@
+/**
+ * 预览模态框样式
+ * 包含文件预览模态框、预览内容、全屏模式等样式
+ */
+
+/* 预览模态框样式 */
+.preview-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden !important;
+}
+
+/* 强制隐藏模态框滚动条 - 只针对模态框 */
+.fixed.inset-0.bg-black\/95 {
+  overflow: hidden !important;
+}
+
+.fixed.inset-0.bg-black\/95 > div {
+  overflow: hidden !important;
+}
+
+/* 确保模态框内容不会溢出 */
+.fixed.inset-0.bg-black\/70 {
+  overflow: hidden !important;
+}
+
+.fixed.inset-0.bg-black\/70 > div {
+  overflow: hidden !important;
+}
+
+/* 强制隐藏所有模态框相关的滚动条 */
+.fixed.inset-0.bg-black\/80 {
+  overflow: hidden !important;
+}
+
+.fixed.inset-0.bg-black\/80 > div {
+  overflow: hidden !important;
+}
+
+/* 确保预览内容容器只在需要时显示滚动条 */
+.preview-content {
+  overflow: auto !important;
+  max-width: 100vw;
+  max-height: 100vh;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* 确保模态框内部容器不显示滚动条 */
+.fixed.inset-0.bg-black\/95 .relative.w-full.h-full {
+  overflow: hidden !important;
+}
+
+/* 只有内容区域可以滚动 */
+.bg-white.rounded-lg.w-full.h-full.max-w-6xl.max-h-\[90vh\] {
+  overflow: auto !important;
+}
+
+/* 确保其他预览内容不显示滚动条 */
+.preview-content:not(.bg-white) {
+  overflow: hidden !important;
+}
+
+/* 图片、视频、音频预览容器不显示滚动条 */
+.preview-image-container,
+.preview-video-container,
+.preview-audio-container {
+  overflow: hidden !important;
+}
+
+/* 隐藏body滚动条当模态框打开时 */
+body.modal-open {
+  overflow: hidden !important;
+}
+
+/* 确保主页面正常显示滚动条 */
+body:not(.modal-open) {
+  overflow: auto !important;
+}
+
+html:not(.modal-open) {
+  overflow: auto !important;
+}
+
+/* 确保主内容区域可以正常滚动 */
+main {
+  overflow: visible !important;
+}
+
+.container {
+  overflow: visible !important;
+}
+
+/* 预览文件信息样式 */
+.preview-file-info {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.preview-file-info:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* 预览关闭按钮样式 */
+.preview-close-btn {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.preview-close-btn:hover {
+  background: rgba(220, 38, 38, 0.8);
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+}
+
+/* 视频预览优化 */
+.preview-video-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-video-container video {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* 音频预览优化 */
+.preview-audio-container {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.preview-audio-container audio {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+/* 图片预览优化 */
+.preview-image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-image-container img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease;
+}
+
+.preview-image-container img:hover {
+  transform: scale(1.02);
+}
+
+/* 音频预览样式 */
+.audio-preview {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.audio-icon {
+  width: 12rem;
+  height: 12rem;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(59, 130, 246, 0.2));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 2rem;
+}
+
+.audio-icon i {
+  font-size: 6rem;
+  color: #06b6d4;
+}
+
+/* Markdown预览样式 */
+.prose {
+  color: #374151;
+  line-height: 1.75;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  color: #111827;
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose h1 {
+  font-size: 2.25em;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5em;
+}
+
+.prose h2 {
+  font-size: 1.875em;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5em;
+}
+
+.prose h3 {
+  font-size: 1.5em;
+}
+
+.prose p {
+  margin-bottom: 1em;
+}
+
+.prose ul, .prose ol {
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+.prose li {
+  margin-bottom: 0.5em;
+}
+
+.prose blockquote {
+  border-left: 4px solid #3b82f6;
+  padding-left: 1em;
+  margin: 1.5em 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.prose code {
+  background-color: #f3f4f6;
+  padding: 0.125em 0.25em;
+  border-radius: 0.25em;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875em;
+}
+
+.prose pre {
+  background-color: #1f2937;
+  color: #f9fafb;
+  padding: 1em;
+  border-radius: 0.5em;
+  overflow-x: auto;
+  margin: 1.5em 0;
+}
+
+.prose pre code {
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+.prose a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  color: #2563eb;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+}
+
+.prose th, .prose td {
+  border: 1px solid #e5e7eb;
+  padding: 0.5em;
+  text-align: left;
+}
+
+.prose th {
+  background-color: #f9fafb;
+  font-weight: 600;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5em;
+  margin: 1em 0;
+}
+
+.prose hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 2em 0;
+}
+
+/* 全屏文本预览样式 */
+.fullscreen-text {
+  background: white;
+  border-radius: 0.5rem;
+  width: 100%;
+  height: 100%;
+  max-width: 72rem;
+  max-height: 90vh;
+  overflow: auto;
+  padding: 2rem;
+}
+
+.fullscreen-text pre {
+  font-size: 1.125rem;
+  font-family: 'Courier New', monospace;
+  color: #1f2937;
+  white-space: pre-wrap;
+  word-break: break-words;
+  line-height: 1.6;
+}
+
+/* 全屏Markdown预览样式 */
+.fullscreen-markdown {
+  background: white;
+  border-radius: 0.5rem;
+  width: 100%;
+  height: 100%;
+  max-width: 72rem;
+  max-height: 90vh;
+  overflow: auto;
+  padding: 2rem;
+}
+
+.fullscreen-markdown .prose {
+  font-size: 1.125rem;
+  line-height: 1.8;
+}
+
+.fullscreen-markdown .prose h1 {
+  font-size: 2.5rem;
+}
+
+.fullscreen-markdown .prose h2 {
+  font-size: 2rem;
+}
+
+.fullscreen-markdown .prose h3 {
+  font-size: 1.75rem;
+}
+
+.fullscreen-markdown .prose p {
+  font-size: 1.125rem;
+  margin-bottom: 1.25rem;
+}
+
+.fullscreen-markdown .prose code {
+  font-size: 1rem;
+}
+
+.fullscreen-markdown .prose pre {
+  font-size: 1rem;
+  padding: 1.5rem;
+}
+
+/* 遮罩层完全覆盖主页面，包括滚动条 */
+.fixed.inset-0.bg-black\/95 {
+  position: fixed !important;
+  z-index: 9999 !important;
+  left: 0 !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  pointer-events: auto !important;
+}
+
+/* 确保弹窗遮罩完全覆盖，包括滚动条区域 */
+.fixed.inset-0.bg-black\/95,
+div[class*="fixed inset-0 bg-black"] {
+  position: fixed !important;
+  z-index: 9999 !important;
+  left: 0 !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  pointer-events: auto !important;
+  background: rgba(0, 0, 0, 0.95) !important;
+}
+
+/* 强制隐藏body滚动条当弹窗打开时 */
+body:has(.fixed.inset-0.bg-black\/95),
+body:has(div[class*="fixed inset-0 bg-black"]) {
+  overflow: hidden !important;
+}
+
+/* 确保弹窗内容不会溢出 */
+.fixed.inset-0.bg-black\/95 > div,
+div[class*="fixed inset-0 bg-black"] > div {
+  overflow: hidden !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+} 
