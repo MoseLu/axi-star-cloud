@@ -139,6 +139,8 @@ class DocViewer {
     convertMarkdownToHtml(markdown) {
         // 简单的Markdown转HTML转换
         let html = markdown
+            // 代码块（先处理，避免被其他规则影响）
+            .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
             // 标题
             .replace(/^### (.*$)/gim, '<h3>$1</h3>')
             .replace(/^## (.*$)/gim, '<h2>$1</h2>')
@@ -146,20 +148,66 @@ class DocViewer {
             // 粗体和斜体
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            // 代码块
-            .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+            // 行内代码
             .replace(/`([^`]+)`/g, '<code>$1</code>')
             // 链接
-            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
-            // 列表
-            .replace(/^\* (.*$)/gim, '<li>$1</li>')
-            .replace(/^- (.*$)/gim, '<li>$1</li>')
-            // 段落
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+        // 处理列表
+        const lines = html.split('\n');
+        let inList = false;
+        let listType = '';
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmedLine = line.trim();
+            
+            // 检测列表开始
+            if (trimmedLine.match(/^[\*\-] /)) {
+                if (!inList) {
+                    inList = true;
+                    listType = 'ul';
+                    lines[i] = '<ul><li>' + trimmedLine.substring(2) + '</li>';
+                } else {
+                    lines[i] = '<li>' + trimmedLine.substring(2) + '</li>';
+                }
+            } else if (trimmedLine.match(/^\d+\. /)) {
+                if (!inList) {
+                    inList = true;
+                    listType = 'ol';
+                    lines[i] = '<ol><li>' + trimmedLine.replace(/^\d+\. /, '') + '</li>';
+                } else {
+                    lines[i] = '<li>' + trimmedLine.replace(/^\d+\. /, '') + '</li>';
+                }
+            } else {
+                // 列表结束
+                if (inList && trimmedLine !== '') {
+                    lines[i] = '</' + listType + '>' + line;
+                    inList = false;
+                    listType = '';
+                }
+            }
+        }
+        
+        // 如果列表在文件末尾，需要关闭标签
+        if (inList) {
+            lines.push('</' + listType + '>');
+        }
+        
+        html = lines.join('\n');
+        
+        // 处理段落
+        html = html
             .replace(/\n\n/g, '</p><p>')
             .replace(/^([^<].*)/gm, '<p>$1</p>');
 
-        // 清理多余的p标签
-        html = html.replace(/<p><\/p>/g, '');
+        // 清理多余的p标签和空行
+        html = html
+            .replace(/<p><\/p>/g, '')
+            .replace(/<p>(<h[1-6]>.*?<\/h[1-6]>)<\/p>/g, '$1')
+            .replace(/<p>(<ul>.*?<\/ul>)<\/p>/g, '$1')
+            .replace(/<p>(<ol>.*?<\/ol>)<\/p>/g, '$1')
+            .replace(/<p>(<pre>.*?<\/pre>)<\/p>/g, '$1');
         
         return html;
     }
