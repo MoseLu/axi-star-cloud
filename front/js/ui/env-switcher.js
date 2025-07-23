@@ -404,7 +404,7 @@ class EnvSwitcher {
                 item.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const action = item.dataset.action;
-                    console.log('菜单项点击:', action);
+        
                     if (action === 'switch-env') {
                         this.showEnvOptions = true;
                         this.updateDisplay();
@@ -512,53 +512,43 @@ class EnvSwitcher {
     }
 
     reloadData() {
-        console.log('开始重新加载数据...');
-        
         // 延迟重新加载数据，确保环境切换完成
         setTimeout(async () => {
             try {
                 // 重新加载文件列表
                 if (window.uiManager && typeof window.uiManager.loadFiles === 'function') {
-                    console.log('重新加载文件列表...');
                     await window.uiManager.loadFiles();
                 } else if (window.fileRenderer && typeof window.fileRenderer.loadFiles === 'function') {
-                    console.log('通过fileRenderer重新加载文件列表...');
                     await window.fileRenderer.loadFiles();
                 }
                 
                 // 重新加载存储信息
                 if (window.uiManager && typeof window.uiManager.api && window.uiManager.api.storage) {
-                    console.log('重新加载存储信息...');
                     const storageInfo = await window.uiManager.api.storage.getStorageInfo();
                     if (storageInfo && window.uiManager.updateStorageDisplay) {
                         window.uiManager.updateStorageDisplay(storageInfo);
                     }
                 } else if (window.storageManager && typeof window.storageManager.updateStorageInfo === 'function') {
-                    console.log('通过storageManager重新加载存储信息...');
                     window.storageManager.updateStorageInfo();
                 }
                 
                 // 重新加载用户信息
                 if (window.uiManager && typeof window.uiManager.api && window.uiManager.api.profile) {
-                    console.log('重新加载用户信息...');
                     const profile = await window.uiManager.api.profile.getProfile();
                     if (profile && window.uiManager.updateProfileDisplay) {
                         window.uiManager.updateProfileDisplay(profile);
                     }
                 } else if (window.profileManager && typeof window.profileManager.loadProfile === 'function') {
-                    console.log('通过profileManager重新加载用户信息...');
                     window.profileManager.loadProfile();
                 }
                 
                 // 重新加载文件夹列表
                 if (window.uiManager && typeof window.uiManager.refreshFolders === 'function') {
-                    console.log('重新加载文件夹列表...');
                     await window.uiManager.refreshFolders();
                 }
                 
                 // 重新加载URL文件列表
                 if (window.uiManager && typeof window.uiManager.api && window.uiManager.api.urlFiles) {
-            
                     const urlFiles = await window.uiManager.api.urlFiles.getUrlFiles();
                     if (urlFiles && window.uiManager.allFiles) {
                         // 更新allFiles中的URL文件部分
@@ -567,8 +557,6 @@ class EnvSwitcher {
                         window.uiManager.renderFileList(window.uiManager.allFiles);
                     }
                 }
-                
-                console.log('数据重新加载完成');
                 
             } catch (error) {
                 console.error('重新加载数据时出错:', error);
