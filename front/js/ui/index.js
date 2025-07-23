@@ -805,7 +805,7 @@ class UIManager {
             return;
         }
         
-        // 检查是否存在同名文件夹
+        // 检查是否存在同名文件夹（前端预检查）
         if (!this.folders || !Array.isArray(this.folders)) {
             this.folders = []; // 初始化为空数组
         }
@@ -828,10 +828,14 @@ class UIManager {
                 this.hideCreateFolderModal();
                 await this.refreshFolders();
             } else {
-                this.showMessage(result.message || '文件夹创建失败', 'error');
+                // 处理后端返回的错误信息
+                const errorMessage = result.error || result.message || '文件夹创建失败';
+                this.showMessage(errorMessage, 'error');
             }
         } catch (error) {
-            this.showMessage(error.message || '文件夹创建失败', 'error');
+            // 处理网络错误或其他异常
+            const errorMessage = error.message || '文件夹创建失败';
+            this.showMessage(errorMessage, 'error');
         }
     }
     
