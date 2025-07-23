@@ -21,7 +21,7 @@ window.ENV_MANAGER = (function() {
         // 生产环境
         prod: {
             name: '生产环境',
-            apiBaseUrl: '', // 相对路径，前后端同域名
+            apiBaseUrl: 'https://redamancy.com.cn',
             debug: false,
             features: {
                 hotReload: false,

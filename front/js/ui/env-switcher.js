@@ -92,7 +92,7 @@ class EnvSwitcher {
                     <div class="env-option" data-env="prod" title="生产环境API">
                         <span class="env-option-icon">🚀</span>
                         <span class="env-option-label">生产API</span>
-                        <span class="env-option-url">相对路径</span>
+                        <span class="env-option-url">redamancy.com.cn</span>
                     </div>
                 </div>
             </div>
