@@ -247,8 +247,9 @@ class UIFileRenderer {
             
             if (file.type === 'image') {
                 // 图片显示小缩略图
+                const imgUrl = file.thumbnailUrl || file.previewUrl || window.apiGateway?.buildUrl('/uploads/image/' + encodeURIComponent(file.name)) || ('/uploads/image/' + encodeURIComponent(file.name));
                 iconCell.innerHTML = `
-                    <img src="${file.thumbnailUrl || file.previewUrl || ('/uploads/image/' + encodeURIComponent(file.name))}" 
+                    <img src="${imgUrl}" 
                          alt="${file.name}" 
                          class="w-10 h-10 object-cover rounded-lg shadow" 
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -662,8 +663,8 @@ class UIFileRenderer {
                 if (file.previewUrl) {
                     return file.previewUrl;
                 }
-                // 否则使用默认的图片路径
-                const imgUrl = '/uploads/image/' + encodeURIComponent(file.name);
+                // 否则使用默认的图片路径，通过API网关构建
+                const imgUrl = window.apiGateway?.buildUrl('/uploads/image/' + encodeURIComponent(file.name)) || ('/uploads/image/' + encodeURIComponent(file.name));
                 return imgUrl;
             } else {
                 // 非图片文件使用默认图标

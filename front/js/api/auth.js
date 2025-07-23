@@ -10,44 +10,43 @@ class Auth {
     // 登录
     async login(username, password) {
         try {
-            const response = await fetch(this.core.buildApiUrl('/api/login'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, password })
+            const response = await window.apiGateway.post('/api/login', {
+                username: username,
+                password: password
             });
 
-            const data = await response.json();
-            if (data.success) {
-                this.core.setCurrentUser({
-                    uuid: data.user.uuid,
-                    username: data.user.username,
-                    isAdmin: data.user.is_admin
-                });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '登录失败');
             }
+
+            const data = await response.json();
             return data;
         } catch (error) {
             console.error('登录失败:', error);
-            return { success: false, error: '网络错误' };
+            throw error;
         }
     }
 
     // 注册
     async register(username, password, email = '') {
         try {
-            const response = await fetch(this.core.buildApiUrl('/api/register'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, password, email })
+            const response = await window.apiGateway.post('/api/register', {
+                username: username,
+                password: password,
+                email: email
             });
 
-            return await response.json();
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '注册失败');
+            }
+
+            const data = await response.json();
+            return data;
         } catch (error) {
             console.error('注册失败:', error);
-            return { success: false, error: '网络错误' };
+            throw error;
         }
     }
 

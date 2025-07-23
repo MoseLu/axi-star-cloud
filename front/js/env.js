@@ -188,7 +188,7 @@ window.ENV_MANAGER = (function() {
 
     // 构建头像URL
     function buildAvatarUrl(avatarPath) {
-        if (!avatarPath || avatarPath.trim() === '') {
+        if (!avatarPath || avatarPath === 'null' || avatarPath === 'undefined') {
             return '/static/public/docs.png';
         }
         
@@ -196,13 +196,9 @@ window.ENV_MANAGER = (function() {
             return avatarPath;
         }
         
-        if (avatarPath === 'avatar.png') {
-            return '/static/public/docs.png';
-        }
-        
         if (avatarPath.startsWith('/uploads/avatars/')) {
             const fileName = avatarPath.replace('/uploads/avatars/', '');
-            return '/uploads/avatars/' + fileName;
+            return window.apiGateway?.buildUrl('/uploads/avatars/' + fileName) || ('/uploads/avatars/' + fileName);
         }
         
         if (avatarPath.startsWith('/')) {
@@ -210,9 +206,9 @@ window.ENV_MANAGER = (function() {
         }
         
         if (avatarPath.includes('avatars/')) {
-            return '/uploads/' + avatarPath;
+            return window.apiGateway?.buildUrl('/uploads/' + avatarPath) || ('/uploads/' + avatarPath);
         } else {
-            return '/uploads/avatars/' + avatarPath;
+            return window.apiGateway?.buildUrl('/uploads/avatars/' + avatarPath) || ('/uploads/avatars/' + avatarPath);
         }
     }
 

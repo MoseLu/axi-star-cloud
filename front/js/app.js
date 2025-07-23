@@ -360,9 +360,7 @@ class App {
         // 调用退出登录API更新最后登录时间
         if (userId) {
             try {
-                await fetch(`/api/logout?user_id=${userId}`, {
-                    method: 'POST'
-                });
+                await window.apiGateway.post(`/api/logout?user_id=${userId}`);
             } catch (error) {
                 console.error('调用退出登录API失败:', error);
             }

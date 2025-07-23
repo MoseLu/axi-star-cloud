@@ -200,7 +200,7 @@ class UIProfileManager {
         if (!finalUrl || finalUrl === 'null' || finalUrl === 'undefined') {
             finalUrl = '/static/public/docs.png';
         } else if (!finalUrl.startsWith('http') && !finalUrl.startsWith('/uploads/') && finalUrl !== '/static/public/docs.png') {
-            finalUrl = `/uploads/avatars/${finalUrl}`;
+            finalUrl = window.apiGateway?.buildUrl('/uploads/avatars/' + finalUrl) || ('/uploads/avatars/' + finalUrl);
         }
         
         // 更新所有头像元素
@@ -553,7 +553,7 @@ class UIProfileManager {
         
         // 构建完整的头像URL
         if (avatarFileName) {
-            return `/uploads/avatars/${avatarFileName}`;
+            return window.apiGateway?.buildUrl('/uploads/avatars/' + avatarFileName) || ('/uploads/avatars/' + avatarFileName);
         }
         
         return avatarFileName;
@@ -836,14 +836,7 @@ class UIProfileManager {
             throw new Error('无法获取用户ID');
         }
         
-        const response = await fetch(`/api/profile?user_id=${userId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify(profileData)
-        });
+        const response = await window.apiGateway.put(`/api/profile?user_id=${userId}`, profileData);
 
         
         if (!response.ok) {
@@ -1033,11 +1026,7 @@ class UIProfileManager {
                 return;
             }
             
-            const response = await fetch(`/api/profile?user_id=${userId}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
+            const response = await window.apiGateway.get(`/api/profile?user_id=${userId}`);
 
             if (response.ok) {
                 const result = await response.json();
@@ -1074,11 +1063,7 @@ class UIProfileManager {
             try {
                 const userId = this.getCurrentUserId();
                 if (userId) {
-                    const response = await fetch(`/api/profile?user_id=${userId}`, {
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
+                    const response = await window.apiGateway.get(`/api/profile?user_id=${userId}`);
                     
                     if (response.ok) {
                         const result = await response.json();
@@ -1109,7 +1094,7 @@ class UIProfileManager {
         let avatarUrl = '/static/public/docs.png';
         if (userData && userData.avatar) {
             if (!userData.avatar.startsWith('http') && !userData.avatar.startsWith('/uploads/')) {
-                avatarUrl = `/uploads/avatars/${userData.avatar}`;
+                avatarUrl = window.apiGateway?.buildUrl('/uploads/avatars/' + userData.avatar) || ('/uploads/avatars/' + userData.avatar);
             } else {
                 avatarUrl = userData.avatar;
             }
@@ -1198,11 +1183,7 @@ class UIProfileManager {
                 return;
             }
 
-            const response = await fetch(`/api/profile?user_id=${userId}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
+            const response = await window.apiGateway.get(`/api/profile?user_id=${userId}`);
 
             if (response.ok) {
                 const result = await response.json();
@@ -1375,7 +1356,7 @@ class UIProfileManager {
             // 确保头像URL包含正确的路径
             let avatarUrl = userData.avatar;
             if (!avatarUrl.startsWith('http') && !avatarUrl.startsWith('/uploads/')) {
-                avatarUrl = `/uploads/avatars/${avatarUrl}`;
+                avatarUrl = window.apiGateway?.buildUrl('/uploads/avatars/' + avatarUrl) || ('/uploads/avatars/' + avatarUrl);
             }
             this.updateProfileModalAvatar(avatarUrl);
         } else {
@@ -1394,7 +1375,7 @@ class UIProfileManager {
                 // 确保头像URL包含正确的路径
                 let fullAvatarUrl = avatarUrl;
                 if (!avatarUrl.startsWith('http') && !avatarUrl.startsWith('/uploads/')) {
-                    fullAvatarUrl = `/uploads/avatars/${avatarUrl}`;
+                    fullAvatarUrl = window.apiGateway?.buildUrl('/uploads/avatars/' + avatarUrl) || ('/uploads/avatars/' + avatarUrl);
                 } else if (avatarUrl.startsWith('/uploads/')) {
                     fullAvatarUrl = avatarUrl;
                 }
