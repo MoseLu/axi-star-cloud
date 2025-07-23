@@ -26,25 +26,29 @@ class App {
 
     async init() {
         try {
-            // 等待API系统初始化
+            console.log('🚀 应用初始化开始...');
+            
+            // 等待API系统准备就绪
             await this.waitForApiSystem();
             
             // 使用新的API系统，确保向后兼容
             this.apiManager = window.apiSystem || window.apiManager;
             if (!this.apiManager) {
-        
+                console.warn('API管理器未找到');
                 return;
             }
 
             // 使用已存在的认证系统实例，避免重复初始化
             this.authManager = window.authSystem || window.authManager;
             if (!this.authManager) {
-        
+                console.warn('认证管理器未找到');
                 return;
             }
             
+            // 初始化UI管理器
             this.uiManager = new UIManager();
             window.uiManager = this.uiManager;
+            
             // 绑定上传按钮弹窗事件
             this.uiManager.bindUploadBtn();
 
@@ -52,9 +56,9 @@ class App {
             window.showMessage = (message, type = 'info') => {
                 if (window.Notify && typeof window.Notify.show === 'function') {
                     window.Notify.show({ message, type });
-                        } else {
-            // 降级处理：如果其他消息系统不可用，静默处理
-        }
+                } else {
+                    // 降级处理：如果其他消息系统不可用，静默处理
+                }
             };
 
             // 初始化日期显示
@@ -65,13 +69,81 @@ class App {
 
             // 设置其他事件监听器
             this.setupEventListeners();
-
+            
             // 检查登录状态
             this.checkLoginStatus();
-
+            
+            // 设置环境切换事件监听
+            this.setupEnvironmentChangeListener();
+            
+            console.log('✅ 应用初始化完成');
+            
         } catch (error) {
-
+            console.error('❌ 应用初始化失败:', error);
         }
+    }
+
+    // 设置环境切换事件监听
+    setupEnvironmentChangeListener() {
+        window.addEventListener('environmentChanged', async (event) => {
+            console.log('🔄 检测到环境切换:', event.detail);
+            
+            try {
+                // 更新API网关的baseUrl
+                if (window.apiGateway && typeof window.apiGateway.updateBaseUrl === 'function') {
+                    window.apiGateway.updateBaseUrl();
+                }
+                
+                // 更新认证管理器的baseUrl
+                if (window.authManager && typeof window.authManager.updateBaseUrl === 'function') {
+                    window.authManager.updateBaseUrl();
+                }
+                
+                // 重新加载所有数据
+                if (this.uiManager) {
+                    // 重新加载文件列表
+                    if (typeof this.uiManager.loadFiles === 'function') {
+                        await this.uiManager.loadFiles();
+                    }
+                    
+                    // 重新加载存储信息
+                    if (this.uiManager.api && this.uiManager.api.storage) {
+                        const storageInfo = await this.uiManager.api.storage.getStorageInfo();
+                        if (storageInfo && typeof this.uiManager.updateStorageDisplay === 'function') {
+                            this.uiManager.updateStorageDisplay(storageInfo);
+                        }
+                    }
+                    
+                    // 重新加载用户信息
+                    if (this.uiManager.api && this.uiManager.api.profile) {
+                        const profile = await this.uiManager.api.profile.getProfile();
+                        if (profile && typeof this.uiManager.updateProfileDisplay === 'function') {
+                            this.uiManager.updateProfileDisplay(profile);
+                        }
+                    }
+                    
+                    // 重新加载文件夹列表
+                    if (typeof this.uiManager.refreshFolders === 'function') {
+                        await this.uiManager.refreshFolders();
+                    }
+                    
+                    // 重新加载URL文件列表
+                    if (this.uiManager.api && this.uiManager.api.urlFiles) {
+                        const urlFiles = await this.uiManager.api.urlFiles.getUrlFiles();
+                        if (urlFiles && this.uiManager.allFiles) {
+                            const regularFiles = this.uiManager.allFiles.filter(file => !file.isUrlFile);
+                            this.uiManager.allFiles = [...regularFiles, ...urlFiles];
+                            this.uiManager.renderFileList(this.uiManager.allFiles);
+                        }
+                    }
+                }
+                
+                console.log('✅ 环境切换后数据重新加载完成');
+                
+            } catch (error) {
+                console.error('❌ 环境切换后数据重新加载失败:', error);
+            }
+        });
     }
 
     // 检查登录状态
