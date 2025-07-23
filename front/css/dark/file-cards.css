@@ -6,7 +6,7 @@
 /* 文件卡片网格布局 */
 #files-grid, .files-grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 240px));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 240px));
   gap: 16px;
   align-items: start;
   justify-items: start;

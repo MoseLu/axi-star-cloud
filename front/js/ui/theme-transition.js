@@ -79,8 +79,8 @@ class ThemeTransitionManager {
         
         // 添加图标
         btn.innerHTML = `
-            <i class="fas fa-sun icon sun-icon" aria-hidden="true"></i>
-            <i class="fas fa-moon icon moon-icon" aria-hidden="true"></i>
+            <i class="fa fa-sun icon sun-icon" aria-hidden="true"></i>
+            <i class="fa fa-moon icon moon-icon" aria-hidden="true"></i>
         `;
         
         // 添加点击事件
@@ -110,11 +110,14 @@ class ThemeTransitionManager {
     async toggleTheme() {
         if (this.isTransitioning) return;
         
+        console.log('主题切换开始');
         this.isTransitioning = true;
         
         // 获取当前主题
         const currentTheme = this.currentTheme;
         const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        
+        console.log(`从 ${currentTheme} 切换到 ${newTheme}`);
         
         // 开始动画
         await this.startTransition(newTheme);
@@ -126,6 +129,7 @@ class ThemeTransitionManager {
         await this.endTransition();
         
         this.isTransitioning = false;
+        console.log('主题切换完成');
     }
 
     async startTransition(newTheme) {
@@ -254,8 +258,19 @@ class ThemeTransitionManager {
     }
 }
 
-// 创建全局实例
-window.themeTransitionManager = new ThemeTransitionManager();
+// 等待DOM加载完成后初始化
+document.addEventListener('DOMContentLoaded', () => {
+    window.themeTransitionManager = new ThemeTransitionManager();
+});
+
+// 如果DOM已经加载完成，立即初始化
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        window.themeTransitionManager = new ThemeTransitionManager();
+    });
+} else {
+    window.themeTransitionManager = new ThemeTransitionManager();
+}
 
 // 导出类（如果需要）
 if (typeof module !== 'undefined' && module.exports) {
