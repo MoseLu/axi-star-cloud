@@ -270,10 +270,10 @@ class EnvSwitcher {
             }
 
             .env-option:hover {
-                background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0.2) 100%);
-                border-color: rgba(16, 185, 129, 0.5);
+                background: linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(34, 197, 94, 0.2) 100%);
+                border-color: rgba(34, 197, 94, 0.5);
                 transform: translateY(-2px);
-                box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+                box-shadow: 0 8px 25px rgba(34, 197, 94, 0.3);
             }
 
             .env-option:hover::before {
@@ -281,10 +281,11 @@ class EnvSwitcher {
             }
 
             .env-option.active {
-                background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0.2) 100%);
+                background: linear-gradient(135deg, rgba(16, 185, 129, 0.4) 0%, rgba(16, 185, 129, 0.3) 100%);
                 border-color: #10b981;
                 color: #10b981;
-                box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+                box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+                transform: translateY(-1px);
             }
 
             .env-option.active::before {
@@ -324,7 +325,7 @@ class EnvSwitcher {
             }
 
             .env-option:hover .env-option-url {
-                color: #10b981;
+                color: #22c55e;
                 opacity: 1;
             }
 
