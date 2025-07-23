@@ -715,6 +715,49 @@ class EnvSwitcher {
                     }
                 }
                 
+                // 延迟重新绑定事件，确保DOM元素完全加载
+                setTimeout(() => {
+                    // 重新绑定布局切换和排序按钮事件
+                    if (window.fileRenderer) {
+                        // 重新绑定布局切换按钮事件
+                        if (typeof window.fileRenderer.bindLayoutSwitchEvent === 'function') {
+                            window.fileRenderer.bindLayoutSwitchEvent();
+                        }
+                        // 重新绑定排序按钮事件
+                        if (typeof window.fileRenderer.bindSortSwitchEvent === 'function') {
+                            window.fileRenderer.bindSortSwitchEvent();
+                        }
+                    }
+                    
+                    // 重新绑定其他UI组件事件
+                    if (window.uiManager) {
+                        // 重新绑定上传按钮事件
+                        if (typeof window.uiManager.bindUploadBtn === 'function') {
+                            window.uiManager.bindUploadBtn();
+                        }
+                        
+                        // 重新绑定分类事件
+                        if (window.uiManager.categories && typeof window.uiManager.categories.bindEvents === 'function') {
+                            window.uiManager.categories.bindEvents();
+                        }
+                        
+                        // 重新绑定设置事件
+                        if (window.uiManager.settingsManager && typeof window.uiManager.settingsManager.bindSettingsEvents === 'function') {
+                            window.uiManager.settingsManager.bindSettingsEvents();
+                        }
+                        
+                        // 重新绑定管理员事件
+                        if (window.uiManager.adminManager && typeof window.uiManager.adminManager.bindAdminEvents === 'function') {
+                            window.uiManager.adminManager.bindAdminEvents();
+                        }
+                        
+                        // 重新绑定同步文档事件
+                        if (window.uiManager.docsSync && typeof window.uiManager.docsSync.bindSyncEvents === 'function') {
+                            window.uiManager.docsSync.bindSyncEvents();
+                        }
+                    }
+                }, 500); // 延迟500ms确保DOM完全加载
+                
                 console.log('数据重新加载完成');
                 
             } catch (error) {
