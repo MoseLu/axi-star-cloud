@@ -163,6 +163,7 @@ class EnvSwitcher {
                 font-size: 24px;
                 color: #fff;
                 transition: transform 0.3s ease;
+                transform-origin: center;
             }
 
             .env-switcher.expanded .env-icon {
@@ -334,34 +335,45 @@ class EnvSwitcher {
     }
 
     bindEvents() {
-        // 主按钮点击事件
-        this.container.querySelector('.env-switcher-toggle').addEventListener('click', () => {
-            this.toggle();
-        });
+        // 延迟绑定事件，确保DOM元素已创建
+        setTimeout(() => {
+            // 主按钮点击事件
+            const toggleBtn = this.container.querySelector('.env-switcher-toggle');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggle();
+                });
+            }
 
-        // 菜单项点击事件
-        this.container.querySelectorAll('.env-menu-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const action = item.dataset.action;
-                if (action === 'switch-env') {
-                    this.showEnvOptions = true;
-                    this.updateDisplay();
-                } else if (action === 'view-docs') {
-                    this.viewDocs();
+            // 菜单项点击事件
+            this.container.querySelectorAll('.env-menu-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const action = item.dataset.action;
+                    console.log('菜单项点击:', action);
+                    if (action === 'switch-env') {
+                        this.showEnvOptions = true;
+                        this.updateDisplay();
+                    } else if (action === 'view-docs') {
+                        this.viewDocs();
+                        this.hide();
+                    }
+                });
+            });
+
+            // 环境选项点击事件
+            this.container.querySelectorAll('.env-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const env = option.dataset.env;
+                    console.log('环境选项点击:', env);
+                    this.switchEnvironment(env);
+                    this.showEnvOptions = false;
                     this.hide();
-                }
+                });
             });
-        });
-
-        // 环境选项点击事件
-        this.container.querySelectorAll('.env-option').forEach(option => {
-            option.addEventListener('click', () => {
-                const env = option.dataset.env;
-                this.switchEnvironment(env);
-                this.showEnvOptions = false;
-                this.hide();
-            });
-        });
+        }, 100);
 
         // 点击外部关闭
         document.addEventListener('click', (e) => {
