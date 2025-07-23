@@ -81,5 +81,10 @@ class Core {
         this.currentUser = null;
         localStorage.removeItem('currentUser');
     }
+
+    // 更新baseUrl（用于环境切换）
+    updateBaseUrl() {
+        this.baseUrl = window.APP_CONFIG?.API_BASE_URL || '';
+    }
 } 
 window.Core = Core; 

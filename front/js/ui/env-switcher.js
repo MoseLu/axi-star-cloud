@@ -522,6 +522,11 @@ class EnvSwitcher {
                 window.apiSystem.reinit();
             }
             
+            // 更新Core实例的baseUrl
+            if (window.apiSystem && window.apiSystem.core && typeof window.apiSystem.core.updateBaseUrl === 'function') {
+                window.apiSystem.core.updateBaseUrl();
+            }
+            
             this.updateDisplay();
             this.hide(); // 切换环境后隐藏选项，变回地球图标
             
