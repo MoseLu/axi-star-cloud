@@ -80,17 +80,19 @@ class EnvSwitcher {
         switcher.className = 'env-switcher';
         switcher.innerHTML = `
             <div class="env-switcher-main">
-                <div class="env-switcher-toggle" title="环境切换">
-                    <span class="env-icon">🌍</span>
+                <div class="env-switcher-toggle" title="API环境切换">
+                    <span class="env-icon">🌐</span>
                 </div>
                 <div class="env-switcher-options">
-                    <div class="env-option" data-env="local" title="开发环境">
+                    <div class="env-option" data-env="local" title="开发环境API">
                         <span class="env-option-icon">🛠️</span>
-                        <span class="env-option-label">开发</span>
+                        <span class="env-option-label">开发API</span>
+                        <span class="env-option-url">localhost:8080</span>
                     </div>
-                    <div class="env-option" data-env="prod" title="生产环境">
+                    <div class="env-option" data-env="prod" title="生产环境API">
                         <span class="env-option-icon">🚀</span>
-                        <span class="env-option-label">生产</span>
+                        <span class="env-option-label">生产API</span>
+                        <span class="env-option-url">相对路径</span>
                     </div>
                 </div>
             </div>
@@ -168,37 +170,54 @@ class EnvSwitcher {
             }
 
             .env-option {
-                width: 50px;
-                height: 40px;
-                background: white;
-                border-radius: 25px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                justify-content: center;
+                padding: 8px 12px;
+                margin: 4px 0;
+                border-radius: 8px;
                 cursor: pointer;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                 transition: all 0.3s ease;
-                gap: 2px;
+                background: rgba(255, 255, 255, 0.95);
+                border: 1px solid rgba(0, 0, 0, 0.1);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                min-width: 80px;
             }
 
             .env-option:hover {
-                transform: scale(1.05);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                background: rgba(255, 255, 255, 1);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             }
 
             .env-option.active {
-                background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
+                border-color: #667eea;
+            }
+
+            .env-option.active .env-option-url {
+                color: rgba(255, 255, 255, 0.8);
             }
 
             .env-option-icon {
-                font-size: 14px;
+                font-size: 16px;
+                margin-bottom: 4px;
             }
 
             .env-option-label {
                 font-size: 10px;
-                font-weight: 500;
+                font-weight: 600;
+                color: #333;
+                text-align: center;
+                line-height: 1;
+            }
+
+            .env-option-url {
+                font-size: 8px;
+                color: #6c757d;
+                margin-top: 2px;
+                text-align: center;
                 line-height: 1;
             }
 
@@ -250,6 +269,10 @@ class EnvSwitcher {
                 .env-option-label {
                     font-size: 9px;
                 }
+
+                .env-option-url {
+                    font-size: 7px;
+                }
             }
 
             /* 暗色主题适配 */
@@ -261,6 +284,43 @@ class EnvSwitcher {
                 
                 .env-option:hover {
                     background: #4a5568;
+                }
+            }
+
+            /* 移动端适配 */
+            @media (max-width: 768px) {
+                .env-switcher {
+                    bottom: 15px;
+                    right: 15px;
+                }
+
+                .env-switcher-toggle {
+                    width: 45px;
+                    height: 45px;
+                }
+
+                .env-switcher-options {
+                    bottom: 55px;
+                    right: 0;
+                    min-width: 70px;
+                }
+
+                .env-option {
+                    padding: 6px 8px;
+                    margin: 3px 0;
+                    min-width: 60px;
+                }
+
+                .env-option-icon {
+                    font-size: 14px;
+                }
+
+                .env-option-label {
+                    font-size: 9px;
+                }
+
+                .env-option-url {
+                    font-size: 7px;
                 }
             }
         `;
@@ -425,4 +485,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // 导出类供外部使用
-window.EnvSwitcher = EnvSwitcher; 
+window.EnvSwitcher = EnvSwitcher;
