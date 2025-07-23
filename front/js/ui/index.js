@@ -2034,19 +2034,28 @@ class UIManager {
     // 设置管理相关
     // 存储空间渲染
     updateStorageDisplay(storageInfo) {
-
+        console.log('更新存储显示，原始数据:', storageInfo);
         
         if (!storageInfo) {
-    
+            console.warn('存储信息为空');
             return;
         }
         
+        // 处理嵌套的存储数据结构
+        const storageData = storageInfo.storage || storageInfo;
+        
         // 计算真实的使用率和格式化数据
-        const used = storageInfo.used_space || storageInfo.used_bytes || 0;
-        const total = storageInfo.total_space || storageInfo.limit_bytes || 1073741824; // 默认1GB
+        const used = storageData.used_space || storageData.used_bytes || 0;
+        const total = storageData.total_space || storageData.limit_bytes || 1073741824; // 默认1GB
         const percentage = total > 0 ? (used / total) * 100 : 0;
         
-
+        console.log('处理后的存储数据:', {
+            used,
+            total,
+            percentage,
+            usedFormatted: this.formatStorageSize(used),
+            totalFormatted: this.formatStorageSize(total)
+        });
 
         // 格式化存储大小
         const formatSize = (bytes) => {
@@ -2059,56 +2068,52 @@ class UIManager {
         
         const usedFormatted = formatSize(used);
         const totalFormatted = formatSize(total);
-        
-
 
         // 更新存储空间显示
         const totalStorageElement = document.getElementById('total-storage');
         if (totalStorageElement) {
             totalStorageElement.textContent = totalFormatted;
-    
+            console.log('更新总存储空间显示:', totalFormatted);
         } else {
-    
+            console.warn('未找到总存储空间元素');
         }
         
         const usedStorageElement = document.getElementById('used-storage');
         if (usedStorageElement) {
             usedStorageElement.textContent = usedFormatted;
-    
+            console.log('更新已使用存储空间显示:', usedFormatted);
         } else {
-    
+            console.warn('未找到已使用存储空间元素');
         }
         
         const usagePercentageElement = document.getElementById('usage-percentage');
         if (usagePercentageElement) {
             usagePercentageElement.textContent = `${percentage.toFixed(2)}%`;
-    
+            console.log('更新使用百分比显示:', `${percentage.toFixed(2)}%`);
         } else {
-    
+            console.warn('未找到使用百分比元素');
         }
         
         // 更新进度条
         const progressBarElement = document.getElementById('storage-progress-bar');
         if (progressBarElement) {
             progressBarElement.style.width = `${percentage}%`;
-    
+            console.log('更新进度条宽度:', `${percentage}%`);
         } else {
-    
+            console.warn('未找到进度条元素');
         }
         
         // 更新进度文本
         const progressTextElement = document.getElementById('storage-progress-text');
         if (progressTextElement) {
             progressTextElement.textContent = `${percentage.toFixed(2)}% 已使用`;
-    
+            console.log('更新进度文本:', `${percentage.toFixed(2)}% 已使用`);
         } else {
-    
+            console.warn('未找到进度文本元素');
         }
         
         // 更新存储状态
         this.updateStorageStatus(percentage);
-        
-
     }
 
     /**
