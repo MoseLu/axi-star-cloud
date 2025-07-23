@@ -453,29 +453,46 @@ class EnvSwitcher {
 
 // 自动初始化环境切换器
 document.addEventListener('DOMContentLoaded', () => {
-    // 延迟初始化，确保用户信息已加载
+    // 优化初始化逻辑，减少延迟
     const initEnvSwitcher = (retryCount = 0) => {
         console.log(`🔍 检查环境切换器初始化条件... (尝试 ${retryCount + 1})`);
         
         // 检查环境管理器是否存在
         if (!window.ENV_MANAGER) {
             console.log('❌ ENV_MANAGER 不存在');
-            if (retryCount < 5) {
-                setTimeout(() => initEnvSwitcher(retryCount + 1), 1000);
+            if (retryCount < 3) {
+                setTimeout(() => initEnvSwitcher(retryCount + 1), 500);
             }
             return;
         }
         
-        // 检查是否为管理员
-        const user = window.authManager?.getCurrentUser();
-        const isAdmin = user && user.role === 'admin';
+        // 智能检测用户信息：优先使用authManager，如果失败则直接检查localStorage
+        let user = window.authManager?.getCurrentUser();
+        let isAdmin = false;
+        
+        // 如果authManager获取失败，直接检查localStorage
+        if (!user) {
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                try {
+                    user = JSON.parse(currentUser);
+                    isAdmin = user.isAdmin === true;
+                    console.log('📦 从localStorage获取用户信息:', user);
+                } catch (e) {
+                    console.log('❌ 解析localStorage用户信息失败:', e);
+                }
+            }
+        } else {
+            isAdmin = user && user.role === 'admin';
+        }
+        
         console.log('👤 当前用户:', user);
         console.log('🔑 管理员权限:', isAdmin);
         
-        // 如果用户信息还没加载完成，重试
-        if (!user && retryCount < 15) {
+        // 如果用户信息还没加载完成，重试（减少重试次数和间隔）
+        if (!user && retryCount < 3) {
             console.log('⏳ 用户信息未加载，等待重试...');
-            setTimeout(() => initEnvSwitcher(retryCount + 1), 1000);
+            setTimeout(() => initEnvSwitcher(retryCount + 1), 300);
             return;
         }
         
@@ -488,8 +505,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    // 首次尝试，延迟5秒
-    setTimeout(() => initEnvSwitcher(), 5000);
+    // 首次尝试，延迟500毫秒（进一步减少延迟）
+    setTimeout(() => initEnvSwitcher(), 500);
 });
 
 // 导出类供外部使用
