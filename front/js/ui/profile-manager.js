@@ -972,17 +972,16 @@ class UIProfileManager {
             return '刚刚';
         } else if (diffInMinutes < 60) {
             return `${diffInMinutes}分钟前`;
-        } else if (diffInMinutes < 1440) { // 24小时
-            const hours = Math.floor(diffInMinutes / 60);
-            return `${hours}小时前`;
         } else {
-        return date.toLocaleString('zh-CN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+            // 超过1小时显示完整时间格式
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
         }
     }
 
