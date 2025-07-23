@@ -39,16 +39,27 @@ window.ENV_MANAGER = (function() {
     function detectEnvironment() {
         const hostname = window.location.hostname;
         const port = window.location.port;
+        const protocol = window.location.protocol;
+        
+        console.log('🔍 环境检测信息:');
+        console.log('  - hostname:', hostname);
+        console.log('  - port:', port);
+        console.log('  - protocol:', protocol);
+        console.log('  - full URL:', window.location.href);
         
         // 开发环境检测
         if (hostname === 'localhost' || 
             hostname === '127.0.0.1' ||
             hostname.startsWith('192.168.') ||
-            (hostname === 'localhost' && port === '8080')) {
+            hostname.startsWith('10.') ||
+            (hostname === 'localhost' && (port === '8080' || port === '')) ||
+            protocol === 'file:') {
+            console.log('✅ 检测到开发环境');
             return 'local';
         }
         
         // 生产环境（默认）
+        console.log('🚀 检测到生产环境');
         return 'prod';
     }
 
@@ -70,12 +81,22 @@ window.ENV_MANAGER = (function() {
 
     // 初始化环境配置
     function initEnvironment() {
+        console.log('🔧 开始初始化环境配置...');
+        
         // 优先级：URL参数 > localStorage > 自动检测
-        let env = getEnvFromUrl() || getEnvFromStorage() || detectEnvironment();
+        const urlEnv = getEnvFromUrl();
+        const storageEnv = getEnvFromStorage();
+        const detectedEnv = detectEnvironment();
+        
+        console.log('  - URL参数环境:', urlEnv);
+        console.log('  - localStorage环境:', storageEnv);
+        console.log('  - 自动检测环境:', detectedEnv);
+        
+        let env = urlEnv || storageEnv || detectedEnv;
         
         // 验证环境是否有效
         if (!ENVIRONMENTS[env]) {
-            console.warn(`无效的环境配置: ${env}，使用默认环境: local`);
+            console.warn(`❌ 无效的环境配置: ${env}，使用默认环境: local`);
             env = 'local';
         }
         
