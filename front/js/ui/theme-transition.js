@@ -21,6 +21,10 @@ class ThemeTransitionManager {
         this.currentTheme = localStorage.getItem('theme') || 'dark';
         // 初始化主题切换按钮
         this.initThemeToggle();
+        // 确保按钮状态正确
+        setTimeout(() => {
+            this.updateButtonState();
+        }, 200);
     }
 
     createOverlay() {
@@ -103,8 +107,24 @@ class ThemeTransitionManager {
         // 添加当前主题类
         btn.classList.add(this.currentTheme);
         
+        // 确保图标正确显示
+        const sunIcon = btn.querySelector('.sun-icon');
+        const moonIcon = btn.querySelector('.moon-icon');
+        
+        if (sunIcon && moonIcon) {
+            if (this.currentTheme === 'light') {
+                sunIcon.style.opacity = '0';
+                moonIcon.style.opacity = '1';
+            } else {
+                sunIcon.style.opacity = '1';
+                moonIcon.style.opacity = '0';
+            }
+        }
+        
         // 更新ARIA属性
         btn.setAttribute('aria-label', this.currentTheme === 'light' ? '切换到暗色主题' : '切换到亮色主题');
+        
+        console.log(`按钮状态更新为: ${this.currentTheme}`);
     }
 
     async toggleTheme() {

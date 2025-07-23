@@ -77,6 +77,22 @@
     display: block !important;
 }
 
+/* 暗色主题下的按钮样式（默认） */
+.theme-toggle-btn.dark {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.theme-toggle-btn.dark .sun-icon {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(0deg);
+}
+
+.theme-toggle-btn.dark .moon-icon {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-90deg);
+}
+
 /* 亮色主题下的按钮样式 */
 .theme-toggle-btn.light {
     background: rgba(0, 0, 0, 0.1);
