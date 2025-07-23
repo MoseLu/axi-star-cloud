@@ -496,7 +496,7 @@ class EnvSwitcher {
             }
             
             this.updateDisplay();
-            this.hide();
+            this.hide(); // 切换环境后隐藏选项，变回地球图标
             
             // 显示切换提示
             this.showNotification(env);
@@ -510,13 +510,8 @@ class EnvSwitcher {
         // 延迟一点时间确保环境切换完成
         setTimeout(() => {
             // 重新加载文件列表
-            if (window.uiManager && window.uiManager.fileRenderer) {
-                window.uiManager.fileRenderer.loadFiles();
-            }
-            
-            // 重新加载文件夹列表
-            if (window.uiManager && window.uiManager.folderManager) {
-                window.uiManager.folderManager.loadFolders();
+            if (window.uiManager && typeof window.uiManager.loadFiles === 'function') {
+                window.uiManager.loadFiles();
             }
             
             // 重新加载URL文件列表
