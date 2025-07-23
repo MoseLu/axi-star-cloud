@@ -88,8 +88,14 @@ func (r *FolderRepository) UpdateFolder(folderID int, userID string, name, categ
 
 // DeleteFolder 删除文件夹
 func (r *FolderRepository) DeleteFolder(folderID int, userID string) error {
-	// 首先删除文件夹中的所有文件
+	// 首先删除文件夹中的所有普通文件
 	_, err := r.db.Exec("DELETE FROM files WHERE folder_id = ? AND user_id = ?", folderID, userID)
+	if err != nil {
+		return err
+	}
+
+	// 删除文件夹中的所有URL文件
+	_, err = r.db.Exec("DELETE FROM url_files WHERE folder_id = ? AND user_id = ?", folderID, userID)
 	if err != nil {
 		return err
 	}
@@ -128,10 +134,23 @@ func (r *FolderRepository) CheckFolderNameExists(userID, name, category string, 
 	return exists, err
 }
 
-// GetFolderFileCount 获取文件夹中的文件数量
+// GetFolderFileCount 获取文件夹中的文件数量（包括普通文件和URL文件）
 func (r *FolderRepository) GetFolderFileCount(folderID int, userID string) (int, error) {
-	var count int
-	query := `SELECT COUNT(*) FROM files WHERE folder_id = ? AND user_id = ?`
-	err := r.db.QueryRow(query, folderID, userID).Scan(&count)
-	return count, err
+	var filesCount, urlFilesCount int
+
+	// 统计普通文件数量
+	filesQuery := `SELECT COUNT(*) FROM files WHERE folder_id = ? AND user_id = ?`
+	err := r.db.QueryRow(filesQuery, folderID, userID).Scan(&filesCount)
+	if err != nil {
+		return 0, err
+	}
+
+	// 统计URL文件数量
+	urlFilesQuery := `SELECT COUNT(*) FROM url_files WHERE folder_id = ? AND user_id = ?`
+	err = r.db.QueryRow(urlFilesQuery, folderID, userID).Scan(&urlFilesCount)
+	if err != nil {
+		return filesCount, nil // 如果URL文件统计失败，至少返回普通文件数量
+	}
+
+	return filesCount + urlFilesCount, nil
 }
