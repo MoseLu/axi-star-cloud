@@ -223,7 +223,7 @@ class EnvSwitcher {
                 position: absolute;
                 bottom: 80px;
                 right: 0;
-                background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+                background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
                 border-radius: 16px;
                 padding: 16px;
                 box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
@@ -252,7 +252,7 @@ class EnvSwitcher {
                 color: #ffffff;
                 margin: 8px 0;
                 border: 2px solid rgba(255, 255, 255, 0.3);
-                background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.2) 100%);
+                background: linear-gradient(135deg, rgba(96, 165, 250, 0.3) 0%, rgba(59, 130, 246, 0.2) 100%);
                 position: relative;
                 overflow: hidden;
             }
