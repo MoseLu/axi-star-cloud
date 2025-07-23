@@ -12,11 +12,25 @@ class EnvSwitcher {
     }
 
     init() {
-        if (this.isAdmin() || window.ENV_MANAGER.config.debug) {
-            this.createSwitcher();
-            this.addStyles();
-            this.bindEvents();
+        // 检查是否为管理员
+        if (!this.isAdmin()) {
+            return;
         }
+        
+        // 创建环境切换器
+        this.createSwitcher();
+        
+        // 添加样式
+        this.addStyles();
+        
+        // 绑定事件
+        this.bindEvents();
+        
+        // 初始化显示
+        this.updateDisplay();
+        
+        // 添加404错误处理
+        this.handle404Error();
     }
 
     isAdmin() {
@@ -509,9 +523,13 @@ class EnvSwitcher {
     reloadData() {
         // 延迟一点时间确保环境切换完成
         setTimeout(() => {
-            // 方法1：尝试重新加载文件列表
+            // 方法1：尝试重新加载文件列表，添加错误处理
             if (window.uiManager && typeof window.uiManager.loadFiles === 'function') {
-                window.uiManager.loadFiles();
+                try {
+                    window.uiManager.loadFiles();
+                } catch (error) {
+                    console.warn('环境切换时重新加载文件失败:', error);
+                }
             }
             
             // 方法2：触发全局重新加载事件
@@ -519,20 +537,54 @@ class EnvSwitcher {
                 detail: { environment: window.ENV_MANAGER.currentEnv }
             }));
             
-            // 方法3：如果上面的方法不够，强制刷新页面
+            // 方法3：直接刷新页面确保环境切换生效，但添加错误处理
             setTimeout(() => {
-                // 检查是否真的需要刷新
-                const currentEnv = window.ENV_MANAGER.currentEnv;
-                const apiBaseUrl = window.ENV_MANAGER.config[currentEnv]?.apiBaseUrl;
-                
-                // 如果API地址已经改变，但数据没有更新，则刷新页面
-                if (apiBaseUrl && window.location.href.includes('localhost') && currentEnv === 'prod') {
-                    window.location.reload();
-                } else if (apiBaseUrl && window.location.href.includes('redamancy.com.cn') && currentEnv === 'local') {
+                try {
+                    // 在刷新前显示提示
+                    if (window.notify) {
+                        window.notify.info('正在切换到新环境，请稍候...', {
+                            duration: 2000,
+                            position: 'top-center'
+                        });
+                    }
+                    
+                    // 延迟刷新，给用户时间看到提示
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                } catch (error) {
+                    console.warn('环境切换刷新失败:', error);
+                    // 备用方案：手动刷新
                     window.location.reload();
                 }
-            }, 1000);
+            }, 800);
         }, 500);
+    }
+
+    // 添加404错误处理
+    handle404Error() {
+        // 监听404错误
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            return originalFetch.apply(this, args).then(response => {
+                if (response.status === 404) {
+                    // 如果是环境切换相关的请求，显示友好提示
+                    const url = args[0];
+                    if (typeof url === 'string' && (url.includes('/api/') || url.includes('/uploads/'))) {
+                        console.warn(`环境切换时发现404错误: ${url}`);
+                        
+                        // 显示用户友好的提示
+                        if (window.notify) {
+                            window.notify.warning('新环境中部分文件不存在，这是正常现象', {
+                                duration: 4000,
+                                position: 'top-center'
+                            });
+                        }
+                    }
+                }
+                return response;
+            });
+        };
     }
 
     showNotification(env) {
