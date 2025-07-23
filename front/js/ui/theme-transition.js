@@ -182,11 +182,8 @@ class ThemeTransitionManager {
     }
 
     switchTheme(newTheme) {
-        // 更新当前主题
-        this.currentTheme = newTheme;
-        
-        // 保存到本地存储
-        localStorage.setItem('theme', newTheme);
+        // 实际切换页面主题
+        this.switchToTheme(newTheme);
         
         // 更新按钮状态
         this.updateButtonState();
@@ -227,24 +224,46 @@ class ThemeTransitionManager {
         // 触发事件
         document.dispatchEvent(event);
         
-        // 调用现有的主题管理器
-        if (window.themeManager && typeof window.themeManager.switchTheme === 'function') {
-            window.themeManager.switchTheme(newTheme);
-        }
+        console.log('主题切换事件已触发:', newTheme);
     }
 
     // 公共方法：手动切换主题
     switchToTheme(theme) {
-        if (this.isTransitioning) return;
+        console.log(`切换主题到: ${theme}`);
         
-        this.isTransitioning = true;
+        // 移除旧主题类
+        document.documentElement.classList.remove('light', 'dark');
         
-        this.startTransition(theme).then(() => {
-            this.switchTheme(theme);
-            return this.endTransition();
-        }).then(() => {
-            this.isTransitioning = false;
-        });
+        // 添加新主题类
+        document.documentElement.classList.add(theme);
+        
+        // 更新body类
+        document.body.className = document.body.className.replace(/theme-\w+/g, '');
+        document.body.classList.add(`theme-${theme}`);
+        
+        // 更新背景色类
+        if (theme === 'dark') {
+            document.body.classList.remove('bg-white', 'text-gray-900');
+            document.body.classList.add('bg-dark', 'text-white');
+        } else {
+            document.body.classList.remove('bg-dark', 'text-white');
+            document.body.classList.add('bg-white', 'text-gray-900');
+        }
+        
+        // 更新当前主题
+        this.currentTheme = theme;
+        
+        // 保存到本地存储
+        localStorage.setItem('theme', theme);
+        
+        // 触发主题管理器的CSS重新加载
+        if (window.themeManager && typeof window.themeManager.applyTheme === 'function') {
+            window.themeManager.applyTheme(theme);
+        }
+        
+        console.log(`主题切换完成: ${theme}`);
+        console.log('documentElement classes:', document.documentElement.classList.toString());
+        console.log('body classes:', document.body.classList.toString());
     }
 
     // 销毁方法
