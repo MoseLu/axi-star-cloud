@@ -405,7 +405,8 @@ class EnvSwitcher {
 
     hide() {
         this.isExpanded = false;
-        this.showEnvOptions = false;
+        // 不要重置showEnvOptions，让环境选项保持显示状态
+        // this.showEnvOptions = false;
         this.updateDisplay();
     }
 
@@ -491,6 +492,12 @@ class EnvSwitcher {
         const switcher = this.container;
         const currentEnv = window.ENV_MANAGER.currentEnv;
         
+        console.log('更新显示状态:', {
+            isExpanded: this.isExpanded,
+            showEnvOptions: this.showEnvOptions,
+            currentEnv: currentEnv
+        });
+        
         // 更新展开状态
         if (this.isExpanded) {
             switcher.classList.add('expanded');
@@ -501,8 +508,10 @@ class EnvSwitcher {
         // 更新环境选项显示状态
         if (this.showEnvOptions) {
             switcher.classList.add('show-env-options');
+            console.log('添加show-env-options类');
         } else {
             switcher.classList.remove('show-env-options');
+            console.log('移除show-env-options类');
         }
         
         // 更新选项状态
@@ -513,6 +522,13 @@ class EnvSwitcher {
             } else {
                 option.classList.remove('active');
             }
+        });
+        
+        // 调试：检查DOM状态
+        console.log('DOM状态:', {
+            hasExpandedClass: switcher.classList.contains('expanded'),
+            hasShowEnvOptionsClass: switcher.classList.contains('show-env-options'),
+            envOptionsVisible: switcher.querySelector('.env-switcher-options').style.display !== 'none'
         });
     }
 }
