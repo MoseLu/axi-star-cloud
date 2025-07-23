@@ -134,6 +134,8 @@ class ThemeTransitionManager {
 
     async startTransition(newTheme) {
         return new Promise((resolve) => {
+            console.log('开始扩散动画');
+            
             // 获取视口尺寸
             const viewportWidth = window.innerWidth;
             const viewportHeight = window.innerHeight;
@@ -141,10 +143,14 @@ class ThemeTransitionManager {
             // 计算最大半径（从右上角到左下角的距离）
             const maxRadius = Math.sqrt(viewportWidth * viewportWidth + viewportHeight * viewportHeight);
             
+            console.log(`视口尺寸: ${viewportWidth}x${viewportHeight}, 最大半径: ${maxRadius}`);
+            
             // 设置覆盖层样式
             this.overlay.className = `theme-transition-overlay ${newTheme}`;
             this.overlay.style.background = newTheme === 'light' ? '#FFFFFF' : '#0F172A';
             this.overlay.style.opacity = '1';
+            
+            console.log('覆盖层样式设置完成');
             
             // 开始动画
             this.startTime = performance.now();
@@ -170,6 +176,7 @@ class ThemeTransitionManager {
             if (progress < 1) {
                 this.animationId = requestAnimationFrame(animate);
             } else {
+                console.log('扩散动画完成');
                 resolve();
             }
         };
@@ -182,8 +189,11 @@ class ThemeTransitionManager {
     }
 
     switchTheme(newTheme) {
-        // 实际切换页面主题
-        this.switchToTheme(newTheme);
+        // 更新当前主题
+        this.currentTheme = newTheme;
+        
+        // 保存到本地存储
+        localStorage.setItem('theme', newTheme);
         
         // 更新按钮状态
         this.updateButtonState();
@@ -199,6 +209,9 @@ class ThemeTransitionManager {
                 cancelAnimationFrame(this.animationId);
                 this.animationId = null;
             }
+            
+            // 在动画结束后真正切换主题
+            this.switchToTheme(this.currentTheme);
             
             // 重置覆盖层
             setTimeout(() => {
