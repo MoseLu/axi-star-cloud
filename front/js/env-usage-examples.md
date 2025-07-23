@@ -2,7 +2,7 @@
 
 ## 🌍 概述
 
-星际云盘项目实现了类似EPS（Environment Configuration System）的动态环境配置系统，支持多种环境切换和配置管理。
+星际云盘项目实现了类似EPS（Environment Configuration System）的动态环境配置系统，支持开发和生产环境的快速切换。
 
 ## 🚀 快速开始
 
@@ -12,24 +12,18 @@
 
 ```javascript
 // 自动检测环境
-console.log(window.ENV_MANAGER.currentEnv); // 'local', 'test', 'baota', 'prod'
+console.log(window.ENV_MANAGER.currentEnv); // 'local' 或 'prod'
 console.log(window.ENV_MANAGER.config.name); // 环境名称
 ```
 
 ### 2. 手动切换环境
 
 ```javascript
-// 切换到本地环境
+// 切换到开发环境
 window.ENV_UTILS.switchToLocal();
-
-// 切换到测试环境
-window.ENV_UTILS.switchToTest();
 
 // 切换到生产环境
 window.ENV_UTILS.switchToProd();
-
-// 切换到自定义环境
-window.ENV_UTILS.switchToCustom('https://your-api.com');
 ```
 
 ### 3. 使用环境配置
@@ -37,7 +31,7 @@ window.ENV_UTILS.switchToCustom('https://your-api.com');
 ```javascript
 // 构建API URL
 const apiUrl = window.ENV_MANAGER.buildApiUrl('/api/files');
-console.log(apiUrl); // http://localhost:8080/api/files
+console.log(apiUrl); // http://localhost:8080/api/files (开发环境)
 
 // 构建资源URL
 const resourceUrl = window.ENV_MANAGER.buildResourceUrl('/static/css/style.css');
@@ -55,11 +49,8 @@ const fileUrl = window.ENV_MANAGER.buildFileUrl('documents/report.pdf');
 
 | 环境 | 名称 | API地址 | 调试模式 | 特性 |
 |------|------|---------|----------|------|
-| local | 本地开发 | http://localhost:8080 | ✅ | 热重载、详细日志 |
-| test | 测试环境 | https://test-api.redamancy.com.cn | ✅ | 详细日志 |
-| baota | 宝塔部署 | 相对路径 | ❌ | 生产优化 |
-| prod | 生产环境 | https://api.redamancy.com.cn | ❌ | 生产优化 |
-| custom | 自定义环境 | 用户定义 | ❌ | 可配置 |
+| local | 开发环境 | http://localhost:8080 | ✅ | 热重载、详细日志 |
+| prod | 生产环境 | 相对路径 | ❌ | 生产优化 |
 
 ### 环境特性
 
@@ -81,9 +72,8 @@ if (window.ENV_MANAGER.isFeatureEnabled('detailedLogs')) {
 在URL中添加`env`参数：
 
 ```
-http://localhost:8080/?env=test
+http://localhost:8080/?env=local
 http://localhost:8080/?env=prod
-http://localhost:8080/?env=custom
 ```
 
 ### 2. 控制台命令切换
@@ -96,19 +86,16 @@ window.ENV_UTILS.showEnvInfo();
 
 // 快速切换环境
 window.ENV_UTILS.switchToLocal();
-window.ENV_UTILS.switchToTest();
 window.ENV_UTILS.switchToProd();
-window.ENV_UTILS.switchToCustom('https://your-api.com');
 ```
 
 ### 3. 可视化界面切换
 
-在开发模式下，页面右上角会显示环境切换器：
+在开发模式下，页面右下角会显示环境切换器（仅管理员可见）：
 
-- 点击环境切换器打开面板
-- 选择要切换的环境
-- 输入自定义API地址
-- 查看当前环境信息
+- 点击悬浮按钮打开选项
+- 选择开发环境或生产环境
+- 自动显示切换提示
 
 ## 🔧 高级用法
 
@@ -139,15 +126,14 @@ const environments = window.ENV_MANAGER.getAvailableEnvironments();
 console.log(environments);
 ```
 
-### 3. 自定义环境配置
+### 3. 检查当前环境
 
 ```javascript
-// 创建自定义环境
-window.ENV_MANAGER.switchEnvironment('custom', 'https://my-api.com');
-
 // 检查当前环境
-if (window.ENV_MANAGER.currentEnv === 'custom') {
-    console.log('当前使用自定义环境');
+if (window.ENV_MANAGER.currentEnv === 'local') {
+    console.log('当前使用开发环境');
+} else {
+    console.log('当前使用生产环境');
 }
 ```
 
@@ -155,32 +141,31 @@ if (window.ENV_MANAGER.currentEnv === 'custom') {
 
 环境切换器在移动端会自动调整：
 
-- 位置调整到右上角
-- 面板宽度适配小屏幕
+- 位置调整到右下角
+- 按钮大小适配小屏幕
 - 触摸友好的交互
 
 ## 🔒 安全考虑
 
-### 生产环境保护
+### 管理员权限
+
+环境切换器只有管理员用户可见：
 
 ```javascript
-// 在生产环境中隐藏环境切换器
-if (window.ENV_MANAGER.currentEnv === 'prod') {
-    // 隐藏调试功能
-    console.log = () => {};
+// 检查是否为管理员
+function isAdmin() {
+    const user = window.authManager?.getCurrentUser();
+    return user && user.role === 'admin';
 }
 ```
 
-### 环境验证
+### 生产环境保护
 
 ```javascript
-// 验证环境配置
-function validateEnvironment() {
-    const config = window.ENV_MANAGER.config;
-    
-    if (!config.apiBaseUrl && window.ENV_MANAGER.currentEnv !== 'baota') {
-        console.warn('警告: API地址未配置');
-    }
+// 在生产环境中隐藏调试功能
+if (window.ENV_MANAGER.currentEnv === 'prod') {
+    // 隐藏调试功能
+    console.log = () => {};
 }
 ```
 
@@ -194,7 +179,7 @@ window.ENV_UTILS.showEnvInfo();
 
 // 输出格式：
 // 🌍 环境信息
-// 环境: 本地开发
+// 环境: 开发环境
 // API地址: http://localhost:8080
 // 调试模式: true
 // 功能特性: {hotReload: true, detailedLogs: true, mockData: false}
@@ -225,8 +210,6 @@ function getCacheStrategy() {
     switch (env) {
         case 'local':
             return 'no-cache'; // 开发环境不缓存
-        case 'test':
-            return 'max-age=300'; // 测试环境5分钟缓存
         case 'prod':
             return 'max-age=3600'; // 生产环境1小时缓存
         default:
@@ -242,8 +225,8 @@ function getCacheStrategy() {
 function handleApiError(error) {
     const env = window.ENV_MANAGER.currentEnv;
     
-    if (env === 'local' || env === 'test') {
-        // 开发/测试环境显示详细错误
+    if (env === 'local') {
+        // 开发环境显示详细错误
         console.error('API错误详情:', error);
     } else {
         // 生产环境显示用户友好错误
@@ -286,11 +269,8 @@ console.log(window.ENV_MANAGER.config.debug);
 
 ### 1. 环境命名规范
 
-- `local`: 本地开发环境
-- `test`: 测试环境
-- `staging`: 预发布环境
+- `local`: 开发环境
 - `prod`: 生产环境
-- `custom`: 自定义环境
 
 ### 2. 配置管理
 
@@ -327,7 +307,7 @@ try {
 
 - ✅ 自动环境检测
 - ✅ 多种切换方式
-- ✅ 可视化界面
+- ✅ 可视化界面（管理员专用）
 - ✅ 向后兼容
 - ✅ 移动端支持
 - ✅ 安全保护

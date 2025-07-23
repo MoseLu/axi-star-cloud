@@ -1,18 +1,31 @@
 /**
  * 环境切换器UI组件
- * 提供可视化的环境切换界面
+ * 右下角悬浮按钮设计，只包含开发和生产环境
+ * 只有管理员可见
  */
 
 class EnvSwitcher {
     constructor() {
         this.isVisible = false;
+        this.isExpanded = false;
         this.init();
     }
 
     init() {
+        // 检查是否为管理员
+        if (!this.isAdmin()) {
+            return;
+        }
+        
         this.createSwitcher();
         this.bindEvents();
         this.updateDisplay();
+    }
+
+    isAdmin() {
+        // 检查是否为管理员用户
+        const user = window.authManager?.getCurrentUser();
+        return user && user.role === 'admin';
     }
 
     createSwitcher() {
@@ -21,35 +34,18 @@ class EnvSwitcher {
         switcher.id = 'env-switcher';
         switcher.className = 'env-switcher';
         switcher.innerHTML = `
-            <div class="env-switcher-toggle">
-                <span class="env-icon">🌍</span>
-                <span class="env-name">环境</span>
-                <span class="env-arrow">▼</span>
-            </div>
-            <div class="env-switcher-panel">
-                <div class="env-header">
-                    <h4>环境切换</h4>
-                    <button class="env-close">×</button>
+            <div class="env-switcher-main">
+                <div class="env-switcher-toggle" title="环境切换">
+                    <span class="env-icon">🌍</span>
                 </div>
-                <div class="env-list">
-                    <!-- 环境列表将通过JavaScript动态生成 -->
-                </div>
-                <div class="env-custom">
-                    <input type="text" placeholder="输入自定义API地址" class="env-custom-input">
-                    <button class="env-custom-btn">应用</button>
-                </div>
-                <div class="env-info">
-                    <div class="env-info-item">
-                        <span class="env-label">当前环境:</span>
-                        <span class="env-value" id="current-env-name">-</span>
+                <div class="env-switcher-options">
+                    <div class="env-option" data-env="local" title="开发环境">
+                        <span class="env-option-icon">🛠️</span>
+                        <span class="env-option-label">开发</span>
                     </div>
-                    <div class="env-info-item">
-                        <span class="env-label">API地址:</span>
-                        <span class="env-value" id="current-env-api">-</span>
-                    </div>
-                    <div class="env-info-item">
-                        <span class="env-label">调试模式:</span>
-                        <span class="env-value" id="current-env-debug">-</span>
+                    <div class="env-option" data-env="prod" title="生产环境">
+                        <span class="env-option-icon">🚀</span>
+                        <span class="env-option-label">生产</span>
                     </div>
                 </div>
             </div>
@@ -68,195 +64,158 @@ class EnvSwitcher {
         style.textContent = `
             .env-switcher {
                 position: fixed;
-                top: 20px;
+                bottom: 20px;
                 right: 20px;
                 z-index: 9999;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             }
 
+            .env-switcher-main {
+                position: relative;
+            }
+
             .env-switcher-toggle {
+                width: 50px;
+                height: 50px;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 8px 12px;
-                border-radius: 20px;
-                cursor: pointer;
+                border-radius: 50%;
                 display: flex;
                 align-items: center;
-                gap: 6px;
-                font-size: 12px;
-                font-weight: 500;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                justify-content: center;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                 transition: all 0.3s ease;
+                position: relative;
+                z-index: 2;
             }
 
             .env-switcher-toggle:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                transform: scale(1.1);
+                box-shadow: 0 6px 20px rgba(0,0,0,0.2);
             }
 
-            .env-switcher-panel {
+            .env-switcher-toggle:active {
+                transform: scale(0.95);
+            }
+
+            .env-icon {
+                font-size: 20px;
+                color: white;
+            }
+
+            .env-switcher-options {
                 position: absolute;
-                top: 100%;
+                bottom: 60px;
                 right: 0;
-                background: white;
-                border-radius: 8px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-                min-width: 280px;
-                margin-top: 8px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
                 opacity: 0;
                 visibility: hidden;
-                transform: translateY(-10px);
+                transform: translateY(10px);
                 transition: all 0.3s ease;
             }
 
-            .env-switcher.show .env-switcher-panel {
+            .env-switcher.expanded .env-switcher-options {
                 opacity: 1;
                 visibility: visible;
                 transform: translateY(0);
             }
 
-            .env-header {
+            .env-option {
+                width: 50px;
+                height: 40px;
+                background: white;
+                border-radius: 25px;
                 display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 12px 16px;
-                border-bottom: 1px solid #eee;
-            }
-
-            .env-header h4 {
-                margin: 0;
-                font-size: 14px;
-                color: #333;
-            }
-
-            .env-close {
-                background: none;
-                border: none;
-                font-size: 18px;
-                cursor: pointer;
-                color: #999;
-                padding: 0;
-                width: 20px;
-                height: 20px;
-                display: flex;
+                flex-direction: column;
                 align-items: center;
                 justify-content: center;
-            }
-
-            .env-close:hover {
-                color: #666;
-            }
-
-            .env-list {
-                padding: 8px 0;
-            }
-
-            .env-item {
-                padding: 8px 16px;
                 cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                transition: background-color 0.2s ease;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: all 0.3s ease;
+                gap: 2px;
             }
 
-            .env-item:hover {
-                background-color: #f5f5f5;
+            .env-option:hover {
+                transform: scale(1.05);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             }
 
-            .env-item.active {
-                background-color: #e3f2fd;
-                color: #1976d2;
+            .env-option.active {
+                background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+                color: white;
             }
 
-            .env-item-icon {
+            .env-option-icon {
                 font-size: 14px;
             }
 
-            .env-item-name {
-                flex: 1;
-                font-size: 13px;
-            }
-
-            .env-item-status {
+            .env-option-label {
                 font-size: 10px;
-                padding: 2px 6px;
-                border-radius: 10px;
-                background: #e8f5e8;
-                color: #2e7d32;
-            }
-
-            .env-custom {
-                padding: 12px 16px;
-                border-top: 1px solid #eee;
-                display: flex;
-                gap: 8px;
-            }
-
-            .env-custom-input {
-                flex: 1;
-                padding: 6px 8px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                font-size: 12px;
-            }
-
-            .env-custom-btn {
-                padding: 6px 12px;
-                background: #1976d2;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 12px;
-            }
-
-            .env-custom-btn:hover {
-                background: #1565c0;
-            }
-
-            .env-info {
-                padding: 12px 16px;
-                background: #f8f9fa;
-                border-top: 1px solid #eee;
-            }
-
-            .env-info-item {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 4px;
-                font-size: 11px;
-            }
-
-            .env-info-item:last-child {
-                margin-bottom: 0;
-            }
-
-            .env-label {
-                color: #666;
-            }
-
-            .env-value {
-                color: #333;
                 font-weight: 500;
+                line-height: 1;
             }
 
-            .env-arrow {
-                transition: transform 0.3s ease;
+            /* 动画效果 */
+            .env-switcher.expanded .env-option:nth-child(1) {
+                animation: slideIn 0.3s ease 0.1s both;
             }
 
-            .env-switcher.show .env-arrow {
-                transform: rotate(180deg);
+            .env-switcher.expanded .env-option:nth-child(2) {
+                animation: slideIn 0.3s ease 0.2s both;
             }
 
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateX(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+            /* 响应式设计 */
             @media (max-width: 768px) {
                 .env-switcher {
-                    top: 10px;
-                    right: 10px;
+                    bottom: 15px;
+                    right: 15px;
                 }
                 
-                .env-switcher-panel {
-                    min-width: 250px;
+                .env-switcher-toggle {
+                    width: 45px;
+                    height: 45px;
+                }
+                
+                .env-option {
+                    width: 45px;
+                    height: 35px;
+                }
+                
+                .env-icon {
+                    font-size: 18px;
+                }
+                
+                .env-option-icon {
+                    font-size: 12px;
+                }
+                
+                .env-option-label {
+                    font-size: 9px;
+                }
+            }
+
+            /* 暗色主题适配 */
+            @media (prefers-color-scheme: dark) {
+                .env-option {
+                    background: #2d3748;
+                    color: #e2e8f0;
+                }
+                
+                .env-option:hover {
+                    background: #4a5568;
                 }
             }
         `;
@@ -264,24 +223,16 @@ class EnvSwitcher {
     }
 
     bindEvents() {
-        // 切换器点击事件
+        // 主按钮点击事件
         const toggle = this.container.querySelector('.env-switcher-toggle');
         toggle.addEventListener('click', () => this.toggle());
 
-        // 关闭按钮事件
-        const closeBtn = this.container.querySelector('.env-close');
-        closeBtn.addEventListener('click', () => this.hide());
-
-        // 自定义环境应用按钮
-        const customBtn = this.container.querySelector('.env-custom-btn');
-        const customInput = this.container.querySelector('.env-custom-input');
-        customBtn.addEventListener('click', () => {
-            const apiUrl = customInput.value.trim();
-            if (apiUrl) {
-                window.ENV_MANAGER.switchEnvironment('custom', apiUrl);
-                this.updateDisplay();
-                this.hide();
-            }
+        // 环境选项点击事件
+        this.container.querySelectorAll('.env-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const env = option.dataset.env;
+                this.switchEnvironment(env);
+            });
         });
 
         // 点击外部关闭
@@ -295,10 +246,17 @@ class EnvSwitcher {
         window.addEventListener('environmentChanged', () => {
             this.updateDisplay();
         });
+
+        // ESC键关闭
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.hide();
+            }
+        });
     }
 
     toggle() {
-        if (this.isVisible) {
+        if (this.isExpanded) {
             this.hide();
         } else {
             this.show();
@@ -306,89 +264,89 @@ class EnvSwitcher {
     }
 
     show() {
-        this.container.classList.add('show');
-        this.isVisible = true;
-        this.updateEnvironmentList();
+        this.container.classList.add('expanded');
+        this.isExpanded = true;
+        this.updateDisplay();
     }
 
     hide() {
-        this.container.classList.remove('show');
-        this.isVisible = false;
+        this.container.classList.remove('expanded');
+        this.isExpanded = false;
     }
 
-    updateEnvironmentList() {
-        const envList = this.container.querySelector('.env-list');
-        const environments = window.ENV_MANAGER.getAvailableEnvironments();
+    switchEnvironment(env) {
         const currentEnv = window.ENV_MANAGER.currentEnv;
+        
+        if (env !== currentEnv) {
+            // 根据环境设置对应的API地址
+            if (env === 'local') {
+                window.ENV_MANAGER.switchEnvironment('local');
+            } else if (env === 'prod') {
+                window.ENV_MANAGER.switchEnvironment('prod');
+            }
+            
+            this.updateDisplay();
+            this.hide();
+            
+            // 显示切换提示
+            this.showNotification(env);
+        }
+    }
 
-        envList.innerHTML = environments.map(env => `
-            <div class="env-item ${env.isCurrent ? 'active' : ''}" data-env="${env.key}">
-                <span class="env-item-icon">${this.getEnvIcon(env.key)}</span>
-                <span class="env-item-name">${env.name}</span>
-                ${env.isCurrent ? '<span class="env-item-status">当前</span>' : ''}
-            </div>
-        `).join('');
-
-        // 绑定环境切换事件
-        envList.querySelectorAll('.env-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const env = item.dataset.env;
-                if (env !== currentEnv) {
-                    window.ENV_MANAGER.switchEnvironment(env);
-                    this.updateDisplay();
-                    this.hide();
-                }
+    showNotification(env) {
+        const envName = env === 'local' ? '开发环境' : '生产环境';
+        const icon = env === 'local' ? '🛠️' : '🚀';
+        
+        // 使用现有的通知系统
+        if (window.notify) {
+            window.notify.success(`${icon} 已切换到${envName}`, {
+                duration: 2000,
+                position: 'top-right'
             });
-        });
+        } else {
+            // 备用提示
+            console.log(`${icon} 已切换到${envName}`);
+        }
     }
 
     updateDisplay() {
-        const config = window.ENV_MANAGER.config;
         const currentEnv = window.ENV_MANAGER.currentEnv;
-
-        // 更新切换器显示
-        const envName = this.container.querySelector('.env-name');
-        envName.textContent = config.name;
-
-        // 更新环境信息
-        document.getElementById('current-env-name').textContent = config.name;
-        document.getElementById('current-env-api').textContent = config.apiBaseUrl || '相对路径';
-        document.getElementById('current-env-debug').textContent = config.debug ? '开启' : '关闭';
-
-        // 更新切换器颜色
+        const config = window.ENV_MANAGER.config;
+        
+        // 更新主按钮图标和颜色
         const toggle = this.container.querySelector('.env-switcher-toggle');
-        toggle.style.background = this.getEnvColor(currentEnv);
-    }
-
-    getEnvIcon(env) {
-        const icons = {
-            local: '🏠',
-            test: '🧪',
-            baota: '🛠️',
-            prod: '🚀',
-            custom: '⚙️'
-        };
-        return icons[env] || '🌍';
-    }
-
-    getEnvColor(env) {
-        const colors = {
-            local: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            test: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-            baota: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-            prod: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-            custom: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
-        };
-        return colors[env] || colors.local;
+        const icon = this.container.querySelector('.env-icon');
+        
+        // 根据当前环境设置图标和颜色
+        if (currentEnv === 'local') {
+            icon.textContent = '🛠️';
+            toggle.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        } else {
+            icon.textContent = '🚀';
+            toggle.style.background = 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)';
+        }
+        
+        // 更新选项状态
+        this.container.querySelectorAll('.env-option').forEach(option => {
+            const env = option.dataset.env;
+            if (env === currentEnv) {
+                option.classList.add('active');
+            } else {
+                option.classList.remove('active');
+            }
+        });
     }
 }
 
 // 自动初始化环境切换器
 document.addEventListener('DOMContentLoaded', () => {
-    // 只在开发模式下显示环境切换器
-    if (window.ENV_MANAGER && window.ENV_MANAGER.config.debug) {
-        new EnvSwitcher();
-    }
+    // 延迟初始化，确保用户信息已加载
+    setTimeout(() => {
+        // 只在开发模式下显示环境切换器
+        if (window.ENV_MANAGER && window.ENV_MANAGER.config.debug) {
+            new EnvSwitcher();
+        }
+    }, 1000);
 });
 
 // 导出类供外部使用

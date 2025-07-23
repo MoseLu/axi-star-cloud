@@ -7,9 +7,9 @@
 window.ENV_MANAGER = (function() {
     // 环境配置定义
     const ENVIRONMENTS = {
-        // 本地开发环境
+        // 开发环境
         local: {
-            name: '本地开发',
+            name: '开发环境',
             apiBaseUrl: 'http://localhost:8080',
             debug: true,
             features: {
@@ -18,47 +18,14 @@ window.ENV_MANAGER = (function() {
                 mockData: false
             }
         },
-        // 测试环境
-        test: {
-            name: '测试环境',
-            apiBaseUrl: 'https://test-api.redamancy.com.cn',
-            debug: true,
-            features: {
-                hotReload: false,
-                detailedLogs: true,
-                mockData: false
-            }
-        },
-        // 宝塔面板部署环境
-        baota: {
-            name: '宝塔部署',
+        // 生产环境
+        prod: {
+            name: '生产环境',
             apiBaseUrl: '', // 相对路径，前后端同域名
             debug: false,
             features: {
                 hotReload: false,
                 detailedLogs: false,
-                mockData: false
-            }
-        },
-        // 生产环境
-        prod: {
-            name: '生产环境',
-            apiBaseUrl: 'https://api.redamancy.com.cn',
-            debug: false,
-            features: {
-                hotReload: false,
-                detailedLogs: false,
-                mockData: false
-            }
-        },
-        // 自定义环境
-        custom: {
-            name: '自定义环境',
-            apiBaseUrl: '',
-            debug: false,
-            features: {
-                hotReload: false,
-                detailedLogs: true,
                 mockData: false
             }
         }
@@ -73,7 +40,7 @@ window.ENV_MANAGER = (function() {
         const hostname = window.location.hostname;
         const port = window.location.port;
         
-        // 本地开发环境检测
+        // 开发环境检测
         if (hostname === 'localhost' || 
             hostname === '127.0.0.1' ||
             hostname.startsWith('192.168.') ||
@@ -81,18 +48,7 @@ window.ENV_MANAGER = (function() {
             return 'local';
         }
         
-        // 宝塔面板部署环境检测
-        if (hostname === 'redamancy.com.cn' || 
-            hostname.endsWith('.redamancy.com.cn')) {
-            return 'baota';
-        }
-        
-        // 测试环境检测
-        if (hostname.includes('test') || hostname.includes('dev')) {
-            return 'test';
-        }
-        
-        // 生产环境
+        // 生产环境（默认）
         return 'prod';
     }
 
@@ -341,17 +297,11 @@ window.APP_UTILS = {
 
 // 环境切换工具函数
 window.ENV_UTILS = {
-    // 快速切换到本地环境
+    // 快速切换到开发环境
     switchToLocal: () => window.ENV_MANAGER.switchEnvironment('local'),
-    
-    // 快速切换到测试环境
-    switchToTest: () => window.ENV_MANAGER.switchEnvironment('test'),
     
     // 快速切换到生产环境
     switchToProd: () => window.ENV_MANAGER.switchEnvironment('prod'),
-    
-    // 切换到自定义环境
-    switchToCustom: (apiUrl) => window.ENV_MANAGER.switchEnvironment('custom', apiUrl),
     
     // 获取当前环境信息
     getCurrentEnv: () => window.ENV_MANAGER.getDebugInfo(),
@@ -368,17 +318,15 @@ window.ENV_UTILS = {
     }
 };
 
-// 开发模式下显示环境信息
-if (window.ENV_MANAGER.config.debug) {
-    window.ENV_UTILS.showEnvInfo();
-    
-    // 在控制台提供便捷的环境切换命令
-    console.log('💡 环境切换命令:');
-    console.log('  ENV_UTILS.switchToLocal()  - 切换到本地环境');
-    console.log('  ENV_UTILS.switchToTest()   - 切换到测试环境');
-    console.log('  ENV_UTILS.switchToProd()   - 切换到生产环境');
-    console.log('  ENV_UTILS.switchToCustom("https://your-api.com") - 切换到自定义环境');
-    console.log('  ENV_UTILS.showEnvInfo()    - 显示当前环境信息');
-}
+    // 开发模式下显示环境信息
+    if (window.ENV_MANAGER.config.debug) {
+        window.ENV_UTILS.showEnvInfo();
+        
+        // 在控制台提供便捷的环境切换命令
+        console.log('💡 环境切换命令:');
+        console.log('  ENV_UTILS.switchToLocal()  - 切换到开发环境');
+        console.log('  ENV_UTILS.switchToProd()   - 切换到生产环境');
+        console.log('  ENV_UTILS.showEnvInfo()    - 显示当前环境信息');
+    }
 
  
