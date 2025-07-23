@@ -196,12 +196,6 @@ class EnvSwitcher {
                 border-color: #667eea;
             }
 
-            .env-option.active .env-option-url {
-                color: rgba(255, 255, 255, 0.9);
-                background: rgba(255, 255, 255, 0.2);
-                border-color: rgba(255, 255, 255, 0.3);
-            }
-
             .env-option-icon {
                 font-size: 16px;
                 margin-bottom: 4px;
@@ -216,16 +210,40 @@ class EnvSwitcher {
             }
 
             .env-option-url {
-                font-size: 9px;
-                color: #495057;
-                margin-top: 3px;
+                font-size: 10px;
+                color: #2c3e50;
+                margin-top: 4px;
                 text-align: center;
-                line-height: 1.2;
-                font-weight: 500;
-                background: rgba(0, 0, 0, 0.05);
-                padding: 2px 4px;
-                border-radius: 3px;
-                border: 1px solid rgba(0, 0, 0, 0.1);
+                line-height: 1.3;
+                font-weight: 600;
+                background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+                padding: 4px 6px;
+                border-radius: 4px;
+                border: 2px solid #95a5a6;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+                letter-spacing: 0.5px;
+            }
+
+            .env-option.active .env-option-url {
+                color: #ffffff;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+                border-color: rgba(255, 255, 255, 0.4);
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            }
+
+            .env-option:not(.active) {
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                border: 2px solid #dee2e6;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            }
+
+            .env-option:not(.active):hover {
+                background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+                border-color: #64b5f6;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             }
 
             /* 动画效果 */
@@ -279,7 +297,8 @@ class EnvSwitcher {
 
                 .env-option-url {
                     font-size: 8px;
-                    padding: 1px 3px;
+                    padding: 3px 4px;
+                    margin-top: 3px;
                 }
             }
 
