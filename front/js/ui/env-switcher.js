@@ -509,20 +509,29 @@ class EnvSwitcher {
     reloadData() {
         // 延迟一点时间确保环境切换完成
         setTimeout(() => {
-            // 重新加载文件列表
+            // 方法1：尝试重新加载文件列表
             if (window.uiManager && typeof window.uiManager.loadFiles === 'function') {
                 window.uiManager.loadFiles();
             }
             
-            // 重新加载用户资料
-            if (window.uiManager && window.uiManager.profileManager && typeof window.uiManager.profileManager.loadProfileData === 'function') {
-                window.uiManager.profileManager.loadProfileData();
-            }
-            
-            // 触发全局重新加载事件
+            // 方法2：触发全局重新加载事件
             window.dispatchEvent(new CustomEvent('environmentDataReload', {
                 detail: { environment: window.ENV_MANAGER.currentEnv }
             }));
+            
+            // 方法3：如果上面的方法不够，强制刷新页面
+            setTimeout(() => {
+                // 检查是否真的需要刷新
+                const currentEnv = window.ENV_MANAGER.currentEnv;
+                const apiBaseUrl = window.ENV_MANAGER.config[currentEnv]?.apiBaseUrl;
+                
+                // 如果API地址已经改变，但数据没有更新，则刷新页面
+                if (apiBaseUrl && window.location.href.includes('localhost') && currentEnv === 'prod') {
+                    window.location.reload();
+                } else if (apiBaseUrl && window.location.href.includes('redamancy.com.cn') && currentEnv === 'local') {
+                    window.location.reload();
+                }
+            }, 1000);
         }, 500);
     }
 
