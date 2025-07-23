@@ -29,6 +29,16 @@
     align-items: center;
     text-align: center;
     transition: all 0.3s ease;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.file-card:hover {
+    border-color: #3B82F6;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
 }
 
 /* 文件夹网格布局 */
@@ -52,6 +62,16 @@
     align-items: center;
     text-align: center;
     transition: all 0.3s ease;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.folder-card:hover {
+    border-color: #3B82F6;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
 }
 
 /* 响应式布局优化 */
@@ -167,8 +187,12 @@
     gap: 0.25rem;
     margin-top: auto;
     padding-top: 0.75rem;
-    border-top: 1px solid #F3F4F6;
+    border-top: 1px solid #E5E7EB;
     width: 100%;
+    background-color: #F9FAFB;
+    border-radius: 0 0 8px 8px;
+    padding: 0.75rem;
+    margin: 0.5rem -0.5rem -0.5rem -0.5rem;
 }
 
 .file-info > div,

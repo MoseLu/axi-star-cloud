@@ -39,9 +39,9 @@
 }
 
 .expandable[data-expanded="true"] {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3)) !important;
-  border-color: rgba(59, 130, 246, 0.5) !important;
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2)) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
 }
 
 /* 子分类水平展开容器样式 */
@@ -92,9 +92,9 @@
 }
 
 .sub-file-type-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(139, 92, 246, 0.4)) !important;
-  border-color: rgba(59, 130, 246, 0.6) !important;
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(139, 92, 246, 0.25)) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
 }
 
 /* 子分类按钮进入动画 */
