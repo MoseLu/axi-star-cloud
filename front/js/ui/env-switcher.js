@@ -289,7 +289,7 @@ class EnvSwitcher {
 
             .env-option:hover {
                 background: linear-gradient(135deg, rgba(249, 115, 22, 0.3) 0%, rgba(251, 146, 60, 0.2) 100%);
-                border-color: rgba(249, 115, 22, 0.5);
+                border-color: #f97316;
                 transform: translateY(-2px);
                 box-shadow: 0 8px 25px rgba(249, 115, 22, 0.3);
                 color: #f97316;
