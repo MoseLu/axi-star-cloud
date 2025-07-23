@@ -123,45 +123,22 @@ class UIFileOperations {
      * @param {Function} onSuccess - 成功回调
      */
     async deleteFile(file, onSuccess) {
-        // 统一获取userId
-        let userId = localStorage.getItem('userId');
-        if (!userId) {
-            const currentUser = localStorage.getItem('currentUser');
-            if (currentUser) {
-                try {
-                    userId = JSON.parse(currentUser).uuid;
-                } catch (e) {}
-            }
-        }
-        if (!userId && window.api && window.api.core && typeof window.api.core.getCurrentUserId === 'function') {
-            userId = window.api.core.getCurrentUserId();
-        }
-        if (!userId) {
-            throw new Error('用户未登录');
-        }
-
         try {
-            // 显示确认对话框
-            const confirmed = await this.showConfirmDialog(
-                '删除文件',
-                `确定要删除文件 "${file.name}" 吗？此操作不可撤销。`
-            );
-
-            if (!confirmed) {
-                return;
+            const userId = window.apiSystem?.getCurrentUserId();
+            if (!userId) {
+                throw new Error('用户未登录');
             }
 
             // 显示删除进度
             this.showDeleteProgress(file.name);
 
-            // 根据文件类型选择不同的API端点
             let apiUrl;
             if (file.type === 'url') {
                 // URL文件使用专门的API端点
-                apiUrl = `/api/url-files/${file.id}`;
+                apiUrl = window.apiSystem?.core?.buildApiUrl(`/api/url-files/${file.id}`);
             } else {
                 // 普通文件使用标准API端点
-                apiUrl = `/api/files/${file.id}`;
+                apiUrl = window.apiSystem?.core?.buildApiUrl(`/api/files/${file.id}`);
             }
 
             const response = await fetch(`${apiUrl}?user_id=${userId}`, {
@@ -302,7 +279,8 @@ class UIFileOperations {
                 ...options
             });
 
-            const response = await fetch(`/api/files/search?${params}`, {
+            const apiUrl = window.apiSystem?.core?.buildApiUrl(`/api/files/search?${params}`);
+            const response = await fetch(apiUrl, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -418,14 +396,14 @@ class UIFileOperations {
                     let apiUrl;
                     if (file.type === 'url') {
                         // URL文件使用专门的API端点
-                        apiUrl = `/api/url-files/${file.id}`;
+                        apiUrl = window.apiSystem?.core?.buildApiUrl(`/api/url-files/${file.id}`);
                     } else {
                         // 普通文件使用标准API端点
-                        apiUrl = `/api/files/${file.id}`;
+                        apiUrl = window.apiSystem?.core?.buildApiUrl(`/api/files/${file.id}`);
                     }
 
                     // 获取当前用户ID
-                    const userId = localStorage.getItem('userId');
+                    const userId = window.apiSystem?.getCurrentUserId();
                     if (!userId) {
                         throw new Error('用户未登录');
                     }
