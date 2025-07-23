@@ -1,0 +1,78 @@
+<!-- 欢迎信息 -->
+<div class="mb-8">
+    <div class="glass-effect rounded-2xl p-4 md:p-8 border border-purple-light/20 shadow-xl relative overflow-hidden">
+        <!-- 背景装饰 -->
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-blue-500/5 to-cyan-500/5"></div>
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
+        <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-cyan-500/10 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
+        
+        <div class="relative z-10">
+            <!-- 移动端优化的头部布局 -->
+            <div class="welcome-header">
+                <!-- 头像和欢迎信息 -->
+                <div class="welcome-user-info">
+                    <div class="avatar-section">
+                        <div class="relative group">
+                            <div class="profile-avatar" id="profile-avatar" title="点击编辑个人资料">
+                                <i class="fa fa-user-circle avatar-icon" id="avatar-icon"></i>
+                                <img id="avatar-image" class="avatar-image hidden" alt="头像">
+                            </div>
+                            <!-- 编辑图标提示 -->
+                            <div class="edit-icon" title="编辑个人资料">
+                                <i class="fa fa-pencil"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="welcome-text">
+                        <h1 class="welcome-title">
+                            <span id="welcome-message">欢迎回来，用户</span>
+                        </h1>
+                        <p class="welcome-date">今天是 <span id="current-date" class="text-purple-light font-medium"></span></p>
+                    </div>
+                </div>
+                
+                <!-- 文件统计卡片 -->
+                <div class="file-stats-card">
+                    <div class="stats-content">
+                        <div class="stats-number" id="file-count">0</div>
+                        <div class="stats-label">个文件</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 状态信息卡片 -->
+            <div class="status-cards">
+                <div class="status-card status-login">
+                    <div class="status-icon">
+                        <i class="fa fa-clock-o"></i>
+                    </div>
+                    <div class="status-info">
+                        <div class="status-label">最后登录</div>
+                        <div class="status-value" id="last-login"></div>
+                    </div>
+                </div>
+                
+                <div class="status-card status-storage">
+                    <div class="status-icon">
+                        <i class="fa fa-cloud"></i>
+                    </div>
+                    <div class="status-info">
+                        <div class="status-label">存储状态</div>
+                        <div class="status-value">正常</div>
+                    </div>
+                </div>
+                
+                <div class="status-card status-security">
+                    <div class="status-icon">
+                        <i class="fa fa-shield"></i>
+                    </div>
+                    <div class="status-info">
+                        <div class="status-label">安全状态</div>
+                        <div class="status-value">已保护</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,75 @@
+/**
+ * 存储管理API
+ * 负责存储信息查询、限制更新等功能
+ */
+class Storage {
+    constructor(core) {
+        this.core = core;
+    }
+
+    // 获取存储信息
+    async getStorageInfo() {
+        const userId = this.core.getCurrentUserId();
+        if (!userId) return null;
+
+        try {
+            const response = await fetch(`${this.core.baseUrl}/api/storage?user_id=${userId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                return data.storage;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            return null;
+        }
+    }
+
+    // 更新存储限制
+    async updateStorageLimit(storageBytes) {
+        const userId = this.core.getCurrentUserId();
+        if (!userId) throw new Error('请先登录');
+
+        const response = await fetch(`${this.core.baseUrl}/api/storage?user_id=${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ storage_limit: storageBytes })
+        });
+
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error(data.error || '更新存储限制失败');
+        }
+
+        return data;
+    }
+
+    // 获取用户所有文件总数（包括普通文件和URL文件）
+    async getTotalFileCount() {
+        const userId = this.core.getCurrentUserId();
+        if (!userId) return 0;
+
+        try {
+            const [filesResponse, urlFilesResponse] = await Promise.all([
+                fetch(`${this.core.baseUrl}/api/files/count?user_id=${userId}`),
+                fetch(`${this.core.baseUrl}/api/url-files/count?user_id=${userId}`)
+            ]);
+            
+            const filesData = await filesResponse.json();
+            const urlFilesData = await urlFilesResponse.json();
+            
+            const filesCount = filesData.success ? filesData.count : 0;
+            const urlFilesCount = urlFilesData.success ? urlFilesData.count : 0;
+            
+            const totalCount = filesCount + urlFilesCount;
+
+            return totalCount;
+        } catch (error) {
+            console.error('❌ 获取文件总数失败:', error);
+            return 0;
+        }
+    }
+} 

@@ -1,0 +1,51 @@
+/* 字体加载优化 */
+@font-face {
+    font-family: 'FontAwesome';
+    src: url('../public/libs/fonts/fontawesome-webfont.woff2?v=4.7.0') format('woff2'),
+         url('../public/libs/fonts/fontawesome-webfont.woff?v=4.7.0') format('woff'),
+         url('../public/libs/fonts/fontawesome-webfont.ttf?v=4.7.0') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap; /* 关键优化：允许字体交换 */
+}
+
+/* 确保FontAwesome图标在字体加载前也能显示 */
+.fa {
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* 添加回退样式 */
+    font-display: swap;
+}
+
+/* 为常用图标添加Unicode回退 */
+.fa-folder:before { content: "\f07b"; }
+.fa-file:before { content: "\f15b"; }
+.fa-user:before { content: "\f007"; }
+.fa-cog:before { content: "\f013"; }
+.fa-edit:before { content: "\f044"; }
+.fa-trash:before { content: "\f1f8"; }
+.fa-upload:before { content: "\f093"; }
+.fa-download:before { content: "\f019"; }
+.fa-search:before { content: "\f002"; }
+.fa-times:before { content: "\f00d"; }
+.fa-check:before { content: "\f00c"; }
+.fa-exclamation-triangle:before { content: "\f071"; }
+.fa-info-circle:before { content: "\f05a"; }
+.fa-calendar:before { content: "\f073"; }
+.fa-link:before { content: "\f0c1"; }
+.fa-image:before { content: "\f03e"; }
+.fa-video-camera:before { content: "\f03d"; }
+.fa-music:before { content: "\f001"; }
+.fa-file-text:before { content: "\f15c"; }
+.fa-file-pdf-o:before { content: "\f1c1"; }
+.fa-file-word-o:before { content: "\f1c2"; }
+.fa-file-excel-o:before { content: "\f1c3"; }
+.fa-file-powerpoint-o:before { content: "\f1c4"; }
+.fa-file-archive-o:before { content: "\f1c6"; }
+.fa-file-audio-o:before { content: "\f1c7"; }
+.fa-file-video-o:before { content: "\f1c8"; }
+.fa-file-code-o:before { content: "\f1c9"; } 
