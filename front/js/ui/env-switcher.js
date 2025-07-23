@@ -422,7 +422,55 @@ class EnvSwitcher {
             
             // 显示切换提示
             this.showNotification(env);
+            
+            // 自动重新加载数据
+            this.reloadData();
         }
+    }
+
+    reloadData() {
+        console.log('🔄 环境切换后重新加载数据...');
+        
+        // 延迟一点时间确保环境切换完成
+        setTimeout(() => {
+            // 重新加载文件列表
+            if (window.uiManager && window.uiManager.fileRenderer) {
+                console.log('📁 重新加载文件列表...');
+                window.uiManager.fileRenderer.loadFiles();
+            }
+            
+            // 重新加载文件夹列表
+            if (window.uiManager && window.uiManager.folderManager) {
+                console.log('📂 重新加载文件夹列表...');
+                window.uiManager.folderManager.loadFolders();
+            }
+            
+            // 重新加载URL文件列表
+            if (window.apiSystem && window.apiSystem.urlFiles) {
+                console.log('🔗 重新加载URL文件列表...');
+                // 触发URL文件重新加载
+                window.dispatchEvent(new CustomEvent('reloadUrlFiles'));
+            }
+            
+            // 重新加载存储统计
+            if (window.uiManager && window.uiManager.core) {
+                console.log('💾 重新加载存储统计...');
+                window.uiManager.core.loadStorageInfo();
+            }
+            
+            // 重新加载用户资料
+            if (window.uiManager && window.uiManager.profileManager) {
+                console.log('👤 重新加载用户资料...');
+                window.uiManager.profileManager.loadProfile();
+            }
+            
+            // 触发全局重新加载事件
+            window.dispatchEvent(new CustomEvent('environmentDataReload', {
+                detail: { environment: window.ENV_MANAGER.currentEnv }
+            }));
+            
+            console.log('✅ 数据重新加载完成');
+        }, 500);
     }
 
     showNotification(env) {
@@ -431,13 +479,13 @@ class EnvSwitcher {
         
         // 使用现有的通知系统
         if (window.notify) {
-            window.notify.success(`${icon} 已切换到${envName}`, {
-                duration: 2000,
+            window.notify.success(`${icon} 已切换到${envName}，正在重新加载数据...`, {
+                duration: 3000,
                 position: 'top-right'
             });
         } else {
             // 备用提示
-            console.log(`${icon} 已切换到${envName}`);
+            console.log(`${icon} 已切换到${envName}，正在重新加载数据...`);
         }
     }
 
