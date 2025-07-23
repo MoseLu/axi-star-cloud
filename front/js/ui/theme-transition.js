@@ -1,6 +1,6 @@
 /**
- * 主题切换波纹扩散动画管理器
- * 从右上角开始扩散，覆盖整个页面
+ * 主题切换圆弧扩散动画管理器
+ * 从右上角开始，通过圆弧扩散实现主题切换
  */
 
 class ThemeTransitionManager {
@@ -8,11 +8,14 @@ class ThemeTransitionManager {
         this.isTransitioning = false;
         this.currentTheme = 'dark';
         this.overlay = null;
+        this.animationId = null;
+        this.startTime = 0;
+        this.duration = 800; // 动画持续时间（毫秒）
         this.init();
     }
 
     init() {
-        // 创建波纹扩散覆盖层
+        // 创建圆弧扩散覆盖层
         this.createOverlay();
         // 获取当前主题
         this.currentTheme = localStorage.getItem('theme') || 'dark';
@@ -24,6 +27,16 @@ class ThemeTransitionManager {
         this.overlay = document.createElement('div');
         this.overlay.className = 'theme-transition-overlay';
         this.overlay.style.pointerEvents = 'none';
+        this.overlay.style.position = 'fixed';
+        this.overlay.style.top = '0';
+        this.overlay.style.right = '0';
+        this.overlay.style.width = '0';
+        this.overlay.style.height = '0';
+        this.overlay.style.zIndex = '9999';
+        this.overlay.style.borderRadius = '50%';
+        this.overlay.style.transform = 'translate(50%, -50%)';
+        this.overlay.style.transition = 'none';
+        this.overlay.style.opacity = '0';
         document.body.appendChild(this.overlay);
     }
 
@@ -66,8 +79,8 @@ class ThemeTransitionManager {
         
         // 添加图标
         btn.innerHTML = `
-            <i class="fa fa-sun icon sun-icon" aria-hidden="true"></i>
-            <i class="fa fa-moon icon moon-icon" aria-hidden="true"></i>
+            <i class="fas fa-sun icon sun-icon" aria-hidden="true"></i>
+            <i class="fas fa-moon icon moon-icon" aria-hidden="true"></i>
         `;
         
         // 添加点击事件
@@ -117,31 +130,51 @@ class ThemeTransitionManager {
 
     async startTransition(newTheme) {
         return new Promise((resolve) => {
+            // 获取视口尺寸
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            
+            // 计算最大半径（从右上角到左下角的距离）
+            const maxRadius = Math.sqrt(viewportWidth * viewportWidth + viewportHeight * viewportHeight);
+            
             // 设置覆盖层样式
             this.overlay.className = `theme-transition-overlay ${newTheme}`;
-            this.overlay.style.opacity = '0';
-            
-            // 触发重排
-            this.overlay.offsetHeight;
-            
-            // 开始扩散动画
+            this.overlay.style.background = newTheme === 'light' ? '#FFFFFF' : '#0F172A';
             this.overlay.style.opacity = '1';
-            this.overlay.classList.add('active');
             
-            // 图标旋转动画
-            const btn = document.getElementById('theme-toggle-btn');
-            if (btn) {
-                const icons = btn.querySelectorAll('.icon');
-                icons.forEach(icon => {
-                    icon.classList.add('rotating');
-                });
-            }
-            
-            // 等待动画完成
-            setTimeout(() => {
-                resolve();
-            }, 600);
+            // 开始动画
+            this.startTime = performance.now();
+            this.animateTransition(maxRadius, resolve);
         });
+    }
+
+    animateTransition(maxRadius, resolve) {
+        const animate = (currentTime) => {
+            const elapsed = currentTime - this.startTime;
+            const progress = Math.min(elapsed / this.duration, 1);
+            
+            // 使用缓动函数
+            const easeProgress = this.easeInOutCubic(progress);
+            
+            // 计算当前半径
+            const currentRadius = easeProgress * maxRadius;
+            
+            // 更新覆盖层尺寸
+            this.overlay.style.width = `${currentRadius * 2}px`;
+            this.overlay.style.height = `${currentRadius * 2}px`;
+            
+            if (progress < 1) {
+                this.animationId = requestAnimationFrame(animate);
+            } else {
+                resolve();
+            }
+        };
+        
+        this.animationId = requestAnimationFrame(animate);
+    }
+
+    easeInOutCubic(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     }
 
     switchTheme(newTheme) {
@@ -160,22 +193,18 @@ class ThemeTransitionManager {
 
     async endTransition() {
         return new Promise((resolve) => {
-            // 移除动画类
-            this.overlay.classList.remove('active');
+            // 停止动画
+            if (this.animationId) {
+                cancelAnimationFrame(this.animationId);
+                this.animationId = null;
+            }
             
             // 重置覆盖层
             setTimeout(() => {
                 this.overlay.style.opacity = '0';
+                this.overlay.style.width = '0';
+                this.overlay.style.height = '0';
                 this.overlay.className = 'theme-transition-overlay';
-                
-                // 移除图标旋转动画
-                const btn = document.getElementById('theme-toggle-btn');
-                if (btn) {
-                    const icons = btn.querySelectorAll('.icon');
-                    icons.forEach(icon => {
-                        icon.classList.remove('rotating');
-                    });
-                }
                 
                 resolve();
             }, 100);
@@ -216,6 +245,9 @@ class ThemeTransitionManager {
 
     // 销毁方法
     destroy() {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+        }
         if (this.overlay && this.overlay.parentNode) {
             this.overlay.parentNode.removeChild(this.overlay);
         }
