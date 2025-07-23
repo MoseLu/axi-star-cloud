@@ -514,20 +514,9 @@ class EnvSwitcher {
                 window.uiManager.loadFiles();
             }
             
-            // 重新加载URL文件列表
-            if (window.apiSystem && window.apiSystem.urlFiles) {
-                // 触发URL文件重新加载
-                window.dispatchEvent(new CustomEvent('reloadUrlFiles'));
-            }
-            
-            // 重新加载存储统计
-            if (window.uiManager && window.uiManager.core) {
-                window.uiManager.core.loadStorageInfo();
-            }
-            
             // 重新加载用户资料
-            if (window.uiManager && window.uiManager.profileManager) {
-                window.uiManager.profileManager.loadProfile();
+            if (window.uiManager && window.uiManager.profileManager && typeof window.uiManager.profileManager.loadProfileData === 'function') {
+                window.uiManager.profileManager.loadProfileData();
             }
             
             // 触发全局重新加载事件
