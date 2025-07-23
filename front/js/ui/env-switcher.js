@@ -502,20 +502,8 @@ class EnvSwitcher {
         const currentEnv = window.ENV_MANAGER.currentEnv;
         
         if (env !== currentEnv) {
-            // 根据环境设置对应的API地址
-            if (env === 'local') {
-                window.ENV_MANAGER.switchEnvironment('local');
-                // 同时更新APP_CONFIG
-                if (window.APP_CONFIG) {
-                    window.APP_CONFIG.API_BASE_URL = window.ENV_MANAGER.config.local.apiBaseUrl;
-                }
-            } else if (env === 'prod') {
-                window.ENV_MANAGER.switchEnvironment('prod');
-                // 同时更新APP_CONFIG
-                if (window.APP_CONFIG) {
-                    window.APP_CONFIG.API_BASE_URL = window.ENV_MANAGER.config.prod.apiBaseUrl;
-                }
-            }
+            // 直接通过ENV_MANAGER切换环境
+            window.ENV_MANAGER.switchEnvironment(env);
             
             // 重新初始化API系统，确保API调用指向正确的环境
             if (window.apiSystem && typeof window.apiSystem.reinit === 'function') {
