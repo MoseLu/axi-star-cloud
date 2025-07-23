@@ -161,23 +161,26 @@ class EnvSwitcher {
             }
 
             .env-icon-main {
-                font-size: 18px;
+                font-size: 16px;
                 color: #fff;
                 transition: transform 0.3s ease;
                 transform-origin: center;
                 z-index: 2;
+                position: absolute;
+                left: 8px;
+                top: 8px;
             }
 
             .env-icon-api {
                 position: absolute;
-                bottom: 4px;
-                right: 4px;
-                font-size: 12px;
+                right: 8px;
+                bottom: 8px;
+                font-size: 16px;
                 color: #fff;
                 background: rgba(0, 0, 0, 0.4);
                 border-radius: 50%;
-                width: 16px;
-                height: 16px;
+                width: 20px;
+                height: 20px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
