@@ -36,15 +36,13 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: transparent;
+    border: none;
     cursor: pointer;
     transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
 }
 
 .theme-toggle-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
     transform: scale(1.05);
 }
 
@@ -54,7 +52,7 @@
 
 /* 图标样式 */
 .theme-toggle-btn .icon {
-    font-size: 18px;
+    font-size: 20px;
     transition: all 0.3s ease;
     position: absolute;
     top: 50%;
@@ -79,8 +77,8 @@
 
 /* 暗色主题下的按钮样式（默认） */
 .theme-toggle-btn.dark {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: transparent;
+    border: none;
 }
 
 .theme-toggle-btn.dark .sun-icon {
@@ -95,8 +93,8 @@
 
 /* 亮色主题下的按钮样式 */
 .theme-toggle-btn.light {
-    background: rgba(0, 0, 0, 0.1);
-    border-color: rgba(0, 0, 0, 0.2);
+    background: transparent;
+    border: none;
 }
 
 .theme-toggle-btn.light .sun-icon {
