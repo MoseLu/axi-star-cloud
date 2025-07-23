@@ -13,15 +13,10 @@ class EnvSwitcher {
     }
 
     init() {
-        console.log('环境切换器初始化开始');
-        
         // 检查是否为管理员
         if (!this.isAdmin()) {
-            console.log('环境切换器初始化失败：非管理员用户');
             return;
         }
-        
-        console.log('开始创建环境切换器');
         
         // 创建环境切换器
         this.createSwitcher();
@@ -37,14 +32,11 @@ class EnvSwitcher {
         
         // 添加404错误处理
         this.handle404Error();
-        
-        console.log('环境切换器初始化完成');
     }
 
     isAdmin() {
         // 开发模式下总是显示
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            console.log('开发模式：显示环境切换器');
             return true;
         }
         
@@ -52,7 +44,6 @@ class EnvSwitcher {
         if (window.authManager && typeof window.authManager.getCurrentUser === 'function') {
             const user = window.authManager.getCurrentUser();
             if (user && user.role === 'admin') {
-                console.log('管理员用户：显示环境切换器');
                 return true;
             }
         }
@@ -63,7 +54,6 @@ class EnvSwitcher {
             try {
                 const user = JSON.parse(currentUser);
                 if (user.isAdmin === true) {
-                    console.log('localStorage管理员：显示环境切换器');
                     return true;
                 }
             } catch (e) {
@@ -73,11 +63,9 @@ class EnvSwitcher {
         
         // 如果authManager不存在，在开发环境下也显示
         if (!window.authManager && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-            console.log('开发模式且authManager未加载：显示环境切换器');
             return true;
         }
         
-        console.log('非管理员用户：隐藏环境切换器');
         return false;
     }
 
