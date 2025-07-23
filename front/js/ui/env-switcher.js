@@ -264,16 +264,16 @@ class EnvSwitcher {
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+                background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
                 opacity: 0;
                 transition: opacity 0.3s ease;
             }
 
             .env-option:hover {
-                background: rgba(139, 92, 246, 0.1);
-                border-color: rgba(139, 92, 246, 0.3);
+                background: rgba(16, 185, 129, 0.1);
+                border-color: rgba(16, 185, 129, 0.3);
                 transform: translateY(-2px);
-                box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
+                box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
             }
 
             .env-option:hover::before {
@@ -281,10 +281,10 @@ class EnvSwitcher {
             }
 
             .env-option.active {
-                background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%);
-                border-color: #8b5cf6;
-                color: #8b5cf6;
-                box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+                background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+                border-color: #10b981;
+                color: #10b981;
+                box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
             }
 
             .env-option.active::before {
@@ -312,14 +312,14 @@ class EnvSwitcher {
 
             .env-option-url {
                 font-size: 13px;
-                color: #888;
+                color: #ffffff;
                 margin-left: 36px;
                 font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-                opacity: 0.8;
+                opacity: 0.9;
             }
 
             .env-option.active .env-option-url {
-                color: #8b5cf6;
+                color: #10b981;
                 opacity: 1;
             }
 
@@ -582,9 +582,6 @@ class EnvSwitcher {
                 duration: 2000,
                 position: 'top-center'
             });
-        } else {
-            // 备用通知方式
-            console.log(message);
         }
     }
 
