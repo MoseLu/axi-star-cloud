@@ -92,7 +92,7 @@
 ### 后端
 - **语言**: Go 1.23.4
 - **Web框架**: Gin
-- **数据库**: SQLite (开发) / MySQL (生产)
+- **数据库**: MySQL
 - **架构**: 分层架构 (Handler -> Repository -> Database)
 
 ### 前端

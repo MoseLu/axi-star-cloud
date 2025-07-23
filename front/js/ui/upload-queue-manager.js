@@ -19,7 +19,6 @@ class UploadQueueManager {
         } else {
             this.baseUrl = '/api';
         }
-        console.log('UploadQueueManager baseUrl更新为:', this.baseUrl);
     }
 
     /**
