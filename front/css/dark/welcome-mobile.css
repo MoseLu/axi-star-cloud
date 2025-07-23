@@ -130,14 +130,17 @@
 .welcome-title {
     font-size: 1.25rem;
     font-weight: bold;
-    color: #FFFFFF;
+    color: transparent;
+    background: linear-gradient(135deg, #a855f7, #3b82f6, #06b6d4);
+    background-clip: text;
+    -webkit-background-clip: text;
     margin-bottom: 0.25rem;
     line-height: 1.2;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .welcome-date {
-    color: #F3F4F6;
+    color: #e5e7eb;
     font-size: 0.75rem;
     font-weight: 500;
 }
@@ -262,14 +265,15 @@
 
 .status-label {
     font-size: 0.625rem;
-    color: #9ca3af;
+    color: #E5E7EB;
     margin-bottom: 0.125rem;
+    font-weight: 500;
 }
 
 .status-value {
     font-size: 0.75rem;
-    font-weight: 500;
-    color: #d1d5db;
+    font-weight: 600;
+    color: #F9FAFB;
 }
 
 /* 小屏幕适配 (481px - 640px) */
@@ -304,12 +308,10 @@
     .welcome-title {
         font-size: 1.5rem;
         line-height: 1.3;
-        color: #FFFFFF;
     }
 
     .welcome-date {
         font-size: 0.875rem;
-        color: #F3F4F6;
     }
 
     .file-stats-card {
@@ -350,10 +352,14 @@
 
     .status-label {
         font-size: 0.75rem;
+        color: #E5E7EB;
+        font-weight: 500;
     }
 
     .status-value {
         font-size: 0.875rem;
+        color: #F9FAFB;
+        font-weight: 600;
     }
 }
 
@@ -389,12 +395,10 @@
     .welcome-title {
         font-size: 1.75rem;
         line-height: 1.4;
-        color: #FFFFFF;
     }
 
     .welcome-date {
         font-size: 1rem;
-        color: #F3F4F6;
     }
 
     .file-stats-card {
@@ -435,10 +439,14 @@
 
     .status-label {
         font-size: 0.875rem;
+        color: #E5E7EB;
+        font-weight: 500;
     }
 
     .status-value {
         font-size: 1rem;
+        color: #F9FAFB;
+        font-weight: 600;
     }
 }
 
@@ -475,12 +483,10 @@
     .welcome-title {
         font-size: 2rem;
         line-height: 1.5;
-        color: #FFFFFF;
     }
 
     .welcome-date {
         font-size: 1.125rem;
-        color: #F3F4F6;
     }
 
     .file-stats-card {
@@ -521,10 +527,14 @@
 
     .status-label {
         font-size: 1rem;
+        color: #E5E7EB;
+        font-weight: 500;
     }
 
     .status-value {
         font-size: 1.125rem;
+        color: #F9FAFB;
+        font-weight: 600;
     }
 }
 
@@ -591,12 +601,10 @@
     .welcome-title {
         font-size: 1rem;
         line-height: 1.2;
-        color: #FFFFFF;
     }
 
     .welcome-date {
         font-size: 0.625rem;
-        color: #F3F4F6;
     }
 
     .file-stats-card {
@@ -637,9 +645,13 @@
 
     .status-label {
         font-size: 0.5rem;
+        color: #E5E7EB;
+        font-weight: 500;
     }
 
     .status-value {
         font-size: 0.625rem;
+        color: #F9FAFB;
+        font-weight: 600;
     }
 } 

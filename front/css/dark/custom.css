@@ -647,9 +647,23 @@
 
 /* 欢迎模块文字颜色强制覆盖 */
 .welcome-title {
-    color: #FFFFFF !important;
+    color: transparent !important;
+    background: linear-gradient(135deg, #a855f7, #3b82f6, #06b6d4) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
 }
 
 .welcome-date {
-    color: #F3F4F6 !important;
+    color: #e5e7eb !important;
+}
+
+/* 状态卡片文字颜色强制覆盖 */
+.status-label {
+    color: #E5E7EB !important;
+    font-weight: 500 !important;
+}
+
+.status-value {
+    color: #F9FAFB !important;
+    font-weight: 600 !important;
 } 
