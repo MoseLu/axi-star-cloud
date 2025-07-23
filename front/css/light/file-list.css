@@ -27,7 +27,7 @@
 
 /* 标题文字 */
 .text-transparent.bg-clip-text.bg-gradient-to-r.from-purple-400.via-blue-400.to-cyan-400 {
-    background: linear-gradient(to right, #7C3AED, #2563EB, #0891B2);
+    background: linear-gradient(to right, #5B21B6, #1D4ED8, #0E7490);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -57,11 +57,11 @@
 
 /* 文字颜色 */
 .text-purple-300 {
-    color: #C4B5FD;
+    color: #8B5CF6;
 }
 
 .text-gray-300 {
-    color: #D1D5DB;
+    color: #9CA3AF;
 }
 
 /* 空状态 */
@@ -70,11 +70,11 @@
 }
 
 .text-purple-light\/70 {
-    color: rgba(168, 85, 247, 0.7);
+    color: rgba(107, 33, 168, 0.8);
 }
 
 .text-transparent.bg-clip-text.bg-gradient-to-r.from-purple-300.to-blue-300 {
-    background: linear-gradient(to right, #8B5CF6, #3B82F6);
+    background: linear-gradient(to right, #6D28D9, #1D4ED8);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
