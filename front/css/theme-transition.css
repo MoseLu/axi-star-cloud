@@ -33,8 +33,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background: transparent;
     border: none;
@@ -52,7 +52,7 @@
 
 /* 图标样式 */
 .theme-toggle-btn .icon {
-    font-size: 20px;
+    font-size: 16px;
     transition: all 0.3s ease;
     position: absolute;
     top: 50%;
