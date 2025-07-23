@@ -716,11 +716,46 @@ header.glass-effect {
 /* 文件信息区域强制覆盖 */
 .file-info,
 .folder-info {
-    background-color: #F9FAFB !important;
+    background-color: #F3F4F6 !important;
     border-top: 1px solid #E5E7EB !important;
     border-radius: 0 0 8px 8px !important;
     padding: 0.75rem !important;
     margin: 0.5rem -0.5rem -0.5rem -0.5rem !important;
+}
+
+/* 文件信息内容强制覆盖 */
+.file-info > div,
+.folder-info > div {
+    background-color: #FFFFFF !important;
+    color: #374151 !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 4px !important;
+    padding: 0.25rem 0.5rem !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.file-info span,
+.folder-info span {
+    color: #1F2937 !important;
+    font-weight: 600 !important;
+}
+
+/* 文件大小和日期标签特殊样式强制覆盖 */
+.file-info .file-size,
+.file-info .file-date,
+.folder-info .folder-date {
+    background-color: #FFFFFF !important;
+    color: #1F2937 !important;
+    font-weight: 600 !important;
+    padding: 0.25rem 0.5rem !important;
+    border-radius: 4px !important;
+    border: 1px solid #D1D5DB !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.file-info i,
+.folder-info i {
+    color: #6B7280 !important;
 }
 
 /* 状态卡片强制覆盖 */
