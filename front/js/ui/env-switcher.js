@@ -12,13 +12,18 @@ class EnvSwitcher {
     }
 
     init() {
-        // 检查是否为管理员
-        if (!this.isAdmin() && !window.ENV_MANAGER.config.debug) {
+        // 检查是否为管理员或调试模式
+        const isAdmin = this.isAdmin();
+        const isDebugMode = window.ENV_MANAGER.config.debug;
+        
+        if (!isAdmin && !isDebugMode) {
             console.log('❌ 非管理员且非调试模式，不显示环境切换器');
             return;
         }
         
         console.log('✅ 开始初始化环境切换器');
+        console.log('  - 管理员权限:', isAdmin);
+        console.log('  - 调试模式:', isDebugMode);
         this.createSwitcher();
         this.bindEvents();
         this.updateDisplay();
@@ -359,18 +364,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        // 检查调试模式
-        const isDebugMode = window.ENV_MANAGER.config.debug;
-        console.log('🔧 调试模式:', isDebugMode);
-        
         // 检查是否为管理员
         const user = window.authManager?.getCurrentUser();
         const isAdmin = user && user.role === 'admin';
         console.log('👤 当前用户:', user);
         console.log('🔑 管理员权限:', isAdmin);
         
-        // 初始化条件：调试模式 OR 管理员权限
-        if (isDebugMode || isAdmin) {
+        // 初始化条件：管理员权限 OR 调试模式
+        if (isAdmin || window.ENV_MANAGER.config.debug) {
             console.log('✅ 初始化环境切换器');
             new EnvSwitcher();
         } else {
