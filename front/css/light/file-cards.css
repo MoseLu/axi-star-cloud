@@ -6,7 +6,7 @@
 /* 文件卡片网格布局 */
 #files-grid, .files-grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 320px));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 240px));
   gap: 16px;
   align-items: start;
   justify-items: start;
@@ -14,14 +14,14 @@
 }
 
 .file-card {
-  max-width: 320px;
+  max-width: 240px;
   width: 100%;
 }
 
 /* 文件卡片样式优化 - 亮色主题 */
 .file-card {
     width: 100%;
-    max-width: 320px;
+    max-width: 240px;
     min-height: 200px;
     display: flex;
     flex-direction: column;
@@ -54,7 +54,7 @@
 /* 文件夹卡片样式 - 亮色主题 */
 .folder-card {
     width: 100%;
-    max-width: 320px;
+    max-width: 240px;
     min-height: 160px;
     display: flex;
     flex-direction: column;
