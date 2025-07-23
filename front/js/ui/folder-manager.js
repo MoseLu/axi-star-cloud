@@ -151,12 +151,22 @@ class UIFolderManager {
 
     // 创建文件夹卡片HTML
     async createFolderCardHTML(folder, categoryInfo) {
-        // 获取文件夹文件数量
+        // 对于新创建的文件夹，直接显示0个文件，避免API调用延迟问题
         let fileCount = 0;
-        try {
-            fileCount = await this.uiManager.api.folders.getFolderFileCount(folder.id);
-        } catch (error) {
-            // 获取文件夹文件数量失败
+        
+        // 只有当文件夹不是新创建的时候才调用API获取文件数量
+        // 通过检查文件夹的创建时间来判断是否为新创建的文件夹
+        const folderCreatedAt = new Date(folder.created_at);
+        const now = new Date();
+        const timeDiff = now - folderCreatedAt;
+        const isNewFolder = timeDiff < 5000; // 5秒内创建的文件夹认为是新文件夹
+        
+        if (!isNewFolder) {
+            try {
+                fileCount = await this.uiManager.api.folders.getFolderFileCount(folder.id);
+            } catch (error) {
+                // 获取文件夹文件数量失败，保持为0
+            }
         }
 
         return `
@@ -249,8 +259,21 @@ class UIFolderManager {
         // 添加事件监听器
         this.addFolderCardEventListeners(folderCard, folder);
 
-        // 异步更新文件数量
-        this.updateFolderCardFileCount(folderCard, folder.id);
+        // 异步更新文件数量（对于新创建的文件夹，延迟更新）
+        const folderCreatedAt = new Date(folder.created_at);
+        const now = new Date();
+        const timeDiff = now - folderCreatedAt;
+        const isNewFolder = timeDiff < 5000; // 5秒内创建的文件夹认为是新文件夹
+        
+        if (isNewFolder) {
+            // 对于新创建的文件夹，延迟2秒后更新文件数量
+            setTimeout(() => {
+                this.updateFolderCardFileCount(folderCard, folder.id);
+            }, 2000);
+        } else {
+            // 对于已存在的文件夹，立即更新文件数量
+            this.updateFolderCardFileCount(folderCard, folder.id);
+        }
 
         return folderCard;
     }
