@@ -13,10 +13,15 @@ class EnvSwitcher {
     }
 
     init() {
+        console.log('环境切换器初始化开始');
+        
         // 检查是否为管理员
         if (!this.isAdmin()) {
+            console.log('环境切换器初始化失败：非管理员用户');
             return;
         }
+        
+        console.log('开始创建环境切换器');
         
         // 创建环境切换器
         this.createSwitcher();
@@ -32,13 +37,22 @@ class EnvSwitcher {
         
         // 添加404错误处理
         this.handle404Error();
+        
+        console.log('环境切换器初始化完成');
     }
 
     isAdmin() {
+        // 开发模式下总是显示
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('开发模式：显示环境切换器');
+            return true;
+        }
+        
         // 优先使用authManager
         if (window.authManager && typeof window.authManager.getCurrentUser === 'function') {
             const user = window.authManager.getCurrentUser();
             if (user && user.role === 'admin') {
+                console.log('管理员用户：显示环境切换器');
                 return true;
             }
         }
@@ -48,12 +62,22 @@ class EnvSwitcher {
         if (currentUser) {
             try {
                 const user = JSON.parse(currentUser);
-                return user.isAdmin === true;
+                if (user.isAdmin === true) {
+                    console.log('localStorage管理员：显示环境切换器');
+                    return true;
+                }
             } catch (e) {
-                return false;
+                console.warn('解析用户信息失败:', e);
             }
         }
         
+        // 如果authManager不存在，在开发环境下也显示
+        if (!window.authManager && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+            console.log('开发模式且authManager未加载：显示环境切换器');
+            return true;
+        }
+        
+        console.log('非管理员用户：隐藏环境切换器');
         return false;
     }
 
@@ -483,17 +507,27 @@ class EnvSwitcher {
 
 // 初始化函数
 const initEnvSwitcher = (retryCount = 0) => {
+    console.log(`环境切换器初始化尝试 ${retryCount + 1}/10`);
+    
     if (retryCount > 10) {
-        console.warn('环境切换器初始化失败');
+        console.warn('环境切换器初始化失败：超过最大重试次数');
         return;
     }
     
-    if (window.ENV_MANAGER && window.authManager) {
+    // 检查基本依赖
+    if (window.ENV_MANAGER) {
         if (!window.envSwitcher) {
+            console.log('创建环境切换器实例');
             window.envSwitcher = new EnvSwitcher();
             console.log('环境切换器已初始化');
+        } else {
+            console.log('环境切换器已存在，跳过初始化');
         }
     } else {
+        console.log('等待ENV_MANAGER加载...', {
+            ENV_MANAGER: !!window.ENV_MANAGER,
+            authManager: !!window.authManager
+        });
         setTimeout(() => initEnvSwitcher(retryCount + 1), 100);
     }
 };
