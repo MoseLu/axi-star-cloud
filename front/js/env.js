@@ -69,6 +69,12 @@ window.ENV_MANAGER = (function() {
         return urlParams.get('env');
     }
 
+    // 清除localStorage中的环境配置
+    function clearStoredEnvironment() {
+        localStorage.removeItem('app_environment');
+        console.log('🗑️ 已清除localStorage中的环境配置');
+    }
+
     // 从localStorage获取保存的环境配置
     function getEnvFromStorage() {
         return localStorage.getItem('app_environment');
@@ -83,16 +89,16 @@ window.ENV_MANAGER = (function() {
     function initEnvironment() {
         console.log('🔧 开始初始化环境配置...');
         
-        // 优先级：URL参数 > localStorage > 自动检测
+        // 优先级：URL参数 > 自动检测 > localStorage
         const urlEnv = getEnvFromUrl();
-        const storageEnv = getEnvFromStorage();
         const detectedEnv = detectEnvironment();
+        const storageEnv = getEnvFromStorage();
         
         console.log('  - URL参数环境:', urlEnv);
-        console.log('  - localStorage环境:', storageEnv);
         console.log('  - 自动检测环境:', detectedEnv);
+        console.log('  - localStorage环境:', storageEnv);
         
-        let env = urlEnv || storageEnv || detectedEnv;
+        let env = urlEnv || detectedEnv || storageEnv;
         
         // 验证环境是否有效
         if (!ENVIRONMENTS[env]) {
@@ -289,7 +295,8 @@ window.ENV_MANAGER = (function() {
         },
         get currentEnv() {
             return currentEnv;
-        }
+        },
+        clearStoredEnvironment // 添加清除localStorage的方法
     };
 })();
 
