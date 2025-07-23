@@ -295,11 +295,11 @@ class EnvSwitcher {
                 color: #f97316;
             }
 
-            .env-option:hover .env-option-title {
+            .env-option:hover .env-option-label {
                 color: #f97316;
             }
 
-            .env-option:hover .env-option-subtitle {
+            .env-option:hover .env-option-url {
                 color: #fb923c;
             }
 
