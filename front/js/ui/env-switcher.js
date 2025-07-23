@@ -77,7 +77,10 @@ class EnvSwitcher {
         switcher.innerHTML = `
             <div class="env-switcher-main">
                 <div class="env-switcher-toggle" title="系统功能菜单">
-                    <span class="env-icon">⚙️</span>
+                    <div class="env-icon-container">
+                        <span class="env-icon-main">⚙️</span>
+                        <span class="env-icon-api" id="env-api-icon">🛠️</span>
+                    </div>
                 </div>
                 <div class="env-switcher-menu">
                     <div class="env-menu-item" data-action="switch-env" title="切换API环境">
@@ -148,14 +151,41 @@ class EnvSwitcher {
                 transform: scale(0.95);
             }
 
-            .env-icon {
-                font-size: 24px;
+            .env-icon-container {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+            }
+
+            .env-icon-main {
+                font-size: 20px;
                 color: #fff;
                 transition: transform 0.3s ease;
                 transform-origin: center;
+                z-index: 2;
             }
 
-            .env-switcher.expanded .env-icon {
+            .env-icon-api {
+                position: absolute;
+                bottom: -2px;
+                right: -2px;
+                font-size: 14px;
+                color: #fff;
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 50%;
+                width: 20px;
+                height: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 3;
+                transition: all 0.3s ease;
+            }
+
+            .env-switcher.expanded .env-icon-main {
                 transform: rotate(180deg);
             }
 
@@ -744,6 +774,22 @@ class EnvSwitcher {
                 option.classList.remove('active');
             }
         });
+        
+        // 更新API图标
+        this.updateApiIcon();
+    }
+
+    updateApiIcon() {
+        const apiIcon = document.getElementById('env-api-icon');
+        if (!apiIcon) return;
+        
+        const currentEnv = window.ENV_MANAGER?.currentEnv || 'local';
+        const envIcons = {
+            'local': '🛠️',
+            'prod': '🚀'
+        };
+        
+        apiIcon.textContent = envIcons[currentEnv] || '🛠️';
     }
 }
 
