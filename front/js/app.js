@@ -26,8 +26,6 @@ class App {
 
     async init() {
         try {
-            console.log('🚀 应用初始化开始...');
-            
             // 等待API系统准备就绪
             await this.waitForApiSystem();
             
@@ -76,8 +74,6 @@ class App {
             // 设置环境切换事件监听
             this.setupEnvironmentChangeListener();
             
-            console.log('✅ 应用初始化完成');
-            
         } catch (error) {
             console.error('❌ 应用初始化失败:', error);
         }
@@ -86,8 +82,6 @@ class App {
     // 设置环境切换事件监听
     setupEnvironmentChangeListener() {
         window.addEventListener('environmentChanged', async (event) => {
-            console.log('🔄 检测到环境切换:', event.detail);
-            
             try {
                 // 更新API网关的baseUrl
                 if (window.apiGateway && typeof window.apiGateway.updateBaseUrl === 'function') {
@@ -137,8 +131,6 @@ class App {
                         }
                     }
                 }
-                
-                console.log('✅ 环境切换后数据重新加载完成');
                 
             } catch (error) {
                 console.error('❌ 环境切换后数据重新加载失败:', error);

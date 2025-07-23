@@ -29,8 +29,6 @@ class ApiGateway {
             this.baseUrl = '';
         }
         
-        console.log('API网关baseUrl更新为:', this.baseUrl);
-        
         // 验证更新是否成功
         if (!this.baseUrl) {
             console.warn('⚠️ API网关baseUrl为空，请检查环境配置');
