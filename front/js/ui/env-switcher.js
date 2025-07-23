@@ -197,7 +197,9 @@ class EnvSwitcher {
             }
 
             .env-option.active .env-option-url {
-                color: rgba(255, 255, 255, 0.8);
+                color: rgba(255, 255, 255, 0.9);
+                background: rgba(255, 255, 255, 0.2);
+                border-color: rgba(255, 255, 255, 0.3);
             }
 
             .env-option-icon {
@@ -214,11 +216,16 @@ class EnvSwitcher {
             }
 
             .env-option-url {
-                font-size: 8px;
-                color: #6c757d;
-                margin-top: 2px;
+                font-size: 9px;
+                color: #495057;
+                margin-top: 3px;
                 text-align: center;
-                line-height: 1;
+                line-height: 1.2;
+                font-weight: 500;
+                background: rgba(0, 0, 0, 0.05);
+                padding: 2px 4px;
+                border-radius: 3px;
+                border: 1px solid rgba(0, 0, 0, 0.1);
             }
 
             /* 动画效果 */
@@ -271,7 +278,8 @@ class EnvSwitcher {
                 }
 
                 .env-option-url {
-                    font-size: 7px;
+                    font-size: 8px;
+                    padding: 1px 3px;
                 }
             }
 
