@@ -236,7 +236,12 @@ class Manager {
         this.currentUser = null;
         localStorage.removeItem('currentUser');
         localStorage.removeItem('userData');
-        localStorage.removeItem('loginData');
+        localStorage.removeItem('lastLoginTime');
+    }
+
+    // 更新baseUrl（用于环境切换）
+    updateBaseUrl() {
+        this.baseUrl = window.APP_CONFIG?.API_BASE_URL || '';
     }
 
     // 显示登录页面
