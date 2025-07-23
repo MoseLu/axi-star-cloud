@@ -139,13 +139,13 @@ class ThemeTransitionManager {
         
         console.log(`从 ${currentTheme} 切换到 ${newTheme}`);
         
-        // 开始动画
+        // 开始扩散动画
         await this.startTransition(newTheme);
         
-        // 切换主题
+        // 动画完成后切换主题
         this.switchTheme(newTheme);
         
-        // 结束动画
+        // 结束动画并清理
         await this.endTransition();
         
         this.isTransitioning = false;
@@ -165,10 +165,14 @@ class ThemeTransitionManager {
             
             console.log(`视口尺寸: ${viewportWidth}x${viewportHeight}, 最大半径: ${maxRadius}`);
             
-            // 设置覆盖层样式
+            // 设置覆盖层样式 - 使用新主题的背景色
             this.overlay.className = `theme-transition-overlay ${newTheme}`;
             this.overlay.style.background = newTheme === 'light' ? '#FFFFFF' : '#0F172A';
             this.overlay.style.opacity = '1';
+            this.overlay.style.transform = 'translate(50%, -50%)';
+            this.overlay.style.borderRadius = '50%';
+            this.overlay.style.width = '0';
+            this.overlay.style.height = '0';
             
             console.log('覆盖层样式设置完成');
             
@@ -189,9 +193,12 @@ class ThemeTransitionManager {
             // 计算当前半径
             const currentRadius = easeProgress * maxRadius;
             
-            // 更新覆盖层尺寸
+            // 更新覆盖层尺寸和位置
             this.overlay.style.width = `${currentRadius * 2}px`;
             this.overlay.style.height = `${currentRadius * 2}px`;
+            this.overlay.style.transform = `translate(50%, -50%)`;
+            
+            console.log(`动画进度: ${progress.toFixed(2)}, 半径: ${currentRadius.toFixed(0)}px`);
             
             if (progress < 1) {
                 this.animationId = requestAnimationFrame(animate);
