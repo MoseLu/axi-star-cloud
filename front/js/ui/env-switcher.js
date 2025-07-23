@@ -234,6 +234,19 @@ class EnvSwitcher {
                 transition: all 0.3s ease;
             }
 
+            .env-option:not(.active) .env-option-url {
+                background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            }
+
+            .env-option:not(.active) .env-option-url::before {
+                background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                border: 1px solid rgba(59, 130, 246, 0.3);
+            }
+
             .env-option:not(.active):hover {
                 background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
                 transform: translateY(-2px);
@@ -322,6 +335,14 @@ class EnvSwitcher {
                     -webkit-text-fill-color: transparent;
                     background-clip: text;
                     text-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+                }
+
+                .env-option:not(.active) .env-option-url {
+                    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    text-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
                 }
 
                 .env-option:not(.active):hover .env-option-url {
