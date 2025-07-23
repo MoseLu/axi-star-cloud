@@ -81,10 +81,9 @@ class ThemeTransitionManager {
         btn.setAttribute('role', 'button');
         btn.setAttribute('aria-label', '主题切换按钮');
         
-        // 添加图标
+        // 只添加一个图标容器
         btn.innerHTML = `
-            <i class="fa fa-sun-o icon sun-icon" aria-hidden="true"></i>
-            <i class="fa fa-moon-o icon moon-icon" aria-hidden="true"></i>
+            <i class="fa icon" aria-hidden="true"></i>
         `;
         
         // 添加点击事件
@@ -107,17 +106,15 @@ class ThemeTransitionManager {
         // 添加当前主题类
         btn.classList.add(this.currentTheme);
         
-        // 确保图标正确显示
-        const sunIcon = btn.querySelector('.sun-icon');
-        const moonIcon = btn.querySelector('.moon-icon');
-        
-        if (sunIcon && moonIcon) {
+        // 动态切换图标
+        const icon = btn.querySelector('.icon');
+        if (icon) {
             if (this.currentTheme === 'light') {
-                sunIcon.style.opacity = '0';
-                moonIcon.style.opacity = '1';
+                icon.className = 'fa fa-moon-o icon';
+                icon.style.color = '#3B82F6';
             } else {
-                sunIcon.style.opacity = '1';
-                moonIcon.style.opacity = '0';
+                icon.className = 'fa fa-sun-o icon';
+                icon.style.color = '#F59E0B';
             }
         }
         

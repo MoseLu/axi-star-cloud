@@ -61,50 +61,16 @@
     display: block !important;
 }
 
-.theme-toggle-btn .sun-icon {
-    opacity: 1;
-    color: #F59E0B;
-    transform: translate(-50%, -50%) rotate(0deg);
-    display: block !important;
-}
-
-.theme-toggle-btn .moon-icon {
-    opacity: 0;
-    color: #3B82F6;
-    transform: translate(-50%, -50%) rotate(-90deg);
-    display: block !important;
-}
-
 /* 暗色主题下的按钮样式（默认） */
 .theme-toggle-btn.dark {
     background: transparent;
     border: none;
 }
 
-.theme-toggle-btn.dark .sun-icon {
-    opacity: 1;
-    transform: translate(-50%, -50%) rotate(0deg);
-}
-
-.theme-toggle-btn.dark .moon-icon {
-    opacity: 0;
-    transform: translate(-50%, -50%) rotate(-90deg);
-}
-
 /* 亮色主题下的按钮样式 */
 .theme-toggle-btn.light {
     background: transparent;
     border: none;
-}
-
-.theme-toggle-btn.light .sun-icon {
-    opacity: 0;
-    transform: translate(-50%, -50%) rotate(90deg);
-}
-
-.theme-toggle-btn.light .moon-icon {
-    opacity: 1;
-    transform: translate(-50%, -50%) rotate(0deg);
 }
 
 /* 图标旋转动画 */

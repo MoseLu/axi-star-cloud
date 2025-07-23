@@ -54,14 +54,14 @@
     flex: 1;
     font-size: 14px;
     line-height: 1.4;
-    color: #333;
+    color: #1F2937;
 }
 
 .message-close {
     background: none;
     border: none;
     font-size: 18px;
-    color: #666;
+    color: #4B5563;
     cursor: pointer;
     padding: 0;
     width: 24px;
@@ -75,7 +75,7 @@
 
 .message-close:hover {
     background: #F3F4F6;
-    color: #374151;
+    color: #1F2937;
 }
 
 /* 消息类型样式 */

@@ -57,15 +57,15 @@
 
 /* 文字颜色 */
 .text-purple-300 {
-    color: #8B5CF6;
+    color: #7C3AED;
 }
 
 .text-purple-200 {
-    color: #000000;
+    color: #1F2937;
 }
 
 .text-gray-300 {
-    color: #9CA3AF;
+    color: #6B7280;
 }
 
 /* 空状态 */
@@ -85,7 +85,7 @@
 }
 
 .text-gray-400 {
-    color: #9CA3AF;
+    color: #4B5563;
 }
 
 /* 响应式调整 */

@@ -30,7 +30,7 @@
 
 .settings-header h3 {
     margin: 0;
-    color: #333;
+    color: #1F2937;
     font-size: 18px;
 }
 
@@ -39,7 +39,7 @@
     border: none;
     font-size: 24px;
     cursor: pointer;
-    color: #666;
+    color: #4B5563;
     padding: 0;
     width: 30px;
     height: 30px;
@@ -52,7 +52,7 @@
 
 .settings-close:hover {
     background: #e9ecef;
-    color: #333;
+    color: #1F2937;
 }
 
 .settings-content {
