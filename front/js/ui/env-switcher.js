@@ -479,30 +479,30 @@ class EnvSwitcher {
             }
         });
     }
+}
 
-    // 初始化函数
-    const initEnvSwitcher = (retryCount = 0) => {
-        if (retryCount > 10) {
-            console.warn('环境切换器初始化失败');
-            return;
-        }
-        
-        if (window.ENV_MANAGER && window.authManager) {
-            if (!window.envSwitcher) {
-                window.envSwitcher = new EnvSwitcher();
-                console.log('环境切换器已初始化');
-            }
-        } else {
-            setTimeout(() => initEnvSwitcher(retryCount + 1), 100);
-        }
-    };
-
-    // 页面加载完成后初始化
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(initEnvSwitcher, 1000);
-        });
-    } else {
-        setTimeout(initEnvSwitcher, 1000);
+// 初始化函数
+const initEnvSwitcher = (retryCount = 0) => {
+    if (retryCount > 10) {
+        console.warn('环境切换器初始化失败');
+        return;
     }
+    
+    if (window.ENV_MANAGER && window.authManager) {
+        if (!window.envSwitcher) {
+            window.envSwitcher = new EnvSwitcher();
+            console.log('环境切换器已初始化');
+        }
+    } else {
+        setTimeout(() => initEnvSwitcher(retryCount + 1), 100);
+    }
+};
+
+// 页面加载完成后初始化
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initEnvSwitcher, 1000);
+    });
+} else {
+    setTimeout(initEnvSwitcher, 1000);
 }

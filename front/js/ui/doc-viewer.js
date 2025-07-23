@@ -10,7 +10,10 @@ class DocViewer {
             { id: 'INDEX.md', title: '文档目录', icon: '📚' },
             { id: 'README.md', title: '项目概述', icon: '📖' },
             { id: 'UPLOAD_LIMITS.md', title: '上传限制', icon: '📋' },
-            { id: 'LICENSE.md', title: '许可证', icon: '⚖️' }
+            { id: 'LICENSE.md', title: '许可证', icon: '⚖️' },
+            { id: 'ENV_USAGE_EXAMPLES.md', title: '环境使用示例', icon: '⚙️' },
+            { id: 'CSS_README.md', title: 'CSS样式文档', icon: '🎨' },
+            { id: 'API_README.md', title: 'API接口文档', icon: '🔌' }
         ];
         this.init();
     }
