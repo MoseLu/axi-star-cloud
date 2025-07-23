@@ -136,6 +136,12 @@ func (r *Router) SetupRoutes(
 	// 更新日志相关路由
 	apiGroup.AddRoute("GET", "/update-logs", updateLogHandler.GetUpdateLogs, "获取更新日志")
 
+	// 注册静态文件列表路由
+	r.registerStaticFilesRoutes()
+
+	// 注册文档路由
+	r.registerDocRoutes()
+
 	// 注册静态文件路由
 	r.registerStaticRoutes()
 
@@ -145,14 +151,8 @@ func (r *Router) SetupRoutes(
 	// 注册健康检查路由
 	r.registerHealthRoutes()
 
-	// 注册文件路径测试路由
+	// 注册测试路由
 	r.registerTestRoutes()
-
-	// 注册静态文件列表路由
-	r.registerStaticFilesRoutes()
-
-	// 注册文档路由
-	r.registerDocRoutes()
 
 	// 应用所有路由组
 	r.applyGroups()
@@ -307,7 +307,7 @@ func (r *Router) registerTestRoutes() {
 
 // registerStaticFilesRoutes 注册静态文件列表路由
 func (r *Router) registerStaticFilesRoutes() {
-	r.engine.GET("/static/list", func(c *gin.Context) {
+	r.engine.GET("/api/static/list", func(c *gin.Context) {
 		// 尝试多个可能的public目录路径
 		possiblePaths := []string{
 			"../front/public",
@@ -344,13 +344,13 @@ func (r *Router) registerStaticFilesRoutes() {
 func (r *Router) registerDocRoutes() {
 	r.engine.GET("/docs/:filename", func(c *gin.Context) {
 		filename := c.Param("filename")
-		
+
 		// 安全检查：只允许.md文件
 		if filepath.Ext(filename) != ".md" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "只允许访问.md文件"})
 			return
 		}
-		
+
 		// 尝试多个可能的docs目录路径
 		possiblePaths := []string{
 			"docs",
@@ -359,7 +359,7 @@ func (r *Router) registerDocRoutes() {
 			"/www/wwwroot/axi-star-cloud/docs",
 			"/www/wwwroot/redamancy.com.cn/docs",
 		}
-		
+
 		var filePath string
 		for _, dir := range possiblePaths {
 			path := filepath.Join(dir, filename)
@@ -368,19 +368,19 @@ func (r *Router) registerDocRoutes() {
 				break
 			}
 		}
-		
+
 		if filePath == "" {
 			c.JSON(http.StatusNotFound, gin.H{"error": "文档文件不存在"})
 			return
 		}
-		
+
 		// 读取文件内容
 		content, err := os.ReadFile(filePath)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "读取文件失败"})
 			return
 		}
-		
+
 		// 设置响应头
 		c.Header("Content-Type", "text/markdown; charset=utf-8")
 		c.Data(http.StatusOK, "text/markdown; charset=utf-8", content)
