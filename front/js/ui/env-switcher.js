@@ -234,6 +234,25 @@ class EnvSwitcher {
                 transform: translateY(10px) scale(0.9);
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 backdrop-filter: blur(10px);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .env-switcher-options::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(45deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 50%, rgba(139, 92, 246, 0.1) 100%);
+                animation: shimmer 3s ease-in-out infinite;
+                pointer-events: none;
+            }
+
+            @keyframes shimmer {
+                0%, 100% { opacity: 0.3; }
+                50% { opacity: 0.6; }
             }
 
             .env-switcher.show-env-options .env-switcher-options {
