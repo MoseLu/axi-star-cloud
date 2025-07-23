@@ -249,10 +249,10 @@ class EnvSwitcher {
                 cursor: pointer;
                 border-radius: 12px;
                 transition: all 0.3s ease;
-                color: #e5e5e5;
+                color: #ffffff;
                 margin: 8px 0;
-                border: 2px solid transparent;
-                background: rgba(255, 255, 255, 0.05);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.2) 100%);
                 position: relative;
                 overflow: hidden;
             }
@@ -264,16 +264,16 @@ class EnvSwitcher {
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+                background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
                 opacity: 0;
                 transition: opacity 0.3s ease;
             }
 
             .env-option:hover {
-                background: rgba(16, 185, 129, 0.1);
-                border-color: rgba(16, 185, 129, 0.3);
+                background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0.2) 100%);
+                border-color: rgba(16, 185, 129, 0.5);
                 transform: translateY(-2px);
-                box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
+                box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
             }
 
             .env-option:hover::before {
@@ -281,7 +281,7 @@ class EnvSwitcher {
             }
 
             .env-option.active {
-                background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+                background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0.2) 100%);
                 border-color: #10b981;
                 color: #10b981;
                 box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
@@ -319,6 +319,11 @@ class EnvSwitcher {
             }
 
             .env-option.active .env-option-url {
+                color: #10b981;
+                opacity: 1;
+            }
+
+            .env-option:hover .env-option-url {
                 color: #10b981;
                 opacity: 1;
             }
