@@ -125,21 +125,21 @@
 /* 文件名和类型容器 */
 .file-card .file-icon-container > div:last-child {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
     gap: 0.5rem;
-    width: 100%;
     margin-top: 0.5rem;
 }
 
 /* 文件名样式 */
 .file-card h4 {
-    text-align: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #F9FAFB;
     margin: 0;
-    width: auto;
-    flex-shrink: 1;
-    min-width: 0;
+    line-height: 1.4;
+    word-break: break-word;
+    max-width: 100%;
 }
 
 /* 文件类型标签样式 */
@@ -161,21 +161,21 @@
 /* 文件夹名和类型容器 */
 .folder-card .folder-icon-container > div:last-child {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
     gap: 0.5rem;
-    width: 100%;
     margin-top: 0.5rem;
 }
 
 /* 文件夹名样式 */
 .folder-card h4 {
-    text-align: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #F9FAFB;
     margin: 0;
-    width: auto;
-    flex-shrink: 1;
-    min-width: 0;
+    line-height: 1.4;
+    word-break: break-word;
+    max-width: 100%;
 }
 
 /* 文件夹类型标签样式 */
