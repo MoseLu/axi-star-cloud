@@ -420,7 +420,7 @@ class EnvSwitcher {
                 option.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const env = option.dataset.env;
-                    console.log('环境选项点击:', env);
+        
                     this.switchEnvironment(env);
                     this.showEnvOptions = false;
                     this.hide();
@@ -467,7 +467,7 @@ class EnvSwitcher {
         const currentEnv = window.ENV_MANAGER.currentEnv;
         
         if (env !== currentEnv) {
-            console.log(`🔄 切换环境: ${currentEnv} -> ${env}`);
+    
             
             // 直接通过ENV_MANAGER切换环境
             window.ENV_MANAGER.switchEnvironment(env);
@@ -558,7 +558,7 @@ class EnvSwitcher {
                 
                 // 重新加载URL文件列表
                 if (window.uiManager && typeof window.uiManager.api && window.uiManager.api.urlFiles) {
-                    console.log('重新加载URL文件列表...');
+            
                     const urlFiles = await window.uiManager.api.urlFiles.getUrlFiles();
                     if (urlFiles && window.uiManager.allFiles) {
                         // 更新allFiles中的URL文件部分

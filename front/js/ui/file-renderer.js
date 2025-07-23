@@ -247,7 +247,22 @@ class UIFileRenderer {
             
             if (file.type === 'image') {
                 // 图片显示小缩略图
-                const imgUrl = file.thumbnailUrl || file.previewUrl || window.apiGateway?.buildUrl('/uploads/image/' + encodeURIComponent(file.name)) || ('/uploads/image/' + encodeURIComponent(file.name));
+                let imgUrl;
+                if (file.thumbnailUrl) {
+                    imgUrl = file.thumbnailUrl;
+                } else if (file.previewUrl) {
+                    imgUrl = file.previewUrl;
+                } else {
+                    // 使用API网关构建正确的URL
+                    if (window.apiGateway && typeof window.apiGateway.buildUrl === 'function') {
+                        imgUrl = window.apiGateway.buildUrl('/uploads/image/' + encodeURIComponent(file.name));
+                    } else if (window.APP_UTILS && typeof window.APP_UTILS.buildResourceUrl === 'function') {
+                        imgUrl = window.APP_UTILS.buildResourceUrl('/uploads/image/' + encodeURIComponent(file.name));
+                    } else {
+                        imgUrl = '/uploads/image/' + encodeURIComponent(file.name);
+                    }
+                }
+                
                 iconCell.innerHTML = `
                     <img src="${imgUrl}" 
                          alt="${file.name}" 
@@ -663,9 +678,14 @@ class UIFileRenderer {
                 if (file.previewUrl) {
                     return file.previewUrl;
                 }
-                // 否则使用默认的图片路径，通过API网关构建
-                const imgUrl = window.apiGateway?.buildUrl('/uploads/image/' + encodeURIComponent(file.name)) || ('/uploads/image/' + encodeURIComponent(file.name));
-                return imgUrl;
+                // 使用API网关构建正确的URL
+                if (window.apiGateway && typeof window.apiGateway.buildUrl === 'function') {
+                    return window.apiGateway.buildUrl('/uploads/image/' + encodeURIComponent(file.name));
+                } else if (window.APP_UTILS && typeof window.APP_UTILS.buildResourceUrl === 'function') {
+                    return window.APP_UTILS.buildResourceUrl('/uploads/image/' + encodeURIComponent(file.name));
+                } else {
+                    return '/uploads/image/' + encodeURIComponent(file.name);
+                }
             } else {
                 // 非图片文件使用默认图标
                 return `/static/public/docs.png`;

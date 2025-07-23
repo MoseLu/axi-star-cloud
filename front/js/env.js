@@ -64,7 +64,7 @@ window.ENV_MANAGER = (function() {
     // 清除localStorage中的环境配置
     function clearStoredEnvironment() {
         localStorage.removeItem('app_environment');
-        console.log('🗑️ 已清除localStorage中的环境配置');
+
     }
 
     // 从localStorage获取保存的环境配置
