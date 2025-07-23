@@ -43,12 +43,27 @@ class EnvSwitcher {
         if (!user) {
             try {
                 const storedUser = localStorage.getItem('user');
+                const currentUser = localStorage.getItem('currentUser');
+                const userData = localStorage.getItem('userData');
+                
+                console.log('  - localStorage中的user:', storedUser);
+                console.log('  - localStorage中的currentUser:', currentUser);
+                console.log('  - localStorage中的userData:', userData);
+                
                 if (storedUser) {
                     const parsedUser = JSON.parse(storedUser);
                     const storedIsAdmin = parsedUser && parsedUser.role === 'admin';
                     console.log('  - 从localStorage获取用户信息:', parsedUser);
                     console.log('  - localStorage中的管理员权限:', storedIsAdmin);
                     return storedIsAdmin;
+                }
+                
+                if (currentUser) {
+                    const parsedCurrentUser = JSON.parse(currentUser);
+                    const currentUserIsAdmin = parsedCurrentUser && parsedCurrentUser.isAdmin;
+                    console.log('  - 从currentUser获取用户信息:', parsedCurrentUser);
+                    console.log('  - currentUser中的管理员权限:', currentUserIsAdmin);
+                    return currentUserIsAdmin;
                 }
             } catch (error) {
                 console.log('  - localStorage解析失败:', error);
@@ -390,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('🔑 管理员权限:', isAdmin);
         
         // 如果用户信息还没加载完成，重试
-        if (!user && retryCount < 10) {
+        if (!user && retryCount < 15) {
             console.log('⏳ 用户信息未加载，等待重试...');
             setTimeout(() => initEnvSwitcher(retryCount + 1), 1000);
             return;
@@ -405,8 +420,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    // 首次尝试，延迟3秒
-    setTimeout(() => initEnvSwitcher(), 3000);
+    // 首次尝试，延迟5秒
+    setTimeout(() => initEnvSwitcher(), 5000);
 });
 
 // 导出类供外部使用
