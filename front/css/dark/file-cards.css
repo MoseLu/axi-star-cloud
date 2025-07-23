@@ -6,7 +6,7 @@
 /* 文件卡片网格布局 */
 #files-grid, .files-grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 240px));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 320px));
   gap: 16px;
   align-items: start;
   justify-items: start;
@@ -14,7 +14,7 @@
 }
 
 .file-card {
-  max-width: 240px;
+  max-width: 320px;
   width: 100%;
 }
 
@@ -54,7 +54,7 @@
 /* 文件夹卡片样式 */
 .folder-card {
     width: 100%;
-    max-width: 240px;
+    max-width: 320px;
     min-height: 160px;
     display: flex;
     flex-direction: column;
