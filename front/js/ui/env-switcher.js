@@ -234,7 +234,6 @@ class EnvSwitcher {
                 transform: translateY(10px) scale(0.9);
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 backdrop-filter: blur(10px);
-                position: relative;
                 overflow: hidden;
             }
 
