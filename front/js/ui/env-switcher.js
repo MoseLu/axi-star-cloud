@@ -499,6 +499,11 @@ class EnvSwitcher {
                 window.authManager.updateBaseUrl();
             }
             
+            // 更新上传队列管理器的baseUrl
+            if (window.uploadQueueManager && typeof window.uploadQueueManager.updateBaseUrl === 'function') {
+                window.uploadQueueManager.updateBaseUrl();
+            }
+            
             // 显示切换提示
             this.showNotification(env);
             

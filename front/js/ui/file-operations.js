@@ -25,13 +25,7 @@ class UIFileOperations {
             this.showDownloadProgress(file.name);
             
             // 获取用户ID
-            let userId = null;
-            if (localStorage.getItem('currentUser')) {
-                try {
-                    const cu = JSON.parse(localStorage.getItem('currentUser'));
-                    if (cu && cu.uuid) userId = cu.uuid;
-                } catch(e) {}
-            }
+            let userId = window.apiSystem?.getCurrentUserId();
             if (!userId && localStorage.getItem('user_id')) userId = localStorage.getItem('user_id');
             if (!userId && window.userId) userId = window.userId;
             
@@ -39,7 +33,17 @@ class UIFileOperations {
                 throw new Error('未检测到用户ID，请重新登录');
             }
             
-            const response = await fetch(`/api/files/${file.id}/download?user_id=${userId}`, {
+            // 使用API网关构建正确的URL
+            let downloadUrl;
+            if (window.apiGateway && typeof window.apiGateway.buildUrl === 'function') {
+                downloadUrl = window.apiGateway.buildUrl(`/api/files/${file.id}/download?user_id=${userId}`);
+            } else if (window.APP_UTILS && typeof window.APP_UTILS.buildApiUrl === 'function') {
+                downloadUrl = window.APP_UTILS.buildApiUrl(`/api/files/${file.id}/download?user_id=${userId}`);
+            } else {
+                downloadUrl = `/api/files/${file.id}/download?user_id=${userId}`;
+            }
+            
+            const response = await fetch(downloadUrl, {
                 method: 'GET'
             });
 

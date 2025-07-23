@@ -432,7 +432,17 @@ class UIAdminManager {
      */
     async loadUserList() {
         try {
-            const response = await fetch('/api/admin/users', {
+            // 使用API网关构建正确的URL
+            let apiUrl;
+            if (window.apiGateway && typeof window.apiGateway.buildUrl === 'function') {
+                apiUrl = window.apiGateway.buildUrl('/api/admin/users');
+            } else if (window.APP_UTILS && typeof window.APP_UTILS.buildApiUrl === 'function') {
+                apiUrl = window.APP_UTILS.buildApiUrl('/api/admin/users');
+            } else {
+                apiUrl = '/api/admin/users';
+            }
+            
+            const response = await fetch(apiUrl, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }

@@ -6,8 +6,20 @@ class UploadQueueManager {
     constructor() {
         this.tasks = new Map();
         this.pollingInterval = null;
-        // 确保使用正确的API路径
-        this.baseUrl = '/api';
+        // 使用API网关的baseUrl，确保环境切换时能正确更新
+        this.updateBaseUrl();
+    }
+
+    // 更新baseUrl（用于环境切换）
+    updateBaseUrl() {
+        if (window.apiGateway && window.apiGateway.baseUrl) {
+            this.baseUrl = window.apiGateway.baseUrl;
+        } else if (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) {
+            this.baseUrl = window.APP_CONFIG.API_BASE_URL;
+        } else {
+            this.baseUrl = '/api';
+        }
+        console.log('UploadQueueManager baseUrl更新为:', this.baseUrl);
     }
 
     /**
