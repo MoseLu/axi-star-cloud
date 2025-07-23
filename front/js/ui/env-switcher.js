@@ -101,7 +101,7 @@ class EnvSwitcher {
                         <span class="env-menu-label">系统文档</span>
                     </div>
                 </div>
-                <div class="env-switcher-options" style="display: none;">
+                <div class="env-switcher-options">
                     <div class="env-option" data-env="local" title="开发环境API">
                         <span class="env-option-icon">🛠️</span>
                         <span class="env-option-label">开发API</span>
@@ -148,6 +148,7 @@ class EnvSwitcher {
                 box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 border: 2px solid rgba(255, 255, 255, 0.1);
+                z-index: 10001;
             }
 
             .env-switcher-toggle:hover {
@@ -170,37 +171,46 @@ class EnvSwitcher {
                 transform: rotate(180deg);
             }
 
+            /* 左侧展开菜单 */
             .env-switcher-menu {
                 position: absolute;
-                bottom: 70px;
-                right: 0;
+                bottom: 0;
+                right: 70px;
                 background: #1a1a1a;
-                border-radius: 12px;
+                border-radius: 28px;
                 padding: 8px;
                 box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
                 border: 1px solid #333;
-                min-width: 160px;
+                min-width: 120px;
                 opacity: 0;
                 visibility: hidden;
-                transform: translateY(10px) scale(0.9);
+                transform: translateX(20px) scale(0.9);
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                height: 56px;
             }
 
             .env-switcher.expanded .env-switcher-menu {
                 opacity: 1;
                 visibility: visible;
-                transform: translateY(0) scale(1);
+                transform: translateX(0) scale(1);
             }
 
             .env-menu-item {
                 display: flex;
+                flex-direction: column;
                 align-items: center;
-                padding: 12px 16px;
+                justify-content: center;
+                padding: 8px 12px;
                 cursor: pointer;
-                border-radius: 8px;
+                border-radius: 20px;
                 transition: all 0.2s ease;
                 color: #e5e5e5;
-                margin: 2px 0;
+                margin: 0 4px;
+                min-width: 50px;
+                height: 40px;
             }
 
             .env-menu-item:hover {
@@ -209,31 +219,33 @@ class EnvSwitcher {
             }
 
             .env-menu-icon {
-                font-size: 18px;
-                margin-right: 12px;
-                width: 20px;
-                text-align: center;
+                font-size: 16px;
+                margin-bottom: 2px;
             }
 
             .env-menu-label {
-                font-size: 14px;
+                font-size: 10px;
                 font-weight: 500;
+                text-align: center;
+                line-height: 1;
             }
 
+            /* 上方环境选项卡片 */
             .env-switcher-options {
                 position: absolute;
-                bottom: 70px;
+                bottom: 80px;
                 right: 0;
-                background: #1a1a1a;
-                border-radius: 12px;
-                padding: 12px;
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-                border: 1px solid #333;
-                min-width: 200px;
+                background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+                border-radius: 16px;
+                padding: 16px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+                border: 1px solid rgba(139, 92, 246, 0.2);
+                min-width: 240px;
                 opacity: 0;
                 visibility: hidden;
                 transform: translateY(10px) scale(0.9);
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                backdrop-filter: blur(10px);
             }
 
             .env-switcher.show-env-options .env-switcher-options {
@@ -245,68 +257,82 @@ class EnvSwitcher {
             .env-option {
                 display: flex;
                 flex-direction: column;
-                padding: 12px 16px;
+                padding: 16px 20px;
                 cursor: pointer;
-                border-radius: 8px;
-                transition: all 0.2s ease;
+                border-radius: 12px;
+                transition: all 0.3s ease;
                 color: #e5e5e5;
-                margin: 4px 0;
-                border: 1px solid transparent;
+                margin: 8px 0;
+                border: 2px solid transparent;
+                background: rgba(255, 255, 255, 0.05);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .env-option::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+                opacity: 0;
+                transition: opacity 0.3s ease;
             }
 
             .env-option:hover {
                 background: rgba(139, 92, 246, 0.1);
                 border-color: rgba(139, 92, 246, 0.3);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
+            }
+
+            .env-option:hover::before {
+                opacity: 1;
             }
 
             .env-option.active {
-                background: rgba(139, 92, 246, 0.2);
+                background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%);
                 border-color: #8b5cf6;
                 color: #8b5cf6;
+                box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+            }
+
+            .env-option.active::before {
+                opacity: 1;
             }
 
             .env-option-header {
                 display: flex;
                 align-items: center;
-                margin-bottom: 4px;
+                margin-bottom: 8px;
             }
 
             .env-option-icon {
-                font-size: 16px;
-                margin-right: 8px;
+                font-size: 20px;
+                margin-right: 12px;
+                width: 24px;
+                text-align: center;
             }
 
             .env-option-label {
-                font-size: 14px;
+                font-size: 16px;
                 font-weight: 600;
+                letter-spacing: 0.5px;
             }
 
             .env-option-url {
-                font-size: 12px;
+                font-size: 13px;
                 color: #888;
-                margin-left: 24px;
+                margin-left: 36px;
+                font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+                opacity: 0.8;
             }
 
-            .env-back-button {
-                display: flex;
-                align-items: center;
-                padding: 8px 12px;
-                cursor: pointer;
-                border-radius: 6px;
-                transition: all 0.2s ease;
-                color: #888;
-                margin-bottom: 8px;
-                font-size: 12px;
-            }
-
-            .env-back-button:hover {
-                background: rgba(255, 255, 255, 0.1);
-                color: #fff;
-            }
-
-            .env-back-icon {
-                margin-right: 6px;
-                font-size: 14px;
+            .env-option.active .env-option-url {
+                color: #8b5cf6;
+                opacity: 1;
             }
 
             @media (max-width: 768px) {
@@ -324,9 +350,48 @@ class EnvSwitcher {
                     font-size: 22px;
                 }
 
-                .env-switcher-menu,
+                .env-switcher-menu {
+                    right: 66px;
+                    height: 52px;
+                }
+
+                .env-menu-item {
+                    height: 36px;
+                    min-width: 45px;
+                }
+
+                .env-menu-icon {
+                    font-size: 14px;
+                }
+
+                .env-menu-label {
+                    font-size: 9px;
+                }
+
                 .env-switcher-options {
-                    min-width: 140px;
+                    min-width: 220px;
+                    padding: 12px;
+                    bottom: 70px;
+                }
+
+                .env-option {
+                    padding: 12px 16px;
+                    margin: 6px 0;
+                }
+
+                .env-option-icon {
+                    font-size: 18px;
+                    margin-right: 10px;
+                    width: 20px;
+                }
+
+                .env-option-label {
+                    font-size: 14px;
+                }
+
+                .env-option-url {
+                    font-size: 11px;
+                    margin-left: 30px;
                 }
             }
         `;
