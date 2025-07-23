@@ -540,10 +540,7 @@ class UIProfileManager {
             throw new Error('无法获取用户ID');
         }
         
-        const response = await fetch(`/api/profile/avatar?user_id=${userId}`, {
-            method: 'POST',
-            body: formData
-        });
+        const response = await window.apiGateway.upload(`/api/profile/avatar?user_id=${userId}`, formData);
 
         if (!response.ok) {
             const errorData = await response.json();

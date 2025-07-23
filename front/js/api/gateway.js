@@ -5,17 +5,22 @@
 class ApiGateway {
     constructor() {
         this.baseUrl = '';
+        this.isInitialized = false;
         this.init();
     }
 
     init() {
-        // 从环境配置获取baseUrl
-        this.updateBaseUrl();
+        // 延迟初始化，确保环境配置已准备好
+        setTimeout(() => {
+            this.updateBaseUrl();
+            this.isInitialized = true;
+        }, 100);
     }
 
     // 更新baseUrl（用于环境切换）
     updateBaseUrl() {
         this.baseUrl = window.APP_CONFIG?.API_BASE_URL || '';
+        console.log('API网关baseUrl更新为:', this.baseUrl);
     }
 
     // 构建完整的API URL

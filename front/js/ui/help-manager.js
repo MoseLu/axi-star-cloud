@@ -299,7 +299,7 @@ class UIHelpManager {
      */
     async loadUpdateLogs() {
         try {
-            const response = await fetch('/api/update-logs');
+            const response = await window.apiGateway.get('/api/update-logs');
             const result = await response.json();
             
             if (result.success && result.data) {

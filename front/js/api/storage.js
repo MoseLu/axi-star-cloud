@@ -10,18 +10,20 @@ class Storage {
     // 获取存储信息
     async getStorageInfo() {
         const userId = this.core.getCurrentUserId();
-        if (!userId) return null;
+        if (!userId) {
+            console.warn('用户未登录，无法获取存储信息');
+            return null;
+        }
 
         try {
-            const response = await fetch(`${this.core.baseUrl}/api/storage?user_id=${userId}`);
-            const data = await response.json();
-            
-            if (data.success) {
-                return data.storage;
-            } else {
-                return null;
+            const response = await window.apiGateway.get(`/api/storage?user_id=${userId}`);
+            if (!response.ok) {
+                throw new Error(`获取存储信息失败: ${response.status}`);
             }
+            const data = await response.json();
+            return data;
         } catch (error) {
+            console.error('获取存储信息失败:', error);
             return null;
         }
     }
