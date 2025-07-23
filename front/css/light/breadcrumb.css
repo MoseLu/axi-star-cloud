@@ -1,0 +1,39 @@
+/**
+ * 面包屑导航样式
+ * 包含面包屑导航容器、按钮和文本样式
+ */
+
+/* 面包屑导航样式 */
+#breadcrumb-container {
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  max-width: 100%;
+}
+
+#breadcrumb-container:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.breadcrumb-back-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.breadcrumb-back-btn:hover {
+  background: rgba(139, 92, 246, 0.1);
+  transform: translateX(-2px);
+}
+
+/* 面包屑文件夹名称样式 */
+#breadcrumb-container span[title] {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+} 

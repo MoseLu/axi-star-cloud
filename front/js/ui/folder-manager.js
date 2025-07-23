@@ -114,6 +114,16 @@ class UIFolderManager {
             }
         });
         
+        // 异步更新每个文件夹的文件数量
+        setTimeout(() => {
+            categoryFolders.forEach(folder => {
+                const folderCard = foldersGrid.querySelector(`[data-folder-id="${folder.id}"]`);
+                if (folderCard) {
+                    this.updateFolderCardFileCount(folderCard, folder.id);
+                }
+            });
+        }, 100);
+        
         // 清除渲染标志
         this._isRendering = false;
     }
@@ -151,23 +161,9 @@ class UIFolderManager {
 
     // 创建文件夹卡片HTML
     async createFolderCardHTML(folder, categoryInfo) {
-        // 对于新创建的文件夹，直接显示0个文件，避免API调用延迟问题
+        // 直接显示0个文件，避免API调用延迟问题
+        // 文件数量会在后续的updateFolderCardFileCount中异步更新
         let fileCount = 0;
-        
-        // 只有当文件夹不是新创建的时候才调用API获取文件数量
-        // 通过检查文件夹的创建时间来判断是否为新创建的文件夹
-        const folderCreatedAt = new Date(folder.created_at);
-        const now = new Date();
-        const timeDiff = now - folderCreatedAt;
-        const isNewFolder = timeDiff < 5000; // 5秒内创建的文件夹认为是新文件夹
-        
-        if (!isNewFolder) {
-            try {
-                fileCount = await this.uiManager.api.folders.getFolderFileCount(folder.id);
-            } catch (error) {
-                // 获取文件夹文件数量失败，保持为0
-            }
-        }
 
         return `
             <div class="glass-effect rounded-xl p-3 border border-blue-400/40 hover:border-blue-400/80 transition-all duration-300 cursor-pointer group drop-zone relative min-h-[100px] max-w-[200px] flex flex-col justify-between items-center bg-gradient-to-br from-blue-900/60 to-dark/80 shadow-lg" data-folder-id="${folder.id}" title="点击查看文件夹内容">
@@ -282,9 +278,33 @@ class UIFolderManager {
     async updateFolderCardFileCount(folderCard, folderId) {
         try {
             const fileCount = await this.uiManager.api.folders.getFolderFileCount(folderId);
-            const countElement = folderCard.querySelector('.file-count');
+            
+            // 尝试查找新的HTML格式中的文件数量元素
+            let countElement = folderCard.querySelector('.file-count');
+            
+            if (!countElement) {
+                // 查找新格式中的文件数量span（在"文件数："后面的span）
+                const fileCountContainer = folderCard.querySelector('.flex.items-center');
+                if (fileCountContainer) {
+                    const spans = fileCountContainer.querySelectorAll('span');
+                    for (let span of spans) {
+                        if (span.textContent.match(/^\d+$/)) {
+                            countElement = span;
+                            break;
+                        }
+                    }
+                }
+            }
+            
             if (countElement) {
-                countElement.textContent = `${fileCount} 个文件`;
+                // 根据元素类型设置不同的文本格式
+                if (countElement.classList.contains('text-cyan-400')) {
+                    // 新格式：只显示数字
+                    countElement.textContent = `${fileCount}`;
+                } else {
+                    // 旧格式：显示完整文本
+                    countElement.textContent = `${fileCount} 个文件`;
+                }
             }
         } catch (error) {
             console.error('更新文件夹文件数量失败:', error);

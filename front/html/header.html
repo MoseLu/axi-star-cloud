@@ -49,6 +49,25 @@
                 <i class="fa fa-info-circle text-green-400 hover:text-green-300 text-lg"></i>
             </button>
             
+            <button id="theme-toggle-btn" class="relative inline-flex items-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg p-1" title="切换主题" role="switch" aria-checked="true" aria-label="主题切换开关">
+                <!-- 开关容器 -->
+                <div class="w-11 h-6 bg-gray-200 rounded-full transition-colors duration-300 ease-in-out relative">
+                    <!-- 开关滑块 -->
+                    <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out transform translate-x-0">
+                        <!-- 太阳图标 -->
+                        <div class="absolute inset-0 flex items-center justify-center text-yellow-500 text-xs opacity-100 transition-opacity duration-300">
+                            <i class="fa fa-sun" aria-hidden="true"></i>
+                        </div>
+                        <!-- 月亮图标 -->
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-600 text-xs opacity-0 transition-opacity duration-300">
+                            <i class="fa fa-moon" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+                <!-- 主题标签 -->
+                <span class="ml-2 text-xs font-medium text-gray-600 transition-colors duration-300">暗色</span>
+            </button>
+            
             <div class="relative group">
                 <button class="flex items-center space-x-2">
                     <img id="user-avatar" alt="用户头像" class="w-8 h-8 rounded-full border-2 border-purple-light/50 object-cover">

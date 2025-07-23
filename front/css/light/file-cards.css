@@ -1,0 +1,296 @@
+/**
+ * 亮色主题文件卡片样式
+ * 包含文件和文件夹卡片的网格布局、样式和响应式设计
+ */
+
+/* 文件卡片网格布局 */
+#files-grid, .files-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 240px));
+  gap: 16px;
+  align-items: start;
+  justify-items: start;
+  justify-content: center;
+}
+
+.file-card {
+  max-width: 240px;
+  width: 100%;
+}
+
+/* 文件卡片样式优化 - 亮色主题 */
+.file-card {
+    width: 100%;
+    max-width: 320px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+/* 文件夹网格布局 */
+#folders-grid, .folders-grid {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 16px !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+}
+
+/* 文件夹卡片样式 - 亮色主题 */
+.folder-card {
+    width: 100%;
+    max-width: 240px;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+/* 响应式布局优化 */
+@media (max-width: 640px) {
+    .files-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+        justify-content: center;
+    }
+    
+    #folders-grid {
+        gap: 12px !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    .files-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+        justify-content: center;
+    }
+    
+    #folders-grid {
+        gap: 16px !important;
+    }
+}
+
+/* 确保卡片内容居中对齐 */
+.file-card .card-content,
+.folder-card .card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+    text-align: center;
+}
+
+/* 文件卡片第一行（图标和文件名） - 亮色主题 */
+.file-card .file-icon-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.file-card .file-icon-container > div:last-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.file-card h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1F2937;
+    margin: 0;
+    line-height: 1.4;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.file-card .file-icon-container > div:last-child span {
+    font-size: 0.75rem;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+/* 文件夹卡片第一行（图标和文件夹名） - 亮色主题 */
+.folder-card .folder-icon-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.folder-card .folder-icon-container > div:last-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.folder-card h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1F2937;
+    margin: 0;
+    line-height: 1.4;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.folder-card .folder-icon-container > div:last-child span {
+    font-size: 0.75rem;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+/* 文件信息样式 - 亮色主题 */
+.file-info,
+.folder-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px solid #F3F4F6;
+    width: 100%;
+}
+
+.file-info > div,
+.folder-info > div {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: #6B7280;
+}
+
+.file-info span,
+.folder-info span {
+    font-size: 0.75rem;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+/* 空状态样式 - 亮色主题 */
+.col-span-full {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6B7280;
+}
+
+.col-span-full h3 {
+    color: #374151;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.col-span-full p {
+    color: #6B7280;
+    font-size: 0.875rem;
+}
+
+/* 外站文档分类特殊样式 - 亮色主题 */
+.external-docs-category #files-grid {
+    background-color: #F9FAFB;
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+/* 文件图标容器样式 - 亮色主题 */
+.file-icon-container,
+.folder-icon-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+/* 文件操作按钮样式 - 亮色主题 */
+.file-actions,
+.folder-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.file-card:hover .file-actions,
+.folder-card:hover .folder-actions {
+    opacity: 1;
+}
+
+/* 外站文档卡片特殊样式 - 亮色主题 */
+.external-docs-category .file-card {
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    position: relative;
+    overflow: hidden;
+}
+
+.external-docs-category .file-card:hover {
+    border-color: #3B82F6;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.external-docs-category .file-card .doc-actions {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.external-docs-category .file-card:hover .doc-actions {
+    opacity: 1;
+}
+
+/* 状态徽章样式 - 亮色主题 */
+.external-docs-category .file-card .status-badge {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #FFFFFF;
+}
+
+.external-docs-category .file-card .status-badge.bg-green-500\/20 {
+    background-color: #D1FAE5;
+    color: #065F46;
+}
+
+.external-docs-category .file-card .status-badge.bg-yellow-500\/20 {
+    background-color: #FEF3C7;
+    color: #D97706;
+}
+
+.external-docs-category .file-card .status-badge.bg-red-500\/20 {
+    background-color: #FEE2E2;
+    color: #DC2626;
+}
+
+.external-docs-category .file-card .status-badge.bg-gray-500\/20 {
+    background-color: #F3F4F6;
+    color: #374151;
+} 

@@ -55,6 +55,8 @@
   pointer-events: none;
   max-width: 0;
   overflow: hidden;
+  width: 0;
+  height: 0;
 }
 
 .sub-categories-expand.show {
@@ -62,6 +64,8 @@
   transform: translateX(0);
   pointer-events: auto;
   max-width: 1000px;
+  width: auto;
+  height: auto;
 }
 
 /* 子分类按钮样式 - 与主标签保持一致 */

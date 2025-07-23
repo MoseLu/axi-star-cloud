@@ -1,28 +1,13 @@
 /**
  * 主样式文件
  * 引入所有拆分的样式模块
+ * 主题样式由主题管理器动态加载
  */
 
-/* 引入基础工具类样式 */
-@import url('./utilities.css');
-
-/* 引入滚动条样式 */
-@import url('./scrollbar.css');
-
-/* 引入面包屑导航样式 */
-@import url('./breadcrumb.css');
-
-/* 引入文件类型过滤器样式 */
-@import url('./file-filters.css');
-
-/* 引入预览模态框样式 */
-@import url('./preview-modal.css');
-
-/* 引入文件卡片样式 */
-@import url('./file-cards.css');
-
-/* 引入通知系统样式 */
-@import url('./notifications.css');
-
-/* 引入响应式布局样式 */
+/* 引入公共样式 */
 @import url('./responsive.css');
+@import url('./font-optimization.css');
+
+/* 主题样式由主题管理器动态加载 */
+/* 暗色主题: /static/css/dark/ */
+/* 亮色主题: /static/css/light/ */

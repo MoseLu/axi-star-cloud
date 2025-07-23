@@ -64,29 +64,14 @@
         }
     </script>
     
-    <!-- 引入拆分的样式模块 -->
-    <link rel="stylesheet" href="/static/css/custom.css">
-    <link rel="stylesheet" href="/static/css/upload-manager.css">
-    <link rel="stylesheet" href="/static/css/profile-manager.css">
-    <link rel="stylesheet" href="/static/css/settings-manager.css">
-    <link rel="stylesheet" href="/static/css/admin-manager.css">
-    <link rel="stylesheet" href="/static/css/docs-sync.css">
-    <link rel="stylesheet" href="/static/css/notifications.css">
-    <link rel="stylesheet" href="/static/css/modal-manager.css">
-    <link rel="stylesheet" href="/static/css/preview-modal.css">
-    <link rel="stylesheet" href="/static/css/breadcrumb.css">
-    <link rel="stylesheet" href="/static/css/file-cards.css">
-    <link rel="stylesheet" href="/static/css/file-filters.css">
-    <link rel="stylesheet" href="/static/css/file-operations.css">
-    <link rel="stylesheet" href="/static/css/mobile-enhancement.css">
+    <!-- 引入公共样式 -->
     <link rel="stylesheet" href="/static/css/responsive.css">
-    <link rel="stylesheet" href="/static/css/scrollbar.css">
-    <link rel="stylesheet" href="/static/css/utilities.css">
-    <link rel="stylesheet" href="/static/css/welcome-mobile.css">
+    <link rel="stylesheet" href="/static/css/font-optimization.css">
+    <link rel="stylesheet" href="/static/css/theme-toggle.css">
     
-    <!-- 引入模块化UI样式 -->
-    <link rel="stylesheet" href="/static/css/url-manager.css">
-    <link rel="stylesheet" href="/static/css/help-manager.css">
+    <!-- 主题样式由主题管理器动态加载 -->
+    <!-- 暗色主题: /static/css/dark/ -->
+    <!-- 亮色主题: /static/css/light/ -->
     
     <!-- 字体优化CSS，必须在Font Awesome之前加载 -->
     <link rel="stylesheet" href="/static/css/font-optimization.css">
@@ -95,6 +80,9 @@
     <script src="/static/js/message-box.js"></script>
     <!-- 只保留 Notify，不再引入 MessageBox 以避免登录成功弹中央提示 -->
     <script src="/static/js/notify.js"></script>
+    <!-- 引入主题管理器 -->
+    <script src="/static/js/ui/theme-manager.js"></script>
+    
     <!-- 引入环境切换器 -->
     <script src="/static/js/ui/env-switcher.js"></script>
     

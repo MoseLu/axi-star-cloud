@@ -1,0 +1,112 @@
+/**
+ * 主题切换开关样式
+ * 模仿TDesign等主流设计的现代化开关
+ */
+
+/* 主题切换开关容器 */
+#theme-toggle-btn {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    border: none;
+    background: none;
+    padding: 0.25rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+#theme-toggle-btn:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+#theme-toggle-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* 开关容器 */
+#theme-toggle-btn .w-11 {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 开关滑块 */
+#theme-toggle-btn .absolute.left-0\.5 {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+/* 图标容器 */
+#theme-toggle-btn .absolute.inset-0 {
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* 悬停效果 */
+#theme-toggle-btn:hover .w-11 {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+#theme-toggle-btn:hover .absolute.left-0\.5 {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 激活状态 */
+#theme-toggle-btn:active .absolute.left-0\.5 {
+    transform: scale(0.95);
+}
+
+/* 暗色主题下的样式调整 */
+body.theme-dark #theme-toggle-btn .w-11 {
+    background-color: #374151;
+}
+
+body.theme-dark #theme-toggle-btn span {
+    color: #D1D5DB;
+}
+
+/* 亮色主题下的样式调整 */
+body.theme-light #theme-toggle-btn .w-11 {
+    background-color: #E5E7EB;
+}
+
+body.theme-light #theme-toggle-btn span {
+    color: #6B7280;
+}
+
+/* 响应式设计 */
+@media (max-width: 640px) {
+    #theme-toggle-btn span {
+        display: none;
+    }
+    
+    #theme-toggle-btn {
+        margin: 0 0.5rem;
+    }
+}
+
+/* 动画优化 */
+@keyframes switchBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+#theme-toggle-btn:active .absolute.left-0\.5 {
+    animation: switchBounce 0.2s ease-in-out;
+}
+
+/* 焦点状态 */
+#theme-toggle-btn:focus {
+    outline: none;
+}
+
+#theme-toggle-btn:focus .w-11 {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* 键盘导航支持 */
+#theme-toggle-btn:focus-visible {
+    outline: 2px solid #3B82F6;
+    outline-offset: 2px;
+    border-radius: 0.375rem;
+} 

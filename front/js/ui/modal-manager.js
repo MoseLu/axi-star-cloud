@@ -441,8 +441,6 @@ class UIModalManager {
      * @returns {Promise<Object>} 用户输入结果
      */
     showInputDialog(title, inputs, options = {}) {
-        console.log('showInputDialog被调用，title:', title, 'inputs:', inputs, 'options:', options);
-        
         const config = {
             type: 'input',
             title,
