@@ -1,0 +1,140 @@
+/**
+ * 主题切换波纹扩散动画
+ * 从右上角开始扩散，覆盖整个页面
+ */
+
+/* 波纹扩散动画容器 */
+.theme-transition-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, var(--theme-color) 0%, var(--theme-color) 100%);
+    border-radius: 50%;
+    z-index: 9999;
+    pointer-events: none;
+    transform: translate(50%, -50%);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+}
+
+.theme-transition-overlay.active {
+    opacity: 1;
+    width: 300vw;
+    height: 300vw;
+    transform: translate(50%, -50%);
+}
+
+/* 亮色主题扩散颜色 */
+.theme-transition-overlay.light {
+    --theme-color: #FFFFFF;
+}
+
+/* 暗色主题扩散颜色 */
+.theme-transition-overlay.dark {
+    --theme-color: #0F172A;
+}
+
+/* 主题切换按钮样式 */
+.theme-toggle-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.theme-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.theme-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+/* 图标样式 */
+.theme-toggle-btn .icon {
+    font-size: 18px;
+    transition: all 0.3s ease;
+    color: #FFFFFF;
+}
+
+.theme-toggle-btn .sun-icon {
+    opacity: 1;
+    transform: rotate(0deg);
+}
+
+.theme-toggle-btn .moon-icon {
+    opacity: 0;
+    transform: rotate(-90deg);
+    position: absolute;
+}
+
+/* 亮色主题下的按钮样式 */
+.theme-toggle-btn.light {
+    background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.theme-toggle-btn.light .icon {
+    color: #374151;
+}
+
+.theme-toggle-btn.light .sun-icon {
+    opacity: 0;
+    transform: rotate(90deg);
+}
+
+.theme-toggle-btn.light .moon-icon {
+    opacity: 1;
+    transform: rotate(0deg);
+}
+
+/* 动画关键帧 */
+@keyframes ripple-expand {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    100% {
+        width: 300vw;
+        height: 300vw;
+        opacity: 1;
+    }
+}
+
+@keyframes icon-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 图标旋转动画 */
+.theme-toggle-btn .icon.rotating {
+    animation: icon-rotate 0.6s ease-in-out;
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+    .theme-toggle-btn {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .theme-toggle-btn .icon {
+        font-size: 16px;
+    }
+} 
