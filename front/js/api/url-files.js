@@ -12,16 +12,19 @@ class UrlFiles {
         const userId = this.core.getCurrentUserId();
         if (!userId) return [];
 
-        let url = `${this.core.baseUrl}/api/url-files?user_id=${userId}`;
+        let url = `/api/url-files?user_id=${userId}`;
         if (folderId) {
             url += `&folder_id=${folderId}`;
         }
 
         try {
-            const response = await fetch(url);
+            const response = await window.apiGateway.get(url);
+            if (!response.ok) {
+                throw new Error(`获取URL文件列表失败: ${response.status}`);
+            }
             const data = await response.json();
             
-            if (data.success && data.files) {
+            if (data.files) {
                 // 转换后端数据格式为前端格式
                 const files = data.files.map(file => {
                     return {
@@ -48,7 +51,7 @@ class UrlFiles {
                 return [];
             }
         } catch (error) {
-            console.error('❌ 获取URL文件列表失败:', error);
+            console.error('获取URL文件列表失败:', error);
             return [];
         }
     }
@@ -59,14 +62,17 @@ class UrlFiles {
         if (!userId) return { success: false, error: '用户未登录' };
 
         try {
-            const response = await fetch(`${this.core.baseUrl}/api/url-files/${fileId}?user_id=${userId}`, {
-                method: 'DELETE'
-            });
+            const response = await window.apiGateway.delete(`/api/url-files/${fileId}?user_id=${userId}`);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '删除URL文件失败');
+            }
 
             return await response.json();
         } catch (error) {
             console.error('删除URL文件失败:', error);
-            return { success: false, error: '网络错误' };
+            return { success: false, error: error.message || '网络错误' };
         }
     }
 
@@ -76,24 +82,22 @@ class UrlFiles {
         if (!userId) return { success: false, error: '用户未登录' };
 
         try {
-            const response = await fetch(this.core.buildApiUrl('/api/url-files'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'User-UUID': userId
-                },
-                body: JSON.stringify({
-                    title: urlData.title,
-                    url: urlData.url,
-                    description: urlData.description || '',
-                    user_id: userId
-                })
+            const response = await window.apiGateway.post('/api/url-files', {
+                title: urlData.title,
+                url: urlData.url,
+                description: urlData.description || '',
+                user_id: userId
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '创建URL文件失败');
+            }
 
             return await response.json();
         } catch (error) {
             console.error('创建URL文件失败:', error);
-            return { success: false, error: '网络错误' };
+            return { success: false, error: error.message || '网络错误' };
         }
     }
 
@@ -103,17 +107,19 @@ class UrlFiles {
         if (!userId) return { success: false, error: '未登录' };
 
         try {
-            const response = await fetch(`${this.core.baseUrl}/api/url-files/${fileId}/move?user_id=${userId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ folder_id: folderId })
+            const response = await window.apiGateway.put(`/api/url-files/${fileId}/move?user_id=${userId}`, {
+                folder_id: folderId
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '移动URL文件失败');
+            }
 
             return await response.json();
         } catch (error) {
-            return { success: false, error: '移动失败' };
+            console.error('移动URL文件失败:', error);
+            return { success: false, error: error.message || '移动失败' };
         }
     }
 } 

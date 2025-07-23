@@ -33,20 +33,22 @@ class Storage {
         const userId = this.core.getCurrentUserId();
         if (!userId) throw new Error('请先登录');
 
-        const response = await fetch(`${this.core.baseUrl}/api/storage?user_id=${userId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ storage_limit: storageBytes })
-        });
+        try {
+            const response = await window.apiGateway.put(`/api/storage?user_id=${userId}`, {
+                storage_limit: storageBytes
+            });
 
-        const data = await response.json();
-        if (!data.success) {
-            throw new Error(data.error || '更新存储限制失败');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '更新存储限制失败');
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('更新存储限制失败:', error);
+            throw error;
         }
-
-        return data;
     }
 
     // 获取用户所有文件总数（包括普通文件和URL文件）
@@ -56,8 +58,8 @@ class Storage {
 
         try {
             const [filesResponse, urlFilesResponse] = await Promise.all([
-                fetch(`${this.core.baseUrl}/api/files/count?user_id=${userId}`),
-                fetch(`${this.core.baseUrl}/api/url-files/count?user_id=${userId}`)
+                window.apiGateway.get(`/api/files/count?user_id=${userId}`),
+                window.apiGateway.get(`/api/url-files/count?user_id=${userId}`)
             ]);
             
             const filesData = await filesResponse.json();
@@ -70,7 +72,7 @@ class Storage {
 
             return totalCount;
         } catch (error) {
-            console.error('❌ 获取文件总数失败:', error);
+            console.error('获取文件总数失败:', error);
             return 0;
         }
     }

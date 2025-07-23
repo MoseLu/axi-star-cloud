@@ -12,21 +12,20 @@ class Folders {
         const userId = this.core.getCurrentUserId();
         if (!userId) return [];
 
-        let url = `${this.core.baseUrl}/api/folders?user_id=${userId}`;
+        let url = `/api/folders?user_id=${userId}`;
         if (category && category !== 'all') {
             url += `&category=${category}`;
         }
 
         try {
-            const response = await fetch(url);
-            const data = await response.json();
-            
-            if (data.success) {
-                return data.folders;
-            } else {
-                return [];
+            const response = await window.apiGateway.get(url);
+            if (!response.ok) {
+                throw new Error(`获取文件夹列表失败: ${response.status}`);
             }
+            const data = await response.json();
+            return data.folders || [];
         } catch (error) {
+            console.error('获取文件夹列表失败:', error);
             return [];
         }
     }
@@ -37,20 +36,20 @@ class Folders {
         if (!userId) return { success: false, error: '未登录' };
 
         try {
-            const response = await fetch(`${this.core.baseUrl}/api/folders?user_id=${userId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: name,
-                    category: category
-                })
+            const response = await window.apiGateway.post(`/api/folders?user_id=${userId}`, {
+                name: name,
+                category: category
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '创建文件夹失败');
+            }
 
             return await response.json();
         } catch (error) {
-            return { success: false, error: '创建失败' };
+            console.error('创建文件夹失败:', error);
+            return { success: false, error: error.message || '创建失败' };
         }
     }
 
@@ -65,17 +64,17 @@ class Folders {
                 requestBody.category = category;
             }
 
-            const response = await fetch(`${this.core.baseUrl}/api/folders/${folderId}?user_id=${userId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestBody)
-            });
+            const response = await window.apiGateway.put(`/api/folders/${folderId}?user_id=${userId}`, requestBody);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '更新文件夹失败');
+            }
 
             return await response.json();
         } catch (error) {
-            return { success: false, error: '更新失败' };
+            console.error('更新文件夹失败:', error);
+            return { success: false, error: error.message || '更新失败' };
         }
     }
 
@@ -85,13 +84,17 @@ class Folders {
         if (!userId) return { success: false, error: '未登录' };
 
         try {
-            const response = await fetch(`${this.core.baseUrl}/api/folders/${folderId}?user_id=${userId}`, {
-                method: 'DELETE'
-            });
+            const response = await window.apiGateway.delete(`/api/folders/${folderId}?user_id=${userId}`);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '删除文件夹失败');
+            }
 
             return await response.json();
         } catch (error) {
-            return { success: false, error: '删除失败' };
+            console.error('删除文件夹失败:', error);
+            return { success: false, error: error.message || '删除失败' };
         }
     }
 
@@ -103,8 +106,8 @@ class Folders {
         try {
             // 获取普通文件数量
             const [filesResponse, urlFilesResponse] = await Promise.all([
-                fetch(`${this.core.baseUrl}/api/folders/${folderId}/count?user_id=${userId}`),
-                fetch(`${this.core.baseUrl}/api/url-files/count?user_id=${userId}&folder_id=${folderId}`)
+                window.apiGateway.get(`/api/folders/${folderId}/count?user_id=${userId}`),
+                window.apiGateway.get(`/api/url-files/count?user_id=${userId}&folder_id=${folderId}`)
             ]);
             
             const filesData = await filesResponse.json();
