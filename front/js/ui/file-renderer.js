@@ -7,10 +7,11 @@ class UIFileRenderer {
         this.uiManager = uiManager;
         this.layoutMode = 'card'; // 默认卡片模式
         this.sortMode = 'name'; // 默认按文件名排序
-        // 绑定布局切换按钮事件
-        this.bindLayoutSwitchEvent();
-        // 绑定排序切换按钮事件
-        this.bindSortSwitchEvent();
+        // 延迟绑定事件，确保DOM已加载
+        setTimeout(() => {
+            this.bindLayoutSwitchEvent();
+            this.bindSortSwitchEvent();
+        }, 500);
     }
 
     bindLayoutSwitchEvent() {
@@ -22,14 +23,22 @@ class UIFileRenderer {
                 btn.style.pointerEvents = 'auto';
                 btn.disabled = false;
                 
-                // 使用内联事件绑定
-                const clickHandler = function(e) {
+                // 移除可能存在的旧事件监听器
+                btn.removeEventListener('click', this.layoutClickHandler);
+                
+                // 创建新的事件处理函数
+                this.layoutClickHandler = function(e) {
                     e.preventDefault();
                     e.stopPropagation();
+                    console.log('布局切换按钮被点击');
                     this.toggleLayoutMode();
                 }.bind(this);
                 
-                btn.onclick = clickHandler;
+                // 绑定新的事件监听器
+                btn.addEventListener('click', this.layoutClickHandler);
+                console.log('布局切换按钮事件绑定成功');
+            } else {
+                console.warn('布局切换按钮未找到');
             }
         }, 100);
     }
@@ -43,14 +52,22 @@ class UIFileRenderer {
                 btn.style.pointerEvents = 'auto';
                 btn.disabled = false;
                 
-                // 使用内联事件绑定
-                const clickHandler = function(e) {
+                // 移除可能存在的旧事件监听器
+                btn.removeEventListener('click', this.sortClickHandler);
+                
+                // 创建新的事件处理函数
+                this.sortClickHandler = function(e) {
                     e.preventDefault();
                     e.stopPropagation();
+                    console.log('排序切换按钮被点击');
                     this.toggleSortMode();
                 }.bind(this);
                 
-                btn.onclick = clickHandler;
+                // 绑定新的事件监听器
+                btn.addEventListener('click', this.sortClickHandler);
+                console.log('排序切换按钮事件绑定成功');
+            } else {
+                console.warn('排序切换按钮未找到');
             }
         }, 100);
     }
