@@ -79,8 +79,8 @@ class ThemeTransitionManager {
         
         // 添加图标
         btn.innerHTML = `
-            <i class="fa fa-sun icon sun-icon" aria-hidden="true"></i>
-            <i class="fa fa-moon icon moon-icon" aria-hidden="true"></i>
+            <i class="fa fa-sun-o icon sun-icon" aria-hidden="true"></i>
+            <i class="fa fa-moon-o icon moon-icon" aria-hidden="true"></i>
         `;
         
         // 添加点击事件
