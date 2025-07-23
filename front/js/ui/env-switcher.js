@@ -39,6 +39,22 @@ class EnvSwitcher {
         console.log('  - 用户角色:', user?.role);
         console.log('  - 是否为管理员:', isAdmin);
         
+        // 如果用户信息未加载，尝试从localStorage获取
+        if (!user) {
+            try {
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    const parsedUser = JSON.parse(storedUser);
+                    const storedIsAdmin = parsedUser && parsedUser.role === 'admin';
+                    console.log('  - 从localStorage获取用户信息:', parsedUser);
+                    console.log('  - localStorage中的管理员权限:', storedIsAdmin);
+                    return storedIsAdmin;
+                }
+            } catch (error) {
+                console.log('  - localStorage解析失败:', error);
+            }
+        }
+        
         return isAdmin;
     }
 
@@ -355,12 +371,15 @@ class EnvSwitcher {
 // 自动初始化环境切换器
 document.addEventListener('DOMContentLoaded', () => {
     // 延迟初始化，确保用户信息已加载
-    setTimeout(() => {
-        console.log('🔍 检查环境切换器初始化条件...');
+    const initEnvSwitcher = (retryCount = 0) => {
+        console.log(`🔍 检查环境切换器初始化条件... (尝试 ${retryCount + 1})`);
         
         // 检查环境管理器是否存在
         if (!window.ENV_MANAGER) {
             console.log('❌ ENV_MANAGER 不存在');
+            if (retryCount < 5) {
+                setTimeout(() => initEnvSwitcher(retryCount + 1), 1000);
+            }
             return;
         }
         
@@ -370,6 +389,13 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('👤 当前用户:', user);
         console.log('🔑 管理员权限:', isAdmin);
         
+        // 如果用户信息还没加载完成，重试
+        if (!user && retryCount < 10) {
+            console.log('⏳ 用户信息未加载，等待重试...');
+            setTimeout(() => initEnvSwitcher(retryCount + 1), 1000);
+            return;
+        }
+        
         // 初始化条件：管理员权限 OR 调试模式
         if (isAdmin || window.ENV_MANAGER.config.debug) {
             console.log('✅ 初始化环境切换器');
@@ -377,7 +403,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             console.log('❌ 不满足初始化条件');
         }
-    }, 2000); // 增加延迟时间，确保用户信息完全加载
+    };
+    
+    // 首次尝试，延迟3秒
+    setTimeout(() => initEnvSwitcher(), 3000);
 });
 
 // 导出类供外部使用
