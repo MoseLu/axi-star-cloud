@@ -63,19 +63,19 @@ class EnvSwitcher {
         switcher.className = 'env-switcher';
         switcher.innerHTML = `
             <div class="env-switcher-main">
-                <div class="env-switcher-toggle" title="API环境切换">
-                    <span class="env-icon">🌐</span>
+                <div class="env-switcher-toggle" title="系统功能菜单">
+                    <span class="env-icon">⚙️</span>
                 </div>
                 <div class="env-switcher-options">
-                    <div class="env-option" data-env="local" title="开发环境API">
-                        <span class="env-option-icon">🛠️</span>
-                        <span class="env-option-label">开发API</span>
-                        <span class="env-option-url">localhost:8080</span>
+                    <div class="env-option" data-action="switch-env" title="切换API环境">
+                        <span class="env-option-icon">🌐</span>
+                        <span class="env-option-label">切换环境</span>
+                        <span class="env-option-url">API环境切换</span>
                     </div>
-                    <div class="env-option" data-env="prod" title="生产环境API">
-                        <span class="env-option-icon">🚀</span>
-                        <span class="env-option-label">生产API</span>
-                        <span class="env-option-url">redamancy.com.cn</span>
+                    <div class="env-option" data-action="view-docs" title="查看系统文档">
+                        <span class="env-option-icon">📚</span>
+                        <span class="env-option-label">系统文档</span>
+                        <span class="env-option-url">项目文档</span>
                     </div>
                 </div>
             </div>
@@ -454,8 +454,12 @@ class EnvSwitcher {
         // 环境选项点击事件
         this.container.querySelectorAll('.env-option').forEach(option => {
             option.addEventListener('click', () => {
-                const env = option.dataset.env;
-                this.switchEnvironment(env);
+                const action = option.dataset.action;
+                if (action === 'switch-env') {
+                    this.switchEnvironment();
+                } else if (action === 'view-docs') {
+                    this.viewDocs();
+                }
             });
         });
 
@@ -498,42 +502,52 @@ class EnvSwitcher {
         this.isExpanded = false;
     }
 
-    switchEnvironment(env) {
+    switchEnvironment() {
         const currentEnv = window.ENV_MANAGER.currentEnv;
         
-        if (env !== currentEnv) {
-            // 直接通过ENV_MANAGER切换环境
-            window.ENV_MANAGER.switchEnvironment(env);
-            
-            // 重新初始化API系统，确保API调用指向正确的环境
-            if (window.apiSystem && typeof window.apiSystem.reinit === 'function') {
-                window.apiSystem.reinit();
-            }
-            
-            // 更新Core实例的baseUrl
-            if (window.apiSystem && window.apiSystem.core && typeof window.apiSystem.core.updateBaseUrl === 'function') {
-                window.apiSystem.core.updateBaseUrl();
-            }
-            
-            // 更新Auth Manager的baseUrl
-            if (window.authManager && typeof window.authManager.updateBaseUrl === 'function') {
-                window.authManager.updateBaseUrl();
-            }
-            
-            // 更新API网关的baseUrl
-            if (window.apiGateway && typeof window.apiGateway.updateBaseUrl === 'function') {
-                window.apiGateway.updateBaseUrl();
-            }
-            
-            this.updateDisplay();
-            this.hide(); // 切换环境后隐藏选项，变回地球图标
-            
-            // 显示切换提示
-            this.showNotification(env);
-            
-            // 自动重新加载数据
-            this.reloadData();
+        if (currentEnv === 'local') {
+            window.ENV_MANAGER.switchEnvironment('prod');
+        } else {
+            window.ENV_MANAGER.switchEnvironment('local');
         }
+        
+        // 重新初始化API系统，确保API调用指向正确的环境
+        if (window.apiSystem && typeof window.apiSystem.reinit === 'function') {
+            window.apiSystem.reinit();
+        }
+        
+        // 更新Core实例的baseUrl
+        if (window.apiSystem && window.apiSystem.core && typeof window.apiSystem.core.updateBaseUrl === 'function') {
+            window.apiSystem.core.updateBaseUrl();
+        }
+        
+        // 更新Auth Manager的baseUrl
+        if (window.authManager && typeof window.authManager.updateBaseUrl === 'function') {
+            window.authManager.updateBaseUrl();
+        }
+        
+        // 更新API网关的baseUrl
+        if (window.apiGateway && typeof window.apiGateway.updateBaseUrl === 'function') {
+            window.apiGateway.updateBaseUrl();
+        }
+        
+        this.updateDisplay();
+        this.hide(); // 切换环境后隐藏选项，变回地球图标
+        
+        // 显示切换提示
+        this.showNotification(currentEnv);
+        
+        // 自动重新加载数据
+        this.reloadData();
+    }
+
+    viewDocs() {
+        // 创建并显示文档查看器
+        if (!window.docViewer) {
+            window.docViewer = new DocViewer();
+            window.docViewer.addStyles();
+        }
+        window.docViewer.show();
     }
 
     reloadData() {
@@ -638,8 +652,8 @@ class EnvSwitcher {
         
         // 更新选项状态
         this.container.querySelectorAll('.env-option').forEach(option => {
-            const env = option.dataset.env;
-            if (env === currentEnv) {
+            const action = option.dataset.action;
+            if (action === 'switch-env') {
                 option.classList.add('active');
             } else {
                 option.classList.remove('active');

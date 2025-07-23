@@ -149,7 +149,10 @@ func (r *Router) SetupRoutes(
 	r.registerTestRoutes()
 
 	// 注册静态文件列表路由
-	// r.registerStaticFilesRoutes()
+	r.registerStaticFilesRoutes()
+
+	// 注册文档路由
+	r.registerDocRoutes()
 
 	// 应用所有路由组
 	r.applyGroups()
@@ -334,6 +337,53 @@ func (r *Router) registerStaticFilesRoutes() {
 		}
 
 		c.JSON(http.StatusOK, gin.H{"files": files})
+	})
+}
+
+// registerDocRoutes 注册文档路由
+func (r *Router) registerDocRoutes() {
+	r.engine.GET("/docs/:filename", func(c *gin.Context) {
+		filename := c.Param("filename")
+		
+		// 安全检查：只允许.md文件
+		if filepath.Ext(filename) != ".md" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "只允许访问.md文件"})
+			return
+		}
+		
+		// 尝试多个可能的docs目录路径
+		possiblePaths := []string{
+			"docs",
+			"./docs",
+			"../docs",
+			"/www/wwwroot/axi-star-cloud/docs",
+			"/www/wwwroot/redamancy.com.cn/docs",
+		}
+		
+		var filePath string
+		for _, dir := range possiblePaths {
+			path := filepath.Join(dir, filename)
+			if _, err := os.Stat(path); err == nil {
+				filePath = path
+				break
+			}
+		}
+		
+		if filePath == "" {
+			c.JSON(http.StatusNotFound, gin.H{"error": "文档文件不存在"})
+			return
+		}
+		
+		// 读取文件内容
+		content, err := os.ReadFile(filePath)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "读取文件失败"})
+			return
+		}
+		
+		// 设置响应头
+		c.Header("Content-Type", "text/markdown; charset=utf-8")
+		c.Data(http.StatusOK, "text/markdown; charset=utf-8", content)
 	})
 }
 
