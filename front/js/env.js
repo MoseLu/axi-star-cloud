@@ -320,24 +320,8 @@ window.ENV_UTILS = {
     // 显示环境信息
     showEnvInfo: () => {
         const info = window.ENV_MANAGER.getDebugInfo();
-        console.group('🌍 环境信息');
-        console.log('环境:', info.name);
-        console.log('API地址:', info.apiBaseUrl);
-        console.log('调试模式:', info.debug);
-        console.log('功能特性:', info.features);
-        console.groupEnd();
+        return info;
     }
 };
-
-    // 开发模式下显示环境信息
-    if (window.ENV_MANAGER.config.debug) {
-        window.ENV_UTILS.showEnvInfo();
-        
-        // 在控制台提供便捷的环境切换命令
-        console.log('💡 环境切换命令:');
-        console.log('  ENV_UTILS.switchToLocal()  - 切换到开发环境');
-        console.log('  ENV_UTILS.switchToProd()   - 切换到生产环境');
-        console.log('  ENV_UTILS.showEnvInfo()    - 显示当前环境信息');
-    }
 
  
