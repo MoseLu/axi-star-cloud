@@ -30,15 +30,11 @@ class UIFileRenderer {
                 this.layoutClickHandler = function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('布局切换按钮被点击');
                     this.toggleLayoutMode();
                 }.bind(this);
                 
                 // 绑定新的事件监听器
                 btn.addEventListener('click', this.layoutClickHandler);
-                console.log('布局切换按钮事件绑定成功');
-            } else {
-                console.warn('布局切换按钮未找到');
             }
         }, 100);
     }
@@ -59,15 +55,11 @@ class UIFileRenderer {
                 this.sortClickHandler = function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('排序切换按钮被点击');
                     this.toggleSortMode();
                 }.bind(this);
                 
                 // 绑定新的事件监听器
                 btn.addEventListener('click', this.sortClickHandler);
-                console.log('排序切换按钮事件绑定成功');
-            } else {
-                console.warn('排序切换按钮未找到');
             }
         }, 100);
     }
