@@ -616,12 +616,6 @@ class EnvSwitcher {
         const switcher = this.container;
         const currentEnv = window.ENV_MANAGER.currentEnv;
         
-        console.log('更新显示状态:', {
-            isExpanded: this.isExpanded,
-            showEnvOptions: this.showEnvOptions,
-            currentEnv: currentEnv
-        });
-        
         // 更新展开状态
         if (this.isExpanded) {
             switcher.classList.add('expanded');
@@ -632,10 +626,8 @@ class EnvSwitcher {
         // 更新环境选项显示状态
         if (this.showEnvOptions) {
             switcher.classList.add('show-env-options');
-            console.log('添加show-env-options类');
         } else {
             switcher.classList.remove('show-env-options');
-            console.log('移除show-env-options类');
         }
         
         // 更新选项状态
@@ -647,20 +639,11 @@ class EnvSwitcher {
                 option.classList.remove('active');
             }
         });
-        
-        // 调试：检查DOM状态
-        console.log('DOM状态:', {
-            hasExpandedClass: switcher.classList.contains('expanded'),
-            hasShowEnvOptionsClass: switcher.classList.contains('show-env-options'),
-            envOptionsVisible: switcher.querySelector('.env-switcher-options').style.display !== 'none'
-        });
     }
 }
 
 // 初始化函数
 const initEnvSwitcher = (retryCount = 0) => {
-    console.log(`环境切换器初始化尝试 ${retryCount + 1}/10`);
-    
     if (retryCount > 10) {
         console.warn('环境切换器初始化失败：超过最大重试次数');
         return;
@@ -669,17 +652,9 @@ const initEnvSwitcher = (retryCount = 0) => {
     // 检查基本依赖
     if (window.ENV_MANAGER) {
         if (!window.envSwitcher) {
-            console.log('创建环境切换器实例');
             window.envSwitcher = new EnvSwitcher();
-            console.log('环境切换器已初始化');
-        } else {
-            console.log('环境切换器已存在，跳过初始化');
         }
     } else {
-        console.log('等待ENV_MANAGER加载...', {
-            ENV_MANAGER: !!window.ENV_MANAGER,
-            authManager: !!window.authManager
-        });
         setTimeout(() => initEnvSwitcher(retryCount + 1), 100);
     }
 };

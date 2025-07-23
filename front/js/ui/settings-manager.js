@@ -658,13 +658,17 @@ class UISettingsManager {
      */
     async refreshAllStorageDisplays() {
         try {
+            console.log('🔄 开始刷新所有存储空间显示...');
+            
             // 获取最新的存储信息
             const api = window.apiSystem || window.apiManager;
             if (!api || !api.storage || !api.storage.getStorageInfo) {
+                console.warn('⚠️ 存储API不可用');
                 return;
             }
             
             const storageInfo = await api.storage.getStorageInfo();
+            console.log('📊 获取到最新存储信息:', storageInfo);
             
             if (storageInfo && storageInfo.used_space !== undefined && storageInfo.total_space !== undefined) {
                 // 调用主页的统一同步方法
@@ -673,11 +677,30 @@ class UISettingsManager {
                                  (window.apiSystem && window.apiSystem.uiManager);
                 
                 if (uiManager && typeof uiManager.syncStorageDisplay === 'function') {
+                    console.log('🔄 调用uiManager.syncStorageDisplay...');
                     await uiManager.syncStorageDisplay(storageInfo);
+                } else if (uiManager && typeof uiManager.updateStorageDisplay === 'function') {
+                    console.log('🔄 调用uiManager.updateStorageDisplay...');
+                    uiManager.updateStorageDisplay(storageInfo);
+                } else {
+                    console.warn('⚠️ uiManager的存储显示方法不可用');
                 }
+                
+                // 直接更新设置页面的存储显示
+                if (this.renderStorageData && typeof this.renderStorageData === 'function') {
+                    console.log('🔄 更新设置页面存储显示...');
+                    this.renderStorageData(storageInfo);
+                }
+                
+                // 更新主页存储空间概览
+                this.updateStorageDisplay(storageInfo);
+                
+                console.log('✅ 存储空间显示刷新完成');
+            } else {
+                console.warn('⚠️ 存储信息格式不正确:', storageInfo);
             }
         } catch (error) {
-            console.error('刷新存储空间显示失败:', error);
+            console.error('❌ 刷新存储空间显示失败:', error);
         }
     }
 

@@ -1141,30 +1141,50 @@ class UIManager {
 
     // 全局存储同步方法
     async syncStorageDisplay(storageInfo) {
+        console.log('🔄 开始同步存储空间显示:', storageInfo);
+        
         if (!storageInfo || storageInfo.used_space === undefined || storageInfo.total_space === undefined) {
+            console.warn('⚠️ 存储信息格式不正确:', storageInfo);
             return;
         }
 
-        // 更新主页存储空间概览
-        this.updateStorageDisplay(storageInfo);
-        
-        // 更新用户管理页面的存储显示（如果存在）
-        if (window.userManager && typeof window.userManager.updateStorageDisplay === 'function') {
-            window.userManager.updateStorageDisplay(storageInfo);
-        }
-        
-        // 更新管理员页面的存储显示（如果存在）
-        if (window.adminManager && typeof window.adminManager.updateStorageDisplay === 'function') {
-            window.adminManager.updateStorageDisplay({
-                total: storageInfo.total_space,
-                used: storageInfo.used_space,
-                available: storageInfo.total_space - storageInfo.used_space
-            });
-        }
-        
-        // 更新设置页面的存储显示（如果存在）
-        if (window.settingsManager && typeof window.settingsManager.renderStorageData === 'function') {
-            window.settingsManager.renderStorageData(storageInfo);
+        try {
+            // 更新主页存储空间概览
+            this.updateStorageDisplay(storageInfo);
+            console.log('✅ 主页存储空间概览已更新');
+            
+            // 更新用户管理页面的存储显示（如果存在）
+            if (window.userManager && typeof window.userManager.updateStorageDisplay === 'function') {
+                window.userManager.updateStorageDisplay(storageInfo);
+                console.log('✅ 用户管理页面存储显示已更新');
+            }
+            
+            // 更新管理员页面的存储显示（如果存在）
+            if (window.adminManager && typeof window.adminManager.updateStorageDisplay === 'function') {
+                window.adminManager.updateStorageDisplay({
+                    total: storageInfo.total_space,
+                    used: storageInfo.used_space,
+                    available: storageInfo.total_space - storageInfo.used_space
+                });
+                console.log('✅ 管理员页面存储显示已更新');
+            }
+            
+            // 更新设置页面的存储显示（如果存在）
+            if (window.settingsManager && typeof window.settingsManager.renderStorageData === 'function') {
+                window.settingsManager.renderStorageData(storageInfo);
+                console.log('✅ 设置页面存储显示已更新');
+            }
+            
+            // 更新个人资料页面的存储显示（如果存在）
+            if (window.profileManager && typeof window.profileManager.updateStorageInfo === 'function') {
+                window.profileManager.updateStorageInfo(storageInfo);
+                console.log('✅ 个人资料页面存储显示已更新');
+            }
+            
+            console.log('✅ 所有存储空间显示同步完成');
+            
+        } catch (error) {
+            console.error('❌ 同步存储空间显示失败:', error);
         }
     }
 
