@@ -479,8 +479,15 @@ class EnvSwitcher {
         const currentEnv = window.ENV_MANAGER.currentEnv;
         
         if (env !== currentEnv) {
+            console.log(`🔄 切换环境: ${currentEnv} -> ${env}`);
+            
             // 直接通过ENV_MANAGER切换环境
             window.ENV_MANAGER.switchEnvironment(env);
+            
+            // 更新API网关的baseUrl
+            if (window.apiGateway && typeof window.apiGateway.updateBaseUrl === 'function') {
+                window.apiGateway.updateBaseUrl();
+            }
             
             // 重新初始化API系统，确保API调用指向正确的环境
             if (window.api && window.api.core) {
@@ -495,8 +502,10 @@ class EnvSwitcher {
             // 显示切换提示
             this.showNotification(env);
             
-            // 自动重新加载数据
-            this.reloadData();
+            // 延迟重新加载数据，确保环境切换完成
+            setTimeout(() => {
+                this.reloadData();
+            }, 100);
         }
     }
 

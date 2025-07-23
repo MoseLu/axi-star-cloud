@@ -19,8 +19,22 @@ class ApiGateway {
 
     // 更新baseUrl（用于环境切换）
     updateBaseUrl() {
-        this.baseUrl = window.APP_CONFIG?.API_BASE_URL || '';
+        // 确保从最新的环境配置获取baseUrl
+        if (window.ENV_MANAGER && typeof window.ENV_MANAGER.getCurrentEnvironment === 'function') {
+            const currentConfig = window.ENV_MANAGER.getCurrentEnvironment();
+            this.baseUrl = currentConfig.apiBaseUrl || '';
+        } else if (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) {
+            this.baseUrl = window.APP_CONFIG.API_BASE_URL;
+        } else {
+            this.baseUrl = '';
+        }
+        
         console.log('API网关baseUrl更新为:', this.baseUrl);
+        
+        // 验证更新是否成功
+        if (!this.baseUrl) {
+            console.warn('⚠️ API网关baseUrl为空，请检查环境配置');
+        }
     }
 
     // 构建完整的API URL
