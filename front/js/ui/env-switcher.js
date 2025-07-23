@@ -430,8 +430,19 @@ class EnvSwitcher {
                     const action = item.dataset.action;
         
                     if (action === 'switch-env') {
-                        this.showEnvOptions = true;
-                        this.updateDisplay();
+                        // 如果当前显示的是菜单，则切换到路由卡片
+                        if (this.isExpanded && !this.showEnvOptions) {
+                            this.showEnvOptions = true;
+                            this.updateDisplay();
+                        } else if (this.showEnvOptions) {
+                            // 如果当前显示的是路由卡片，则关闭
+                            this.showEnvOptions = false;
+                            this.updateDisplay();
+                        } else {
+                            // 如果当前是收起状态，则展开菜单
+                            this.showEnvOptions = false;
+                            this.toggle();
+                        }
                     } else if (action === 'view-docs') {
                         this.viewDocs();
                         this.hide();
@@ -469,21 +480,25 @@ class EnvSwitcher {
 
     toggle() {
         if (this.isExpanded) {
+            // 如果当前是展开状态，则关闭所有内容
             this.hide();
         } else {
+            // 如果当前是收起状态，则展开菜单
             this.show();
         }
     }
 
     show() {
         this.isExpanded = true;
+        this.showEnvOptions = false; // 默认显示菜单，不显示路由卡片
+        this.container.classList.add('expanded');
         this.updateDisplay();
     }
 
     hide() {
         this.isExpanded = false;
-        // 不要重置showEnvOptions，让环境选项保持显示状态
-        // this.showEnvOptions = false;
+        this.showEnvOptions = false;
+        this.container.classList.remove('expanded');
         this.updateDisplay();
     }
 
@@ -491,7 +506,8 @@ class EnvSwitcher {
         const currentEnv = window.ENV_MANAGER.currentEnv;
         
         if (env !== currentEnv) {
-    
+            // 先清空文件列表，避免不同环境的文件混在一起
+            this.clearFileList();
             
             // 直接通过ENV_MANAGER切换环境
             window.ENV_MANAGER.switchEnvironment(env);
@@ -526,6 +542,41 @@ class EnvSwitcher {
         }
     }
 
+    // 清空文件列表
+    clearFileList() {
+        // 清空文件网格
+        const fileGrid = document.getElementById('files-grid');
+        if (fileGrid) {
+            fileGrid.innerHTML = '';
+        }
+        
+        // 清空UI管理器的文件缓存
+        if (window.uiManager) {
+            window.uiManager.allFiles = [];
+            window.uiManager.files = [];
+            
+            // 重置文件计数
+            if (window.uiManager.updateFileCount) {
+                window.uiManager.updateFileCount(0, 0);
+            }
+            
+            // 显示空状态
+            if (window.uiManager.toggleEmptyState) {
+                window.uiManager.toggleEmptyState(0);
+            }
+        }
+        
+        // 清空文件渲染器的缓存
+        if (window.fileRenderer) {
+            window.fileRenderer.files = [];
+        }
+        
+        // 重置分类状态
+        if (window.uiManager) {
+            window.uiManager.currentCategory = 'all';
+        }
+    }
+
     viewDocs() {
         // 创建并显示文档查看器
         if (!window.docViewer) {
@@ -539,11 +590,24 @@ class EnvSwitcher {
         // 延迟重新加载数据，确保环境切换完成
         setTimeout(async () => {
             try {
+                // 强制清空所有缓存数据
+                if (window.uiManager) {
+                    window.uiManager.allFiles = [];
+                    window.uiManager.folders = [];
+                    window.uiManager.storageInfo = null;
+                    window.uiManager.profile = null;
+                }
+                
                 // 重新加载文件列表
                 if (window.uiManager && typeof window.uiManager.loadFiles === 'function') {
                     await window.uiManager.loadFiles();
                 } else if (window.fileRenderer && typeof window.fileRenderer.loadFiles === 'function') {
                     await window.fileRenderer.loadFiles();
+                } else if (window.app && typeof window.app.loadUserData === 'function') {
+                    // 使用app的loadUserData方法重新加载所有数据
+                    const currentUser = window.apiManager?.currentUser || 
+                                      JSON.parse(localStorage.getItem('currentUser') || '{}');
+                    await window.app.loadUserData(currentUser);
                 }
                 
                 // 重新加载存储信息
@@ -582,8 +646,25 @@ class EnvSwitcher {
                     }
                 }
                 
+                // 重置分类状态到全部
+                if (window.uiManager) {
+                    window.uiManager.currentCategory = 'all';
+                    // 触发分类按钮重置
+                    const allCategoryBtn = document.querySelector('[data-category="all"]');
+                    if (allCategoryBtn) {
+                        allCategoryBtn.click();
+                    }
+                }
+                
             } catch (error) {
                 console.error('重新加载数据时出错:', error);
+                // 如果重新加载失败，显示错误提示
+                if (window.Notify) {
+                    window.Notify.show({ 
+                        message: '环境切换后数据加载失败，请刷新页面', 
+                        type: 'error' 
+                    });
+                }
             }
         }, 500);
     }
