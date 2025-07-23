@@ -12,65 +12,34 @@ class EnvSwitcher {
     }
 
     init() {
-        // 检查是否为管理员或调试模式
-        const isAdmin = this.isAdmin();
-        const isDebugMode = window.ENV_MANAGER.config.debug;
-        
-        if (!isAdmin && !isDebugMode) {
-            console.log('❌ 非管理员且非调试模式，不显示环境切换器');
-            return;
+        if (this.isAdmin() || window.ENV_MANAGER.config.debug) {
+            this.createSwitcher();
+            this.addStyles();
+            this.bindEvents();
         }
-        
-        console.log('✅ 开始初始化环境切换器');
-        console.log('  - 管理员权限:', isAdmin);
-        console.log('  - 调试模式:', isDebugMode);
-        this.createSwitcher();
-        this.bindEvents();
-        this.updateDisplay();
     }
 
     isAdmin() {
-        // 检查是否为管理员用户
-        const user = window.authManager?.getCurrentUser();
-        const isAdmin = user && user.role === 'admin';
-        
-        console.log('🔍 管理员权限检查:');
-        console.log('  - 用户信息:', user);
-        console.log('  - 用户角色:', user?.role);
-        console.log('  - 是否为管理员:', isAdmin);
-        
-        // 如果用户信息未加载，尝试从localStorage获取
-        if (!user) {
-            try {
-                const storedUser = localStorage.getItem('user');
-                const currentUser = localStorage.getItem('currentUser');
-                const userData = localStorage.getItem('userData');
-                
-                console.log('  - localStorage中的user:', storedUser);
-                console.log('  - localStorage中的currentUser:', currentUser);
-                console.log('  - localStorage中的userData:', userData);
-                
-                if (storedUser) {
-                    const parsedUser = JSON.parse(storedUser);
-                    const storedIsAdmin = parsedUser && parsedUser.role === 'admin';
-                    console.log('  - 从localStorage获取用户信息:', parsedUser);
-                    console.log('  - localStorage中的管理员权限:', storedIsAdmin);
-                    return storedIsAdmin;
-                }
-                
-                if (currentUser) {
-                    const parsedCurrentUser = JSON.parse(currentUser);
-                    const currentUserIsAdmin = parsedCurrentUser && parsedCurrentUser.isAdmin;
-                    console.log('  - 从currentUser获取用户信息:', parsedCurrentUser);
-                    console.log('  - currentUser中的管理员权限:', currentUserIsAdmin);
-                    return currentUserIsAdmin;
-                }
-            } catch (error) {
-                console.log('  - localStorage解析失败:', error);
+        // 优先使用authManager
+        if (window.authManager && typeof window.authManager.getCurrentUser === 'function') {
+            const user = window.authManager.getCurrentUser();
+            if (user && user.role === 'admin') {
+                return true;
             }
         }
         
-        return isAdmin;
+        // 备用方案：直接检查localStorage
+        const currentUser = localStorage.getItem('currentUser');
+        if (currentUser) {
+            try {
+                const user = JSON.parse(currentUser);
+                return user.isAdmin === true;
+            } catch (e) {
+                return false;
+            }
+        }
+        
+        return false;
     }
 
     createSwitcher() {
@@ -211,39 +180,72 @@ class EnvSwitcher {
 
             .env-option-url {
                 font-size: 10px;
-                color: #2c3e50;
                 margin-top: 4px;
                 text-align: center;
                 line-height: 1.3;
                 font-weight: 600;
-                background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
                 padding: 4px 6px;
                 border-radius: 4px;
-                border: 2px solid #95a5a6;
+                border: 2px solid transparent;
                 box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-                text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
                 letter-spacing: 0.5px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                position: relative;
+            }
+
+            .env-option-url::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 4px;
+                opacity: 0.1;
+                z-index: -1;
             }
 
             .env-option.active .env-option-url {
-                color: #ffffff;
-                background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
-                border-color: rgba(255, 255, 255, 0.4);
+                background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                border-color: rgba(255, 255, 255, 0.3);
                 box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            }
+
+            .env-option.active .env-option-url::before {
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+                border: 1px solid rgba(255, 255, 255, 0.3);
             }
 
             .env-option:not(.active) {
-                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                border: 2px solid #dee2e6;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border: 2px solid transparent;
+                box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+                transition: all 0.3s ease;
             }
 
             .env-option:not(.active):hover {
-                background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-                border-color: #64b5f6;
-                transform: translateY(-1px);
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(67, 233, 123, 0.3);
+                border-color: rgba(67, 233, 123, 0.3);
+            }
+
+            .env-option:not(.active):hover .env-option-url {
+                background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .env-option:not(.active):hover .env-option-url::before {
+                background: linear-gradient(135deg, rgba(67, 233, 123, 0.1) 0%, rgba(56, 249, 215, 0.1) 100%);
             }
 
             /* 动画效果 */
@@ -299,6 +301,24 @@ class EnvSwitcher {
                     font-size: 8px;
                     padding: 3px 4px;
                     margin-top: 3px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                }
+
+                .env-option.active .env-option-url {
+                    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                }
+
+                .env-option:not(.active):hover .env-option-url {
+                    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
                 }
             }
 
@@ -429,38 +449,31 @@ class EnvSwitcher {
     }
 
     reloadData() {
-        console.log('🔄 环境切换后重新加载数据...');
-        
         // 延迟一点时间确保环境切换完成
         setTimeout(() => {
             // 重新加载文件列表
             if (window.uiManager && window.uiManager.fileRenderer) {
-                console.log('📁 重新加载文件列表...');
                 window.uiManager.fileRenderer.loadFiles();
             }
             
             // 重新加载文件夹列表
             if (window.uiManager && window.uiManager.folderManager) {
-                console.log('📂 重新加载文件夹列表...');
                 window.uiManager.folderManager.loadFolders();
             }
             
             // 重新加载URL文件列表
             if (window.apiSystem && window.apiSystem.urlFiles) {
-                console.log('🔗 重新加载URL文件列表...');
                 // 触发URL文件重新加载
                 window.dispatchEvent(new CustomEvent('reloadUrlFiles'));
             }
             
             // 重新加载存储统计
             if (window.uiManager && window.uiManager.core) {
-                console.log('💾 重新加载存储统计...');
                 window.uiManager.core.loadStorageInfo();
             }
             
             // 重新加载用户资料
             if (window.uiManager && window.uiManager.profileManager) {
-                console.log('👤 重新加载用户资料...');
                 window.uiManager.profileManager.loadProfile();
             }
             
@@ -468,8 +481,6 @@ class EnvSwitcher {
             window.dispatchEvent(new CustomEvent('environmentDataReload', {
                 detail: { environment: window.ENV_MANAGER.currentEnv }
             }));
-            
-            console.log('✅ 数据重新加载完成');
         }, 500);
     }
 
@@ -522,11 +533,8 @@ class EnvSwitcher {
 document.addEventListener('DOMContentLoaded', () => {
     // 优化初始化逻辑，减少延迟
     const initEnvSwitcher = (retryCount = 0) => {
-        console.log(`🔍 检查环境切换器初始化条件... (尝试 ${retryCount + 1})`);
-        
         // 检查环境管理器是否存在
         if (!window.ENV_MANAGER) {
-            console.log('❌ ENV_MANAGER 不存在');
             if (retryCount < 3) {
                 setTimeout(() => initEnvSwitcher(retryCount + 1), 500);
             }
@@ -544,31 +552,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     user = JSON.parse(currentUser);
                     isAdmin = user.isAdmin === true;
-                    console.log('📦 从localStorage获取用户信息:', user);
                 } catch (e) {
-                    console.log('❌ 解析localStorage用户信息失败:', e);
+                    // 静默处理错误
                 }
             }
         } else {
             isAdmin = user && user.role === 'admin';
         }
         
-        console.log('👤 当前用户:', user);
-        console.log('🔑 管理员权限:', isAdmin);
-        
         // 如果用户信息还没加载完成，重试（减少重试次数和间隔）
         if (!user && retryCount < 3) {
-            console.log('⏳ 用户信息未加载，等待重试...');
             setTimeout(() => initEnvSwitcher(retryCount + 1), 300);
             return;
         }
         
         // 初始化条件：管理员权限 OR 调试模式
         if (isAdmin || window.ENV_MANAGER.config.debug) {
-            console.log('✅ 初始化环境切换器');
             new EnvSwitcher();
-        } else {
-            console.log('❌ 不满足初始化条件');
         }
     };
     

@@ -41,12 +41,6 @@ window.ENV_MANAGER = (function() {
         const port = window.location.port;
         const protocol = window.location.protocol;
         
-        console.log('🔍 环境检测信息:');
-        console.log('  - hostname:', hostname);
-        console.log('  - port:', port);
-        console.log('  - protocol:', protocol);
-        console.log('  - full URL:', window.location.href);
-        
         // 开发环境检测
         if (hostname === 'localhost' || 
             hostname === '127.0.0.1' ||
@@ -54,12 +48,10 @@ window.ENV_MANAGER = (function() {
             hostname.startsWith('10.') ||
             (hostname === 'localhost' && (port === '8080' || port === '')) ||
             protocol === 'file:') {
-            console.log('✅ 检测到开发环境');
             return 'local';
         }
         
         // 生产环境（默认）
-        console.log('🚀 检测到生产环境');
         return 'prod';
     }
 
@@ -87,16 +79,10 @@ window.ENV_MANAGER = (function() {
 
     // 初始化环境配置
     function initEnvironment() {
-        console.log('🔧 开始初始化环境配置...');
-        
         // 优先级：URL参数 > localStorage > 自动检测
         const urlEnv = getEnvFromUrl();
         const storageEnv = getEnvFromStorage();
         const detectedEnv = detectEnvironment();
-        
-        console.log('  - URL参数环境:', urlEnv);
-        console.log('  - localStorage环境:', storageEnv);
-        console.log('  - 自动检测环境:', detectedEnv);
         
         let env = urlEnv || storageEnv || detectedEnv;
         
@@ -109,7 +95,6 @@ window.ENV_MANAGER = (function() {
         currentEnv = env;
         saveEnvToStorage(env);
         
-        console.log(`🌍 当前环境: ${ENVIRONMENTS[env].name} (${env})`);
         return env;
     }
 
@@ -129,8 +114,6 @@ window.ENV_MANAGER = (function() {
                 apiBaseUrl: customApiUrl
             };
         }
-        
-        console.log(`🔄 切换到环境: ${getCurrentEnvironment().name} (${env})`);
         
         // 触发环境切换事件
         window.dispatchEvent(new CustomEvent('environmentChanged', {
