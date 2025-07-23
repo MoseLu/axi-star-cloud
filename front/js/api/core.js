@@ -11,6 +11,12 @@ class Core {
 
     // 构建API URL的通用方法
     buildApiUrl(endpoint) {
+        // 使用API网关构建URL
+        if (window.apiGateway) {
+            return window.apiGateway.buildUrl(endpoint);
+        }
+        
+        // 备用方案：原来的逻辑
         if (!endpoint) return '';
         if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
             return endpoint;

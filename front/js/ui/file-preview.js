@@ -261,7 +261,7 @@ class UIFilePreview {
         }
         
         // 构建PDF URL
-        let pdfUrl = `/api/files/${file.id}/download?user_id=${userId}`;
+        let pdfUrl = window.apiGateway.buildUrl(`/api/files/${file.id}/download?user_id=${userId}`);
         
         // 加载PDF
         setTimeout(async () => {

@@ -132,21 +132,16 @@ class UIFileOperations {
             // 显示删除进度
             this.showDeleteProgress(file.name);
 
-            let apiUrl;
+            let endpoint;
             if (file.type === 'url') {
                 // URL文件使用专门的API端点
-                apiUrl = window.apiSystem?.core?.buildApiUrl(`/api/url-files/${file.id}`);
+                endpoint = `/api/url-files/${file.id}`;
             } else {
                 // 普通文件使用标准API端点
-                apiUrl = window.apiSystem?.core?.buildApiUrl(`/api/files/${file.id}`);
+                endpoint = `/api/files/${file.id}`;
             }
 
-            const response = await fetch(`${apiUrl}?user_id=${userId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
+            const response = await window.apiGateway.delete(`${endpoint}?user_id=${userId}`);
 
             if (!response.ok) {
                 throw new Error(`删除失败: ${response.status}`);
@@ -279,13 +274,7 @@ class UIFileOperations {
                 ...options
             });
 
-            const apiUrl = window.apiSystem?.core?.buildApiUrl(`/api/files/search?${params}`);
-            const response = await fetch(apiUrl, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            const response = await window.apiGateway.get(`/api/files/search?${params}`);
 
             if (!response.ok) {
                 throw new Error(`搜索失败: ${response.status}`);
@@ -393,13 +382,13 @@ class UIFileOperations {
             for (const file of files) {
                 try {
                     // 根据文件类型选择不同的API端点
-                    let apiUrl;
+                    let endpoint;
                     if (file.type === 'url') {
                         // URL文件使用专门的API端点
-                        apiUrl = window.apiSystem?.core?.buildApiUrl(`/api/url-files/${file.id}`);
+                        endpoint = `/api/url-files/${file.id}`;
                     } else {
                         // 普通文件使用标准API端点
-                        apiUrl = window.apiSystem?.core?.buildApiUrl(`/api/files/${file.id}`);
+                        endpoint = `/api/files/${file.id}`;
                     }
 
                     // 获取当前用户ID
@@ -408,12 +397,7 @@ class UIFileOperations {
                         throw new Error('用户未登录');
                     }
 
-                    const response = await fetch(`${apiUrl}?user_id=${userId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
-                    });
+                    const response = await window.apiGateway.delete(`${endpoint}?user_id=${userId}`);
 
                     if (response.ok) {
                         successCount++;

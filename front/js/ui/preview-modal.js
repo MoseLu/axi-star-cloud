@@ -195,7 +195,7 @@ class UIPreviewModal {
     }
 
     async loadImagePreview() {
-        const response = await fetch(`/api/files/${this.currentFile.id}/download`);
+        const response = await window.apiGateway.download(`/api/files/${this.currentFile.id}/download`);
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
 
@@ -208,21 +208,12 @@ class UIPreviewModal {
 
     async loadPDFPreview() {
         // 获取用户ID
-        let userId = null;
-        if (localStorage.getItem('currentUser')) {
-            try {
-                const cu = JSON.parse(localStorage.getItem('currentUser'));
-                if (cu && cu.uuid) userId = cu.uuid;
-            } catch(e) {}
-        }
-        if (!userId && localStorage.getItem('user_id')) userId = localStorage.getItem('user_id');
-        if (!userId && window.userId) userId = window.userId;
-        
+        const userId = window.apiSystem?.getCurrentUserId();
         if (!userId) {
             throw new Error('未检测到用户ID，请重新登录');
         }
         
-        const response = await fetch(`/api/files/${this.currentFile.id}/download?user_id=${userId}`);
+        const response = await window.apiGateway.download(`/api/files/${this.currentFile.id}/download?user_id=${userId}`);
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
 
@@ -234,7 +225,7 @@ class UIPreviewModal {
     }
 
     async loadTextPreview() {
-        const response = await fetch(`/api/files/${this.currentFile.id}/download`);
+        const response = await window.apiGateway.download(`/api/files/${this.currentFile.id}/download`);
         const text = await response.text();
 
         this.previewContainer.innerHTML = `
@@ -246,21 +237,12 @@ class UIPreviewModal {
 
     async loadVideoPreview() {
         // 获取用户ID
-        let userId = null;
-        if (localStorage.getItem('currentUser')) {
-            try {
-                const cu = JSON.parse(localStorage.getItem('currentUser'));
-                if (cu && cu.uuid) userId = cu.uuid;
-            } catch(e) {}
-        }
-        if (!userId && localStorage.getItem('user_id')) userId = localStorage.getItem('user_id');
-        if (!userId && window.userId) userId = window.userId;
-        
+        const userId = window.apiSystem?.getCurrentUserId();
         if (!userId) {
             throw new Error('未检测到用户ID，请重新登录');
         }
         
-        const response = await fetch(`/api/files/${this.currentFile.id}/download?user_id=${userId}`);
+        const response = await window.apiGateway.download(`/api/files/${this.currentFile.id}/download?user_id=${userId}`);
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
 
@@ -275,7 +257,7 @@ class UIPreviewModal {
     }
 
     async loadAudioPreview() {
-        const response = await fetch(`/api/files/${this.currentFile.id}/download`);
+        const response = await window.apiGateway.download(`/api/files/${this.currentFile.id}/download`);
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
 
@@ -343,21 +325,12 @@ class UIPreviewModal {
 
         try {
             // 获取用户ID
-            let userId = null;
-            if (localStorage.getItem('currentUser')) {
-                try {
-                    const cu = JSON.parse(localStorage.getItem('currentUser'));
-                    if (cu && cu.uuid) userId = cu.uuid;
-                } catch(e) {}
-            }
-            if (!userId && localStorage.getItem('user_id')) userId = localStorage.getItem('user_id');
-            if (!userId && window.userId) userId = window.userId;
-            
+            const userId = window.apiSystem?.getCurrentUserId();
             if (!userId) {
                 throw new Error('未检测到用户ID，请重新登录');
             }
             
-            const response = await fetch(`/api/files/${this.currentFile.id}/download?user_id=${userId}`);
+            const response = await window.apiGateway.download(`/api/files/${this.currentFile.id}/download?user_id=${userId}`);
             const blob = await response.blob();
             const url = URL.createObjectURL(blob);
             
