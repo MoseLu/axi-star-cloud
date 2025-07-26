@@ -270,7 +270,11 @@ class DocViewer {
         
         if (!content || !fullscreenBtn) return;
         
-        // 添加全屏样式
+        // 隐藏body滚动条
+        document.body.style.overflow = 'hidden';
+        
+        // 添加全屏样式到模态框和内容
+        this.modal.classList.add('fullscreen');
         content.classList.add('fullscreen');
         
         // 更新按钮图标和标题
@@ -290,7 +294,11 @@ class DocViewer {
         
         if (!content || !fullscreenBtn) return;
         
+        // 恢复body滚动条
+        document.body.style.overflow = '';
+        
         // 移除全屏样式
+        this.modal.classList.remove('fullscreen');
         content.classList.remove('fullscreen');
         
         // 更新按钮图标和标题
@@ -322,6 +330,15 @@ class DocViewer {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             }
 
+            /* 全屏模态框样式 */
+            .doc-viewer-modal.fullscreen {
+                background: rgba(0, 0, 0, 0.95);
+                justify-content: flex-start;
+                align-items: flex-start;
+                padding: 0;
+                margin: 0;
+            }
+
             .doc-viewer-content {
                 background: #1a1a1a;
                 border-radius: 12px;
@@ -338,12 +355,16 @@ class DocViewer {
 
             /* 全屏样式 */
             .doc-viewer-content.fullscreen {
-                width: 100%;
-                height: 100%;
+                width: 100vw;
+                height: 100vh;
                 max-width: none;
                 max-height: none;
                 border-radius: 0;
                 border: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                z-index: 10001;
             }
 
             /* 明亮主题适配 */
