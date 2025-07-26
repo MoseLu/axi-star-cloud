@@ -1,295 +1,100 @@
+/**
+ * 认证处理器（重构版本）
+ * 
+ * 这是重构后的认证处理器，使用分层架构：
+ * - 控制器层：处理HTTP请求和响应
+ * - 服务层：处理业务逻辑
+ * - 中间件层：处理权限验证
+ * - 工具层：提供辅助功能
+ * 
+ * 该文件现在主要作为兼容性层，实际功能已迁移到新的架构中
+ */
+
 package handlers
 
 import (
-	"fmt"
-	"net/http"
-	"strconv"
-	"time"
-
+	"backend/controllers"
 	"backend/database"
-	"backend/models"
+	"backend/middleware"
+	"backend/services"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
-// AuthHandler 认证处理器
+// AuthHandler 认证处理器（重构版本）
 type AuthHandler struct {
-	userRepo *database.UserRepository
+	authController *controllers.AuthController
+	authMiddleware *middleware.AuthMiddleware
 }
 
 // NewAuthHandler 创建认证处理器实例
 func NewAuthHandler(userRepo *database.UserRepository) *AuthHandler {
-	return &AuthHandler{userRepo: userRepo}
-}
-
-// Register 处理注册请求
-func (h *AuthHandler) Register(c *gin.Context) {
-	var registerData models.RegisterRequest
-
-	// 绑定请求数据
-	if err := c.ShouldBindJSON(&registerData); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数错误"})
-		return
-	}
-
-	// 检查用户名是否已存在
-	exists, err := h.userRepo.CheckUsernameExists(registerData.Username)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "服务器内部错误"})
-		return
-	}
-
-	if exists {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "用户名已存在"})
-		return
-	}
-
-	// 创建新用户
-	user := &models.User{
-		UUID:     uuid.New().String(),
-		Username: registerData.Username,
-		Password: registerData.Password, // 实际应用中应该哈希密码
-		Email:    registerData.Email,
-		StorageLimit: func() int64 {
-			// 管理员用户设置更大的存储空间（5GB），普通用户设置较小的存储空间（1GB）
-			if registerData.Username == "Mose" {
-				return 5 * 1024 * 1024 * 1024 // 5GB
-			}
-			return 1024 * 1024 * 1024 // 1GB
-		}(),
-		IsAdmin:   registerData.Username == "Mose", // 只有Mose用户才能是管理员
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-
-	// 保存用户到数据库
-	err = h.userRepo.CreateUser(user)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "注册失败"})
-		return
-	}
-
-	// 注册成功响应
-	response := models.RegisterResponse{
-		Success: true,
-		Message: "注册成功",
-	}
-	response.User.UUID = user.UUID
-	response.User.Username = user.Username
-	response.User.IsAdmin = user.IsAdmin
-
-	c.JSON(http.StatusOK, response)
-}
-
-// Login 处理登录请求
-func (h *AuthHandler) Login(c *gin.Context) {
-	var loginData models.LoginRequest
-
-	// 绑定请求数据
-	if err := c.ShouldBindJSON(&loginData); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数错误"})
-		return
-	}
-
-	// 根据用户名获取用户
-	user, err := h.userRepo.GetUserByUsername(loginData.Username)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "服务器内部错误"})
-		return
-	}
-
-	// 检查用户是否存在
-	if user == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户名或密码错误"})
-		return
-	}
-
-	// 验证密码（实际应用中应该使用哈希密码）
-	if user.Password != loginData.Password {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户名或密码错误"})
-		return
-	}
-
-	// 更新最后登录时间
-	if err := h.userRepo.UpdateLastLoginTime(user.UUID); err != nil {
-		// 记录错误但不影响登录流程
-		fmt.Printf("更新最后登录时间失败: %v\n", err)
-	}
-
-	// 登录成功响应
-	response := models.LoginResponse{
-		Success: true,
-		Message: "登录成功",
-		User: models.UserResponse{
-			UUID:     user.UUID,
-			Username: user.Username,
-			Email:    user.Email,
-			Bio:      user.Bio,
-			Avatar:   user.Avatar,
-			IsAdmin:  user.IsAdmin,
-		},
-		LastLoginTime: user.UpdatedAt, // 返回更新前的最后登录时间
-	}
-
-	c.JSON(http.StatusOK, response)
-}
-
-// Logout 处理退出登录请求
-func (h *AuthHandler) Logout(c *gin.Context) {
-	userID := c.Query("user_id")
+	// 创建服务层
+	authService := services.NewAuthService(userRepo)
 	
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "缺少用户ID"})
-		return
-	}
+	// 创建控制器
+	authController := controllers.NewAuthController(authService)
+	
+	// 创建中间件
+	authMiddleware := middleware.NewAuthMiddleware(userRepo)
 
-	// 更新最后登录时间
-	if err := h.userRepo.UpdateLastLoginTime(userID); err != nil {
-		// 记录错误但不影响退出流程
-		fmt.Printf("更新最后登录时间失败: %v\n", err)
+	return &AuthHandler{
+		authController: authController,
+		authMiddleware: authMiddleware,
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "退出登录成功",
-	})
 }
 
-// CheckAdminPermission 检查管理员权限的中间件
+// Register 处理注册请求（委托给控制器）
+func (h *AuthHandler) Register(c *gin.Context) {
+	h.authController.Register(c)
+}
+
+// Login 处理登录请求（委托给控制器）
+func (h *AuthHandler) Login(c *gin.Context) {
+	h.authController.Login(c)
+}
+
+// Logout 处理退出登录请求（委托给控制器）
+func (h *AuthHandler) Logout(c *gin.Context) {
+	h.authController.Logout(c)
+}
+
+// RefreshToken 刷新普通用户token（委托给控制器）
+func (h *AuthHandler) RefreshToken(c *gin.Context) {
+	h.authController.RefreshToken(c)
+}
+
+// RefreshAdminToken 刷新管理员token（委托给控制器）
+func (h *AuthHandler) RefreshAdminToken(c *gin.Context) {
+	h.authController.RefreshAdminToken(c)
+}
+
+// ValidateToken 验证普通用户token（委托给控制器）
+func (h *AuthHandler) ValidateToken(c *gin.Context) {
+	h.authController.ValidateToken(c)
+}
+
+// ValidateAdminToken 验证管理员token（委托给控制器）
+func (h *AuthHandler) ValidateAdminToken(c *gin.Context) {
+	h.authController.ValidateAdminToken(c)
+}
+
+// CheckAdminPermission 检查管理员权限的中间件（委托给中间件）
 func (h *AuthHandler) CheckAdminPermission() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// 从请求头或查询参数获取用户UUID
-		userUUID := c.GetHeader("User-UUID")
-		if userUUID == "" {
-			userUUID = c.Query("user_uuid")
-		}
-		if userUUID == "" {
-			userUUID = c.Query("user_id") // 兼容前端发送的user_id参数
-		}
-
-		if userUUID == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "未提供用户信息"})
-			c.Abort()
-			return
-		}
-
-		// 查询用户信息
-		user, err := h.userRepo.GetUserByUUID(userUUID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "服务器内部错误"})
-			c.Abort()
-			return
-		}
-
-		if user == nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "用户不存在"})
-			c.Abort()
-			return
-		}
-
-		// 检查是否为管理员
-		if !user.IsAdmin {
-			c.JSON(http.StatusForbidden, gin.H{"error": "权限不足，需要管理员权限"})
-			c.Abort()
-			return
-		}
-
-		// 将用户信息存储到上下文中
-		c.Set("currentUser", user)
-		c.Next()
-	}
+	return h.authMiddleware.CheckAdminPermission()
 }
 
-// GetAllUsers 获取所有用户（管理员功能）
+// CheckUserPermission 检查普通用户权限的中间件（委托给中间件）
+func (h *AuthHandler) CheckUserPermission() gin.HandlerFunc {
+	return h.authMiddleware.CheckUserPermission()
+}
+
+// GetAllUsers 获取所有用户（管理员功能）（委托给控制器）
 func (h *AuthHandler) GetAllUsers(c *gin.Context) {
-	// 获取分页参数
-	page := 1
-	pageSize := 5 // 每页显示5个用户
-
-	if pageStr := c.Query("page"); pageStr != "" {
-		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
-			page = p
-		}
-	}
-
-	if pageSizeStr := c.Query("page_size"); pageSizeStr != "" {
-		if ps, err := strconv.Atoi(pageSizeStr); err == nil && ps > 0 {
-			pageSize = ps
-		}
-	}
-
-	// 获取用户总数
-	total, err := h.userRepo.GetUserCount()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取用户列表失败"})
-		return
-	}
-
-	// 如果用户总数超过5个，使用分页
-	if total > 5 {
-		users, totalCount, err := h.userRepo.GetUsersWithPagination(page, pageSize)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取用户列表失败"})
-			return
-		}
-
-		response := models.UserListResponse{
-			Success:  true,
-			Users:    users,
-			Total:    totalCount,
-			Page:     page,
-			PageSize: pageSize,
-			HasMore:  page*pageSize < totalCount,
-		}
-
-		c.JSON(http.StatusOK, response)
-	} else {
-		// 用户总数不超过5个，返回所有用户
-		users, err := h.userRepo.GetAllUsers()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取用户列表失败"})
-			return
-		}
-
-		response := models.UserListResponse{
-			Success: true,
-			Users:   users,
-			Total:   total,
-		}
-
-		c.JSON(http.StatusOK, response)
-	}
+	h.authController.GetAllUsers(c)
 }
 
-// UpdateUserStorage 更新用户存储限制（管理员功能）
+// UpdateUserStorage 更新用户存储限制（管理员功能）（委托给控制器）
 func (h *AuthHandler) UpdateUserStorage(c *gin.Context) {
-	var updateData models.UpdateUserStorageRequest
-
-	// 添加调试日志
-	fmt.Printf("收到更新用户存储请求 - UUID: %s, StorageLimit: %d\n", updateData.UUID, updateData.StorageLimit)
-
-	// 绑定请求数据
-	if err := c.ShouldBindJSON(&updateData); err != nil {
-		fmt.Printf("请求参数绑定失败: %v\n", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数错误"})
-		return
-	}
-
-	fmt.Printf("成功绑定请求数据 - UUID: %s, StorageLimit: %d\n", updateData.UUID, updateData.StorageLimit)
-
-	// 更新用户存储限制
-	err := h.userRepo.UpdateStorageLimit(updateData.UUID, updateData.StorageLimit)
-	if err != nil {
-		fmt.Printf("更新存储限制失败: %v\n", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "更新存储限制失败"})
-		return
-	}
-
-	fmt.Printf("存储限制更新成功 - UUID: %s\n", updateData.UUID)
-
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "存储限制更新成功",
-	})
+	h.authController.UpdateUserStorage(c)
 }

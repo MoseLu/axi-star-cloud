@@ -96,27 +96,32 @@ class UIUserManager {
     /**
      * 显示管理员用户管理界面
      */
-    showAdminUsersModal() {
-        const currentUser = window.authSystem ? window.authSystem.getCurrentUser() : null;
-        
-        if (!currentUser || !currentUser.isAdmin) {
-            this.showMessage('权限不足，需要管理员权限', 'error');
-            return;
+    async showAdminUsersModal() {
+        try {
+            // 直接显示用户管理界面，权限验证交给后端API处理
+            this.createAdminUsersModal();
+            this.loadUsersList();
+        } catch (error) {
+            console.error('显示用户管理界面失败:', error);
+            this.showMessage('显示用户管理界面失败', 'error');
         }
+    }
 
+    /**
+     * 创建管理员用户管理模态框
+     */
+    createAdminUsersModal() {
         // 检查是否已经存在用户管理模态框
-        const existingModal = document.querySelector('.fixed[data-modal="user-management"]');
+        const existingModal = document.querySelector('.fixed.inset-0.z-50[data-modal="user-management"]');
         if (existingModal) {
-            // 删除所有console.log调试语句
-            return;
+            existingModal.remove();
         }
 
-        // 创建模态框
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/60';
         modal.setAttribute('data-modal', 'user-management');
         modal.innerHTML = `
-            <div class="bg-dark-light rounded-xl p-8 w-full max-w-4xl max-h-[80vh] shadow-2xl border border-blue-400/30 overflow-hidden">
+            <div class="bg-dark-light rounded-xl p-6 w-full max-w-4xl max-h-[90vh] shadow-2xl border border-blue-400/30 overflow-hidden">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-xl font-bold text-blue-300">用户管理</h3>
                     <button class="text-gray-400 hover:text-white transition-colors" id="close-user-management">
@@ -124,31 +129,24 @@ class UIUserManager {
                     </button>
                 </div>
                 
-                <div class="overflow-y-auto max-h-[60vh]">
+                <div class="overflow-y-auto max-h-[calc(90vh-120px)]">
+                    <!-- 用户列表容器 -->
                     <div id="users-list" class="space-y-4">
-                        <div class="flex items-center justify-center py-8">
-                            <i class="fa fa-spinner fa-spin text-blue-400 text-2xl"></i>
-                            <span class="ml-2 text-gray-300">加载中...</span>
+                        <div class="text-center py-8 text-gray-400">
+                            <i class="fa fa-spinner fa-spin text-2xl mb-4"></i>
+                            <p>加载中...</p>
                         </div>
                     </div>
                     
-                    <!-- 美化的分页控件 -->
-                    <div id="pagination-controls" class="mt-8 flex flex-col items-center justify-center space-y-4 hidden">
-                        <!-- 分页信息 -->
-                        <div class="text-sm text-gray-300 bg-dark-light/50 rounded-lg px-4 py-2 border border-blue-400/30">
-                            <span id="page-info" class="font-medium"></span>
-                        </div>
-                        
-                        <!-- 分页按钮 -->
-                        <div class="flex items-center justify-center space-x-3">
-                            <button id="prev-page-btn" class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-dark-light border border-blue-400/30 rounded-lg hover:bg-blue-600/20 hover:border-blue-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
-                                <i class="fa fa-chevron-left mr-2"></i>上一页
-                            </button>
-                            
-                            <button id="next-page-btn" class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-dark-light border border-blue-400/30 rounded-lg hover:bg-blue-600/20 hover:border-blue-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
-                                下一页<i class="fa fa-chevron-right ml-2"></i>
-                            </button>
-                        </div>
+                    <!-- 分页控件 -->
+                    <div id="pagination-controls" class="flex items-center justify-between mt-6 pt-4 border-t border-gray-700 hidden">
+                        <button id="prev-page-btn" class="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fa fa-chevron-left mr-1"></i>上一页
+                        </button>
+                        <span id="page-info" class="text-gray-400 text-sm"></span>
+                        <button id="next-page-btn" class="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            下一页<i class="fa fa-chevron-right ml-1"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -171,8 +169,25 @@ class UIUserManager {
             }
         });
         
-        // 加载用户列表
-        this.loadUsersList();
+        // 按ESC键关闭模态框
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+            }
+        });
+    }
+
+    /**
+     * 获取当前用户信息
+     * @returns {Object|null} 用户信息
+     */
+    getCurrentUser() {
+        if (window.StorageManager && typeof window.StorageManager.getUserInfo === 'function') {
+            return window.StorageManager.getUserInfo();
+        } else {
+            const userData = localStorage.getItem('userInfo');
+            return userData ? JSON.parse(userData) : null;
+        }
     }
 
     /**
@@ -185,6 +200,7 @@ class UIUserManager {
                 return;
             }
             
+            // 确保API调用包含正确的认证信息
             const result = await this.adminApi.getAllUsers(page, this.pageSize);
             
             if (result.success) {
@@ -268,16 +284,16 @@ class UIUserManager {
         }
 
         usersList.innerHTML = headerHtml + users.map(user => `
-            <div class="bg-dark border border-gray-700 rounded-lg p-4 hover:border-blue-400/50 transition-colors ${user.is_admin ? 'border-red-400/50 bg-red-900/10' : ''}">
+            <div class="bg-dark border border-gray-700 rounded-lg p-4 hover:border-blue-400/50 transition-colors ${user.username === 'Mose' ? 'border-red-400/50 bg-red-900/10' : ''}">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
-                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center ${user.is_admin ? 'from-red-500/20 to-orange-500/20' : ''}">
-                            <i class="fa fa-user text-blue-400 text-xl ${user.is_admin ? 'text-red-400' : ''}"></i>
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center ${user.username === 'Mose' ? 'from-red-500/20 to-orange-500/20' : ''}">
+                            <i class="fa fa-user text-blue-400 text-xl ${user.username === 'Mose' ? 'text-red-400' : ''}"></i>
                         </div>
                         <div>
                             <div class="flex items-center space-x-2">
-                                <h4 class="text-white font-semibold">${user.username}</h4>
-                                ${user.is_admin ? '<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded-full text-xs font-medium">管理员</span>' : ''}
+                                <h4 class="font-semibold">${user.username}</h4>
+                                ${user.username === 'Mose' ? '<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded-full text-xs font-medium">管理员</span>' : ''}
                             </div>
                             <p class="text-gray-400 text-sm">${user.email || '未设置邮箱'}</p>
                             <p class="text-gray-500 text-xs">创建于 ${this.formatDate(user.created_at)}</p>
@@ -287,7 +303,7 @@ class UIUserManager {
                     <div class="flex items-center space-x-4">
                         <div class="text-right">
                             <p class="text-sm text-gray-400">存储空间</p>
-                            <p class="text-white font-semibold">${this.formatStorageSize(user.storage_limit)}</p>
+                            <p class="font-semibold">${this.formatStorageSize(user.storage_limit)}</p>
                         </div>
                         
                         <div class="flex space-x-2">
@@ -331,13 +347,13 @@ class UIUserManager {
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">当前限制</label>
-                        <p class="text-white font-semibold">${this.formatStorageSize(currentLimit)}</p>
+                        <p class="font-semibold">${this.formatStorageSize(currentLimit)}</p>
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">新限制 (GB)</label>
                         <input type="number" id="new-storage-limit" min="1" max="1000" 
-                               class="w-full p-3 bg-dark border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                               class="w-full p-3 bg-dark border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
                                value="${Math.round(currentLimit / (1024 * 1024 * 1024))}" />
                     </div>
                 </div>
@@ -345,7 +361,7 @@ class UIUserManager {
                 <div class="flex justify-end space-x-3 mt-6">
                     <button class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors" 
                             id="storage-edit-cancel">取消</button>
-                    <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    <button class="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
                             id="storage-edit-save" data-uuid="${uuid}">保存</button>
                 </div>
             </div>

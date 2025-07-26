@@ -608,3 +608,188 @@
     border-radius: 50%;
     animation: spin 1s linear infinite;
 } 
+
+/* 亮色主题适配 */
+body.theme-light .profile-card {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(209, 213, 219, 0.5) !important;
+    color: #1f2937 !important;
+}
+
+body.theme-light .user-avatar {
+    background-color: #f3f4f6 !important;
+    border: 3px solid #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+body.theme-light .user-avatar:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+}
+
+body.theme-light .info-item {
+    border-bottom: 1px solid #e5e7eb !important;
+}
+
+body.theme-light .info-label {
+    color: #6b7280 !important;
+}
+
+body.theme-light .info-value {
+    color: #1f2937 !important;
+}
+
+body.theme-light .username,
+body.theme-light .user-name {
+    color: #1f2937 !important;
+}
+
+body.theme-light .user-email {
+    color: #2563eb !important;
+}
+
+body.theme-light .user-role {
+    color: #6b7280 !important;
+}
+
+body.theme-light .user-role.admin {
+    color: #d97706 !important;
+}
+
+body.theme-light .user-role.user {
+    color: #059669 !important;
+}
+
+body.theme-light .user-role.guest {
+    color: #7c3aed !important;
+}
+
+body.theme-light .last-login {
+    color: #6b7280 !important;
+}
+
+body.theme-light .storage-section h4 {
+    color: #1f2937 !important;
+}
+
+body.theme-light .storage-bar {
+    background: #f3f4f6 !important;
+}
+
+body.theme-light .storage-progress {
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8) !important;
+}
+
+body.theme-light .storage-info {
+    color: #6b7280 !important;
+}
+
+body.theme-light .storage-used,
+body.theme-light .storage-total {
+    color: #1f2937 !important;
+}
+
+body.theme-light .storage-percentage {
+    color: #2563eb !important;
+}
+
+body.theme-light .profile-form h4 {
+    color: #1f2937 !important;
+}
+
+body.theme-light .form-group label {
+    color: #374151 !important;
+}
+
+body.theme-light .form-group input,
+body.theme-light .form-group textarea {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid #d1d5db !important;
+    color: #1f2937 !important;
+}
+
+body.theme-light .form-group input:focus,
+body.theme-light .form-group textarea:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+body.theme-light .form-group input.error {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+}
+
+body.theme-light .form-group input:disabled {
+    background: rgba(249, 250, 251, 0.4) !important;
+    color: #9ca3af !important;
+}
+
+body.theme-light .form-group .help-text {
+    color: #6b7280 !important;
+}
+
+body.theme-light .form-group .error-text {
+    color: #dc2626 !important;
+}
+
+body.theme-light .edit-profile-btn,
+body.theme-light .save-profile-btn,
+body.theme-light .cancel-profile-btn {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid #d1d5db !important;
+    color: #374151 !important;
+}
+
+body.theme-light .edit-profile-btn:hover {
+    background: rgba(59, 130, 246, 0.8) !important;
+    border-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+body.theme-light .save-profile-btn:hover {
+    background: rgba(34, 197, 94, 0.8) !important;
+    border-color: #22c55e !important;
+    color: #ffffff !important;
+}
+
+body.theme-light .cancel-profile-btn:hover {
+    background: rgba(239, 68, 68, 0.8) !important;
+    border-color: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+body.theme-light .profile-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+    border-color: #9ca3af !important;
+}
+
+body.theme-light .profile-header {
+    background: rgba(249, 250, 251, 0.8) !important;
+    border-bottom: 1px solid #e5e7eb !important;
+}
+
+body.theme-light .profile-name {
+    color: #1f2937 !important;
+}
+
+body.theme-light .profile-email {
+    color: #2563eb !important;
+}
+
+body.theme-light .profile-role {
+    color: #6b7280 !important;
+}
+
+body.theme-light .profile-view,
+body.theme-light .profile-form {
+    background: rgba(255, 255, 255, 0.95) !important;
+}
+
+body.theme-light .avatar-upload-progress {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid #d1d5db !important;
+}
+
+body.theme-light .avatar-upload-spinner {
+    border: 2px solid #d1d5db !important;
+    border-top: 2px solid #3b82f6 !important;
+} 

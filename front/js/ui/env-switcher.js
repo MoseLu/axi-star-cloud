@@ -40,25 +40,30 @@ class EnvSwitcher {
             return true;
         }
         
-        // 优先使用authManager
-        if (window.authManager && typeof window.authManager.getCurrentUser === 'function') {
-            const user = window.authManager.getCurrentUser();
-            if (user && user.role === 'admin') {
-                return true;
+        // 优先使用token验证管理员权限
+        if (window.tokenManager && typeof window.tokenManager.validateAdminTokens === 'function') {
+            // 异步验证，这里暂时返回false，实际使用时应该等待验证结果
+            return false;
+        }
+        
+        // 备用方案：检查当前用户是否为管理员用户（Mose）
+        let currentUser = null;
+        if (window.StorageManager && typeof window.StorageManager.getUser === 'function') {
+            currentUser = window.StorageManager.getUser();
+        } else {
+            // 如果 StorageManager 未加载，使用 localStorage 作为备用
+            const userData = localStorage.getItem('currentUser');
+            if (userData) {
+                try {
+                    currentUser = JSON.parse(userData);
+                } catch (e) {
+                    console.warn('解析用户信息失败:', e);
+                }
             }
         }
         
-        // 备用方案：直接检查localStorage
-        const currentUser = localStorage.getItem('currentUser');
-        if (currentUser) {
-            try {
-                const user = JSON.parse(currentUser);
-                if (user.isAdmin === true) {
-                    return true;
-                }
-            } catch (e) {
-                console.warn('解析用户信息失败:', e);
-            }
+        if (currentUser && currentUser.username === 'Mose') {
+            return true;
         }
         
         // 如果authManager不存在，在开发环境下也显示
@@ -142,9 +147,20 @@ class EnvSwitcher {
                 z-index: 10001;
             }
 
+            /* 明亮主题适配 */
+            body.theme-light .env-switcher-toggle {
+                background: linear-gradient(135deg, rgba(139, 92, 246, 0.8) 0%, rgba(168, 85, 247, 0.8) 100%);
+                box-shadow: 0 4px 20px rgba(139, 92, 246, 0.2);
+                border: 2px solid rgba(139, 92, 246, 0.3);
+            }
+
             .env-switcher-toggle:hover {
                 transform: scale(1.1);
                 box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            }
+
+            body.theme-light .env-switcher-toggle:hover {
+                box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
             }
 
             .env-switcher-toggle:active {
@@ -214,6 +230,14 @@ class EnvSwitcher {
                 height: 56px;
             }
 
+            /* 明亮主题菜单适配 */
+            body.theme-light .env-switcher-menu {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(139, 92, 246, 0.2);
+                box-shadow: 0 10px 40px rgba(139, 92, 246, 0.2);
+            }
+
             .env-switcher.expanded .env-switcher-menu {
                 opacity: 1;
                 visibility: visible;
@@ -236,6 +260,16 @@ class EnvSwitcher {
             }
 
             .env-menu-item:hover {
+                background: rgba(139, 92, 246, 0.1);
+                color: #8b5cf6;
+            }
+
+            /* 明亮主题菜单项适配 */
+            body.theme-light .env-menu-item {
+                color: #374151;
+            }
+
+            body.theme-light .env-menu-item:hover {
                 background: rgba(139, 92, 246, 0.1);
                 color: #8b5cf6;
             }
@@ -269,6 +303,13 @@ class EnvSwitcher {
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 backdrop-filter: blur(10px);
                 overflow: hidden;
+            }
+
+            /* 明亮主题选项卡片适配 */
+            body.theme-light .env-switcher-options {
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+                box-shadow: 0 20px 60px rgba(139, 92, 246, 0.2);
+                border: 1px solid rgba(139, 92, 246, 0.2);
             }
 
             .env-switcher-options::before {
@@ -309,6 +350,13 @@ class EnvSwitcher {
                 overflow: hidden;
             }
 
+            /* 明亮主题选项适配 */
+            body.theme-light .env-option {
+                color: #374151;
+                border: 2px solid rgba(139, 92, 246, 0.2);
+                background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+            }
+
             .env-option::before {
                 content: '';
                 position: absolute;
@@ -326,6 +374,13 @@ class EnvSwitcher {
                 border-color: #f97316;
                 transform: translateY(-2px);
                 box-shadow: 0 8px 25px rgba(249, 115, 22, 0.3);
+                color: #f97316;
+            }
+
+            body.theme-light .env-option:hover {
+                background: linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(251, 146, 60, 0.1) 100%);
+                border-color: #f97316;
+                box-shadow: 0 8px 25px rgba(249, 115, 22, 0.2);
                 color: #f97316;
             }
 
@@ -347,6 +402,13 @@ class EnvSwitcher {
                 color: #10b981;
                 box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
                 transform: translateY(-1px);
+            }
+
+            body.theme-light .env-option.active {
+                background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0.2) 100%);
+                border-color: #10b981;
+                color: #10b981;
+                box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
             }
 
             .env-option.active::before {
@@ -636,70 +698,70 @@ class EnvSwitcher {
                 console.log('开始重新加载数据...');
                 
                 // 获取当前用户信息
-                const currentUser = window.apiManager?.currentUser || 
-                                  JSON.parse(localStorage.getItem('currentUser') || '{}');
-                
-                // 方法1: 尝试使用app的loadUserData方法（最可靠）
-                if (window.app && typeof window.app.loadUserData === 'function') {
-                    console.log('使用app.loadUserData重新加载数据');
-                    await window.app.loadUserData(currentUser);
-                }
-                // 方法2: 尝试使用uiManager的loadFiles方法
-                else if (window.uiManager && typeof window.uiManager.loadFiles === 'function') {
-                    console.log('使用uiManager.loadFiles重新加载数据');
-                    await window.uiManager.loadFiles();
-                }
-                // 方法3: 尝试使用fileRenderer的loadFiles方法
-                else if (window.fileRenderer && typeof window.fileRenderer.loadFiles === 'function') {
-                    console.log('使用fileRenderer.loadFiles重新加载数据');
-                    await window.fileRenderer.loadFiles();
-                }
-                // 方法4: 手动重新加载各个组件
-                else {
-                    console.log('手动重新加载各个组件');
-                    
-                    // 重新加载文件列表
-                    if (window.uiManager && window.uiManager.api && window.uiManager.api.files) {
-                        const files = await window.uiManager.api.files.getFiles();
-                        if (files && window.uiManager.renderFileList) {
-                            window.uiManager.allFiles = files;
-                            window.uiManager.renderFileList(files);
-                        }
-                    }
-                    
-                    // 重新加载URL文件
-                    if (window.uiManager && window.uiManager.api && window.uiManager.api.urlFiles) {
-                        const urlFiles = await window.uiManager.api.urlFiles.getUrlFiles();
-                        if (urlFiles && window.uiManager.allFiles) {
-                            const regularFiles = window.uiManager.allFiles.filter(file => !file.isUrlFile);
-                            window.uiManager.allFiles = [...regularFiles, ...urlFiles];
-                            if (window.uiManager.renderFileList) {
-                                window.uiManager.renderFileList(window.uiManager.allFiles);
+                let currentUser = window.apiManager?.currentUser;
+                if (!currentUser) {
+                    if (window.StorageManager && typeof window.StorageManager.getUser === 'function') {
+                        currentUser = window.StorageManager.getUser();
+                    } else {
+                        // 如果 StorageManager 未加载，使用 localStorage 作为备用
+                        const userData = localStorage.getItem('currentUser');
+                        if (userData) {
+                            try {
+                                currentUser = JSON.parse(userData);
+                            } catch (e) {
+                                console.warn('解析用户信息失败:', e);
                             }
                         }
                     }
-                    
-                    // 重新加载文件夹
-                    if (window.uiManager && window.uiManager.api && window.uiManager.api.folders) {
-                        const folders = await window.uiManager.api.folders.getFolders();
-                        if (folders && window.uiManager.renderFolderList) {
-                            window.uiManager.folders = folders;
-                            window.uiManager.renderFolderList(folders);
+                }
+                if (!currentUser) currentUser = {};
+                
+                // 直接手动重新加载各个组件，避免循环调用
+                console.log('手动重新加载各个组件');
+                
+                // 重新加载文件列表
+                if (window.uiManager && window.uiManager.api && window.uiManager.api.files) {
+                    const files = await window.uiManager.api.files.getFiles();
+                    if (files && window.uiManager.renderFileList) {
+                        window.uiManager.allFiles = files;
+                        window.uiManager.renderFileList(files);
+                    }
+                }
+                
+                // 重新加载URL文件
+                if (window.uiManager && window.uiManager.api && window.uiManager.api.urlFiles) {
+                    const urlFiles = await window.uiManager.api.urlFiles.getUrlFiles();
+                    if (urlFiles && window.uiManager.allFiles) {
+                        const regularFiles = window.uiManager.allFiles.filter(file => !file.isUrlFile);
+                        window.uiManager.allFiles = [...regularFiles, ...urlFiles];
+                        if (window.uiManager.renderFileList) {
+                            window.uiManager.renderFileList(window.uiManager.allFiles);
                         }
                     }
-                    
-                    // 重新加载存储信息
-                    if (window.uiManager && window.uiManager.api && window.uiManager.api.storage) {
-                        const storageInfo = await window.uiManager.api.storage.getStorageInfo();
-                        if (storageInfo && window.uiManager.updateStorageDisplay) {
-                            window.uiManager.updateStorageDisplay(storageInfo);
-                        }
+                }
+                
+                // 重新加载文件夹
+                if (window.uiManager && window.uiManager.api && window.uiManager.api.folders) {
+                    const folders = await window.uiManager.api.folders.getFolders();
+                    if (folders && window.uiManager.renderFolderList) {
+                        window.uiManager.folders = folders;
+                        window.uiManager.renderFolderList(folders);
                     }
-                    
-                    // 重新加载用户信息
-                    if (window.uiManager && window.uiManager.api && window.uiManager.api.profile) {
-                        const profile = await window.uiManager.api.profile.getProfile();
-                        if (profile && window.uiManager.updateProfileDisplay) {
+                }
+                
+                // 重新加载存储信息
+                if (window.uiManager && window.uiManager.api && window.uiManager.api.storage) {
+                    const storageInfo = await window.uiManager.api.storage.getStorageInfo();
+                    if (storageInfo && window.uiManager.updateStorageDisplay) {
+                        window.uiManager.updateStorageDisplay(storageInfo);
+                    }
+                }
+                
+                // 重新加载用户信息
+                if (window.uiManager && window.uiManager.api && window.uiManager.api.profile) {
+                    const profile = await window.uiManager.api.profile.getProfile();
+                    if (profile) {
+                        if (window.uiManager.updateProfileDisplay) {
                             window.uiManager.updateProfileDisplay(profile);
                         }
                     }

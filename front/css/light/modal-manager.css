@@ -1,5 +1,68 @@
 /* 模态框管理模块样式 */
 
+/* 亮色主题模态框样式 */
+body.theme-light .modal-overlay {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+body.theme-light .modal-overlay > div {
+    background: #FFFFFF !important;
+    border: 1px solid #E5E7EB !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+}
+
+body.theme-light .modal-overlay h3 {
+    color: #1F2937 !important;
+}
+
+body.theme-light .modal-overlay p {
+    color: #6B7280 !important;
+}
+
+body.theme-light .modal-overlay input {
+    background: #FFFFFF !important;
+    border: 1px solid #D1D5DB !important;
+    color: #1F2937 !important;
+}
+
+body.theme-light .modal-overlay input:focus {
+    border-color: #3B82F6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+body.theme-light .modal-overlay input::placeholder {
+    color: #9CA3AF !important;
+}
+
+body.theme-light .modal-overlay button {
+    color: #374151 !important;
+}
+
+body.theme-light .modal-overlay button:hover {
+    background: #F3F4F6 !important;
+}
+
+body.theme-light .modal-overlay button[id="confirm-btn"] {
+    background: #3B82F6 !important;
+    color: #FFFFFF !important;
+    border: none !important;
+}
+
+body.theme-light .modal-overlay button[id="confirm-btn"]:hover {
+    background: #2563EB !important;
+}
+
+body.theme-light .modal-overlay button[id="cancel-btn"] {
+    background: transparent !important;
+    border: 1px solid #D1D5DB !important;
+    color: #374151 !important;
+}
+
+body.theme-light .modal-overlay button[id="cancel-btn"]:hover {
+    background: #F3F4F6 !important;
+    border-color: #9CA3AF !important;
+}
+
 /* 消息容器 */
 .message-container {
     position: fixed;
@@ -203,7 +266,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.3);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -211,7 +274,7 @@
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(4px);
 }
 
 .modal-overlay.show {
@@ -227,7 +290,7 @@
 .modal-content {
     background: #FFFFFF;
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
     max-width: 500px;
     width: 90%;
     max-height: 80vh;
@@ -318,52 +381,52 @@
 }
 
 .btn-primary {
-    background: #007bff;
+    background: #3B82F6;
     color: white;
 }
 
 .btn-primary:hover {
-    background: #0056b3;
+    background: #2563EB;
     transform: translateY(-1px);
 }
 
 .btn-secondary {
-    background: #6c757d;
+    background: #6B7280;
     color: white;
 }
 
 .btn-secondary:hover {
-    background: #545b62;
+    background: #4B5563;
     transform: translateY(-1px);
 }
 
 .btn-success {
-    background: #28a745;
+    background: #10B981;
     color: white;
 }
 
 .btn-success:hover {
-    background: #1e7e34;
+    background: #059669;
     transform: translateY(-1px);
 }
 
 .btn-danger {
-    background: #dc3545;
+    background: #EF4444;
     color: white;
 }
 
 .btn-danger:hover {
-    background: #c82333;
+    background: #DC2626;
     transform: translateY(-1px);
 }
 
 .btn-warning {
-    background: #ffc107;
-    color: #212529;
+    background: #F59E0B;
+    color: white;
 }
 
 .btn-warning:hover {
-    background: #e0a800;
+    background: #D97706;
     transform: translateY(-1px);
 }
 
@@ -375,16 +438,19 @@
 .form-input {
     width: 100%;
     padding: 12px 16px;
-    border: 1px solid #ddd;
+    border: 1px solid #D1D5DB;
     border-radius: 6px;
     font-size: 14px;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background: #FFFFFF;
+    color: #1F2937;
 }
 
 .form-input:focus {
     outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: #FFFFFF;
 }
 
 /* 选择对话框样式 */
@@ -398,15 +464,17 @@
     align-items: center;
     padding: 12px;
     margin: 4px 0;
-    border: 1px solid #eee;
+    border: 1px solid #E5E7EB;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s ease;
+    background: #FFFFFF;
+    color: #1F2937;
 }
 
 .select-option:hover {
-    background: #f8f9fa;
-    border-color: #007bff;
+    background: #F9FAFB;
+    border-color: #3B82F6;
 }
 
 .select-option input[type="radio"],
@@ -650,6 +718,74 @@
 #create-folder-modal > div {
     max-width: 320px !important;
     width: 320px !important;
+}
+
+/* 亮色主题下的新建分组模态框适配 */
+body.theme-light #create-folder-modal {
+    background: rgba(0, 0, 0, 0.5) !important;
+}
+
+body.theme-light #create-folder-modal > div {
+    background: #ffffff !important;
+    border: 1px solid rgba(139, 92, 246, 0.2) !important;
+    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2) !important;
+}
+
+body.theme-light #create-folder-modal h3 {
+    color: #111827 !important;
+}
+
+body.theme-light #create-folder-modal #current-category-info {
+    color: #6b7280 !important;
+}
+
+body.theme-light #create-folder-modal label {
+    color: #374151 !important;
+}
+
+body.theme-light #create-folder-modal #folder-name-input {
+    background: rgba(249, 250, 251, 0.95) !important;
+    border-color: rgba(139, 92, 246, 0.3) !important;
+    color: #374151 !important;
+}
+
+body.theme-light #create-folder-modal #folder-name-input::placeholder {
+    color: #9ca3af !important;
+}
+
+body.theme-light #create-folder-modal #folder-name-input:focus {
+    border-color: rgba(139, 92, 246, 0.5) !important;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
+}
+
+body.theme-light #create-folder-modal #cancel-create-folder-btn {
+    background: #ffffff !important;
+    border-color: rgba(139, 92, 246, 0.3) !important;
+    color: #374151 !important;
+}
+
+body.theme-light #create-folder-modal #cancel-create-folder-btn:hover {
+    background: rgba(139, 92, 246, 0.05) !important;
+    border-color: rgba(139, 92, 246, 0.5) !important;
+}
+
+body.theme-light #create-folder-modal #confirm-create-folder-btn {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(139, 92, 246, 0.8)) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+}
+
+body.theme-light #create-folder-modal #confirm-create-folder-btn:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 1), rgba(139, 92, 246, 1)) !important;
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4) !important;
+}
+
+body.theme-light #create-folder-modal #close-create-folder-btn {
+    color: #6b7280 !important;
+}
+
+body.theme-light #create-folder-modal #close-create-folder-btn:hover {
+    color: #374151 !important;
 }
 
 /* 确保模态框在小屏幕上也能正常显示 */

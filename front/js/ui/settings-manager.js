@@ -173,22 +173,7 @@ class UISettingsManager {
                 event.preventDefault();
                 event.stopPropagation();
                 
-                // 检查是否为管理员
-                if (!this.isAdmin()) {
-                    if (window.MessageBox && window.MessageBox.show) {
-                        window.MessageBox.show({
-                            message: '只有管理员可以管理存储空间设置',
-                            type: 'warning',
-                            duration: 3000
-                        });
-                    } else if (window.$utils && window.$utils.showMessage) {
-                        window.$utils.showMessage('只有管理员可以管理存储空间设置', 'warning');
-                    } else {
-                        console.warn('只有管理员可以管理存储空间设置');
-                    }
-                    return;
-                }
-                
+                // 直接显示设置模态框，鉴权由后端API统一处理
                 this.showSettingsModal();
                 this.switchTab('storage');
             });
@@ -658,8 +643,6 @@ class UISettingsManager {
      */
     async refreshAllStorageDisplays() {
         try {
-            console.log('🔄 开始刷新所有存储空间显示...');
-            
             // 获取最新的存储信息
             const api = window.apiSystem || window.apiManager;
             if (!api || !api.storage || !api.storage.getStorageInfo) {
@@ -668,7 +651,6 @@ class UISettingsManager {
             }
             
             const storageInfo = await api.storage.getStorageInfo();
-            console.log('📊 获取到最新存储信息:', storageInfo);
             
             if (storageInfo && storageInfo.used_space !== undefined && storageInfo.total_space !== undefined) {
                 // 调用主页的统一同步方法
@@ -677,10 +659,8 @@ class UISettingsManager {
                                  (window.apiSystem && window.apiSystem.uiManager);
                 
                 if (uiManager && typeof uiManager.syncStorageDisplay === 'function') {
-                    console.log('🔄 调用uiManager.syncStorageDisplay...');
                     await uiManager.syncStorageDisplay(storageInfo);
                 } else if (uiManager && typeof uiManager.updateStorageDisplay === 'function') {
-                    console.log('🔄 调用uiManager.updateStorageDisplay...');
                     uiManager.updateStorageDisplay(storageInfo);
                 } else {
                     console.warn('⚠️ uiManager的存储显示方法不可用');
@@ -688,14 +668,11 @@ class UISettingsManager {
                 
                 // 直接更新设置页面的存储显示
                 if (this.renderStorageData && typeof this.renderStorageData === 'function') {
-                    console.log('🔄 更新设置页面存储显示...');
                     this.renderStorageData(storageInfo);
                 }
                 
                 // 更新主页存储空间概览
                 this.updateStorageDisplay(storageInfo);
-                
-                console.log('✅ 存储空间显示刷新完成');
             } else {
                 console.warn('⚠️ 存储信息格式不正确:', storageInfo);
             }
@@ -858,6 +835,16 @@ class UISettingsManager {
         // 更新状态文本和样式
         statusElement.textContent = statusText;
         statusElement.className = `px-2 md:px-3 py-1 ${bgColor} ${textColor} text-xs rounded-full border ${borderColor}`;
+        
+        // 触发自定义事件，通知其他模块存储状态已更新
+        window.dispatchEvent(new CustomEvent('storageStatusUpdated', {
+            detail: {
+                status: statusText,
+                percentage: percentage,
+                remainingPercentage: remainingPercentage,
+                timestamp: Date.now()
+            }
+        }));
     }
 
     /**
@@ -1082,9 +1069,9 @@ class UISettingsManager {
                         this.settings = this.mergeSettings(this.getDefaultSettings(), importedSettings);
                         this.updateFormValues();
                         this.saveSettings();
-                        alert('设置导入成功！');
+                        this.showSuccessMessage('设置导入成功！');
                     } catch (error) {
-                        alert('设置导入失败：' + error.message);
+                        this.showErrorMessage('设置导入失败：' + error.message);
                     }
                 };
                 reader.readAsText(file);
@@ -1241,30 +1228,33 @@ class UISettingsManager {
      * 检查是否为管理员
      * @returns {boolean} 是否为管理员
      */
-    isAdmin() {
-        // 检查uiManager
-        if (window.uiManager && window.uiManager.isAdmin) {
-            const isAdmin = window.uiManager.isAdmin();
-            return isAdmin;
-        }
-
-        // 检查profileManager
-        if (window.profileManager && window.profileManager.isAdmin) {
-            const isAdmin = window.profileManager.isAdmin();
-            return isAdmin;
-        }
-
-        // 从localStorage获取用户数据
+    async isAdmin() {
         try {
-            const user = JSON.parse(localStorage.getItem('user'));
-            if (user && user.isAdmin !== undefined) {
-                return user.isAdmin;
+            // 使用token验证管理员权限
+            if (window.tokenManager && typeof window.tokenManager.validateAdminTokens === 'function') {
+                return await window.tokenManager.validateAdminTokens();
+            } else {
+                // 兼容性处理：检查当前用户是否为管理员用户（Mose）
+                const currentUser = this.getCurrentUser();
+                return currentUser && currentUser.username === 'Mose';
             }
         } catch (error) {
-            // 静默处理错误
+            console.error('验证管理员权限失败:', error);
+            return false;
         }
+    }
 
-        return false;
+    /**
+     * 获取当前用户信息
+     * @returns {Object|null} 用户信息
+     */
+    getCurrentUser() {
+        if (window.StorageManager && typeof window.StorageManager.getUserInfo === 'function') {
+            return window.StorageManager.getUserInfo();
+        } else {
+            const userData = localStorage.getItem('userInfo');
+            return userData ? JSON.parse(userData) : null;
+        }
     }
 }
 

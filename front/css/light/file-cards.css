@@ -28,17 +28,40 @@
     justify-content: space-between;
     align-items: center;
     text-align: center;
-    transition: all 0.3s ease;
-    background-color: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+    border: 1px solid rgba(147, 51, 234, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
 }
 
 .file-card:hover {
-    border-color: #3B82F6;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 16px 32px rgba(59, 130, 246, 0.2), 0 8px 16px rgba(139, 92, 246, 0.15);
+    border-color: transparent;
+}
+
+/* 文件卡片内容区域 */
+.file-card .card-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.file-card:hover .card-content {
     transform: translateY(-2px);
+    border-radius: 12px;
+    margin: 4px;
+    padding: 12px;
 }
 
 /* 文件夹网格布局 */
@@ -49,6 +72,22 @@
     gap: 16px !important;
     align-items: flex-start !important;
     justify-content: flex-start !important;
+    align-content: flex-start !important;
+}
+
+/* 文件夹空状态时的网格居中 */
+#folders-grid.empty-state,
+.folders-grid.empty-state {
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+/* 确保文件夹卡片在空状态时不会被拉伸 */
+#folders-grid.empty-state .folder-card,
+.folders-grid.empty-state .folder-card {
+    min-height: 120px !important;
+    height: auto !important;
+    flex: none !important;
 }
 
 /* 文件夹卡片样式 - 亮色主题 */
@@ -62,16 +101,29 @@
     align-items: center;
     text-align: center;
     transition: all 0.3s ease;
-    background-color: #FFFFFF;
-    border: 1px solid #E5E7EB;
+    background: transparent;
+    border: 1px solid rgba(147, 51, 234, 0.2);
     border-radius: 12px;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(10px);
 }
 
 .folder-card:hover {
     border-color: #3B82F6;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     transform: translateY(-2px);
+}
+
+/* 文件夹卡片内容区域 */
+.folder-card .card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 0.75rem;
+    text-align: center;
 }
 
 /* 响应式布局优化 */
@@ -137,6 +189,13 @@
     line-height: 1.4;
     word-break: break-word;
     max-width: 100%;
+    transition: color 0.3s ease;
+}
+
+.file-card:hover h4 {
+    color: #1F2937 !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+    font-weight: 600;
 }
 
 .file-card .file-icon-container > div:last-child span {
@@ -170,6 +229,13 @@
     line-height: 1.4;
     word-break: break-word;
     max-width: 100%;
+    transition: color 0.3s ease;
+}
+
+.folder-card:hover h4 {
+    color: #1F2937 !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+    font-weight: 600;
 }
 
 .folder-card .folder-icon-container > div:last-child span {
@@ -192,7 +258,7 @@
     background-color: transparent;
     border-radius: 0 0 8px 8px;
     padding: 0.75rem;
-    margin: 0.5rem -0.5rem -0.5rem -0.5rem;
+    margin: 0;
 }
 
 .file-info > div,
@@ -201,19 +267,34 @@
     align-items: center;
     gap: 0.25rem;
     font-size: 0.75rem;
-    color: #374151;
+    color: #D1D5DB;
     background-color: transparent;
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     border: none;
     box-shadow: none;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: nowrap;
+    overflow: visible;
 }
 
 .file-info span,
 .folder-info span {
     font-size: 0.75rem;
-    color: #6B7280;
-    font-weight: 500;
+    color: #374151;
+    font-weight: 600;
+    background-color: transparent;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    flex-shrink: 0;
+    min-width: auto;
+}
+
+/* 文件大小文本特殊样式 - 保持蓝色 */
+.file-info span.text-blue-400 {
+    color: #2563EB !important;
 }
 
 /* 文件大小和日期标签特殊样式 - 移除背景 */
@@ -221,8 +302,8 @@
 .file-info .file-date,
 .folder-info .folder-date {
     background-color: transparent !important;
-    color: #6B7280 !important;
-    font-weight: 500 !important;
+    color: #1F2937 !important;
+    font-weight: 600 !important;
     padding: 0.25rem 0.5rem !important;
     border-radius: 4px !important;
     border: none !important;
@@ -244,7 +325,7 @@
 /* 图标颜色调整 */
 .file-info i,
 .folder-info i {
-    color: #6B7280;
+    color: #60A5FA;
     margin-right: 0.25rem;
 }
 
@@ -269,7 +350,6 @@
 
 /* 外站文档分类特殊样式 - 亮色主题 */
 .external-docs-category #files-grid {
-    background-color: #F9FAFB;
     border-radius: 12px;
     padding: 1rem;
 }
@@ -282,6 +362,14 @@
     align-items: center;
     justify-content: center;
     margin-bottom: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.file-card:hover .file-icon-container,
+.folder-card:hover .folder-icon-container {
+    transform: scale(1.05);
+    border-radius: 8px;
+    padding: 4px;
 }
 
 /* 文件操作按钮样式 - 亮色主题 */
@@ -301,27 +389,119 @@
 
 /* 外站文档卡片特殊样式 - 亮色主题 */
 .external-docs-category .file-card {
-    background-color: #FFFFFF;
-    border: 1px solid #E5E7EB;
+    width: 100%;
+    max-width: 240px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+    border: 1px solid rgba(147, 51, 234, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1);
     position: relative;
     overflow: hidden;
+    backdrop-filter: blur(10px);
 }
 
 .external-docs-category .file-card:hover {
-    border-color: #3B82F6;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 16px 32px rgba(59, 130, 246, 0.2), 0 8px 16px rgba(139, 92, 246, 0.15);
+    border-color: transparent;
 }
 
+/* 外站文档卡片内容布局 */
+.external-docs-category .file-card .flex.flex-col {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* 图标容器 */
+.external-docs-category .file-card .w-12.h-12 {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0.5rem;
+    flex-shrink: 0;
+}
+
+/* 标题区域 */
+.external-docs-category .file-card .flex-1.min-w-0 {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+/* 标题样式 */
+.external-docs-category .file-card h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+    line-height: 1.4;
+    max-width: 100%;
+    word-break: break-word;
+}
+
+/* 日期和标签容器 */
+.external-docs-category .file-card .flex.flex-col.items-center.justify-center.space-y-2 {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+}
+
+/* 日期和标签项 */
+.external-docs-category .file-card .flex.items-center.space-x-1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+/* 操作按钮容器 */
 .external-docs-category .file-card .doc-actions {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(147, 51, 234, 0.1);
     opacity: 0;
     transition: opacity 0.3s ease;
 }
 
 .external-docs-category .file-card:hover .doc-actions {
     opacity: 1;
+}
+
+/* 按钮样式 */
+.external-docs-category .file-card .doc-actions button {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.external-docs-category .file-card .doc-actions button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* 状态徽章样式 - 亮色主题 */
@@ -354,4 +534,21 @@
 .external-docs-category .file-card .status-badge.bg-gray-500\/20 {
     background-color: #F3F4F6;
     color: #374151;
+}
+
+/* 文件夹空状态样式 - 亮色主题 */
+body.theme-light #folders-grid.empty-state .w-full.flex.items-center.justify-center {
+    min-height: 300px;
+}
+
+body.theme-light #folders-grid .text-center h3 {
+    color: #374151 !important;
+}
+
+body.theme-light #folders-grid .text-center p {
+    color: #6b7280 !important;
+}
+
+body.theme-light #folders-grid .text-center .fa-folder-open {
+    color: #3b82f6 !important;
 } 

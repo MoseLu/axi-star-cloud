@@ -49,17 +49,23 @@
     }
 
     /* 文件卡片适配 */
-    .file-card,
-    .folder-card {
+    .file-card {
         min-height: 160px;
+        max-width: 100%;
+    }
+    
+    .folder-card {
+        min-height: 120px;
         max-width: 100%;
     }
 
     /* 文件信息适配 */
     .file-info span,
     .folder-info span {
-        max-width: 80px;
+        max-width: none;
         font-size: 0.75rem;
+        word-break: break-word;
+        overflow-wrap: break-word;
     }
 
     /* 模态框适配 */

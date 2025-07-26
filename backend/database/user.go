@@ -2,13 +2,12 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 
 	"backend/models"
 )
 
-// UserRepository 用户数据访问层
+// UserRepository 用户数据仓库
 type UserRepository struct {
 	db *sql.DB
 }
@@ -20,10 +19,9 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 
 // CreateUser 创建新用户
 func (r *UserRepository) CreateUser(user *models.User) error {
-	query := `INSERT INTO user (uuid, username, password, email, storage_limit, is_admin, created_at, updated_at) 
-			  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-
-	_, err := r.db.Exec(query, user.UUID, user.Username, user.Password, user.Email, user.StorageLimit, user.IsAdmin, user.CreatedAt, user.UpdatedAt)
+	query := `INSERT INTO user (uuid, username, password, email, storage_limit, created_at, updated_at)
+			  VALUES (?, ?, ?, ?, ?, ?, ?)`
+	_, err := r.db.Exec(query, user.UUID, user.Username, user.Password, user.Email, user.StorageLimit, user.CreatedAt, user.UpdatedAt)
 	return err
 }
 
@@ -31,19 +29,15 @@ func (r *UserRepository) CreateUser(user *models.User) error {
 func (r *UserRepository) GetUserByUsername(username string) (*models.User, error) {
 	var user models.User
 	var email, bio, avatar sql.NullString
-	query := `SELECT uuid, username, password, email, bio, avatar, storage_limit, is_admin, created_at, updated_at 
+	query := `SELECT uuid, username, password, email, bio, avatar, storage_limit, created_at, updated_at 
 			  FROM user WHERE username = ?`
 
 	err := r.db.QueryRow(query, username).Scan(
 		&user.UUID, &user.Username, &user.Password,
 		&email, &bio, &avatar,
-		&user.StorageLimit, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt)
+		&user.StorageLimit, &user.CreatedAt, &user.UpdatedAt)
 
 	if err != nil {
-		if err == sql.ErrNoRows {
-			// 用户不存在，返回nil而不是错误
-			return nil, nil
-		}
 		return nil, err
 	}
 
@@ -59,13 +53,13 @@ func (r *UserRepository) GetUserByUsername(username string) (*models.User, error
 func (r *UserRepository) GetUserByUUID(uuid string) (*models.User, error) {
 	var user models.User
 	var email, bio, avatar sql.NullString
-	query := `SELECT uuid, username, password, email, bio, avatar, storage_limit, is_admin, created_at, updated_at 
+	query := `SELECT uuid, username, password, email, bio, avatar, storage_limit, created_at, updated_at 
 			  FROM user WHERE uuid = ?`
 
 	err := r.db.QueryRow(query, uuid).Scan(
 		&user.UUID, &user.Username, &user.Password,
 		&email, &bio, &avatar,
-		&user.StorageLimit, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt)
+		&user.StorageLimit, &user.CreatedAt, &user.UpdatedAt)
 
 	if err != nil {
 		return nil, err
@@ -86,10 +80,9 @@ func (r *UserRepository) GetUserByID(id string) (*models.User, error) {
 
 // GetAllUsers 获取所有用户（管理员功能）
 func (r *UserRepository) GetAllUsers() ([]models.User, error) {
-	// 先获取管理员用户，再获取普通用户，管理员始终在最前面
-	query := `SELECT uuid, username, email, bio, avatar, storage_limit, is_admin, created_at, updated_at 
+	query := `SELECT uuid, username, email, bio, avatar, storage_limit, created_at, updated_at 
 			  FROM user 
-			  ORDER BY is_admin DESC, created_at DESC`
+			  ORDER BY created_at DESC`
 
 	rows, err := r.db.Query(query)
 	if err != nil {
@@ -105,7 +98,7 @@ func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 		err := rows.Scan(
 			&user.UUID, &user.Username,
 			&email, &bio, &avatar,
-			&user.StorageLimit, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt)
+			&user.StorageLimit, &user.CreatedAt, &user.UpdatedAt)
 
 		if err != nil {
 			return nil, err
@@ -127,9 +120,10 @@ func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 
 // GetUsersWithPagination 获取用户列表（带分页）
 func (r *UserRepository) GetUsersWithPagination(page, pageSize int) ([]models.User, int, error) {
-	// 获取总用户数
+	// 获取总数
 	var total int
-	err := r.db.QueryRow("SELECT COUNT(*) FROM user").Scan(&total)
+	countQuery := `SELECT COUNT(*) FROM user`
+	err := r.db.QueryRow(countQuery).Scan(&total)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -137,10 +131,10 @@ func (r *UserRepository) GetUsersWithPagination(page, pageSize int) ([]models.Us
 	// 计算偏移量
 	offset := (page - 1) * pageSize
 
-	// 获取分页用户数据，管理员始终在最前面
-	query := `SELECT uuid, username, email, bio, avatar, storage_limit, is_admin, created_at, updated_at 
+	// 获取用户列表
+	query := `SELECT uuid, username, email, bio, avatar, storage_limit, created_at, updated_at 
 			  FROM user 
-			  ORDER BY is_admin DESC, created_at DESC
+			  ORDER BY created_at DESC
 			  LIMIT ? OFFSET ?`
 
 	rows, err := r.db.Query(query, pageSize, offset)
@@ -157,7 +151,7 @@ func (r *UserRepository) GetUsersWithPagination(page, pageSize int) ([]models.Us
 		err := rows.Scan(
 			&user.UUID, &user.Username,
 			&email, &bio, &avatar,
-			&user.StorageLimit, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt)
+			&user.StorageLimit, &user.CreatedAt, &user.UpdatedAt)
 
 		if err != nil {
 			return nil, 0, err
@@ -177,105 +171,52 @@ func (r *UserRepository) GetUsersWithPagination(page, pageSize int) ([]models.Us
 	return users, total, nil
 }
 
-// GetUserCount 获取用户总数
-func (r *UserRepository) GetUserCount() (int, error) {
-	var count int
-	err := r.db.QueryRow("SELECT COUNT(*) FROM user").Scan(&count)
-	return count, err
-}
-
 // UpdateUser 更新用户信息
 func (r *UserRepository) UpdateUser(user *models.User) error {
-	query := `UPDATE user SET username = ?, email = ?, bio = ?, avatar = ?, updated_at = ? WHERE uuid = ?`
-
-	// 处理空字符串为NULL
-	var email, bio, avatar interface{}
-	if user.Email == "" {
-		email = nil
-	} else {
-		email = user.Email
-	}
-	if user.Bio == "" {
-		bio = nil
-	} else {
-		bio = user.Bio
-	}
-	if user.Avatar == "" {
-		avatar = nil
-	} else {
-		avatar = user.Avatar
-	}
-
-	_, err := r.db.Exec(query, user.Username, email, bio, avatar, time.Now(), user.UUID)
+	query := `UPDATE user SET username = ?, email = ?, bio = ?, avatar = ?, storage_limit = ?, updated_at = ? 
+			  WHERE uuid = ?`
+	_, err := r.db.Exec(query, user.Username, user.Email, user.Bio, user.Avatar, user.StorageLimit, user.UpdatedAt, user.UUID)
 	return err
 }
 
-// UpdateStorageLimit 更新用户存储限制
-func (r *UserRepository) UpdateStorageLimit(uuid string, storageLimit int64) error {
-	fmt.Printf("[UpdateStorageLimit] uuid=%s, storageLimit=%d\n", uuid, storageLimit)
+// UpdateUserStorage 更新用户存储限制
+func (r *UserRepository) UpdateUserStorage(uuid string, storageLimit int64) error {
 	query := `UPDATE user SET storage_limit = ?, updated_at = ? WHERE uuid = ?`
-	res, err := r.db.Exec(query, storageLimit, time.Now(), uuid)
-	if err != nil {
-		fmt.Printf("[UpdateStorageLimit] SQL执行出错: %v\n", err)
+	_, err := r.db.Exec(query, storageLimit, time.Now(), uuid)
 	return err
-	}
-	rows, _ := res.RowsAffected()
-	fmt.Printf("[UpdateStorageLimit] 影响行数: %d\n", rows)
-	return nil
 }
 
-// GetUserStorageInfo 获取用户存储信息
-func (r *UserRepository) GetUserStorageInfo(uuid string) (*models.StorageInfo, error) {
-	// 获取用户存储限制
-	var storageLimit int64
-	err := r.db.QueryRow("SELECT storage_limit FROM user WHERE uuid = ?", uuid).Scan(&storageLimit)
-	if err != nil {
-		return nil, err
-	}
-
-	// 获取已使用空间
-	var usedSpace int64
-	err = r.db.QueryRow("SELECT COALESCE(SUM(size), 0) FROM files WHERE user_id = ?", uuid).Scan(&usedSpace)
-	if err != nil {
-		return nil, err
-	}
-
-	storageInfo := &models.StorageInfo{
-		UsedSpace:  usedSpace,
-		TotalSpace: storageLimit,
-	}
-
-	// 计算使用百分比
-	if storageLimit > 0 {
-		storageInfo.UsagePercent = int((usedSpace * 100) / storageLimit)
-	}
-
-	return storageInfo, nil
+// DeleteUser 删除用户
+func (r *UserRepository) DeleteUser(uuid string) error {
+	query := `DELETE FROM user WHERE uuid = ?`
+	_, err := r.db.Exec(query, uuid)
+	return err
 }
 
 // CheckUsernameExists 检查用户名是否已存在
 func (r *UserRepository) CheckUsernameExists(username string) (bool, error) {
 	var exists int
 	query := `SELECT COUNT(*) FROM user WHERE username = ?`
-
 	err := r.db.QueryRow(query, username).Scan(&exists)
+	return exists > 0, err
+}
+
+// GetUserStorageInfo 获取用户存储信息
+func (r *UserRepository) GetUserStorageInfo(userUUID string) (*models.StorageInfo, error) {
+	// 获取用户存储限制
+	var storageLimit int64
+	query := `SELECT storage_limit FROM user WHERE uuid = ?`
+	err := r.db.QueryRow(query, userUUID).Scan(&storageLimit)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	return exists > 0, nil
-}
+	// 注意：已使用空间现在由 StorageHandler 通过 FileRepository 计算
+	// 这里只返回存储限制，已使用空间会在 StorageHandler 中更新
+	usedSpace := int64(0)
 
-// UpdateUserStorage 更新用户存储使用量
-func (r *UserRepository) UpdateUserStorage(uuid string, fileSize int64) error {
-	query := `UPDATE user SET storage_limit = storage_limit + ? WHERE uuid = ?`
-	_, err := r.db.Exec(query, fileSize, uuid)
-	return err
-}
-
-// UpdateLastLoginTime 更新用户最后登录时间
-func (r *UserRepository) UpdateLastLoginTime(uuid string) error {
-	query := `UPDATE user SET updated_at = ? WHERE uuid = ?`
-	_, err := r.db.Exec(query, time.Now(), uuid)
-	return err
+	return &models.StorageInfo{
+		TotalSpace: storageLimit,
+		UsedSpace:  usedSpace,
+	}, nil
 }

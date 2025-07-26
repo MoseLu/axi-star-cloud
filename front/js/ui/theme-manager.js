@@ -14,19 +14,14 @@ class ThemeManager {
      */
     init() {
         try {
-            console.log('主题管理器初始化开始...');
-            
             // 从本地存储加载主题设置
             this.loadThemeFromStorage();
-            console.log('当前主题:', this.currentTheme);
             
             // 应用当前主题
             this.applyTheme(this.currentTheme);
             
             // 设置全局主题切换事件
             this.setupGlobalThemeToggle();
-            
-            console.log('主题管理器初始化完成');
         } catch (error) {
             console.error('主题管理器初始化失败:', error);
         }
@@ -37,12 +32,48 @@ class ThemeManager {
      */
     loadThemeFromStorage() {
         try {
-            const savedTheme = localStorage.getItem(this.themeKey);
-            if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
-                this.currentTheme = savedTheme;
+            // 检查 StorageManager 是否已加载
+            if (window.StorageManager && typeof window.StorageManager.getTheme === 'function') {
+                const savedTheme = window.StorageManager.getTheme();
+                if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+                    this.currentTheme = savedTheme;
+                } else {
+                    // 如果没有保存的主题设置，检查当前页面状态
+                    const body = document.body;
+                    if (body && body.classList.contains('theme-light')) {
+                        this.currentTheme = 'light';
+                    } else if (body && body.classList.contains('theme-dark')) {
+                        this.currentTheme = 'dark';
+                    } else {
+                        // 如果页面没有任何主题类，使用系统偏好或默认暗色主题
+                        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        this.currentTheme = prefersDark ? 'dark' : 'light';
+                    }
+                }
+            } else {
+                // 如果 StorageManager 未加载，使用 localStorage 作为备用
+                const savedTheme = localStorage.getItem('theme') || localStorage.getItem('currentTheme');
+                if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+                    this.currentTheme = savedTheme;
+                } else {
+                    // 如果没有保存的主题设置，检查当前页面状态
+                    const body = document.body;
+                    if (body && body.classList.contains('theme-light')) {
+                        this.currentTheme = 'light';
+                    } else if (body && body.classList.contains('theme-dark')) {
+                        this.currentTheme = 'dark';
+                    } else {
+                        // 如果页面没有任何主题类，使用系统偏好或默认暗色主题
+                        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        this.currentTheme = prefersDark ? 'dark' : 'light';
+                    }
+                }
             }
         } catch (error) {
             console.error('加载主题设置失败:', error);
+            // 出错时使用系统偏好或默认暗色主题
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            this.currentTheme = prefersDark ? 'dark' : 'light';
         }
     }
 
@@ -51,7 +82,13 @@ class ThemeManager {
      */
     saveThemeToStorage(theme) {
         try {
-            localStorage.setItem(this.themeKey, theme);
+            // 检查 StorageManager 是否已加载
+            if (window.StorageManager && typeof window.StorageManager.setTheme === 'function') {
+                window.StorageManager.setTheme(theme);
+            } else {
+                // 如果 StorageManager 未加载，使用 localStorage 作为备用
+                localStorage.setItem('theme', theme);
+            }
         } catch (error) {
             console.error('保存主题设置失败:', error);
         }
@@ -75,12 +112,39 @@ class ThemeManager {
             return;
         }
 
+        // 创建圆弧扩散动画
+        this.createThemeTransitionAnimation(theme);
+    }
+
+    /**
+     * 创建主题切换圆弧扩散动画
+     * @param {string} theme - 目标主题
+     */
+    createThemeTransitionAnimation(theme) {
+        // 获取按钮位置作为动画起点
+        const themeBtn = document.getElementById('theme-toggle-btn');
+        
+        if (themeBtn) {
+            // 给按钮添加动画类
+            themeBtn.classList.add('animating');
+        }
+
+        // 给body添加动画类
+        document.body.classList.add('theme-transitioning');
+
+        // 立即应用新主题
         this.currentTheme = theme;
         this.saveThemeToStorage(theme);
         this.applyTheme(theme);
-        
-        // 触发主题切换事件
         this.dispatchThemeChangeEvent(theme);
+
+        // 动画完成后清理状态
+        setTimeout(() => {
+            if (themeBtn) {
+                themeBtn.classList.remove('animating');
+            }
+            document.body.classList.remove('theme-transitioning');
+        }, 800);
     }
 
     /**
@@ -149,8 +213,15 @@ class ThemeManager {
                 'file-operations.css',
                 'breadcrumb.css',
                 'scrollbar.css',
-                'utilities.css'
+                'utilities.css',
+                'storage-overview.css',
+                'file-list.css',
+                'upload-area.css',
+                'header.css'
             ];
+
+            let loadedFiles = 0;
+            const totalFiles = themeFiles.length;
 
             themeFiles.forEach(file => {
                 const link = document.createElement('link');
@@ -161,10 +232,17 @@ class ThemeManager {
                 // 添加错误处理
                 link.onerror = () => {
                     console.warn(`主题样式文件加载失败: ${theme}/${file}`);
+                    loadedFiles++;
+                    if (loadedFiles === totalFiles) {
+                        this.applyWelcomeAndStorageStyles();
+                    }
                 };
                 
                 link.onload = () => {
-                    console.log(`主题样式文件加载成功: ${theme}/${file}`);
+                    loadedFiles++;
+                    if (loadedFiles === totalFiles) {
+                        this.applyWelcomeAndStorageStyles();
+                    }
                 };
                 
                 document.head.appendChild(link);
@@ -172,6 +250,14 @@ class ThemeManager {
         } catch (error) {
             console.warn('加载主题样式失败:', error);
         }
+    }
+
+    /**
+     * 强制应用欢迎模块和存储概览的背景色
+     */
+    applyWelcomeAndStorageStyles() {
+        // 移除动态样式设置，让CSS文件自己处理
+        // 这样可以避免主题切换时的背景滞留问题
     }
 
     /**
@@ -211,6 +297,7 @@ class ThemeManager {
      */
     updateThemeToggleButton(theme) {
         try {
+            // 更新主应用的主题切换按钮
             const themeToggleBtn = document.getElementById('theme-toggle-btn');
             if (themeToggleBtn) {
                 const switchContainer = themeToggleBtn.querySelector('.w-11');
@@ -247,6 +334,30 @@ class ThemeManager {
                     themeToggleBtn.setAttribute('aria-checked', 'false');
                 }
             }
+
+            // 更新登录页面的主题切换按钮
+            const loginThemeToggleBtn = document.getElementById('login-theme-toggle-btn');
+            if (loginThemeToggleBtn) {
+                const icon = loginThemeToggleBtn.querySelector('.icon');
+                
+                if (theme === 'dark') {
+                    // 暗色主题状态 - 显示太阳图标
+                    if (icon) {
+                        icon.className = 'fa fa-sun-o icon';
+                        icon.style.color = '#F59E0B'; // 金色
+                    }
+                    loginThemeToggleBtn.title = '切换到明亮主题';
+                    loginThemeToggleBtn.setAttribute('aria-checked', 'true');
+                } else {
+                    // 亮色主题状态 - 显示月亮图标
+                    if (icon) {
+                        icon.className = 'fa fa-moon-o icon';
+                        icon.style.color = '#6B7280'; // 灰色
+                    }
+                    loginThemeToggleBtn.title = '切换到黑暗主题';
+                    loginThemeToggleBtn.setAttribute('aria-checked', 'false');
+                }
+            }
         } catch (error) {
             console.warn('更新主题切换按钮失败:', error);
         }
@@ -258,7 +369,7 @@ class ThemeManager {
     setupGlobalThemeToggle() {
         // 监听主题切换按钮点击事件
         document.addEventListener('click', (e) => {
-            if (e.target.closest('#theme-toggle-btn')) {
+            if (e.target.closest('#theme-toggle-btn') || e.target.closest('#login-theme-toggle-btn')) {
                 e.preventDefault();
                 this.toggleTheme();
             }

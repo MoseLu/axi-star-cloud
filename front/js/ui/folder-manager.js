@@ -73,16 +73,22 @@ class UIFolderManager {
         const categoryFolders = folders.filter(f => f.category === category);
         
         if (categoryFolders.length === 0) {
-            foldersGrid.innerHTML = `<div class="col-span-full text-center py-12">
-                <div class="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fa fa-folder-open text-2xl text-blue-400"></i>
+            foldersGrid.classList.add('empty-state');
+            foldersGrid.innerHTML = `<div class="w-full flex items-center justify-center py-12">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fa fa-folder-open text-2xl text-blue-400"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-2">暂无分组</h3>
+                    <p class="text-gray-400 text-sm">点击"新建分组"按钮创建第一个分组</p>
                 </div>
-                <h3 class="text-lg font-semibold text-white mb-2">暂无分组</h3>
-                <p class="text-gray-400 text-sm">点击"新建分组"按钮创建第一个分组</p>
             </div>`;
             this._isRendering = false; // 清除渲染标志
             return;
         }
+        
+        // 移除空状态类
+        foldersGrid.classList.remove('empty-state');
         
         // 使用DocumentFragment来提高性能
         const fragment = document.createDocumentFragment();
@@ -166,7 +172,7 @@ class UIFolderManager {
         let fileCount = 0;
 
         return `
-            <div class="glass-effect rounded-xl p-3 border border-blue-400/40 hover:border-blue-400/80 transition-all duration-300 cursor-pointer group drop-zone relative min-h-[100px] max-w-[200px] flex flex-col justify-between items-center bg-gradient-to-br from-blue-900/60 to-dark/80 shadow-lg" data-folder-id="${folder.id}" title="点击查看文件夹内容">
+            <div class="glass-effect rounded-xl p-2 border border-blue-400/40 hover:border-blue-400/80 transition-all duration-300 cursor-pointer group drop-zone relative max-w-[200px] flex flex-col justify-between items-center bg-gradient-to-br from-blue-900/60 to-dark/80 shadow-lg" data-folder-id="${folder.id}" title="点击查看文件夹内容">
                 <!-- 第一行：文件夹名称和操作按钮 -->
                 <div class="flex items-center justify-between w-full mb-2">
                     <h4 class="font-semibold text-blue-300 truncate text-xs flex-1 min-w-0 max-w-[70%]" title="${folder.name}">
@@ -194,9 +200,9 @@ class UIFolderManager {
                 </div>
                 
                 <!-- 第三行：创建时间 -->
-                <div class="flex items-center justify-center w-full">
-                    <i class="fa fa-calendar text-xs text-green-400 mr-1"></i>
-                    <span class="text-xs text-green-300">${this.formatDate(folder.created_at)}</span>
+                <div class="flex items-center justify-center w-full h-5">
+                    <i class="fa fa-calendar text-xs mr-1" style="color: #86efac;"></i>
+                    <span class="text-xs" style="color: #86efac;">${this.formatDate(folder.created_at)}</span>
                 </div>
             </div>
         `;
@@ -205,12 +211,12 @@ class UIFolderManager {
     // 创建文件夹卡片
     createFolderCard(folder) {
         const folderCard = document.createElement('div');
-        folderCard.className = 'glass-effect rounded-xl p-6 border border-blue-400/20 hover:border-blue-400/40 transition-all duration-300 cursor-pointer group folder-card drop-zone relative min-h-[180px] max-w-[280px]';
+                    folderCard.className = 'rounded-xl p-4 transition-all duration-300 cursor-pointer group folder-card drop-zone relative max-w-[280px]';
         folderCard.setAttribute('data-folder-id', folder.id);
 
         folderCard.innerHTML = `
             <!-- 主要内容区域 -->
-            <div class="card-content flex flex-col h-full" data-folder-id="${folder.id}" title="点击查看文件夹内容">
+            <div class="card-content flex flex-col" data-folder-id="${folder.id}" title="点击查看文件夹内容">
                 <!-- 顶部：图标 -->
                 <div class="folder-icon-container flex flex-col items-center justify-center mb-4">
                     <div class="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 flex-shrink-0 mb-3">
@@ -243,9 +249,9 @@ class UIFolderManager {
                 </div>
                 
                 <!-- 第三行：创建时间 -->
-                <div class="flex items-center justify-center mb-3 w-full">
-                    <i class="fa fa-calendar text-xs text-green-400 mr-1"></i>
-                    <span class="text-xs text-green-300">${this.formatDate(folder.created_at)}</span>
+                <div class="flex items-center justify-center mb-3 w-full h-5">
+                    <i class="fa fa-calendar text-xs mr-1" style="color: #86efac;"></i>
+                    <span class="text-xs" style="color: #86efac;">${this.formatDate(folder.created_at)}</span>
                 </div>
             </div>
             
@@ -682,15 +688,19 @@ class UIFolderManager {
             // 启用分类按钮
             this.enableCategoryButtons();
             
-            // 显示文件夹区域
-            this.showFolderSection();
+            // 根据当前分类决定是否显示文件夹区域
+            if (this.uiManager.currentCategory && this.uiManager.currentCategory !== 'all') {
+                this.showFolderSection();
+                // 重新渲染文件夹列表
+                const folders = await this.uiManager.api.folders.getFolders();
+                await this.renderFolderList(folders);
+            } else {
+                // 全部文件分类时隐藏文件夹区域
+                this.hideFolderSection();
+            }
             
             // 隐藏返回按钮
             this.hideBackButton();
-            
-            // 重新渲染文件夹列表
-            const folders = await this.uiManager.api.folders.getFolders();
-            await this.renderFolderList(folders);
             
         } catch (error) {
             if (this.uiManager.showMessage) {

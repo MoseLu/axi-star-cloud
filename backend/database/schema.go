@@ -1,7 +1,6 @@
 package database
 
 import (
-	"backend/models"
 	"database/sql"
 )
 
@@ -116,8 +115,8 @@ func CreateTables(db *sql.DB) error {
 func InsertInitialData(db *sql.DB) error {
 	// 插入Mose管理员用户数据
 	insertUser := `
-	INSERT IGNORE INTO user (uuid, username, password, email, bio, is_admin) VALUES 
-	('550e8400-e29b-41d4-a716-446655440000', 'Mose', '123456', 'mose@example.com', '系统管理员', TRUE)`
+	INSERT IGNORE INTO user (uuid, username, password, email, bio, storage_limit, created_at, updated_at) VALUES 
+	('550e8400-e29b-41d4-a716-446655440000', 'Mose', '123456', 'mose@example.com', '系统管理员', 5368709120, NOW(), NOW())`
 
 	_, err := db.Exec(insertUser)
 	if err != nil {
@@ -125,11 +124,6 @@ func InsertInitialData(db *sql.DB) error {
 	}
 
 	// 删除自动插入测试文件的逻辑
-
-	// 插入初始更新日志数据
-	if err := models.InsertInitialUpdateLogs(db); err != nil {
-		return err
-	}
 
 	return nil
 }

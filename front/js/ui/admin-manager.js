@@ -15,11 +15,11 @@ class UIAdminManager {
     /**
      * 初始化管理员模块
      */
-    init() {
+    async init() {
         // 立即隐藏同步文档按钮，避免页面刷新时短暂显示
         this.hideSyncDocsButton();
         
-        this.checkAdminPermissions();
+        await this.checkAdminPermissions();
         this.setupAdminMenu();
         this.bindAdminEvents();
         this.loadSystemStats();
@@ -28,14 +28,26 @@ class UIAdminManager {
     /**
      * 检查管理员权限
      */
-    checkAdminPermissions() {
-        // 首先隐藏同步文档按钮，避免页面刷新时短暂显示
+    async checkAdminPermissions() {
+        // 首先隐藏管理员相关按钮，避免页面刷新时短暂显示
         this.hideSyncDocsButton();
+        this.hideStorageSettingsButton();
         
-        // 检查当前用户是否为管理员
-        const currentUser = this.getCurrentUser();
-        // 只检查 isAdmin 字段
-        this.isAdmin = currentUser && currentUser.isAdmin === true;
+        try {
+            // 使用token验证管理员权限
+            if (window.tokenManager && typeof window.tokenManager.validateAdminTokens === 'function') {
+                this.isAdmin = await window.tokenManager.validateAdminTokens();
+            } else {
+                // 兼容性处理：检查当前用户是否为管理员用户（Mose）
+                const currentUser = this.getCurrentUser();
+                this.isAdmin = currentUser && currentUser.username === 'Mose';
+            }
+            
+
+        } catch (error) {
+            console.error('验证管理员权限失败:', error);
+            this.isAdmin = false;
+        }
         
         // 处理头像下拉菜单中的管理员菜单显示
         this.updateAvatarAdminMenu();
@@ -62,27 +74,52 @@ class UIAdminManager {
     }
 
     /**
+     * 隐藏管理存储空间按钮（初始化时调用）
+     */
+    hideStorageSettingsButton() {
+        const storageSettingsBtn = document.getElementById('storage-settings-btn');
+        if (storageSettingsBtn) {
+            storageSettingsBtn.style.display = 'none';
+        } else {
+            // 如果元素还没有加载，延迟重试
+            setTimeout(() => {
+                this.hideStorageSettingsButton();
+            }, 100);
+        }
+    }
+
+    /**
      * 更新头像下拉菜单中的管理员菜单显示
      */
     updateAvatarAdminMenu() {
         const adminMenu = document.getElementById('admin-menu');
         const settingsBtn = document.getElementById('settings-btn');
         const syncDocsBtn = document.getElementById('sync-docs-btn');
+        const storageSettingsBtn = document.getElementById('storage-settings-btn');
+        
+
         
         if (adminMenu && settingsBtn) {
             if (this.isAdmin) {
-                // 管理员：显示设置按钮、同步文档按钮和管理员菜单
+                // 管理员：显示设置按钮、同步文档按钮、管理存储空间按钮和管理员菜单
                 settingsBtn.style.display = 'block';
                 adminMenu.classList.remove('hidden');
                 if (syncDocsBtn) {
                     syncDocsBtn.classList.remove('hidden');
                 }
+                if (storageSettingsBtn) {
+                    storageSettingsBtn.style.display = 'block';
+                }
+
             } else {
-                // 非管理员：隐藏设置按钮、管理员菜单和同步文档按钮
+                // 非管理员：隐藏设置按钮、管理员菜单、同步文档按钮和管理存储空间按钮
                 settingsBtn.style.display = 'none';
                 adminMenu.classList.add('hidden');
                 if (syncDocsBtn) {
                     syncDocsBtn.classList.add('hidden');
+                }
+                if (storageSettingsBtn) {
+                    storageSettingsBtn.style.display = 'none';
                 }
             }
         }
@@ -94,7 +131,7 @@ class UIAdminManager {
      */
     getCurrentUser() {
         // 从localStorage获取用户信息
-        const userData = localStorage.getItem('currentUser');
+        const userData = localStorage.getItem('userInfo');
         return userData ? JSON.parse(userData) : null;
     }
 
@@ -445,7 +482,8 @@ class UIAdminManager {
             const response = await fetch(apiUrl, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
+                },
+                credentials: 'include' // 确保发送cookies
             });
 
             if (response.ok) {

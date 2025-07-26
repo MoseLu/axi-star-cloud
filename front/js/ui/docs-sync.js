@@ -217,12 +217,23 @@ class UIDocsSync {
      * 绑定同步文档事件（别名方法，与index.js调用匹配）
      */
     bindSyncDocsEvents() {
-        // 同步文档按钮事件
+        // 同步文档按钮事件 - 防止重复绑定
         const syncDocsBtn = document.getElementById('sync-docs-btn');
         if (syncDocsBtn) {
-            syncDocsBtn.addEventListener('click', () => {
+            // 移除可能存在的旧事件监听器
+            if (this._syncDocsClickHandler) {
+                syncDocsBtn.removeEventListener('click', this._syncDocsClickHandler);
+            }
+            
+            // 创建新的事件处理器
+            this._syncDocsClickHandler = () => {
                 this.showSyncDocsModal();
-            });
+            };
+            
+            // 绑定新的事件监听器
+            syncDocsBtn.addEventListener('click', this._syncDocsClickHandler);
+        } else {
+            // 未找到同步文档按钮元素
         }
 
         // 同步文档模态框事件
@@ -302,6 +313,46 @@ class UIDocsSync {
                     if (files.length > 0) {
                         this.handleDocFile(files[0]);
                     }
+                });
+            }
+            
+            // 清空文档标题按钮
+            const clearTitleBtn = document.getElementById('clear-doc-title');
+            const titleInput = document.getElementById('doc-title');
+            if (clearTitleBtn && titleInput) {
+                // 初始状态检查
+                this.updateClearButtonVisibility(titleInput, clearTitleBtn);
+                
+                // 点击清空
+                clearTitleBtn.addEventListener('click', () => {
+                    titleInput.value = '';
+                    titleInput.focus();
+                    this.updateClearButtonVisibility(titleInput, clearTitleBtn);
+                });
+                
+                // 输入时更新按钮显示状态
+                titleInput.addEventListener('input', () => {
+                    this.updateClearButtonVisibility(titleInput, clearTitleBtn);
+                });
+            }
+            
+            // 清空文档分类按钮
+            const clearCategoryBtn = document.getElementById('clear-doc-category');
+            const categoryInput = document.getElementById('doc-category');
+            if (clearCategoryBtn && categoryInput) {
+                // 初始状态检查
+                this.updateClearButtonVisibility(categoryInput, clearCategoryBtn);
+                
+                // 点击清空
+                clearCategoryBtn.addEventListener('click', () => {
+                    categoryInput.value = '';
+                    categoryInput.focus();
+                    this.updateClearButtonVisibility(categoryInput, clearCategoryBtn);
+                });
+                
+                // 输入时更新按钮显示状态
+                categoryInput.addEventListener('input', () => {
+                    this.updateClearButtonVisibility(categoryInput, clearCategoryBtn);
                 });
             }
         }, 100);
@@ -579,13 +630,31 @@ class UIDocsSync {
     getCurrentUserId() {
         let userId = null;
         
-        // 方式1: 从authSystem获取
-        if (window.authSystem && window.authSystem.getCurrentUser) {
-            const currentUser = window.authSystem.getCurrentUser();
-            userId = currentUser ? currentUser.id : null;
+        // 方式1: 从API系统获取（最可靠）
+        if (window.apiSystem && typeof window.apiSystem.getCurrentUserId === 'function') {
+            userId = window.apiSystem.getCurrentUserId();
         }
         
-        // 方式2: 从localStorage获取currentUser
+        // 方式2: 从localStorage获取userInfo（与登录系统一致）
+        if (!userId) {
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                try {
+                    const user = JSON.parse(userInfo);
+                    userId = user.uuid || user.id;
+                } catch (e) {
+                    console.warn('解析userInfo失败:', e);
+                }
+            }
+        }
+        
+        // 方式3: 从认证系统获取
+        if (!userId && window.authSystem && typeof window.authSystem.getCurrentUser === 'function') {
+            const currentUser = window.authSystem.getCurrentUser();
+            userId = currentUser?.uuid || currentUser?.id;
+        }
+        
+        // 方式4: 从localStorage获取currentUser（兼容旧版本）
         if (!userId) {
             const storedUser = localStorage.getItem('currentUser');
             if (storedUser) {
@@ -598,13 +667,13 @@ class UIDocsSync {
             }
         }
         
-        // 方式3: 从URL参数获取（如果有的话）
+        // 方式5: 从URL参数获取（如果有的话）
         if (!userId) {
             const urlParams = new URLSearchParams(window.location.search);
             userId = urlParams.get('user_id');
         }
         
-        // 方式4: 使用默认用户ID（仅用于开发测试）
+        // 方式6: 使用默认用户ID（仅用于开发测试）
         if (!userId && window.APP_CONFIG && window.APP_CONFIG.DEBUG) {
             userId = '550e8400-e29b-41d4-a716-446655440000';
             console.warn('使用默认用户ID进行开发测试');
@@ -647,12 +716,13 @@ class UIDocsSync {
                 return;
             }
             
-            // 调用后端API获取文档列表 - 暂时不发送认证头，因为GET请求成功
+            // 调用后端API获取文档列表 - 包含认证信息
             const response = await fetch(window.APP_UTILS.buildApiUrl(`/api/documents?user_id=${userId}`), {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                credentials: 'include' // 包含cookie中的管理员token
             });
 
             if (response.ok) {
@@ -756,7 +826,7 @@ class UIDocsSync {
                     <div class="flex-1 min-w-0 mb-3">
                         <h4 class="text-white font-semibold truncate mb-3" title="${doc.title}">${doc.title}</h4>
                         <div style="height:8px;"></div>
-                        <div class="flex items-center justify-center space-x-2 text-xs text-gray-400">
+                        <div class="flex flex-col items-center justify-center space-y-2 text-xs text-gray-400">
                             <div class="flex items-center space-x-1">
                                 <i class="fa fa-clock-o text-emerald-400"></i>
                                 <span class="text-emerald-300 font-medium">${this.formatDate(doc.addedAt)}</span>
@@ -875,7 +945,8 @@ class UIDocsSync {
             // 调用后端API创建文档
             const response = await fetch(window.APP_UTILS.buildApiUrl(`/api/documents?user_id=${userId}`), {
                 method: 'POST',
-                body: formData
+                body: formData,
+                credentials: 'include' // 包含cookie中的管理员token
             });
 
             if (response.ok) {
@@ -1197,15 +1268,8 @@ class UIDocsSync {
     /**
      * 显示同步文档模态框
      */
-    showSyncDocsModal() {
-        const currentUser = window.authSystem ? window.authSystem.getCurrentUser() : null;
-        if (!currentUser || !currentUser.isAdmin) {
-            if (window.showMessage) {
-                window.showMessage('权限不足，需要管理员权限', 'error');
-            }
-            return;
-        }
-
+    async showSyncDocsModal() {
+        // 直接弹窗，不再判断cookie
         const modal = document.getElementById('sync-docs-modal');
         if (modal) {
             modal.classList.remove('opacity-0', 'invisible');
@@ -1215,8 +1279,6 @@ class UIDocsSync {
                 glassEffect.classList.remove('scale-95');
                 glassEffect.classList.add('scale-100');
             }
-            
-            // 重新绑定事件，确保模态框显示后事件正常工作
             this.bindSyncDocsModalEvents();
         }
     }
@@ -1244,8 +1306,25 @@ class UIDocsSync {
      * 重置同步文档表单
      */
     resetSyncDocsForm() {
-        document.getElementById('doc-title').value = '';
-        document.getElementById('doc-category').value = '';
+        const titleInput = document.getElementById('doc-title');
+        const categoryInput = document.getElementById('doc-category');
+        const clearTitleBtn = document.getElementById('clear-doc-title');
+        const clearCategoryBtn = document.getElementById('clear-doc-category');
+        
+        if (titleInput) {
+            titleInput.value = '';
+            if (clearTitleBtn) {
+                this.updateClearButtonVisibility(titleInput, clearTitleBtn);
+            }
+        }
+        
+        if (categoryInput) {
+            categoryInput.value = '';
+            if (clearCategoryBtn) {
+                this.updateClearButtonVisibility(categoryInput, clearCategoryBtn);
+            }
+        }
+        
         document.getElementById('doc-order').value = '';
         document.getElementById('doc-file-input').value = '';
         document.getElementById('doc-file-info').classList.add('hidden');
@@ -1282,6 +1361,19 @@ class UIDocsSync {
         
         // 存储文件对象
         this.selectedDocFile = file;
+        
+        // 自动填充标题：如果标题输入框为空，则使用文件名（去掉扩展名）作为标题
+        const titleInput = document.getElementById('doc-title');
+        const clearTitleBtn = document.getElementById('clear-doc-title');
+        if (titleInput && !titleInput.value.trim()) {
+            // 去掉.md扩展名，获取文件名作为标题
+            const fileNameWithoutExt = file.name.replace(/\.md$/i, '');
+            titleInput.value = fileNameWithoutExt;
+            // 更新清空按钮显示状态
+            if (clearTitleBtn) {
+                this.updateClearButtonVisibility(titleInput, clearTitleBtn);
+            }
+        }
     }
 
     /**
@@ -1361,7 +1453,8 @@ class UIDocsSync {
             // 调用后端API创建文档
             const response = await fetch(window.APP_UTILS.buildApiUrl(`/api/documents?user_id=${userId}`), {
                 method: 'POST',
-                body: formData
+                body: formData,
+                credentials: 'include' // 包含cookie中的管理员token
             });
 
             if (response.ok) {
@@ -1501,6 +1594,21 @@ class UIDocsSync {
      */
     isSyncing() {
         return this.syncStatus === 'syncing';
+    }
+
+    /**
+     * 更新清空按钮的显示状态
+     * @param {HTMLElement} input - 输入框元素
+     * @param {HTMLElement} button - 清空按钮元素
+     */
+    updateClearButtonVisibility(input, button) {
+        if (input.value.trim() !== '') {
+            button.style.opacity = '1';
+            button.style.pointerEvents = 'auto';
+        } else {
+            button.style.opacity = '0';
+            button.style.pointerEvents = 'none';
+        }
     }
 
 

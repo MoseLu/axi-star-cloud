@@ -9,9 +9,9 @@ class Admin {
 
     // 获取所有用户（管理员功能）
     async getAllUsers(page = 1, pageSize = 5) {
-        if (!this.core.isAdmin()) {
-            return { success: false, error: '权限不足' };
-        }
+        
+        // 移除前端权限检查，让后端API处理鉴权
+        // 用户能看到管理员面板就说明已经通过了鉴权
 
         try {
             // 修复URL构建问题 - 在云端环境中API_BASE_URL为空字符串
@@ -32,7 +32,8 @@ class Admin {
                 headers: {
                     'User-UUID': this.core.getCurrentUserId(),
                     'Content-Type': 'application/json',
-                }
+                },
+                credentials: 'include' // 确保发送cookies
             });
 
             return await response.json();
@@ -44,9 +45,8 @@ class Admin {
 
     // 更新用户存储限制（管理员功能）
     async updateUserStorage(uuid, storageLimit) {
-        if (!this.core.isAdmin()) {
-            return { success: false, error: '权限不足' };
-        }
+        // 移除前端权限检查，让后端API处理鉴权
+        // 用户能看到管理员面板就说明已经通过了鉴权
 
         try {
             // 修复URL构建问题
@@ -58,6 +58,7 @@ class Admin {
                     'User-UUID': this.core.getCurrentUserId(),
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include', // 确保发送cookies
                 body: JSON.stringify({ uuid, storage_limit: storageLimit })
             });
 
@@ -67,4 +68,7 @@ class Admin {
             return { success: false, error: '网络错误' };
         }
     }
-} 
+}
+
+// 导出Admin类到全局作用域
+window.Admin = Admin; 

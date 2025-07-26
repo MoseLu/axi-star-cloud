@@ -11,25 +11,25 @@
 }
 
 .border-purple-light\/20 {
-    border-color: rgba(168, 85, 247, 0.15);
+    border-color: rgba(168, 85, 247, 0.1);
 }
 
 /* 拖放区域 */
 .border-purple-light\/30 {
-    border-color: rgba(168, 85, 247, 0.2);
+    border-color: rgba(168, 85, 247, 0.15);
 }
 
 .hover\:border-purple-light\/60:hover {
-    border-color: rgba(168, 85, 247, 0.4);
+    border-color: rgba(168, 85, 247, 0.25);
 }
 
 /* 图标和文字颜色 */
 .text-purple-light\/60 {
-    color: rgba(168, 85, 247, 0.6);
+    color: rgba(168, 85, 247, 0.4);
 }
 
 .text-purple-light {
-    color: #A78BFA;
+    color: #C4B5FD;
 }
 
 .text-emerald-light {
@@ -46,24 +46,31 @@
 
 /* 按钮样式 */
 .bg-gradient-to-r.from-primary\/80.to-secondary\/80 {
-    background: linear-gradient(to right, rgba(59, 130, 246, 0.8), rgba(139, 92, 246, 0.8));
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.6), rgba(139, 92, 246, 0.6));
 }
 
 .hover\:from-primary.to-secondary:hover {
-    background: linear-gradient(to right, #3B82F6, #8B5CF6);
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.8), rgba(139, 92, 246, 0.8));
 }
 
 .shadow-primary\/20 {
-    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.15);
 }
 
 /* 进度条 */
 .bg-dark-light {
-    background-color: #6B7280;
+    background-color: #E5E7EB;
 }
 
 .bg-gradient-to-r.from-blue-light.to-purple-light {
     background: linear-gradient(to right, #60A5FA, #A78BFA);
+}
+
+
+
+body.theme-light .bg-gradient-to-r.from-blue-light.to-purple-light {
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.7), rgba(139, 92, 246, 0.7));
+    box-shadow: none !important;
 }
 
 /* 关闭按钮悬停效果 */

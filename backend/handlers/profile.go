@@ -194,6 +194,7 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 	// 获取上传的文件
 	file, err := c.FormFile("avatar")
 	if err != nil {
+
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"error":   "获取上传文件失败",
@@ -230,10 +231,8 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 
 	// 创建上传目录
 	uploadDir := utils.GetAvatarUploadDir()
-	fmt.Printf("🔍 头像上传目录: %s\n", uploadDir)
 
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
-		fmt.Printf("❌ 创建上传目录失败: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"error":   "创建上传目录失败",
@@ -245,29 +244,24 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 	fileExt := filepath.Ext(file.Filename)
 	fileName := fmt.Sprintf("%s_%s%s", userID, uuid.New().String(), fileExt)
 	filePath := filepath.Join(uploadDir, fileName)
-	fmt.Printf("🔍 头像文件路径: %s\n", filePath)
 
 	// 保存文件
 	if err := c.SaveUploadedFile(file, filePath); err != nil {
-		fmt.Printf("❌ 保存头像文件失败: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"error":   "保存头像文件失败",
 		})
 		return
 	}
-	fmt.Printf("✅ 头像文件保存成功: %s\n", filePath)
 
 	// 验证文件是否保存成功
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		fmt.Printf("❌ 文件保存验证失败: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"error":   "文件保存失败",
 		})
 		return
 	}
-	fmt.Printf("✅ 头像文件验证成功: %s\n", filePath)
 
 	// 生成访问URL - 只保存文件名，不包含路径
 	avatarURL := fileName

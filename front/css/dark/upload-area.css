@@ -1,0 +1,83 @@
+/**
+ * 暗色主题上传区域样式
+ * 覆盖Tailwind CSS类以适配暗色主题
+ */
+
+/* 上传区域容器 */
+.glass-effect {
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(51, 65, 85, 0.3);
+}
+
+.border-purple-light\/20 {
+    border-color: rgba(168, 85, 247, 0.15);
+}
+
+/* 拖放区域 */
+.border-purple-light\/30 {
+    border-color: rgba(168, 85, 247, 0.2);
+}
+
+.hover\:border-purple-light\/60:hover {
+    border-color: rgba(168, 85, 247, 0.4);
+}
+
+/* 图标和文字颜色 */
+.text-purple-light\/60 {
+    color: rgba(168, 85, 247, 0.6);
+}
+
+.text-purple-light {
+    color: #A78BFA;
+}
+
+.text-emerald-light {
+    color: #34D399;
+}
+
+.text-gray-300 {
+    color: #CBD5E1;
+}
+
+.text-gray-400 {
+    color: #94A3B8;
+}
+
+/* 按钮样式 */
+.bg-gradient-to-r.from-primary\/80.to-secondary\/80 {
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.8), rgba(139, 92, 246, 0.8));
+}
+
+.hover\:from-primary.to-secondary:hover {
+    background: linear-gradient(to right, #3B82F6, #8B5CF6);
+}
+
+.shadow-primary\/20 {
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+/* 进度条 */
+.bg-dark-light {
+    background-color: #374151;
+}
+
+.bg-gradient-to-r.from-blue-light.to-purple-light {
+    background: linear-gradient(to right, #60A5FA, #A78BFA);
+}
+
+/* 关闭按钮悬停效果 */
+.hover\:text-white:hover {
+    color: #F8FAFC;
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+    .glass-effect {
+        background: rgba(15, 23, 42, 0.9);
+    }
+    
+    .border-purple-light\/20 {
+        border-color: rgba(168, 85, 247, 0.1);
+    }
+} 

@@ -22,13 +22,16 @@ class UIUploadManager {
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'application/vnd.ms-powerpoint',
             'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            'text/*'
+            'text/plain',
+            'application/zip',
+            'application/x-rar-compressed'
         ];
         this.uploadProgress = {};
         
         // 初始化上传队列管理器
         this.queueManager = new UploadQueueManager();
         this.currentUserID = null;
+        this.init();
     }
 
     /**
@@ -222,14 +225,40 @@ class UIUploadManager {
     async handleFiles(files) {
         if (files.length === 0) return;
 
+        // 获取当前用户ID - 使用最可靠的方式
+        let currentUserID = null;
+        
+        // 方式1: 从API系统获取（最可靠）
+        if (window.apiSystem && typeof window.apiSystem.getCurrentUserId === 'function') {
+            currentUserID = window.apiSystem.getCurrentUserId();
+        }
+        
+        // 方式2: 从localStorage获取userInfo（备用）
+        if (!currentUserID) {
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                try {
+                    const user = JSON.parse(userInfo);
+                    currentUserID = user.uuid || user.id;
+                } catch (e) {
+                    console.warn('解析userInfo失败:', e);
+                }
+            }
+        }
+        
+        // 方式3: 从认证系统获取（备用）
+        if (!currentUserID && window.authSystem && typeof window.authSystem.getCurrentUser === 'function') {
+            const currentUser = window.authSystem.getCurrentUser();
+            currentUserID = currentUser?.uuid || currentUser?.id;
+        }
 
-
-        // 获取当前用户ID
-        this.currentUserID = window.api?.core?.getCurrentUserId();
-        if (!this.currentUserID) {
+        if (!currentUserID) {
+            console.error('无法获取用户ID');
             this.showMessage('用户未登录，无法上传文件', 'error');
             return;
         }
+
+        this.currentUserID = currentUserID;
 
         // 验证文件
         const validFiles = files.filter(file => this.validateFile(file));
@@ -406,48 +435,188 @@ class UIUploadManager {
                 this.clearUploadQueue();
             }
         } else {
-            // 批量上传处理
-            
+            // 批量上传处理 - 使用新的批量上传API
             try {
-                for (let i = 0; i < this.uploadQueue.length; i++) {
-                    const item = this.uploadQueue[i];
-                    if (item.status === 'pending') {
-                        try {
-                            await this.uploadFile(item, false);
-                        } catch (error) {
-                            console.error(`上传文件 ${item.file.name} 失败:`, error);
-                        }
-                    }
-                }
+                await this.uploadFilesBatch();
             } catch (error) {
-                console.error('处理上传队列失败:', error);
+                console.error('批量上传失败:', error);
+                this.showMessage('批量上传失败', 'error');
             } finally {
                 this.isUploading = false;
-                
-                // 计算上传结果
-                const total = this.uploadQueue.length;
-                const completed = this.uploadQueue.filter(item => item.status === 'completed').length;
-                const failed = this.uploadQueue.filter(item => item.status === 'failed').length;
-
-                // 批量上传消息
-                if (completed === total) {
-                    this.showMessage(`批量上传完成！成功上传 ${completed} 个文件`, 'success');
-                } else if (failed > 0) {
-                    this.showMessage(`批量上传完成！成功: ${completed} 个，失败: ${failed} 个`, failed === total ? 'error' : 'warning');
-                }
-
-                // 刷新文件列表
-                if (completed > 0) {
-                    this.refreshFileList();
-                }
-
-                // 延迟关闭进度条
-                setTimeout(() => {
-                    this.hideUploadProgress();
-                    this.clearUploadQueue();
-                }, 1500);
+                this.hideUploadProgress();
+                this.clearUploadQueue();
             }
         }
+    }
+
+    /**
+     * 批量上传文件
+     */
+    async uploadFilesBatch() {
+        try {
+            // 获取用户ID
+            let userId = null;
+            
+            // 方式1: 使用已保存的currentUserID
+            if (this.currentUserID) {
+                userId = this.currentUserID;
+            }
+            
+            // 方式2: 从API系统获取（最可靠）
+            if (!userId && window.apiSystem && typeof window.apiSystem.getCurrentUserId === 'function') {
+                userId = window.apiSystem.getCurrentUserId();
+            }
+            
+            // 方式3: 从localStorage获取userInfo（备用）
+            if (!userId) {
+                const userInfo = localStorage.getItem('userInfo');
+                if (userInfo) {
+                    try {
+                        const user = JSON.parse(userInfo);
+                        userId = user.uuid || user.id;
+                    } catch (e) {
+                        console.warn('解析userInfo失败:', e);
+                    }
+                }
+            }
+            
+            // 方式4: 从认证系统获取（备用）
+            if (!userId && window.authSystem && typeof window.authSystem.getCurrentUser === 'function') {
+                const currentUser = window.authSystem.getCurrentUser();
+                userId = currentUser?.uuid || currentUser?.id;
+            }
+            
+            if (!userId) {
+                console.error('无法获取用户ID');
+                this.showMessage('未检测到用户ID，无法上传！请重新登录', 'error');
+                return;
+            }
+
+            // 创建FormData
+            const formData = new FormData();
+            
+            // 添加所有文件
+            for (const item of this.uploadQueue) {
+                if (item.status === 'pending') {
+                    formData.append('files', item.file);
+                }
+            }
+            
+            formData.append('user_id', userId);
+
+            // 如果有当前文件夹ID，也发送
+            if (this.uiManager && this.uiManager.currentFolderId) {
+                formData.append('folder_id', this.uiManager.currentFolderId);
+            }
+
+            // 创建XHR请求
+            const xhr = new XMLHttpRequest();
+            const uploadUrl = '/api/upload/batch';
+                
+            // 设置超时
+            xhr.timeout = 300000; // 5分钟
+
+            // 进度处理
+            xhr.upload.addEventListener('progress', (e) => {
+                if (e.lengthComputable) {
+                    const progress = Math.round((e.loaded / e.total) * 100);
+                    // 更新所有待上传文件的进度
+                    for (const item of this.uploadQueue) {
+                        if (item.status === 'pending') {
+                            item.progress = progress;
+                        }
+                    }
+                    this.updateUploadSummary();
+                }
+            });
+
+            // 请求完成处理
+            xhr.addEventListener('load', () => {
+                if (xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            this.handleBatchUploadSuccess(response);
+                        } else {
+                            this.handleBatchUploadError(response.error || '批量上传失败');
+                        }
+                    } catch (error) {
+                        this.handleBatchUploadError('解析响应失败');
+                    }
+                } else {
+                    this.handleBatchUploadError(`HTTP错误: ${xhr.status}`);
+                }
+            });
+
+            // 错误处理
+            xhr.addEventListener('error', () => {
+                this.handleBatchUploadError('网络错误');
+            });
+
+            // 超时处理
+            xhr.addEventListener('timeout', () => {
+                this.handleBatchUploadError('上传超时');
+            });
+
+            // 发送请求
+            xhr.open('POST', uploadUrl);
+            xhr.send(formData);
+
+        } catch (error) {
+            console.error('批量上传请求创建失败:', error);
+            this.handleBatchUploadError('创建上传请求失败');
+        }
+    }
+
+    /**
+     * 处理批量上传成功
+     */
+    handleBatchUploadSuccess(response) {
+        console.log('批量上传成功:', response);
+        
+        // 更新队列中所有文件的状态
+        for (const item of this.uploadQueue) {
+            if (item.status === 'pending') {
+                // 查找对应的结果
+                const result = response.results.find(r => r.filename === item.file.name);
+                if (result && result.success) {
+                    item.status = 'completed';
+                    item.progress = 100;
+                } else {
+                    item.status = 'failed';
+                    item.error = result ? result.error : '上传失败';
+                }
+            }
+        }
+
+        // 显示批量上传结果消息
+        this.showMessage(response.message, response.failed_count > 0 ? 'warning' : 'success');
+
+        // 刷新文件列表和存储空间
+        if (response.success_count > 0) {
+            this.refreshFileListAndStorage();
+        }
+
+        // 更新上传队列显示
+        this.updateUploadQueueDisplay();
+    }
+
+    /**
+     * 处理批量上传错误
+     */
+    handleBatchUploadError(error) {
+        console.error('批量上传失败:', error);
+        
+        // 将所有待上传文件标记为失败
+        for (const item of this.uploadQueue) {
+            if (item.status === 'pending') {
+                item.status = 'failed';
+                item.error = error;
+            }
+        }
+
+        this.showMessage(`批量上传失败: ${error}`, 'error');
+        this.updateUploadQueueDisplay();
     }
 
     /**
@@ -459,30 +628,55 @@ class UIUploadManager {
         try {
             // 更新状态
             item.status = 'uploading';
-                this.updateUploadQueueDisplay();
+            this.updateUploadQueueDisplay();
             this.updateUploadProgress(item);
 
             // 创建FormData
             const formData = new FormData();
             // 添加文件数据
             formData.append('file', item.file);
-            // 自动获取user_id
+            
+            // 获取用户ID - 使用最可靠的方式
             let userId = null;
-            // 优先从localStorage的currentUser.uuid获取
-            if (localStorage.getItem('currentUser')) {
-                try {
-                    const cu = JSON.parse(localStorage.getItem('currentUser'));
-                    if (cu && cu.uuid) userId = cu.uuid;
-                } catch(e) {}
+            
+            // 方式1: 使用已保存的currentUserID
+            if (this.currentUserID) {
+                userId = this.currentUserID;
             }
-            // 备用方案
-            if (!userId && window.userId) userId = window.userId;
-            if (!userId && window.currentUser && window.currentUser.id) userId = window.currentUser.id;
-            if (!userId && localStorage.getItem('user_id')) userId = localStorage.getItem('user_id');
+            
+            // 方式2: 从API系统获取（最可靠）
+            if (!userId && window.apiSystem && typeof window.apiSystem.getCurrentUserId === 'function') {
+                userId = window.apiSystem.getCurrentUserId();
+            }
+            
+            // 方式3: 从localStorage获取userInfo（备用）
             if (!userId) {
-                alert('未检测到用户ID，无法上传！请重新登录');
+                const userInfo = localStorage.getItem('userInfo');
+                if (userInfo) {
+                    try {
+                        const user = JSON.parse(userInfo);
+                        userId = user.uuid || user.id;
+                    } catch (e) {
+                        console.warn('解析userInfo失败:', e);
+                    }
+                }
+            }
+            
+            // 方式4: 从认证系统获取（备用）
+            if (!userId && window.authSystem && typeof window.authSystem.getCurrentUser === 'function') {
+                const currentUser = window.authSystem.getCurrentUser();
+                userId = currentUser?.uuid || currentUser?.id;
+            }
+            
+            if (!userId) {
+                console.error('无法获取用户ID');
+                // 只在单个文件上传时显示错误消息，批量上传时由processUploadQueue统一处理
+                if (this.uploadQueue.length === 1) {
+                    this.showMessage('未检测到用户ID，无法上传！请重新登录', 'error');
+                }
                 return;
             }
+            
             formData.append('user_id', userId);
 
             // 如果是视频文件且有缩略图，将缩略图数据也发送到后端
@@ -496,24 +690,24 @@ class UIUploadManager {
             }
 
             // 创建XHR请求
-                const xhr = new XMLHttpRequest();
+            const xhr = new XMLHttpRequest();
             const uploadUrl = '/api/upload';
                 
             // 设置超时
             xhr.timeout = 300000; // 5分钟
 
             // 进度处理
-                xhr.upload.addEventListener('progress', (e) => {
+            xhr.upload.addEventListener('progress', (e) => {
                 if (e.lengthComputable) {
-                        const progress = Math.round((e.loaded / e.total) * 100);
-                        item.progress = progress;
+                    const progress = Math.round((e.loaded / e.total) * 100);
+                    item.progress = progress;
                     this.updateUploadProgress(item);
-                        this.updateUploadSummary();
-                    }
-                });
+                    this.updateUploadSummary();
+                }
+            });
 
             // 请求完成处理
-                xhr.addEventListener('load', () => {
+            xhr.addEventListener('load', () => {
                 if (xhr.status === 200) {
                     try {
                         const response = JSON.parse(xhr.responseText);
@@ -527,22 +721,22 @@ class UIUploadManager {
                     }
                 } else {
                     this.handleUploadError(item, `HTTP错误: ${xhr.status}`);
-                    }
-                });
+                }
+            });
 
             // 错误处理
-                xhr.addEventListener('error', () => {
+            xhr.addEventListener('error', () => {
                 this.handleUploadError(item, '网络错误');
-                });
+            });
 
             // 超时处理
-                xhr.addEventListener('timeout', () => {
+            xhr.addEventListener('timeout', () => {
                 this.handleUploadError(item, '上传超时');
-                });
+            });
 
-                // 发送请求
-                xhr.open('POST', uploadUrl);
-                xhr.send(formData);
+            // 发送请求
+            xhr.open('POST', uploadUrl);
+            xhr.send(formData);
 
         } catch (error) {
             this.handleUploadError(item, error.message || '上传失败');
@@ -1017,29 +1211,8 @@ class UIUploadManager {
      * 刷新文件列表
      */
     refreshFileList() {
-        // 优先使用传入的UI管理器
-        if (this.uiManager && typeof this.uiManager.loadFiles === 'function') {
-            this.uiManager.loadFiles();
-            return;
-        }
-        
-        // 尝试多种方式获取UI管理器
-        const uiManager = window.uiManager || window.UIManager || 
-                         (window.app && window.app.uiManager) ||
-                         (window.apiSystem && window.apiSystem.uiManager);
-        
-        if (uiManager && typeof uiManager.loadFiles === 'function') {
-            uiManager.loadFiles();
-        } else if (uiManager && typeof uiManager.renderFileList === 'function') {
-            // 如果loadFiles不存在，尝试直接重新获取文件并渲染
-            this.refreshFileListDirect();
-        } else {
-            // 降级方案：刷新页面
-            console.warn('无法找到UI管理器，将刷新页面');
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        }
+        // 调用新的综合刷新方法
+        this.refreshFileListAndStorage();
     }
 
     /**
@@ -1077,6 +1250,70 @@ class UIUploadManager {
     }
 
     /**
+     * 刷新文件列表和存储空间
+     */
+    async refreshFileListAndStorage() {
+        try {
+            // 获取API管理器
+            const apiManager = window.apiSystem || window.apiManager || window.api;
+            if (!apiManager) {
+                console.error('无法找到API管理器');
+                return;
+            }
+
+            // 并行获取文件列表和存储信息
+            const [files, urlFiles, storageInfo] = await Promise.all([
+                apiManager.files.getFiles(),
+                apiManager.urlFiles.getUrlFiles(),
+                apiManager.storage.getStorageInfo()
+            ]);
+
+            // 合并文件列表
+            const allFiles = [...files, ...urlFiles];
+
+            // 获取UI管理器
+            const uiManager = window.uiManager || window.UIManager || 
+                             (window.app && window.app.uiManager) ||
+                             (window.apiSystem && window.apiSystem.uiManager);
+            
+            if (uiManager) {
+                // 更新文件缓存
+                if (uiManager.allFiles) {
+                    uiManager.allFiles = allFiles;
+                }
+                
+                // 更新存储信息到本地缓存
+                if (storageInfo && window.StorageManager && typeof window.StorageManager.setStorageInfo === 'function') {
+                    window.StorageManager.setStorageInfo(storageInfo);
+                }
+                
+                // 更新存储空间显示
+                if (typeof uiManager.syncStorageDisplay === 'function') {
+                    await uiManager.syncStorageDisplay(storageInfo);
+                } else if (typeof uiManager.updateStorageDisplay === 'function') {
+                    uiManager.updateStorageDisplay(storageInfo);
+                }
+                
+                // 重新渲染文件列表
+                if (typeof uiManager.renderFileList === 'function') {
+                    uiManager.renderFileList(allFiles);
+                }
+                
+                // 如果当前在特定分类下，重新过滤文件
+                if (uiManager.currentCategory && uiManager.currentCategory !== 'all') {
+                    const categoriesManager = window.categoriesManager || 
+                                           (uiManager.categoriesManager);
+                    if (categoriesManager && typeof categoriesManager.filterFiles === 'function') {
+                        categoriesManager.filterFiles(uiManager.currentCategory);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('❌ 刷新文件列表和存储空间失败:', error);
+        }
+    }
+
+    /**
      * 处理上传成功
      * @param {Object} item - 上传项
      * @param {Object} response - 服务器响应
@@ -1109,12 +1346,14 @@ class UIUploadManager {
         this.updateUploadQueueDisplay();
         this.updateUploadSummary();
         
-        // 显示成功消息
-        this.showMessage('文件上传成功！', 'success');
+        // 只在单个文件上传时显示成功消息，批量上传时由processUploadQueue统一处理
+        if (this.uploadQueue.length === 1) {
+            this.showMessage('文件上传成功！', 'success');
+        }
         
-        // 刷新文件列表
+        // 刷新文件列表和存储空间
         setTimeout(() => {
-            this.refreshFileList();
+            this.refreshFileListAndStorage();
         }, 500);
         
         // 如果是单个文件上传，关闭进度条
@@ -1141,8 +1380,10 @@ class UIUploadManager {
         this.updateUploadQueueDisplay();
         this.updateUploadSummary();
         
-        // 显示错误消息
-        this.showMessage(`上传失败: ${error}`, 'error');
+        // 只在单个文件上传时显示错误消息，批量上传时由processUploadQueue统一处理
+        if (this.uploadQueue.length === 1) {
+            this.showMessage(`上传失败: ${error}`, 'error');
+        }
     }
 }
 

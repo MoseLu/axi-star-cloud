@@ -291,7 +291,164 @@ class UIHelpManager {
             headers.forEach(header => {
                 header.classList.add('bg-dark-light', 'text-purple-300', 'font-bold');
             });
+            
+            // 添加亮色主题适配样式
+            this.addLightThemeStyles();
         }
+    }
+    
+    /**
+     * 添加亮色主题适配样式
+     */
+    addLightThemeStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            /* 亮色主题下的帮助文档样式 */
+            body.theme-light #help-modal .bg-dark-light {
+                background: #ffffff;
+                border: 1px solid rgba(139, 92, 246, 0.2);
+                box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
+            }
+            
+            body.theme-light #help-modal .text-purple-300 {
+                color: #8b5cf6 !important;
+            }
+            
+            body.theme-light #help-modal .text-gray-300 {
+                color: #374151 !important;
+            }
+            
+            body.theme-light #help-modal .text-gray-400 {
+                color: #6b7280 !important;
+            }
+            
+            body.theme-light #help-modal .text-gray-400:hover {
+                color: #374151 !important;
+            }
+            
+            body.theme-light #help-modal .bg-dark-light.text-green-300 {
+                background: rgba(139, 92, 246, 0.1) !important;
+                color: #8b5cf6 !important;
+            }
+            
+            body.theme-light #help-modal .text-blue-400 {
+                color: #8b5cf6 !important;
+            }
+            
+            body.theme-light #help-modal .text-blue-400:hover {
+                color: #7c3aed !important;
+            }
+            
+            body.theme-light #help-modal .border-gray-600 {
+                border-color: rgba(139, 92, 246, 0.3) !important;
+            }
+            
+            body.theme-light #help-modal .bg-dark-light.text-purple-300 {
+                background: rgba(139, 92, 246, 0.1) !important;
+                color: #8b5cf6 !important;
+            }
+            
+            /* 亮色主题下的标题样式 */
+            body.theme-light #help-modal h1,
+            body.theme-light #help-modal h2,
+            body.theme-light #help-modal h3,
+            body.theme-light #help-modal h4,
+            body.theme-light #help-modal h5,
+            body.theme-light #help-modal h6 {
+                color: #111827 !important;
+            }
+            
+            /* 亮色主题下的段落样式 */
+            body.theme-light #help-modal p {
+                color: #374151 !important;
+            }
+            
+            /* 亮色主题下的列表样式 */
+            body.theme-light #help-modal ul,
+            body.theme-light #help-modal ol {
+                color: #374151 !important;
+            }
+            
+            /* 亮色主题下的代码块样式 */
+            body.theme-light #help-modal pre {
+                background: rgba(249, 250, 251, 0.95) !important;
+                border: 1px solid rgba(139, 92, 246, 0.2) !important;
+                color: #374151 !important;
+            }
+            
+            /* 亮色主题下的引用块样式 */
+            body.theme-light #help-modal blockquote {
+                border-left: 4px solid #8b5cf6 !important;
+                color: #6b7280 !important;
+                background: rgba(139, 92, 246, 0.05) !important;
+                padding: 12px 16px !important;
+                margin: 16px 0 !important;
+                border-radius: 0 4px 4px 0 !important;
+            }
+            
+            /* 亮色主题下的表格样式 */
+            body.theme-light #help-modal table {
+                border-color: rgba(139, 92, 246, 0.3) !important;
+            }
+            
+            body.theme-light #help-modal th,
+            body.theme-light #help-modal td {
+                border-color: rgba(139, 92, 246, 0.3) !important;
+                color: #374151 !important;
+            }
+            
+            body.theme-light #help-modal th {
+                background: rgba(139, 92, 246, 0.1) !important;
+                color: #8b5cf6 !important;
+            }
+            
+            /* 亮色主题下的滚动条样式 */
+            body.theme-light #help-modal ::-webkit-scrollbar {
+                width: 8px;
+            }
+            
+            body.theme-light #help-modal ::-webkit-scrollbar-track {
+                background: rgba(249, 250, 251, 0.5);
+                border-radius: 4px;
+            }
+            
+            body.theme-light #help-modal ::-webkit-scrollbar-thumb {
+                background: rgba(139, 92, 246, 0.3);
+                border-radius: 4px;
+            }
+            
+            body.theme-light #help-modal ::-webkit-scrollbar-thumb:hover {
+                background: rgba(139, 92, 246, 0.5);
+            }
+            
+            /* 亮色主题下的版本信息容器样式 */
+            body.theme-light #help-modal .version-info-container {
+                background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
+                border: 1px solid rgba(139, 92, 246, 0.2) !important;
+            }
+            
+            body.theme-light #help-modal .version-info-container .text-gray-300 {
+                color: #374151 !important;
+            }
+            
+            body.theme-light #help-modal .version-info-container .text-gray-400 {
+                color: #6b7280 !important;
+            }
+            
+            body.theme-light #help-modal .version-info-container .text-purple-400 {
+                color: #8b5cf6 !important;
+            }
+            
+            body.theme-light #help-modal .version-info-container .text-blue-400 {
+                color: #3b82f6 !important;
+            }
+            
+            body.theme-light #help-modal .version-info-container .text-red-400 {
+                color: #ef4444 !important;
+            }
+        `;
+        
+        document.head.appendChild(style);
     }
 
     /**
@@ -304,6 +461,8 @@ class UIHelpManager {
             
             if (result.success && result.data) {
                 this.renderUpdateLogs(result.data);
+                // 更新最后更新时间和版本信息
+                this.updateLastUpdateInfo(result.data);
             } else {
                 console.error('❌ 获取更新日志失败:', result.message);
                 this.renderUpdateLogs([]);
@@ -311,6 +470,38 @@ class UIHelpManager {
         } catch (error) {
             console.error('❌ 获取更新日志出错:', error);
             this.renderUpdateLogs([]);
+        }
+    }
+
+    /**
+     * 更新最后更新时间和版本信息
+     */
+    updateLastUpdateInfo(logs) {
+        if (logs && logs.length > 0) {
+            // 获取最新版本信息
+            const latestLog = logs[0]; // 按时间倒序，第一个是最新的
+            const latestVersion = latestLog.version;
+            const latestDate = window.dayjs ? dayjs(latestLog.release_date).format('YYYY年MM月DD日') : new Date(latestLog.release_date).toLocaleDateString('zh-CN');
+            
+            // 更新页面中的版本信息
+            const versionElements = document.querySelectorAll('.help-version-info');
+            versionElements.forEach(element => {
+                if (element.textContent.includes('版本:')) {
+                    element.textContent = `版本: ${latestVersion}`;
+                }
+                if (element.textContent.includes('最后更新:')) {
+                    element.textContent = `最后更新: ${latestDate}`;
+                }
+            });
+            
+            // 添加一些动画效果
+            const container = document.querySelector('.version-info-container');
+            if (container) {
+                container.classList.add('animate-pulse');
+                setTimeout(() => {
+                    container.classList.remove('animate-pulse');
+                }, 1000);
+            }
         }
     }
 
@@ -668,8 +859,24 @@ class UIHelpManager {
 
 ---
 
-*最后更新: ${currentDate}*
-*版本: 1.1.0*
+<div class="version-info-container bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-400/20 rounded-lg p-4 mt-8">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-calendar text-purple-400"></i>
+                <span class="help-version-info text-gray-300 font-medium">最后更新: ${currentDate}</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-tag text-blue-400"></i>
+                <span class="help-version-info text-gray-300 font-medium">版本: 1.1.0</span>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <i class="fa fa-heart text-red-400 animate-pulse"></i>
+            <span class="text-gray-400 text-sm">星际云盘</span>
+        </div>
+    </div>
+</div>
         `;
     }
 }

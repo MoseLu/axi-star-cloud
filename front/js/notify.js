@@ -40,6 +40,38 @@
     }
   };
 
+  // 亮色主题配置
+  const lightThemes = {
+    info: {
+      bg: 'bg-blue-50',
+      border: 'border-blue-200',
+      icon: 'text-blue-600',
+      text: 'text-blue-900',
+      accent: 'bg-blue-100'
+    },
+    success: {
+      bg: 'bg-emerald-50',
+      border: 'border-emerald-200',
+      icon: 'text-emerald-600',
+      text: 'text-emerald-900',
+      accent: 'bg-emerald-100'
+    },
+    warning: {
+      bg: 'bg-amber-50',
+      border: 'border-amber-200',
+      icon: 'text-amber-600',
+      text: 'text-amber-900',
+      accent: 'bg-amber-100'
+    },
+    error: {
+      bg: 'bg-red-50',
+      border: 'border-red-200',
+      icon: 'text-red-600',
+      text: 'text-red-900',
+      accent: 'bg-red-100'
+    }
+  };
+
   function createContainer() {
     if (container) return container;
     container = document.createElement('div');
@@ -58,13 +90,18 @@
   function show({ message, type = 'info', duration = 3000, onClose }) {
     
     createContainer();
-    const theme = themes[type] || themes.info;
+    
+    // 检测当前主题
+    const isLightTheme = document.body.classList.contains('theme-light');
+    const themeConfig = isLightTheme ? lightThemes : themes;
+    const theme = themeConfig[type] || themeConfig.info;
+    
     const notify = document.createElement('div');
     notify.className = `relative p-3 rounded-lg border ${theme.border} ${theme.bg} flex items-center gap-2 shadow max-w-xs min-w-[200px]`;
     notify.innerHTML = `
       <div class="flex-shrink-0 w-6 h-6 ${theme.accent} rounded flex items-center justify-center"><i class="fa ${icons[type]} ${theme.icon} text-xs"></i></div>
       <div class="flex-1 min-w-0"><p class="${theme.text} text-xs font-medium leading-snug">${message}</p></div>
-      <button class="flex-shrink-0 w-5 h-5 bg-white/10 hover:bg-white/20 rounded flex items-center justify-center transition-all duration-200"><i class="fa fa-times text-gray-400 hover:text-white text-xs"></i></button>
+      <button class="flex-shrink-0 w-5 h-5 ${isLightTheme ? 'bg-gray-100 hover:bg-gray-200' : 'bg-white/10 hover:bg-white/20'} rounded flex items-center justify-center transition-all duration-200"><i class="fa fa-times ${isLightTheme ? 'text-gray-500 hover:text-gray-700' : 'text-gray-400 hover:text-white'} text-xs"></i></button>
     `;
     
     // 初始状态：透明且向右偏移

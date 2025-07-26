@@ -147,16 +147,27 @@ class MobileEnhancement {
     optimizeSubCategoriesAnimation() {
         const expandableButtons = document.querySelectorAll('.expandable');
         expandableButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                if (this.isMobile) {
-                    // 在移动端使用更快的动画
-                    const subContainer = document.getElementById('sub-categories-container');
-                    if (subContainer) {
-                        subContainer.style.transition = 'all 0.2s ease';
-                    }
-                }
-            });
+            // 移除可能存在的旧事件监听器
+            button.removeEventListener('click', this.handleExpandableClick);
+            
+            // 添加新的事件监听器，但不阻止事件冒泡
+            button.addEventListener('click', this.handleExpandableClick.bind(this));
         });
+    }
+
+    /**
+     * 处理可展开按钮的点击事件
+     */
+    handleExpandableClick(e) {
+        // 只在移动端应用优化，且不阻止事件冒泡
+        if (this.isMobile) {
+            // 在移动端使用更快的动画
+            const subContainer = document.getElementById('sub-categories-container');
+            if (subContainer) {
+                subContainer.style.transition = 'all 0.2s ease';
+            }
+        }
+        // 不调用 preventDefault 或 stopPropagation，让事件继续冒泡到双击处理器
     }
 
     /**

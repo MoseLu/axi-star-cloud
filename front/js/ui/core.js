@@ -53,7 +53,9 @@ class UICore {
             
             // 检查并显示管理员菜单
             if (this.uiManager) {
-                this.uiManager.checkAndShowAdminMenu();
+                this.uiManager.checkAndShowAdminMenu().catch(error => {
+                    console.error('检查管理员权限失败:', error);
+                });
             }
         }, 100);
         
@@ -141,12 +143,12 @@ class UICore {
             }
         });
 
-        // 同步文档按钮事件
-        document.getElementById('sync-docs-btn')?.addEventListener('click', () => {
-            if (this.uiManager) {
-                this.uiManager.showSyncDocsModal();
-            }
-        });
+        // 同步文档按钮事件 - 由docs-sync模块处理，避免重复绑定
+        // document.getElementById('sync-docs-btn')?.addEventListener('click', () => {
+        //     if (this.uiManager) {
+        //         this.uiManager.showSyncDocsModal();
+        //     }
+        // });
 
         // 关闭上传区域按钮
         document.getElementById('close-upload-btn')?.addEventListener('click', () => {
@@ -261,15 +263,7 @@ class UICore {
 
         // 设置按钮
         document.getElementById('settings-btn')?.addEventListener('click', () => {
-            // 检查是否为管理员
-            const currentUser = window.authSystem ? window.authSystem.getCurrentUser() : null;
-            if (!currentUser || !currentUser.isAdmin) {
-                if (window.Notify) {
-                    window.Notify.show({ message: '只有管理员才能修改存储设置', type: 'warning' });
-                }
-                return;
-            }
-            
+            // 设置按钮只有管理员才能看到，所以不需要再次检查权限
             if (this.uiManager) {
                 this.uiManager.showSettingsModal();
             }

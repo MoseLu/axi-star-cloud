@@ -70,63 +70,101 @@ class Manager {
                 body: JSON.stringify({
                     username: username,
                     password: password
-                })
+                }),
+                credentials: 'include' // 包含cookie
             });
+
+            // 检查响应状态
+            if (!response.ok) {
+                const errorText = await response.text();
+                let errorData;
+                try {
+                    errorData = JSON.parse(errorText);
+                } catch (e) {
+                    errorData = { error: errorText };
+                }
+                throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+            }
 
             const data = await response.json();
 
             if (data.success) {
-                // 移除登录成功消息，由App管理器统一处理
-                // this.showMessage('登录成功', 'success');
-
-                // 保存用户认证信息到localStorage
-                const currentUser = {
+                // 保存用户信息
+                const userInfo = {
                     uuid: data.user.uuid,
                     username: data.user.username,
-                    isAdmin: data.user.is_admin
+                    email: data.user.email,
+                    bio: data.user.bio,
+                    avatar: data.user.avatar
                 };
                 
-                // 保存用户详细信息到localStorage
-                const userData = {
-                    username: data.user.username,
-                    email: data.user.email || '',
-                    bio: data.user.bio || '',
-                    avatar: data.user.avatar || ''
-                };
+                // 保存到localStorage
+                localStorage.setItem('userInfo', JSON.stringify(userInfo));
                 
-                // 保存最后登录时间
-                if (data.last_login_time) {
-                    localStorage.setItem('lastLoginTime', data.last_login_time);
+                // 如果使用StorageManager，也保存到那里
+                if (window.StorageManager && typeof window.StorageManager.setUserInfo === 'function') {
+                    window.StorageManager.setUserInfo(userInfo);
                 }
                 
-                // 分别存储到两个不同的key
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                localStorage.setItem('userData', JSON.stringify(userData));
+                // 更新当前用户
+                this.currentUser = userInfo;
                 
-                // 更新当前用户对象
-                this.currentUser = currentUser;
-
-                // 同步到API管理器
-                if (window.apiManager && typeof window.apiManager.setCurrentUser === 'function') {
-                    try {
-                        window.apiManager.setCurrentUser(this.currentUser);
-                    } catch (error) {
-                        // 静默处理错误
+                // 保存token信息（如果后端返回了token）
+                if (data.tokens) {
+                    const tokenInfo = {
+                        accessToken: data.tokens.access_token,
+                        refreshToken: data.tokens.refresh_token,
+                        expiresAt: data.tokens.expires_at
+                    };
+                    
+                    if (window.StorageManager && typeof window.StorageManager.setSystemInfo === 'function') {
+                        const systemInfo = window.StorageManager.getSystemInfo() || {};
+                        systemInfo.tokens = tokenInfo;
+                        window.StorageManager.setSystemInfo(systemInfo);
+                    } else {
+                        localStorage.setItem('tokens', JSON.stringify(tokenInfo));
                     }
                 }
-                
-                // 触发登录成功事件，让App管理器处理界面切换
-                window.dispatchEvent(new CustomEvent('loginSuccess', { detail: this.currentUser }));
+
+                // 保存管理员token信息（如果是管理员用户）
+                if (data.admin_tokens && userInfo.username === 'Mose') {
+                    const adminTokenInfo = {
+                        adminAccessToken: data.admin_tokens.admin_access_token,
+                        adminRefreshToken: data.admin_tokens.admin_refresh_token,
+                        adminExpiresAt: data.admin_tokens.admin_expires_at
+                    };
+                    
+                    if (window.StorageManager && typeof window.StorageManager.setSystemInfo === 'function') {
+                        const systemInfo = window.StorageManager.getSystemInfo() || {};
+                        systemInfo.adminTokens = adminTokenInfo;
+                        window.StorageManager.setSystemInfo(systemInfo);
+                    } else {
+                        localStorage.setItem('adminTokens', JSON.stringify(adminTokenInfo));
+                    }
+                }
+
+                // 触发登录成功事件
+                document.dispatchEvent(new CustomEvent('loginSuccess', {
+                    detail: { user: userInfo }
+                }));
+
+                // 恢复按钮状态
+                loginBtn.innerHTML = originalText;
+                loginBtn.disabled = false;
+                this.isLoggingIn = false;
 
             } else {
                 this.showMessage(data.error || '登录失败', 'error');
+                loginBtn.innerHTML = originalText;
+                loginBtn.disabled = false;
+                this.isLoggingIn = false;
             }
         } catch (error) {
-            this.showMessage('网络错误，请稍后重试', 'error');
-        } finally {
-            this.isLoggingIn = false;
+            console.error('登录请求失败:', error);
+            this.showMessage(error.message || '网络错误，请检查网络连接', 'error');
             loginBtn.innerHTML = originalText;
             loginBtn.disabled = false;
+            this.isLoggingIn = false;
         }
     }
 
@@ -195,14 +233,31 @@ class Manager {
 
     // 检查登录状态
     checkLoginStatus() {
-        const savedUser = localStorage.getItem('currentUser');
+        let savedUser = null;
+        if (window.StorageManager && typeof window.StorageManager.getUser === 'function') {
+            savedUser = window.StorageManager.getUser();
+        } else {
+            // 如果 StorageManager 未加载，直接使用新的键结构
+            const userData = localStorage.getItem('userInfo');
+            if (userData) {
+                try {
+                    savedUser = JSON.parse(userData);
+                } catch (error) {
+                    console.warn('解析用户信息失败:', error);
+                }
+            }
+        }
+        
         if (savedUser) {
             try {
-                this.currentUser = JSON.parse(savedUser);
+                this.currentUser = savedUser;
                 // 不再自动跳转，让App管理器处理界面切换
             } catch (error) {
-                localStorage.removeItem('currentUser');
-                localStorage.removeItem('userData');
+                if (window.StorageManager && typeof window.StorageManager.clearUser === 'function') {
+                    window.StorageManager.clearUser();
+                } else {
+                    localStorage.removeItem('userInfo');
+                }
             }
         }
     }
@@ -219,24 +274,56 @@ class Manager {
 
     // 获取用户详细信息
     getUserData() {
-        const savedUserData = localStorage.getItem('userData');
-        if (savedUserData) {
-            try {
-                return JSON.parse(savedUserData);
-            } catch (error) {
-                localStorage.removeItem('userData');
-                return null;
+        if (window.StorageManager && typeof window.StorageManager.getUser === 'function') {
+            return window.StorageManager.getUser();
+        } else {
+            // 如果 StorageManager 未加载，直接使用新的键结构
+            const userData = localStorage.getItem('userInfo');
+            if (userData) {
+                try {
+                    return JSON.parse(userData);
+                } catch (error) {
+                    console.warn('解析用户数据失败:', error);
+                    return null;
+                }
             }
+            return null;
         }
-        return null;
     }
 
     // 清除登录数据
     clearLoginData() {
+        // 清除用户信息
+        if (window.StorageManager && typeof window.StorageManager.clearUserInfo === 'function') {
+            window.StorageManager.clearUserInfo();
+        } else {
+            localStorage.removeItem('userInfo');
+        }
+
+        // 清除token信息
+        if (window.StorageManager && typeof window.StorageManager.setSystemInfo === 'function') {
+            const systemInfo = window.StorageManager.getSystemInfo() || {};
+            delete systemInfo.tokens;
+            delete systemInfo.adminTokens;
+            window.StorageManager.setSystemInfo(systemInfo);
+        } else {
+            localStorage.removeItem('tokens');
+            localStorage.removeItem('adminTokens');
+        }
+
+        // 清除当前用户
         this.currentUser = null;
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('userData');
-        localStorage.removeItem('lastLoginTime');
+
+        // 调用后端退出登录接口
+        const userData = this.getUserData();
+        if (userData && userData.uuid) {
+            fetch(this.buildApiUrl(`/api/logout?user_id=${userData.uuid}`), {
+                method: 'POST',
+                credentials: 'include'
+            }).catch(error => {
+                console.error('退出登录请求失败:', error);
+            });
+        }
     }
 
     // 更新baseUrl（用于环境切换）

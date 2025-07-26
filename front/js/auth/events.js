@@ -69,6 +69,34 @@ class Events {
                 this.authManager.showLoginForm();
             });
         }
+
+        // 设置密码切换事件
+        this.setupPasswordToggleEvents();
+    }
+
+    // 设置密码切换事件
+    setupPasswordToggleEvents() {
+        const passwordToggles = document.querySelectorAll('.password-toggle');
+        
+        passwordToggles.forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const input = toggle.parentElement.querySelector('input[type="password"], input[type="text"]');
+                const icon = toggle.querySelector('i');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                }
+            });
+        });
     }
 
     // 重新绑定事件（用于动态内容更新后）

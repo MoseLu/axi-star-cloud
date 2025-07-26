@@ -66,16 +66,26 @@
             <form id="sync-docs-form" class="space-y-4 md:space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">文档标题 <span class="text-red-400">*</span></label>
-                    <input type="text" id="doc-title" name="title" required
-                           class="w-full bg-dark-light border border-emerald-light/30 text-gray-100 rounded-lg px-3 md:px-4 py-2 md:py-3 focus:ring-2 focus:ring-emerald-light/50 focus:border-emerald-light transition-all duration-300 text-sm md:text-base"
-                           placeholder="请输入文档标题">
+                                                <div class="relative group">
+                                <input type="text" id="doc-title" name="title" required
+                                       class="w-full bg-dark-light border border-emerald-light/30 text-gray-100 rounded-lg px-3 md:px-4 py-2 md:py-3 pr-10 focus:ring-2 focus:ring-emerald-light/50 focus:border-emerald-light transition-all duration-300 text-sm md:text-base"
+                                       placeholder="请输入文档标题">
+                                <button type="button" id="clear-doc-title" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-400 transition-colors opacity-0" title="清空标题">
+                                    <i class="fa fa-times text-sm"></i>
+                                </button>
+                            </div>
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">文档分类 <span class="text-red-400">*</span></label>
-                    <input type="text" id="doc-category" name="category" required
-                           class="w-full bg-dark-light border border-emerald-light/30 text-gray-100 rounded-lg px-3 md:px-4 py-2 md:py-3 focus:ring-2 focus:ring-emerald-light/50 focus:border-emerald-light transition-all duration-300 text-sm md:text-base"
-                           placeholder="请输入文档分类">
+                    <div class="relative group">
+                        <input type="text" id="doc-category" name="category" required
+                               class="w-full bg-dark-light border border-emerald-light/30 text-gray-100 rounded-lg px-3 md:px-4 py-2 md:py-3 pr-10 focus:ring-2 focus:ring-emerald-light/50 focus:border-emerald-light transition-all duration-300 text-sm md:text-base"
+                               placeholder="请输入文档分类">
+                        <button type="button" id="clear-doc-category" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-400 transition-colors opacity-0" title="清空分类">
+                            <i class="fa fa-times text-sm"></i>
+                        </button>
+                    </div>
                 </div>
                 
                 <div>

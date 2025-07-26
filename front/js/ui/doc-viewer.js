@@ -259,6 +259,13 @@ class DocViewer {
                 box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
             }
 
+            /* 明亮主题适配 */
+            body.theme-light .doc-viewer-content {
+                background: #ffffff;
+                border: 1px solid rgba(139, 92, 246, 0.2);
+                box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
+            }
+
             .doc-viewer-header {
                 display: flex;
                 justify-content: space-between;
@@ -269,11 +276,20 @@ class DocViewer {
                 border-radius: 12px 12px 0 0;
             }
 
+            body.theme-light .doc-viewer-header {
+                border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+                background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(255, 255, 255, 0.95) 100%);
+            }
+
             .doc-viewer-title {
                 color: #fff;
                 font-size: 18px;
                 font-weight: 600;
                 margin: 0;
+            }
+
+            body.theme-light .doc-viewer-title {
+                color: #374151;
             }
 
             .doc-viewer-close {
@@ -292,6 +308,15 @@ class DocViewer {
                 background: rgba(255, 255, 255, 0.1);
             }
 
+            body.theme-light .doc-viewer-close {
+                color: #6b7280;
+            }
+
+            body.theme-light .doc-viewer-close:hover {
+                color: #374151;
+                background: rgba(139, 92, 246, 0.1);
+            }
+
             .doc-viewer-body {
                 display: flex;
                 flex: 1;
@@ -303,6 +328,11 @@ class DocViewer {
                 background: #222;
                 border-right: 1px solid #333;
                 overflow-y: auto;
+            }
+
+            body.theme-light .doc-sidebar {
+                background: rgba(249, 250, 251, 0.95);
+                border-right: 1px solid rgba(139, 92, 246, 0.2);
             }
 
             .doc-nav {
@@ -330,6 +360,21 @@ class DocViewer {
                 border-left-color: #8b5cf6;
             }
 
+            body.theme-light .doc-nav-item {
+                color: #6b7280;
+            }
+
+            body.theme-light .doc-nav-item:hover {
+                background: rgba(139, 92, 246, 0.1);
+                color: #8b5cf6;
+            }
+
+            body.theme-light .doc-nav-item.active {
+                background: rgba(139, 92, 246, 0.15);
+                color: #8b5cf6;
+                border-left-color: #8b5cf6;
+            }
+
             .doc-nav-icon {
                 margin-right: 12px;
                 font-size: 16px;
@@ -347,6 +392,10 @@ class DocViewer {
                 background: #1a1a1a;
             }
 
+            body.theme-light .doc-content {
+                background: #ffffff;
+            }
+
             .doc-loading {
                 display: flex;
                 flex-direction: column;
@@ -355,6 +404,10 @@ class DocViewer {
                 height: 200px;
                 color: #888;
                 font-size: 16px;
+            }
+
+            body.theme-light .doc-loading {
+                color: #6b7280;
             }
 
             .doc-loading i {
@@ -370,6 +423,10 @@ class DocViewer {
                 height: 200px;
                 color: #ef4444;
                 text-align: center;
+            }
+
+            body.theme-light .doc-error {
+                color: #dc2626;
             }
 
             .doc-error i {
@@ -392,6 +449,14 @@ class DocViewer {
                 color: #666;
             }
 
+            body.theme-light .doc-error p {
+                color: #6b7280;
+            }
+
+            body.theme-light .doc-error-details {
+                color: #9ca3af;
+            }
+
             .doc-markdown {
                 color: #e5e5e5;
                 line-height: 1.6;
@@ -405,6 +470,16 @@ class DocViewer {
                 font-weight: 600;
             }
 
+            body.theme-light .doc-markdown {
+                color: #374151;
+            }
+
+            body.theme-light .doc-markdown h1,
+            body.theme-light .doc-markdown h2,
+            body.theme-light .doc-markdown h3 {
+                color: #111827;
+            }
+
             .doc-markdown h1 {
                 font-size: 24px;
                 border-bottom: 2px solid #333;
@@ -415,6 +490,14 @@ class DocViewer {
                 font-size: 20px;
                 border-bottom: 1px solid #333;
                 padding-bottom: 6px;
+            }
+
+            body.theme-light .doc-markdown h1 {
+                border-bottom: 2px solid rgba(139, 92, 246, 0.3);
+            }
+
+            body.theme-light .doc-markdown h2 {
+                border-bottom: 1px solid rgba(139, 92, 246, 0.3);
             }
 
             .doc-markdown h3 {
@@ -458,6 +541,20 @@ class DocViewer {
                 color: #e5e5e5;
             }
 
+            body.theme-light .doc-markdown code {
+                background: rgba(139, 92, 246, 0.1);
+                color: #8b5cf6;
+            }
+
+            body.theme-light .doc-markdown pre {
+                background: rgba(249, 250, 251, 0.95);
+                border: 1px solid rgba(139, 92, 246, 0.2);
+            }
+
+            body.theme-light .doc-markdown pre code {
+                color: #374151;
+            }
+
             .doc-markdown a {
                 color: #8b5cf6;
                 text-decoration: none;
@@ -475,6 +572,10 @@ class DocViewer {
                 padding: 0 16px;
                 color: #ccc;
                 font-style: italic;
+            }
+
+            body.theme-light .doc-markdown blockquote {
+                color: #6b7280;
             }
 
             @media (max-width: 768px) {

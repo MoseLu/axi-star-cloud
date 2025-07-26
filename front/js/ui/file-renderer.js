@@ -441,7 +441,7 @@ class UIFileRenderer {
     createFileCard(file) {
         try {
             const fileCard = document.createElement('div');
-            fileCard.className = 'glass-effect rounded-xl p-2 border border-purple-light/20 hover:border-purple-light/40 transition-all duration-300 cursor-pointer group file-card relative hover:shadow-lg hover:shadow-purple-500/10 min-h-[140px] w-full max-w-[200px]';
+            fileCard.className = 'rounded-xl p-2 transition-all duration-300 cursor-pointer group file-card relative hover:shadow-lg hover:shadow-purple-500/10 min-h-[140px] w-full max-w-[200px]';
             fileCard.setAttribute('data-type', file.type);
             fileCard.setAttribute('data-file-id', file.id);
             fileCard.setAttribute('draggable', 'true');
@@ -471,8 +471,9 @@ class UIFileRenderer {
                 const isInFolder = currentFolderId === file.folder_id;
                 
                 // 根据是否在文件夹内部决定图标颜色和提示文本
-                const bgColor = isInFolder ? 'from-red-500 to-red-600' : 'from-blue-500 to-blue-600';
-                const borderColor = isInFolder ? 'border-red-400/30' : 'border-blue-400/30';
+                // 使用更浅的蓝色背景以在暗色模式下更清晰可见
+                const bgColor = isInFolder ? 'from-red-400 to-red-500' : 'from-blue-400 to-blue-500';
+                const borderColor = isInFolder ? 'border-red-300/40' : 'border-blue-300/40';
                 const tooltipText = isInFolder ? 
                     `点击移出文件夹：${folderName}` : 
                     `点击查看文件夹：${folderName}`;
@@ -507,15 +508,19 @@ class UIFileRenderer {
                     <!-- 针对外站文档增加额外间距 -->
                     ${file.type === 'external-docs' ? '<div style="height:8px;"></div>' : ''}
                     
-                    <!-- 第二排：文件大小和日期（带图标） -->
-                    <div class="file-info flex items-center justify-center space-x-1 mb-2 text-xs">
+                    <!-- 第二排：文件大小 -->
+                    <div class="file-size-info flex items-center justify-center mb-1 text-xs h-5">
                         <div class="flex items-center space-x-1 flex-shrink-0">
                             <i class="fa ${file.type === 'url' ? 'fa-link' : 'fa-hdd-o'} text-blue-400 flex-shrink-0 text-xs"></i>
-                            <span class="bg-gray-800/50 px-1 py-0.5 rounded-full font-medium truncate max-w-[60px] text-blue-300" title="${fileSize}">${fileSize}</span>
+                            <span class="font-medium text-blue-400" title="${fileSize}">${fileSize}</span>
                         </div>
+                    </div>
+                    
+                    <!-- 第三排：文件创建日期 -->
+                    <div class="file-date-info flex items-center justify-center mb-2 text-xs h-5">
                         <div class="flex items-center space-x-1 flex-shrink-0">
-                            <i class="fa fa-calendar text-green-400 flex-shrink-0 text-xs"></i>
-                            <span class="bg-gray-800/50 px-1 py-0.5 rounded-full font-medium truncate max-w-[80px]" style="color: #86efac;" title="${formattedDate}">${formattedDate}</span>
+                            <i class="fa fa-calendar flex-shrink-0 text-xs" style="color: #86efac;"></i>
+                            <span class="font-medium" style="color: #86efac;" title="${formattedDate}">${formattedDate}</span>
                         </div>
                     </div>
                     

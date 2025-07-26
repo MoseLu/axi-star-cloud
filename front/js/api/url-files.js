@@ -122,4 +122,7 @@ class UrlFiles {
             return { success: false, error: error.message || '移动失败' };
         }
     }
-} 
+}
+
+// 导出UrlFiles类到全局作用域
+window.UrlFiles = UrlFiles; 

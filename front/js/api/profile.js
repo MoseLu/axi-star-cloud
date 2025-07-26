@@ -68,4 +68,7 @@ class Profile {
             return { success: false, error: error.message || '上传失败' };
         }
     }
-} 
+}
+
+// 导出Profile类到全局作用域
+window.Profile = Profile; 

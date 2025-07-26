@@ -14,66 +14,103 @@
     <!-- DNS预解析 -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
     <link rel="dns-prefetch" href="//cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="//unpkg.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
     
+    <!-- Tailwind CSS - 使用多个CDN源作为备用 -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // 如果Tailwind加载失败，尝试备用CDN
+        if (typeof tailwind === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/3.3.0/tailwind.min.js';
+            document.head.appendChild(script);
+        }
+        
+        // 等待Tailwind加载完成后再配置
+        function configureTailwind() {
+            if (typeof tailwind !== 'undefined') {
+                tailwind.config = {
+                    theme: {
+                        extend: {
+                            screens: {
+                                'xs': '480px',
+                            },
+                            colors: {
+                                primary: '#165DFF',
+                                secondary: '#7B61FF',
+                                dark: '#0F172A',
+                                'dark-light': '#1E293B',
+                                'purple-deep': '#4338CA',
+                                'purple-light': '#818CF8',
+                                'blue-light': '#3B82F6',
+                                'blue-deep': '#0A2463',
+                            },
+                            fontFamily: {
+                                inter: ['Inter', 'sans-serif'],
+                            },
+                            animation: {
+                                'float': 'float 6s ease-in-out infinite',
+                                'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                                'glow': 'glow 2s ease-in-out infinite alternate',
+                            },
+                            keyframes: {
+                                float: {
+                                    '0%, 100%': { transform: 'translateY(0)' },
+                                    '50%': { transform: 'translateY(-10px)' },
+                                },
+                                glow: {
+                                    '0%': { boxShadow: '0 0 5px rgba(123, 97, 255, 0.5)' },
+                                    '100%': { boxShadow: '0 0 20px rgba(123, 97, 255, 0.8), 0 0 30px rgba(59, 130, 246, 0.6)' },
+                                }
+                            }
+                        },
+                    }
+                };
+            } else {
+                // 如果Tailwind还没加载，等待一下再试
+                setTimeout(configureTailwind, 100);
+            }
+        }
+        
+        // 立即尝试配置，如果失败则等待
+        configureTailwind();
+    </script>
+    
     <script src="/static/public/libs/chart.umd.min.js"></script>
     <script src="/static/public/libs/marked.min.js"></script>
     <script src="/static/public/libs/particles.min.js"></script>
     <script src="/static/public/libs/xlsx.full.min.js"></script>
-    <script src="https://unpkg.com/dayjs@1.11.10/dayjs.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Tailwind配置 -->
+    <!-- Day.js - 使用多个CDN源作为备用 -->
+    <script src="https://unpkg.com/dayjs@1.11.10/dayjs.min.js"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    screens: {
-                        'xs': '480px',
-                    },
-                    colors: {
-                        primary: '#165DFF',
-                        secondary: '#7B61FF',
-                        dark: '#0F172A',
-                        'dark-light': '#1E293B',
-                        'purple-deep': '#4338CA',
-                        'purple-light': '#818CF8',
-                        'blue-light': '#3B82F6',
-                        'blue-deep': '#0A2463',
-                    },
-                    fontFamily: {
-                        inter: ['Inter', 'sans-serif'],
-                    },
-                    animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'glow': 'glow 2s ease-in-out infinite alternate',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        },
-                        glow: {
-                            '0%': { boxShadow: '0 0 5px rgba(123, 97, 255, 0.5)' },
-                            '100%': { boxShadow: '0 0 20px rgba(123, 97, 255, 0.8), 0 0 30px rgba(59, 130, 246, 0.6)' },
-                        }
-                    }
-                },
-            }
+        // 如果Day.js加载失败，尝试备用CDN
+        if (typeof dayjs === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/dayjs.min.js';
+            document.head.appendChild(script);
         }
     </script>
+    
+    <!-- Google Fonts - 添加备用方案 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 备用字体方案 */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        /* 如果Google Fonts加载失败，使用系统字体 */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+    </style>
+    
+    <!-- Tailwind配置 -->
     
     <!-- 引入公共样式 -->
     <link rel="stylesheet" href="/static/css/responsive.css">
     <link rel="stylesheet" href="/static/css/font-optimization.css">
     <link rel="stylesheet" href="/static/css/theme-toggle.css">
     <link rel="stylesheet" href="/static/css/theme-transition.css">
-    <link rel="stylesheet" href="/static/css/light/storage-overview.css">
-    <link rel="stylesheet" href="/static/css/light/file-list.css">
-    <link rel="stylesheet" href="/static/css/light/upload-area.css">
-    <link rel="stylesheet" href="/static/css/light/header.css">
-    <link rel="stylesheet" href="/static/css/light/welcome-section.css">
     
     <!-- 主题样式由主题管理器动态加载 -->
     <!-- 暗色主题: /static/css/dark/ -->
@@ -89,6 +126,9 @@
     <!-- 引入主题管理器 -->
     <script src="/static/js/ui/theme-manager.js"></script>
     
+    <!-- 引入存储管理器 -->
+    <script src="/static/js/ui/storage-manager.js"></script>
+    
     <!-- 引入主题切换动画 -->
     <script src="/static/js/ui/theme-transition.js"></script>
     
@@ -97,6 +137,12 @@
     
     <!-- 字体加载测试脚本 -->
     <script src="/static/js/font-load-test.js"></script>
+    
+    <!-- 性能优化模块 -->
+    <script src="/static/js/bundle-optimizer.js"></script>
+    <script src="/static/js/performance-monitor.js"></script>
+    
+
 </head>
 <body class="bg-dark text-white font-inter">
     <!-- 登录页面 -->
@@ -128,6 +174,7 @@
     <!-- 加载JavaScript模块 -->
     <script src="/static/js/auth/utils.js?v=20250718"></script>
     <script src="/static/js/auth/manager.js?v=20250718"></script>
+    <script src="/static/js/auth/token-manager.js?v=20250718"></script>
     <script src="/static/js/auth/particles.js?v=20250718"></script>
     <script src="/static/js/auth/events.js?v=20250718"></script>
     <script src="/static/js/auth/index.js?v=20250718"></script>
@@ -182,6 +229,19 @@
 
 
     <script>
+        // 注册Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+        
         // 动态加载HTML模板
         async function loadTemplate(templateName) {
             try {
@@ -299,5 +359,8 @@
         //     }, 1000);
         // });
     </script>
+    
+    <!-- 调试脚本 -->
+
 </body>
 </html> 

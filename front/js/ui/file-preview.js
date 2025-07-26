@@ -12,6 +12,26 @@ class UIFilePreview {
         // 可以在这里添加初始化逻辑
     }
 
+    /**
+     * 构建文件URL
+     * @param {Object} file - 文件对象
+     * @returns {string} 完整的文件URL
+     */
+    buildFileUrl(file) {
+        let fileUrl = file.path || file.previewUrl;
+        
+        // 如果没有完整URL，通过API网关构建
+        if (!fileUrl || (!fileUrl.startsWith('http') && !fileUrl.startsWith('https'))) {
+            if (window.apiGateway && typeof window.apiGateway.buildUrl === 'function') {
+                fileUrl = window.apiGateway.buildUrl(`/uploads/${file.type}/${file.name}`);
+            } else {
+                fileUrl = `/uploads/${file.type}/${file.name}`;
+            }
+        }
+        
+        return fileUrl;
+    }
+
     // 显示文件预览
     showFilePreview(file) {
         // 根据文件类型实现不同的预览方式
@@ -64,10 +84,17 @@ class UIFilePreview {
 
         const showImage = (index) => {
             const f = imageFiles[index];
-            let imgUrl = f.path || f.previewUrl || `/uploads/${f.type}/${f.name}`;
-            if (imgUrl && !imgUrl.startsWith('http') && !imgUrl.startsWith('/')) {
-                imgUrl = `/uploads/${f.type}/${f.name}`;
+            let imgUrl = f.path || f.previewUrl;
+            
+            // 如果没有完整URL，通过API网关构建
+            if (!imgUrl || (!imgUrl.startsWith('http') && !imgUrl.startsWith('https'))) {
+                if (window.apiGateway && typeof window.apiGateway.buildUrl === 'function') {
+                    imgUrl = window.apiGateway.buildUrl(`/uploads/${f.type}/${f.name}`);
+                } else {
+                    imgUrl = `/uploads/${f.type}/${f.name}`;
+                }
             }
+            
             modal.querySelector('.preview-img').src = imgUrl;
             modal.querySelector('.preview-img').alt = f.name;
             modal.querySelector('.preview-file-name').textContent = f.name;
@@ -80,7 +107,7 @@ class UIFilePreview {
         modal.style.overflow = 'hidden';
         modal.innerHTML = `
             <div class="relative w-full h-full flex items-center justify-center" style="overflow: hidden;">
-                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" title="关闭" tabindex="1">
+                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" title="关闭" tabindex="1" onclick="window.uiManager.filePreview.closeModal(this.parentElement.parentElement)">
                     <i class="fa fa-times"></i>
                 </button>
                 <button class="absolute left-4 top-1/2 -translate-y-1/2 text-white text-3xl bg-black/30 hover:bg-black/60 rounded-full w-12 h-12 flex items-center justify-center z-20 preview-prev-btn" title="上一张" tabindex="2">
@@ -112,8 +139,7 @@ class UIFilePreview {
 
         // 关闭按钮
         modal.querySelector('.preview-close-btn').onclick = () => {
-            modal.remove();
-            this.restoreScrollbars();
+            this.closeModal(modal);
         };
         // 上一张
         modal.querySelector('.preview-prev-btn').onclick = (e) => {
@@ -136,8 +162,7 @@ class UIFilePreview {
                 currentIndex = (currentIndex + 1) % imageFiles.length;
                 showImage(currentIndex);
             } else if (e.key === 'Escape') {
-                modal.remove();
-                this.restoreScrollbars();
+                this.closeModal(modal);
                 document.removeEventListener('keydown', handleKey);
             }
         };
@@ -156,14 +181,20 @@ class UIFilePreview {
         modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
         modal.style.overflow = 'hidden';
         
-        let videoUrl = file.path || file.previewUrl || `/uploads/video/${file.name}`;
-        if (videoUrl && !videoUrl.startsWith('http') && !videoUrl.startsWith('/')) {
-            videoUrl = `/uploads/video/${file.name}`;
+        let videoUrl = file.path || file.previewUrl;
+        
+        // 如果没有完整URL，通过API网关构建
+        if (!videoUrl || (!videoUrl.startsWith('http') && !videoUrl.startsWith('https'))) {
+            if (window.apiGateway && typeof window.apiGateway.buildUrl === 'function') {
+                videoUrl = window.apiGateway.buildUrl(`/uploads/video/${file.name}`);
+            } else {
+                videoUrl = `/uploads/video/${file.name}`;
+            }
         }
         
         modal.innerHTML = `
             <div class="relative w-full h-full" style="overflow: hidden;">
-                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
+                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="window.uiManager.filePreview.closeModal(this.parentElement.parentElement)">
                     <i class="fa fa-times"></i>
                 </button>
                 <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
@@ -190,14 +221,20 @@ class UIFilePreview {
         modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
         modal.style.overflow = 'hidden';
         
-        let audioUrl = file.path || file.previewUrl || `/uploads/audio/${file.name}`;
-        if (audioUrl && !audioUrl.startsWith('http') && !audioUrl.startsWith('/')) {
-            audioUrl = `/uploads/audio/${file.name}`;
+        let audioUrl = file.path || file.previewUrl;
+        
+        // 如果没有完整URL，通过API网关构建
+        if (!audioUrl || (!audioUrl.startsWith('http') && !audioUrl.startsWith('https'))) {
+            if (window.apiGateway && typeof window.apiGateway.buildUrl === 'function') {
+                audioUrl = window.apiGateway.buildUrl(`/uploads/audio/${file.name}`);
+            } else {
+                audioUrl = `/uploads/audio/${file.name}`;
+            }
         }
         
         modal.innerHTML = `
             <div class="relative w-full h-full" style="overflow: hidden;">
-                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
+                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="window.uiManager.filePreview.closeModal(this.parentElement.parentElement)">
                     <i class="fa fa-times"></i>
                 </button>
                 <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
@@ -229,15 +266,15 @@ class UIFilePreview {
         
         modal.innerHTML = `
             <div class="relative w-full h-full" style="overflow: hidden;">
-                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
+                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="window.uiManager.filePreview.closeModal(this.parentElement.parentElement)">
                     <i class="fa fa-times"></i>
                 </button>
                 <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
                     <h3 class="text-xl font-semibold">${file.name}</h3>
                     <p class="text-gray-300 text-sm">${file.size} • ${file.type}</p>
                 </div>
-                <div class="relative w-full h-full flex items-center justify-center preview-pdf-container" style="overflow: hidden;">
-                    <iframe id="pdf-iframe" class="w-full h-full rounded-lg" frameborder="0"></iframe>
+                <div class="relative w-full h-full preview-pdf-container" style="overflow: hidden;">
+                    <iframe id="pdf-iframe" class="w-full h-full" frameborder="0" style="border: none;"></iframe>
                 </div>
             </div>
         `;
@@ -315,7 +352,7 @@ class UIFilePreview {
         modal.className = 'fixed inset-0 bg-black/80 z-50 flex items-center justify-center';
         modal.innerHTML = `
             <div class="relative max-w-md p-6 bg-dark-light rounded-xl border border-purple-light/20">
-                <button class="absolute top-2 right-2 text-gray-400 hover:text-white" onclick="this.parentElement.parentElement.remove()">
+                <button class="absolute top-2 right-2 text-gray-400 hover:text-white" onclick="window.uiManager.filePreview.closeModal(this.parentElement.parentElement)">
                     <i class="fa fa-times"></i>
                 </button>
                 <div class="text-center">
@@ -325,7 +362,7 @@ class UIFilePreview {
                     <h3 class="text-lg font-semibold text-white mb-2">${file.name}</h3>
                     <p class="text-gray-300 mb-6">${file.size} • ${file.type}</p>
                     <div class="space-y-3">
-                        <button onclick="window.open('${file.path || `/uploads/${file.type}/${file.name}`}', '_blank')" class="w-full bg-gradient-to-r from-orange-500/80 to-amber-500/80 hover:from-orange-500 hover:to-amber-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
+                        <button onclick="window.open('${this.buildFileUrl(file)}', '_blank')" class="w-full bg-gradient-to-r from-orange-500/80 to-amber-500/80 hover:from-orange-500 hover:to-amber-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
                             <i class="fa fa-external-link mr-2"></i>在新窗口打开
                         </button>
                         <button class="download-doc-btn w-full bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-500 hover:to-emerald-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
@@ -341,7 +378,7 @@ class UIFilePreview {
         // 绑定下载按钮事件
         const downloadBtn = modal.querySelector('.download-doc-btn');
         downloadBtn.addEventListener('click', () => {
-            modal.remove();
+            this.closeModal(modal);
             if (this.uiManager.downloadFile) {
                 this.uiManager.downloadFile(file);
             }
@@ -357,22 +394,21 @@ class UIFilePreview {
         modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
         modal.style.overflow = 'hidden';
         
-        let fileUrl = file.path || `/uploads/${file.type}/${file.name}`;
-        if (fileUrl && !fileUrl.startsWith('http') && !fileUrl.startsWith('/')) {
-            fileUrl = `/uploads/${file.type}/${file.name}`;
-        }
+        let fileUrl = this.buildFileUrl(file);
         
-        if (fileUrl && !fileUrl.startsWith('http')) {
+        // 确保是完整URL
+        if (!fileUrl.startsWith('http')) {
             fileUrl = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
+            fileUrl = window.location.origin + fileUrl;
         }
         
-        const fullFileUrl = window.location.origin + fileUrl;
+        const fullFileUrl = fileUrl;
         const encodedFileUrl = encodeURIComponent(fullFileUrl);
         const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodedFileUrl}`;
         
         modal.innerHTML = `
             <div class="relative w-full h-full" style="overflow: hidden;">
-                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
+                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="window.uiManager.filePreview.closeModal(this.parentElement.parentElement)">
                     <i class="fa fa-times"></i>
                 </button>
                 <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
@@ -392,59 +428,43 @@ class UIFilePreview {
     }
 
     // 预览Excel文档
-    async previewExcel(file) {
-        try {
-            let fileUrl = file.path || `/uploads/${file.type}/${file.name}`;
-            
-            const possibleUrls = [
-                fileUrl,
-                file.path,
-                `/uploads/${file.type}/${file.name}`,
-                `/static/uploads/${file.type}/${file.name}`
-            ];
-            
-            let response = null;
-            let successfulUrl = null;
-            
-            for (const url of possibleUrls) {
-                if (!url) continue;
-                
-                try {
-                    response = await fetch(url);
-                    if (response.ok) {
-                        successfulUrl = url;
-                        break;
-                    }
-                } catch (e) {
-                    // 静默处理错误
-                }
-            }
-            
-            if (!response || !response.ok) {
-                throw new Error(`HTTP ${response?.status || 'unknown'}: ${response?.statusText || 'Failed to fetch'}`);
-            }
-            
-            const arrayBuffer = await response.arrayBuffer();
-            
-            // 检查是否加载了SheetJS库
-            if (typeof XLSX === 'undefined') {
-                this.showExcelDownloadOptions(file);
-                return;
-            }
-            
-            // 使用SheetJS解析Excel文件
-            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-            
-            // 显示表格预览
-            this.showExcelTablePreview(file, jsonData, workbook.SheetNames);
-            
-        } catch (error) {
-            console.error('Excel预览失败:', error);
-            this.showExcelDownloadOptions(file);
+    previewExcel(file) {
+        this.hideScrollbars();
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
+        modal.style.overflow = 'hidden';
+        
+        let fileUrl = this.buildFileUrl(file);
+        
+        // 确保是完整URL
+        if (!fileUrl.startsWith('http')) {
+            fileUrl = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
+            fileUrl = window.location.origin + fileUrl;
         }
+        
+        const fullFileUrl = fileUrl;
+        const encodedFileUrl = encodeURIComponent(fullFileUrl);
+        const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodedFileUrl}`;
+        
+        modal.innerHTML = `
+            <div class="relative w-full h-full" style="overflow: hidden;">
+                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="window.uiManager.filePreview.closeModal(this.parentElement.parentElement)">
+                    <i class="fa fa-times"></i>
+                </button>
+                <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
+                    <h3 class="text-xl font-semibold">${file.name}</h3>
+                    <p class="text-gray-300 text-sm">${file.size} • Excel文件</p>
+                </div>
+                <div class="relative w-full h-full preview-excel-container" style="overflow: hidden;">
+                    <div class="excel-viewer w-full h-full">
+                        <iframe id="excel-iframe" class="w-full h-full border-0" style="background: white;" src="${officeViewerUrl}"></iframe>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        this.addModalEventListeners(modal);
     }
 
     // 预览PowerPoint文档
@@ -454,22 +474,21 @@ class UIFilePreview {
         modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
         modal.style.overflow = 'hidden';
         
-        let fileUrl = file.path || `/uploads/${file.type}/${file.name}`;
-        if (fileUrl && !fileUrl.startsWith('http') && !fileUrl.startsWith('/')) {
-            fileUrl = `/uploads/${file.type}/${file.name}`;
-        }
+        let fileUrl = this.buildFileUrl(file);
         
-        if (fileUrl && !fileUrl.startsWith('http')) {
+        // 确保是完整URL
+        if (!fileUrl.startsWith('http')) {
             fileUrl = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
+            fileUrl = window.location.origin + fileUrl;
         }
         
-        const fullFileUrl = window.location.origin + fileUrl;
+        const fullFileUrl = fileUrl;
         const encodedFileUrl = encodeURIComponent(fullFileUrl);
         const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodedFileUrl}`;
         
         modal.innerHTML = `
             <div class="relative w-full h-full" style="overflow: hidden;">
-                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
+                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="window.uiManager.filePreview.closeModal(this.parentElement.parentElement)">
                     <i class="fa fa-times"></i>
                 </button>
                 <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
@@ -495,14 +514,38 @@ class UIFilePreview {
         modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
         modal.style.overflow = 'hidden';
         
+        // 只对确实有严格CSP限制的网站进行预检测
+        const strictCspRestrictedDomains = [
+            'mp.weixin.qq.com',
+            'work.weixin.qq.com',
+            'paypal.com',
+            'alipay.com',
+            'wechat.com',
+            'qq.com'
+        ];
+        
+        const urlDomain = new URL(file.url).hostname;
+        const isStrictCspRestricted = strictCspRestrictedDomains.some(domain => 
+            urlDomain.includes(domain)
+        );
+        
+        if (isStrictCspRestricted) {
+            // 只对确实有CSP限制的网站直接显示安全限制提示
+            this.showBlockedMessage(modal, file);
+            document.body.appendChild(modal);
+            this.addModalEventListeners(modal);
+            return;
+        }
+        
         modal.innerHTML = `
             <div class="relative w-full h-full" style="overflow: hidden;">
-                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
+                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="window.uiManager.filePreview.closeModal(this.parentElement.parentElement)">
                     <i class="fa fa-times"></i>
                 </button>
                 <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-20">
                     <h3 class="text-lg font-semibold">${file.title || 'URL链接'}</h3>
                     <p class="text-sm text-gray-300">${file.url}</p>
+                    <div id="loading-status" class="text-xs text-blue-300 mt-1">正在检测网站兼容性...</div>
                 </div>
                 <iframe id="url-preview-iframe" src="${file.url}" class="w-full h-full" style="border: none;"></iframe>
             </div>
@@ -510,41 +553,184 @@ class UIFilePreview {
         
         document.body.appendChild(modal);
         
-        // 监听iframe加载错误
+        // 监听iframe加载状态
         const iframe = modal.querySelector('#url-preview-iframe');
         let hasShownBlockedMessage = false;
         let loadTimeout;
+        let loadStartTime = Date.now();
+        let contentLoaded = false;
+        let iframeLoadAttempted = false;
+        let retryCount = 0;
+        const maxRetries = 2;
         
+        // 设置更长的超时时间，给网站充分加载时间
         loadTimeout = setTimeout(() => {
-            if (!hasShownBlockedMessage) {
+            if (!hasShownBlockedMessage && !contentLoaded && iframeLoadAttempted && retryCount >= maxRetries) {
                 hasShownBlockedMessage = true;
                 this.showBlockedMessage(modal, file);
             }
-        }, 3000);
+        }, 45000); // 延长到45秒，给更多时间
         
+        // 监听iframe加载开始
+        iframe.onloadstart = () => {
+            iframeLoadAttempted = true;
+        };
+        
+        // 监听iframe加载完成
         iframe.onload = () => {
             clearTimeout(loadTimeout);
+            
+            // 给iframe更多时间完全加载内容
             setTimeout(() => {
                 try {
                     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                    if (!iframeDoc || iframeDoc.body.innerHTML === '') {
-                        if (!hasShownBlockedMessage) {
+                    
+                    // 检查是否能访问iframe文档
+                    if (!iframeDoc) {
+                        // 无法访问iframe文档，可能是CSP限制，但也可能是正常的跨域限制
+                        // 不要立即显示安全限制，而是让用户继续浏览
+                        if (retryCount >= maxRetries) {
+                            // 只有在多次重试后仍然无法访问时才考虑显示提示
+                            
+                            // 更新状态提示
+                            const loadingStatus = modal.querySelector('#loading-status');
+                            if (loadingStatus) {
+                                loadingStatus.textContent = '网站已加载，可能存在跨域限制';
+                                loadingStatus.className = 'text-xs text-yellow-300 mt-1';
+                            }
+                        } else if (retryCount < maxRetries) {
+                            retryCount++;
+                            // 重试一次
+                            setTimeout(() => {
+                                iframe.onload();
+                            }, 3000);
+                        }
+                        return;
+                    }
+                    
+                    // 更精确的内容检测 - 检查页面是否有实际内容
+                    const bodyContent = iframeDoc.body ? iframeDoc.body.innerHTML : '';
+                    const title = iframeDoc.title || '';
+                    const hasContent = bodyContent.length > 100 || title.length > 0;
+                    
+                    // 检查是否有明确的错误页面内容（更精确的关键词）
+                    const errorKeywords = [
+                        'access denied',
+                        'forbidden',
+                        'blocked by frame-ancestors',
+                        'x-frame-options',
+                        'content security policy',
+                        'refused to display',
+                        'clickjacking protection'
+                    ];
+                    const pageText = iframeDoc.body ? iframeDoc.body.textContent.toLowerCase() : '';
+                    const hasErrorContent = errorKeywords.some(keyword => pageText.includes(keyword));
+                    
+                    // 检查页面是否为空或只有错误信息
+                    const isEmptyPage = bodyContent.length < 50 && title.length === 0;
+                    
+                    // 检查是否有正常的HTML结构（更智能的检测）
+                    const hasNormalStructure = iframeDoc.body && 
+                        (iframeDoc.body.children.length > 0 || 
+                         iframeDoc.body.innerHTML.includes('<div') || 
+                         iframeDoc.body.innerHTML.includes('<p') || 
+                         iframeDoc.body.innerHTML.includes('<span'));
+                    
+                    if (hasErrorContent) {
+                        // 发现明确的错误内容，显示安全限制提示
+                        if (!hasShownBlockedMessage && !contentLoaded) {
                             hasShownBlockedMessage = true;
                             this.showBlockedMessage(modal, file);
                         }
+                    } else if (hasContent || hasNormalStructure) {
+                        // 有实际内容或正常HTML结构，认为加载成功
+                        contentLoaded = true;
+                        clearTimeout(loadTimeout);
+                        
+                        // 更新状态提示
+                        const loadingStatus = modal.querySelector('#loading-status');
+                        if (loadingStatus) {
+                            loadingStatus.textContent = '网站加载成功';
+                            loadingStatus.className = 'text-xs text-green-300 mt-1';
+                        }
+                    } else if (isEmptyPage && retryCount >= maxRetries) {
+                        // 空页面且重试次数已用完，但不一定是安全限制
+                        // 让用户继续浏览，可能页面正在加载中
+                        
+                        // 更新状态提示
+                        const loadingStatus = modal.querySelector('#loading-status');
+                        if (loadingStatus) {
+                            loadingStatus.textContent = '网站已加载，内容较少';
+                            loadingStatus.className = 'text-xs text-yellow-300 mt-1';
+                        }
+                    } else if (retryCount < maxRetries) {
+                        // 内容不够明确，重试一次
+                        retryCount++;
+                        
+                        // 更新状态提示
+                        const loadingStatus = modal.querySelector('#loading-status');
+                        if (loadingStatus) {
+                            loadingStatus.textContent = `正在重试检测... (${retryCount}/${maxRetries})`;
+                            loadingStatus.className = 'text-xs text-yellow-300 mt-1';
+                        }
+                        
+                        setTimeout(() => {
+                            iframe.onload();
+                        }, 3000);
                     }
                 } catch (error) {
-                    if (!hasShownBlockedMessage) {
-                        hasShownBlockedMessage = true;
-                        this.showBlockedMessage(modal, file);
+                    // 检查是否是跨域访问限制（更精确的错误类型）
+                    const isCrossOriginError = error.name === 'SecurityError' || 
+                        error.message.includes('blocked by frame-ancestors') ||
+                        error.message.includes('X-Frame-Options') ||
+                        error.message.includes('Refused to frame') ||
+                        error.message.includes('cross-origin frame');
+                    
+                    if (isCrossOriginError && retryCount >= maxRetries) {
+                        // 跨域错误，但不一定是安全限制，让用户继续浏览
+                        
+                        // 更新状态提示
+                        const loadingStatus = modal.querySelector('#loading-status');
+                        if (loadingStatus) {
+                            loadingStatus.textContent = '网站已加载，存在跨域限制';
+                            loadingStatus.className = 'text-xs text-yellow-300 mt-1';
+                        }
+                    } else if (retryCount < maxRetries) {
+                        // 其他错误可能是临时网络问题，重试一次
+                        retryCount++;
+                        
+                        // 更新状态提示
+                        const loadingStatus = modal.querySelector('#loading-status');
+                        if (loadingStatus) {
+                            loadingStatus.textContent = `检测遇到问题，正在重试... (${retryCount}/${maxRetries})`;
+                            loadingStatus.className = 'text-xs text-yellow-300 mt-1';
+                        }
+                        
+                        setTimeout(() => {
+                            iframe.onload();
+                        }, 2000);
+                    } else {
+                        // 其他错误（如网络错误等）不显示安全限制提示
+                        
+                        // 更新状态提示
+                        const loadingStatus = modal.querySelector('#loading-status');
+                        if (loadingStatus) {
+                            loadingStatus.textContent = '网站加载完成';
+                            loadingStatus.className = 'text-xs text-green-300 mt-1';
+                        }
                     }
                 }
-            }, 1000);
+            }, 8000); // 增加到8秒，给网站更多加载时间
         };
         
+        // 监听iframe加载错误
         iframe.onerror = () => {
-            clearTimeout(loadTimeout);
-            if (!hasShownBlockedMessage) {
+            // 网络错误不显示安全限制提示，让用户正常浏览
+        };
+        
+        // 监听iframe加载超时
+        iframe.ontimeout = () => {
+            if (!hasShownBlockedMessage && !contentLoaded && retryCount >= maxRetries) {
                 hasShownBlockedMessage = true;
                 this.showBlockedMessage(modal, file);
             }
@@ -555,9 +741,27 @@ class UIFilePreview {
 
     // 显示被阻止的提示
     showBlockedMessage(modal, file) {
+        // 检查不同类型的网站
+        const urlDomain = new URL(file.url).hostname;
+        const isWechatDomain = urlDomain.includes('weixin.qq.com') || urlDomain.includes('wechat.com');
+        const isPayment = urlDomain.includes('paypal.com') || urlDomain.includes('alipay.com');
+        
+        let title, description;
+        
+        if (isWechatDomain) {
+            title = '微信安全限制';
+            description = '微信公众平台设置了严格的安全策略，不允许在框架中显示。这是微信的安全保护机制。';
+        } else if (isPayment) {
+            title = '支付平台安全限制';
+            description = '该支付平台设置了严格的安全策略，不允许在框架中显示。这是支付安全保护机制。';
+        } else {
+            title = '安全限制';
+            description = '该网站设置了安全策略，不允许在框架中显示。为了您的安全，我们需要跳转到新页面。';
+        }
+        
         modal.innerHTML = `
             <div class="relative w-full h-full" style="overflow: hidden;">
-                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
+                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="window.uiManager.filePreview.closeModal(this.parentElement.parentElement)">
                     <i class="fa fa-times"></i>
                 </button>
                 <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-20">
@@ -567,17 +771,17 @@ class UIFilePreview {
                 <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
                     <div class="bg-white/95 backdrop-blur-sm rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl border border-white/20">
                         <div class="w-20 h-20 bg-gradient-to-br from-red-400 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                            <i class="fa fa-shield-alt text-3xl text-white"></i>
+                            <span style="font-size: 3em; color: white;">🛡️</span>
                         </div>
-                        <h3 class="text-2xl font-bold mb-3 text-gray-800">安全限制</h3>
-                        <p class="text-gray-600 mb-8 leading-relaxed">该网站设置了安全策略，不允许在框架中显示。为了您的安全，我们需要跳转到新页面。</p>
+                        <h3 class="text-2xl font-bold mb-3 text-gray-800">${title}</h3>
+                        <p class="text-gray-600 mb-8 leading-relaxed">${description}</p>
                         
                         <div class="space-y-4">
                             <button class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg" onclick="window.open('${file.url}', '_blank')">
-                                <i class="fa fa-external-link mr-3"></i>在新标签页打开
+                                <span style="margin-right: 12px; display: inline-block;">🔗</span>在新标签页打开
                             </button>
                             <button class="w-full bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg copy-url-btn" data-url="${file.url}">
-                                <i class="fa fa-copy mr-3"></i>复制链接
+                                <span style="margin-right: 12px; display: inline-block;">📋</span>复制链接
                             </button>
                         </div>
                         
@@ -599,7 +803,7 @@ class UIFilePreview {
                     if (window.uiManager && window.uiManager.showMessage) {
                         window.uiManager.showMessage('链接已复制到剪贴板', 'success');
                     }
-                    modal.remove();
+                    window.uiManager.filePreview.closeModal(modal);
                 } catch (error) {
                     const textArea = document.createElement('textarea');
                     textArea.value = url;
@@ -610,7 +814,7 @@ class UIFilePreview {
                     if (window.uiManager && window.uiManager.showMessage) {
                         window.uiManager.showMessage('链接已复制到剪贴板', 'success');
                     }
-                    modal.remove();
+                    window.uiManager.filePreview.closeModal(modal);
                 }
             });
         }
@@ -619,39 +823,61 @@ class UIFilePreview {
     // 预览文本文件
     async previewTextFile(file) {
         try {
-            let fileUrl;
-            if (file.path && file.path.startsWith('/uploads/')) {
-                fileUrl = file.path;
-            } else {
-                fileUrl = `/uploads/${file.type}/${file.name}`;
+            // 获取用户ID - 使用多种可靠的方式
+            let userId = null;
+            
+            // 方式1: 从API系统获取（最可靠）
+            if (window.apiSystem && typeof window.apiSystem.getCurrentUserId === 'function') {
+                userId = window.apiSystem.getCurrentUserId();
             }
             
-            const possibleUrls = [
-                fileUrl,
-                file.path,
-                `/uploads/${file.type}/${file.name}`,
-                `/static/uploads/${file.type}/${file.name}`
-            ];
+            // 方式2: 从API管理器获取
+            if (!userId && window.apiManager && typeof window.apiManager.getCurrentUserId === 'function') {
+                userId = window.apiManager.getCurrentUserId();
+            }
             
-            let response = null;
-            let successfulUrl = null;
-            
-            for (const url of possibleUrls) {
-                if (!url) continue;
-                
-                try {
-                    response = await fetch(url);
-                    if (response.ok) {
-                        successfulUrl = url;
-                        break;
+            // 方式3: 从localStorage获取userInfo（与登录系统一致）
+            if (!userId) {
+                const userInfo = localStorage.getItem('userInfo');
+                if (userInfo) {
+                    try {
+                        const user = JSON.parse(userInfo);
+                        userId = user.uuid || user.id;
+                    } catch (e) {
+                        console.warn('解析userInfo失败:', e);
                     }
-                } catch (e) {
-                    // 静默处理错误
                 }
             }
             
-            if (!response || !response.ok) {
-                throw new Error(`HTTP ${response?.status || 'unknown'}: ${response?.statusText || 'Failed to fetch'}`);
+            // 方式4: 从认证系统获取
+            if (!userId && window.authSystem && typeof window.authSystem.getCurrentUser === 'function') {
+                const currentUser = window.authSystem.getCurrentUser();
+                userId = currentUser?.uuid || currentUser?.id;
+            }
+            
+            // 方式5: 从localStorage获取currentUser（兼容旧版本）
+            if (!userId) {
+                const currentUser = localStorage.getItem('currentUser');
+                if (currentUser) {
+                    try {
+                        const user = JSON.parse(currentUser);
+                        userId = user.uuid || user.id;
+                    } catch (e) {
+                        console.warn('解析currentUser失败:', e);
+                    }
+                }
+            }
+            
+            if (!userId) {
+                throw new Error('未检测到用户ID，请重新登录');
+            }
+            
+            console.log('文本文件预览时使用的用户ID:', userId);
+            
+            // 通过API下载文件
+            const response = await window.apiGateway.download(`/api/files/${file.id}/download?user_id=${userId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
             const textContent = await response.text();
@@ -660,8 +886,8 @@ class UIFilePreview {
             modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
             modal.style.overflow = 'hidden';
             modal.innerHTML = `
-                <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
-                    <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
+                <div class="relative w-full h-full" style="overflow: hidden;">
+                    <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="window.uiManager.filePreview.closeModal(this.parentElement.parentElement)">
                         <i class="fa fa-times"></i>
                     </button>
                     
@@ -670,7 +896,7 @@ class UIFilePreview {
                         <p class="text-gray-300 text-sm">${file.size} • 文本文件</p>
                     </div>
                     
-                    <div class="bg-white rounded-lg w-full h-full max-w-4xl max-h-[90vh] preview-content modal-scrollbar" style="overflow: auto;">
+                    <div class="bg-white w-full h-full preview-content modal-scrollbar" style="overflow: auto;">
                         <div class="p-8">
                             <pre class="whitespace-pre-wrap font-mono text-sm leading-relaxed">${textContent}</pre>
                         </div>
@@ -691,34 +917,61 @@ class UIFilePreview {
     // 预览Markdown文件
     async previewMarkdown(file) {
         try {
-            let fileUrl = file.path || `/uploads/${file.type}/${file.name}`;
+            // 获取用户ID - 使用多种可靠的方式
+            let userId = null;
             
-            const possibleUrls = [
-                fileUrl,
-                file.path,
-                `/uploads/${file.type}/${file.name}`,
-                `/static/uploads/${file.type}/${file.name}`
-            ];
+            // 方式1: 从API系统获取（最可靠）
+            if (window.apiSystem && typeof window.apiSystem.getCurrentUserId === 'function') {
+                userId = window.apiSystem.getCurrentUserId();
+            }
             
-            let response = null;
-            let successfulUrl = null;
+            // 方式2: 从API管理器获取
+            if (!userId && window.apiManager && typeof window.apiManager.getCurrentUserId === 'function') {
+                userId = window.apiManager.getCurrentUserId();
+            }
             
-            for (const url of possibleUrls) {
-                if (!url) continue;
-                
-                try {
-                    response = await fetch(url);
-                    if (response.ok) {
-                        successfulUrl = url;
-                        break;
+            // 方式3: 从localStorage获取userInfo（与登录系统一致）
+            if (!userId) {
+                const userInfo = localStorage.getItem('userInfo');
+                if (userInfo) {
+                    try {
+                        const user = JSON.parse(userInfo);
+                        userId = user.uuid || user.id;
+                    } catch (e) {
+                        console.warn('解析userInfo失败:', e);
                     }
-                } catch (e) {
-                    // 静默处理错误
                 }
             }
             
-            if (!response || !response.ok) {
-                throw new Error(`HTTP ${response?.status || 'unknown'}: ${response?.statusText || 'Failed to fetch'}`);
+            // 方式4: 从认证系统获取
+            if (!userId && window.authSystem && typeof window.authSystem.getCurrentUser === 'function') {
+                const currentUser = window.authSystem.getCurrentUser();
+                userId = currentUser?.uuid || currentUser?.id;
+            }
+            
+            // 方式5: 从localStorage获取currentUser（兼容旧版本）
+            if (!userId) {
+                const currentUser = localStorage.getItem('currentUser');
+                if (currentUser) {
+                    try {
+                        const user = JSON.parse(currentUser);
+                        userId = user.uuid || user.id;
+                    } catch (e) {
+                        console.warn('解析currentUser失败:', e);
+                    }
+                }
+            }
+            
+            if (!userId) {
+                throw new Error('未检测到用户ID，请重新登录');
+            }
+            
+            console.log('Markdown文件预览时使用的用户ID:', userId);
+            
+            // 通过API下载文件
+            const response = await window.apiGateway.download(`/api/files/${file.id}/download?user_id=${userId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
             const markdownContent = await response.text();
@@ -727,17 +980,17 @@ class UIFilePreview {
             modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
             modal.style.overflow = 'hidden';
             modal.innerHTML = `
-                <div class="relative w-full h-full flex flex-col items-center justify-center p-4" style="overflow: hidden;">
-                    <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
+                <div class="relative w-full h-full" style="overflow: hidden;">
+                    <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="window.uiManager.filePreview.closeModal(this.parentElement.parentElement)">
                         <i class="fa fa-times"></i>
                     </button>
                     
                     <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
                         <h3 class="text-xl font-semibold">${file.name}</h3>
-                        <p class="text-gray-300 text-sm">${file.size} • Markdown文档</p>
+                        <p class="text-sm text-gray-300">${file.size} • Markdown文档</p>
                     </div>
                     
-                    <div class="bg-white rounded-lg w-full h-full max-w-6xl max-h-[90vh] preview-content modal-scrollbar" style="overflow: auto;">
+                    <div class="bg-white w-full h-full preview-content modal-scrollbar" style="overflow: auto;">
                         <div class="p-8">
                             <div class="prose prose-lg max-w-none">
                                 <div class="markdown-content">${this.renderMarkdown(markdownContent)}</div>
@@ -785,217 +1038,6 @@ class UIFilePreview {
             .replace(/<p class="mb-4">([^<]*(?:<[^p][^>]*>[^<]*<\/[^p][^>]*>[^<]*)*)<\/p>/g, '<p class="mb-4">$1</p>');
     }
 
-    // 显示Excel下载选项
-    showExcelDownloadOptions(file) {
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 bg-black/80 z-50 flex items-center justify-center';
-        modal.innerHTML = `
-            <div class="relative max-w-md p-6 bg-dark-light rounded-xl border border-purple-light/20">
-                <button class="absolute top-2 right-2 text-gray-400 hover:text-white" onclick="this.parentElement.parentElement.remove()">
-                    <i class="fa fa-times"></i>
-                </button>
-                <div class="text-center">
-                    <div class="w-24 h-24 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fa fa-file-excel-o text-4xl text-green-400"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-white mb-2">${file.name}</h3>
-                    <p class="text-gray-300 mb-6">${file.size} • Excel文件</p>
-                    <div class="space-y-3">
-                        <button onclick="window.open('${file.path || `/uploads/${file.type}/${file.name}`}', '_blank')" class="w-full bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-500 hover:to-emerald-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
-                            <i class="fa fa-external-link mr-2"></i>在新窗口打开
-                        </button>
-                        <button class="download-excel-btn w-full bg-gradient-to-r from-blue-500/80 to-indigo-500/80 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-2 rounded-lg transition-all duration-300">
-                            <i class="fa fa-download mr-2"></i>下载文件
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        // 绑定下载按钮事件
-        const downloadBtn = modal.querySelector('.download-excel-btn');
-        downloadBtn.addEventListener('click', () => {
-            modal.remove();
-            if (this.uiManager.downloadFile) {
-                this.uiManager.downloadFile(file);
-            }
-        });
-        
-        this.addModalEventListeners(modal);
-    }
-
-    // 显示Excel表格预览
-    showExcelTablePreview(file, data, sheetNames) {
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 bg-black/95 z-50 flex items-center justify-center';
-        modal.style.overflow = 'hidden';
-        
-        // 保存数据到全局变量，供分页更新使用
-        window.currentExcelData = data;
-        
-        // 分页配置
-        const paginationConfig = {
-            currentPage: 1,
-            pageSize: 20,
-            totalRows: data.length - 1, // 减去表头
-            totalPages: Math.ceil((data.length - 1) / 20)
-        };
-        
-        // 生成分页后的表格HTML
-        const tableHTML = this.generatePaginatedTableHTML(data, paginationConfig);
-        
-        modal.innerHTML = `
-            <div class="relative w-full h-full" style="overflow: hidden;">
-                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 preview-close-btn" onclick="this.parentElement.parentElement.remove()">
-                    <i class="fa fa-times"></i>
-                </button>
-                <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center text-white z-10 preview-file-info">
-                    <h3 class="text-xl font-semibold">${file.name}</h3>
-                    <p class="text-gray-300 text-sm">${file.size} • Excel表格预览</p>
-                </div>
-                <div class="relative w-full h-full preview-excel-container" style="overflow: hidden;">
-                    <div class="excel-viewer w-full h-full bg-white rounded-lg overflow-hidden">
-                        <div class="p-4">
-                            <div class="mb-4">
-                                <h4 class="text-lg font-semibold text-gray-800 mb-2">工作表: ${sheetNames.join(', ')}</h4>
-                                <p class="text-sm text-gray-600">共 ${data.length} 行数据</p>
-                            </div>
-                            <div class="overflow-auto max-h-[calc(100vh-200px)]">
-                                ${tableHTML}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        // 初始化分页控件
-        this.initializePaginationControls(modal, data, paginationConfig);
-        
-        this.addModalEventListeners(modal);
-    }
-
-    // 生成分页表格HTML
-    generatePaginatedTableHTML(data, config) {
-        const startIndex = (config.currentPage - 1) * config.pageSize;
-        const endIndex = Math.min(startIndex + config.pageSize, data.length);
-        const pageData = data.slice(startIndex, endIndex);
-        
-        return this.generateTableHTML(pageData);
-    }
-
-    // 生成表格HTML
-    generateTableHTML(data) {
-        if (!data || data.length === 0) {
-            return '<div class="text-center text-gray-500 py-8">暂无数据</div>';
-        }
-        
-        const headers = data[0];
-        const rows = data.slice(1);
-        
-        let tableHTML = '<table class="min-w-full border border-gray-200">';
-        
-        // 表头
-        tableHTML += '<thead class="bg-gray-50">';
-        tableHTML += '<tr>';
-        headers.forEach(header => {
-            tableHTML += `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">${header || ''}</th>`;
-        });
-        tableHTML += '</tr>';
-        tableHTML += '</thead>';
-        
-        // 表格内容
-        tableHTML += '<tbody class="bg-white divide-y divide-gray-200">';
-        rows.forEach(row => {
-            tableHTML += '<tr>';
-            headers.forEach((header, index) => {
-                const cellValue = row[index] || '';
-                tableHTML += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">${cellValue}</td>`;
-            });
-            tableHTML += '</tr>';
-        });
-        tableHTML += '</tbody>';
-        tableHTML += '</table>';
-        
-        return tableHTML;
-    }
-
-    // 初始化分页控件
-    initializePaginationControls(modal, data, config) {
-        const updatePagination = (newConfig) => {
-            const tableContainer = modal.querySelector('.excel-viewer .overflow-auto');
-            if (tableContainer) {
-                const newTableHTML = this.generatePaginatedTableHTML(data, newConfig);
-                tableContainer.innerHTML = newTableHTML;
-                this.updatePageNumbers(modal, newConfig);
-            }
-        };
-        
-        // 创建分页控件
-        const paginationContainer = document.createElement('div');
-        paginationContainer.className = 'flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200';
-        paginationContainer.innerHTML = `
-            <div class="flex items-center space-x-2">
-                <button class="prev-page-btn px-3 py-1 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                    上一页
-                </button>
-                <span class="page-info text-sm text-gray-700"></span>
-                <button class="next-page-btn px-3 py-1 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                    下一页
-                </button>
-            </div>
-            <div class="text-sm text-gray-500">
-                每页 ${config.pageSize} 行
-            </div>
-        `;
-        
-        modal.querySelector('.excel-viewer').appendChild(paginationContainer);
-        
-        // 更新页码显示
-        this.updatePageNumbers(modal, config);
-        
-        // 绑定分页按钮事件
-        const prevBtn = paginationContainer.querySelector('.prev-page-btn');
-        const nextBtn = paginationContainer.querySelector('.next-page-btn');
-        
-        prevBtn.addEventListener('click', () => {
-            if (config.currentPage > 1) {
-                config.currentPage--;
-                updatePagination(config);
-            }
-        });
-        
-        nextBtn.addEventListener('click', () => {
-            if (config.currentPage < config.totalPages) {
-                config.currentPage++;
-                updatePagination(config);
-            }
-        });
-    }
-
-    // 更新页码显示
-    updatePageNumbers(modal, config) {
-        const pageInfo = modal.querySelector('.page-info');
-        const prevBtn = modal.querySelector('.prev-page-btn');
-        const nextBtn = modal.querySelector('.next-page-btn');
-        
-        if (pageInfo) {
-            pageInfo.textContent = `第 ${config.currentPage} 页，共 ${config.totalPages} 页`;
-        }
-        
-        if (prevBtn) {
-            prevBtn.disabled = config.currentPage <= 1;
-        }
-        
-        if (nextBtn) {
-            nextBtn.disabled = config.currentPage >= config.totalPages;
-        }
-    }
-
     // 隐藏滚动条
     hideScrollbars() {
         document.body.style.overflow = 'hidden';
@@ -1012,21 +1054,27 @@ class UIFilePreview {
         document.documentElement.style.height = '';
     }
 
+    // 关闭模态框的统一方法
+    closeModal(modal) {
+        if (modal && modal.parentNode) {
+            modal.remove();
+            this.restoreScrollbars();
+        }
+    }
+
     // 添加模态框事件监听器
     addModalEventListeners(modal) {
         // 点击背景关闭
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                modal.remove();
-                this.restoreScrollbars();
+                this.closeModal(modal);
             }
         });
         
         // ESC键关闭
         const handleEsc = (e) => {
             if (e.key === 'Escape') {
-                modal.remove();
-                this.restoreScrollbars();
+                this.closeModal(modal);
                 document.removeEventListener('keydown', handleEsc);
             }
         };

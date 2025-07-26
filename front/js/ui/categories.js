@@ -5,7 +5,6 @@
 class UICategories {
     constructor(uiManager) {
         this.uiManager = uiManager;
-        this.clickTimeout = null; // 用于处理可展开按钮的单击延迟
         this.isProcessingDoubleClick = false; // 防止双击事件重复触发
     }
 
@@ -30,10 +29,23 @@ class UICategories {
         
         // 初始化分类管理器
         this.initializeFileTypeButtons();
-        this.bindExpandableCategoryEvents();
+        
+        // 绑定文件类型按钮点击事件
+        this.bindCategoryClickEvents();
+        
+        // 延迟绑定可展开分类事件，确保DOM完全加载
+        setTimeout(() => {
+            this.bindExpandableCategoryEvents();
+        }, 200); // 增加延迟时间，确保DOM完全加载
         
         // 初始化新建分组按钮事件
         this.initializeCreateFolderButton();
+        
+        // 移除空的全局双击事件监听器，避免干扰双击事件处理
+        // document.addEventListener('dblclick', (e) => {
+        //     if (e.target.closest('.file-type-btn.expandable')) {
+        //     }
+        // });
     }
     
     // 初始化新建分组按钮
@@ -97,6 +109,15 @@ class UICategories {
             if (syncDocsBtn) {
                 syncDocsBtn.style.display = 'none';
             }
+            
+            // 初始化时隐藏文件夹区域（默认是全部文件分类）
+            const folderSection = document.getElementById('folder-section');
+            if (folderSection) {
+                folderSection.classList.add('hidden');
+            }
+            
+            // 初始化上传按钮文本（默认是全部文件分类）
+            this.updateUploadButtonText('all');
         }
         
         // 绑定所有分类按钮的点击事件
@@ -110,7 +131,9 @@ class UICategories {
     bindCategoryClickEvents() {
         // 为所有分类按钮绑定点击事件（包括可展开的按钮）
         const categoryButtons = document.querySelectorAll('.file-type-btn');
-        categoryButtons.forEach(btn => {
+        
+        categoryButtons.forEach((btn, index) => {
+            
             // 移除可能存在的旧事件监听器
             btn.removeEventListener('click', this.handleFileTypeFilter.bind(this));
             
@@ -121,19 +144,32 @@ class UICategories {
     
     // 绑定可展开分类的事件
     bindExpandableCategoryEvents() {
+        
         // 为所有可展开的按钮绑定双击事件
         const expandableButtons = document.querySelectorAll('.file-type-btn.expandable');
-        expandableButtons.forEach(btn => {
+        
+        expandableButtons.forEach((btn, index) => {
+            
             // 移除可能存在的旧事件监听器
             btn.removeEventListener('dblclick', this.handleExpandableDoubleClick);
+            btn.removeEventListener('click', this.handleExpandableClick);
             
-            // 添加新的双击事件监听器
+            // 只添加双击事件监听器，移除单击事件
             btn.addEventListener('dblclick', this.handleExpandableDoubleClick.bind(this));
+            
+            // 确保按钮有正确的属性
+            btn.setAttribute('data-expanded', 'false');
         });
         
         // 为子分类按钮绑定点击事件
         const subButtons = document.querySelectorAll('.sub-file-type-btn');
-        subButtons.forEach(btn => {
+        
+        subButtons.forEach((btn, index) => {
+            
+            // 移除可能存在的旧事件监听器
+            btn.removeEventListener('click', this.handleSubFileTypeFilter);
+            
+            // 添加新的点击事件监听器
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -142,16 +178,13 @@ class UICategories {
         });
     }
     
+
+    
     // 处理可展开按钮的双击事件
     handleExpandableDoubleClick(e) {
+        
         e.preventDefault();
         e.stopPropagation();
-        
-        // 取消单击延迟
-        if (this.clickTimeout) {
-            clearTimeout(this.clickTimeout);
-            this.clickTimeout = null;
-        }
         
         // 防止重复触发
         if (this.isProcessingDoubleClick) {
@@ -163,6 +196,7 @@ class UICategories {
         // 获取按钮元素（可能是子元素触发的双击）
         const btn = e.target.closest('.file-type-btn.expandable');
         if (btn) {
+            
             // 检查当前状态
             const isExpanded = btn.getAttribute('data-expanded') === 'true';
             const subContainer = document.getElementById('sub-categories-container');
@@ -179,13 +213,16 @@ class UICategories {
         // 延迟重置标志，防止重复触发
         setTimeout(() => {
             this.isProcessingDoubleClick = false;
-        }, 500);
+        }, 300);
     }
 
     // 切换可展开分类的展开/收起
     toggleExpandableCategory(btn) {
+        
         const isExpanded = btn.getAttribute('data-expanded') === 'true';
         const subContainer = document.getElementById('sub-categories-container');
+        
+
         
         if (isExpanded) {
             // 收起子分类
@@ -199,28 +236,99 @@ class UICategories {
     // 展开子分类
     expandSubCategories(btn, subContainer) {
         btn.setAttribute('data-expanded', 'true');
+        
+        // 获取文档按钮和音频按钮
+        const documentBtn = document.querySelector('.file-type-btn[data-type="document"]');
+        const audioBtn = document.querySelector('.file-type-btn[data-type="audio"]');
+        const fileTypeContainer = document.getElementById('file-type-container');
+        
+        if (!documentBtn || !audioBtn || !fileTypeContainer || !subContainer) {
+            return;
+        }
+        
+        // 设置子分类容器的样式
         subContainer.classList.remove('hidden');
+        subContainer.classList.add('show');
+        subContainer.style.display = 'inline-flex';
+        subContainer.style.opacity = '1';
+        subContainer.style.transform = 'translateX(0)';
+        subContainer.style.pointerEvents = 'auto';
+        subContainer.style.maxWidth = 'none';
+        subContainer.style.width = 'auto';
+        subContainer.style.height = 'auto';
+        subContainer.style.overflow = 'visible';
+        subContainer.style.margin = '0';
+        subContainer.style.padding = '0';
+        subContainer.style.border = 'none';
+        subContainer.style.flex = '0 0 auto';
+        subContainer.style.minWidth = 'auto';
+        subContainer.style.minHeight = 'auto';
+        subContainer.style.gap = '8px';
+        subContainer.style.alignItems = 'center';
+        subContainer.style.flexWrap = 'nowrap';
+        
+        // 将子分类容器插入到文档按钮和音频按钮之间
+        if (subContainer.parentNode !== fileTypeContainer) {
+            fileTypeContainer.insertBefore(subContainer, audioBtn);
+        } else {
+            // 如果已经在容器中，移动到正确位置
+            const currentIndex = Array.from(fileTypeContainer.children).indexOf(subContainer);
+            const audioIndex = Array.from(fileTypeContainer.children).indexOf(audioBtn);
+            if (currentIndex !== audioIndex) {
+                fileTypeContainer.insertBefore(subContainer, audioBtn);
+            }
+        }
         
         // 设置按钮动画延迟
         const subButtons = subContainer.querySelectorAll('.sub-file-type-btn');
         subButtons.forEach((button, index) => {
             button.style.setProperty('--btn-index', index);
+            button.style.height = 'auto';
+            button.style.minHeight = '2.5rem';
+            button.style.lineHeight = '1';
+            button.style.flexShrink = '0';
         });
         
-        // 触发展开动画
-        requestAnimationFrame(() => {
-            subContainer.classList.add('show');
-        });
+        // 调整音频按钮的位置，确保间距一致
+        setTimeout(() => {
+            // 确保音频按钮与子分类容器之间有正确的间距
+            if (audioBtn) {
+                audioBtn.style.marginLeft = '8px';
+            }
+        }, 50);
     }
 
     // 收起子分类
     collapseSubCategories(btn, subContainer) {
         btn.setAttribute('data-expanded', 'false');
-        subContainer.classList.remove('show');
         
-        // 延迟隐藏容器
+        // 恢复音频按钮的原始间距
+        const audioBtn = document.querySelector('.file-type-btn[data-type="audio"]');
+        if (audioBtn) {
+            audioBtn.style.marginLeft = '';
+        }
+        
+        subContainer.classList.remove('show');
+        subContainer.style.opacity = '0';
+        subContainer.style.transform = 'translateX(-20px)';
+        subContainer.style.pointerEvents = 'none';
+        subContainer.style.maxWidth = '0';
+        subContainer.style.width = '0';
+        subContainer.style.height = '0';
+        subContainer.style.overflow = 'hidden';
+        subContainer.style.margin = '0';
+        subContainer.style.padding = '0';
+        subContainer.style.border = 'none';
+        subContainer.style.flex = '0 0 auto';
+        subContainer.style.minWidth = '0';
+        subContainer.style.minHeight = '0';
+        subContainer.style.gap = '';
+        subContainer.style.alignItems = '';
+        subContainer.style.flexWrap = '';
+        
         setTimeout(() => {
             subContainer.classList.add('hidden');
+            subContainer.style.display = 'none';
         }, 300);
     }
 
@@ -280,38 +388,56 @@ class UICategories {
         return wrapper;
     }
 
-    // 处理子分类按钮点击
+    // 处理子文件类型过滤
     handleSubFileTypeFilter(btn) {
-        const type = btn.getAttribute('data-type');
+        // 立即更新按钮样式
+        this.updateButtonStyles(btn);
         
-        // 移除所有按钮的活动状态
-        document.querySelectorAll('.file-type-btn, .sub-file-type-btn').forEach(b => {
-            b.classList.remove('active', 'bg-gradient-to-r', 'from-primary', 'to-secondary', 'text-white', 'shadow-md', 'shadow-primary/20');
-            if (b.classList.contains('file-type-btn')) {
-                b.classList.add('bg-dark-light', 'hover:bg-dark-light/70', 'text-white');
-            } else {
-                // 恢复子按钮的默认样式
-                b.classList.remove('active');
+        // 异步处理文件过滤
+        setTimeout(() => {
+            const type = btn.getAttribute('data-type');
+            
+            // 移除所有按钮的活动状态
+            document.querySelectorAll('.file-type-btn, .sub-file-type-btn').forEach(b => {
+                b.classList.remove('active', 'bg-gradient-to-r', 'from-primary', 'to-secondary', 'text-white', 'shadow-md', 'shadow-primary/20');
+                if (b.classList.contains('file-type-btn')) {
+                    b.classList.add('bg-dark-light', 'hover:bg-dark-light/70', 'text-white');
+                } else {
+                    // 恢复子按钮的默认样式
+                    b.classList.remove('active');
+                }
+            });
+            
+            // 设置当前按钮为激活状态
+            btn.classList.add('active');
+            
+            // 更新当前分类
+            this.uiManager.currentCategory = type;
+            
+            // 直接处理新建分组按钮的显示/隐藏
+            const createFolderBtn = document.getElementById('create-folder-main-btn');
+            if (createFolderBtn) {
+                if (type === 'all') {
+                    createFolderBtn.style.display = 'none';
+                } else {
+                    createFolderBtn.style.display = 'flex';
+                }
             }
-        });
-        
-        // 设置当前按钮为激活状态
-        btn.classList.add('active');
-        
-        // 更新当前分类
-        this.uiManager.currentCategory = type;
-        
-        // 过滤文件
-        this.filterFiles(type);
-        
-        // 更新上传按钮显示状态
-        this.forceUpdateCreateFolderButton();
+            
+            // 更新上传按钮文本和图标
+            this.updateUploadButtonText(type);
+            
+            // 过滤文件
+            this.filterFiles(type);
+        }, 0);
     }
 
     // 处理文件类型过滤
     handleFileTypeFilter(event) {
         const btn = event.target.closest('.file-type-btn');
-        if (!btn) return;
+        if (!btn) {
+            return;
+        }
         
         // 检查是否为可展开按钮
         const isExpandable = btn.classList.contains('expandable');
@@ -326,7 +452,7 @@ class UICategories {
             // 设置新的延迟
             this.clickTimeout = setTimeout(() => {
                 this.executeFileTypeFilter(btn);
-            }, 200); // 200ms延迟，给双击事件留出时间
+            }, 100); // 减少延迟时间，给双击事件留出时间
             
             return;
         }
@@ -337,6 +463,17 @@ class UICategories {
     
     // 执行文件类型过滤
     executeFileTypeFilter(btn) {
+        // 立即更新按钮样式，不等待文件渲染
+        this.updateButtonStyles(btn);
+        
+        // 异步处理文件过滤和渲染
+        setTimeout(() => {
+            this.processFileFiltering(btn);
+        }, 0);
+    }
+    
+    // 立即更新按钮样式
+    updateButtonStyles(btn) {
         // 移除所有标签的活动状态
         document.querySelectorAll('.file-type-btn, .sub-file-type-btn').forEach(b => {
             b.classList.remove('active', 'bg-gradient-to-r', 'from-primary', 'to-secondary', 'text-white', 'shadow-md', 'shadow-primary/20');
@@ -348,10 +485,13 @@ class UICategories {
             }
         });
 
-        // 添加当前标签的活动状态
+        // 立即添加当前标签的活动状态
         btn.classList.add('active', 'bg-gradient-to-r', 'from-primary', 'to-secondary', 'text-white', 'shadow-md', 'shadow-primary/20');
         btn.classList.remove('bg-dark-light', 'hover:bg-dark-light/70');
-
+    }
+    
+    // 处理文件过滤逻辑
+    processFileFiltering(btn) {
         // 过滤文件
         const type = btn.getAttribute('data-type');
         this.uiManager.currentCategory = type; // 记录当前分类
@@ -432,60 +572,39 @@ class UICategories {
         // 清理外站文档显示
         this.cleanupExternalDocsDisplay();
         
-        // 先过滤文件，确保文件显示正确
-        this.filterFiles(type);
-
-        // 控制分组区域显示/隐藏
+        // 根据分类决定是否显示文件夹区域和新建分组按钮
         const folderSection = document.getElementById('folder-section');
         const createFolderBtn = document.getElementById('create-folder-main-btn');
         
         if (folderSection) {
             if (type === 'all') {
+                // 全部文件分类时隐藏文件夹区域
                 folderSection.classList.add('hidden');
-                if (createFolderBtn) {
-                    createFolderBtn.style.display = 'none';
-                }
             } else {
+                // 其他分类时显示文件夹区域
                 folderSection.classList.remove('hidden');
-                if (createFolderBtn) {
-                    createFolderBtn.style.display = 'flex';
+                
+                // 重新渲染文件夹列表（如果存在文件夹管理器）
+                if (this.uiManager && this.uiManager.folderManager && this.uiManager.folders) {
+                    this.uiManager.folderManager.renderFolderList(this.uiManager.folders);
                 }
             }
         }
         
-        // 显示上传按钮，隐藏同步文档按钮（非外站文档分类）
-        const uploadBtn = document.getElementById('upload-btn');
-        const syncDocsBtn = document.getElementById('sync-docs-btn');
-        
-        if (uploadBtn) {
-            if (type === 'url') {
-                // URL类型显示特殊的"添加链接"按钮
-                uploadBtn.innerHTML = '<i class="fa fa-link mr-2"></i>添加链接';
-                uploadBtn.style.display = 'flex';
+        // 直接处理新建分组按钮的显示/隐藏
+        if (createFolderBtn) {
+            if (type === 'all') {
+                createFolderBtn.style.display = 'none';
             } else {
-                uploadBtn.innerHTML = '<i class="fa fa-upload mr-2"></i>上传文件';
-                uploadBtn.style.display = 'flex';
+                createFolderBtn.style.display = 'flex';
             }
         }
         
-        if (syncDocsBtn) {
-            syncDocsBtn.style.display = 'none';
-        }
-
-        // 延迟刷新分组，确保文件过滤完成后再刷新分组
-        setTimeout(() => {
-            if (this.uiManager.refreshFolders) {
-                this.uiManager.refreshFolders();
-            }
-        }, 100);
+        // 更新上传按钮文本和图标
+        this.updateUploadButtonText(type);
         
-        // 更新上传区域提示信息和文件输入框设置
-        if (this.uiManager.updateUploadAreaHint) {
-            this.uiManager.updateUploadAreaHint();
-        }
-        if (this.uiManager.updateFileInputMultiple) {
-            this.uiManager.updateFileInputMultiple();
-        }
+        // 过滤文件
+        this.filterFiles(type);
     }
     
     // 清理外站文档显示
@@ -499,6 +618,21 @@ class UICategories {
         // 移除外站文档卡片
         const externalDocsCards = document.querySelectorAll('#files-grid .external-doc-card');
         externalDocsCards.forEach(card => card.remove());
+        
+        // 恢复上传按钮显示状态
+        const uploadBtn = document.getElementById('upload-btn');
+        const syncDocsBtn = document.getElementById('sync-docs-btn');
+        
+        if (uploadBtn) {
+            uploadBtn.style.display = 'flex';
+        }
+        
+        if (syncDocsBtn) {
+            syncDocsBtn.style.display = 'none';
+        }
+        
+        // 移除外站文档分类CSS类
+        document.body.classList.remove('external-docs-category');
     }
     
     // 加载外站文档
@@ -513,7 +647,33 @@ class UICategories {
                 await this.uiManager.docsSync.loadExternalDocs();
             }
         } catch (error) {
-            console.error('加载外站文档失败:', error);
+        }
+    }
+
+    // 更新上传按钮文本和图标
+    updateUploadButtonText(type) {
+        const uploadBtn = document.getElementById('upload-btn');
+        if (uploadBtn) {
+            const iconElement = uploadBtn.querySelector('i');
+            const textElement = uploadBtn.querySelector('span');
+            
+            if (type === 'url') {
+                // URL分类：显示"添加链接"和链接图标
+                if (iconElement) {
+                    iconElement.className = 'fa fa-link';
+                }
+                if (textElement) {
+                    textElement.textContent = '添加链接';
+                }
+            } else {
+                // 其他分类：显示"上传文件"和上传图标
+                if (iconElement) {
+                    iconElement.className = 'fa fa-upload';
+                }
+                if (textElement) {
+                    textElement.textContent = '上传文件';
+                }
+            }
         }
     }
 
@@ -521,11 +681,13 @@ class UICategories {
     filterFiles(type) {
         this.uiManager.currentCategory = type;
         
-        // 外站文档分类不进行文件过滤，由docs-sync模块处理
+
+        
+        // 处理外站文档分类
         if (type === 'external-docs') {
             // 更新文件计数为0，因为外站文档由docs-sync模块处理
             if (this.uiManager.updateFileCount) {
-                this.uiManager.updateFileCount(0, 0);
+                this.uiManager.updateFileCount(0, this.uiManager.totalFileCount || 0);
             }
             if (this.uiManager.toggleEmptyState) {
                 this.uiManager.toggleEmptyState(0);
@@ -533,10 +695,57 @@ class UICategories {
             return;
         }
         
-        if (type === 'all' && window.app && typeof window.app.loadUserData === 'function') {
-            // 切换到全部时强制刷新所有数据
-            window.app.loadUserData(window.app.apiManager.currentUser);
-            return;
+        // 检查是否需要重新加载文件数据
+        if (!this.uiManager.allFiles || this.uiManager.allFiles.length === 0) {
+            // 尝试重新加载文件数据
+            if (this.uiManager.apiManager && typeof this.uiManager.apiManager.getFiles === 'function') {
+                this.uiManager.apiManager.getFiles().then(files => {
+                    this.uiManager.allFiles = files || [];
+                    // 重新执行过滤
+                    this.filterFiles(type);
+                }).catch(error => {
+                    console.error('重新加载文件失败:', error);
+                });
+                return;
+            }
+        }
+        
+        // 根据文件类型过滤文件
+        let filteredFiles = [];
+        
+        if (type === 'all') {
+            // 显示所有文件
+            filteredFiles = this.uiManager.allFiles || [];
+        } else {
+            // 根据类型过滤文件
+            filteredFiles = (this.uiManager.allFiles || []).filter(file => {
+                // 处理子分类
+                if (type === 'document') {
+                    return ['word', 'excel', 'pdf', 'powerpoint'].includes(file.type);
+                } else if (type === 'word') {
+                    return file.type === 'word';
+                } else if (type === 'excel') {
+                    return file.type === 'excel';
+                } else if (type === 'pdf') {
+                    return file.type === 'pdf';
+                } else if (type === 'powerpoint') {
+                    return file.type === 'powerpoint';
+                } else {
+                    return file.type === type;
+                }
+            });
+        }
+        
+
+        
+        // 更新文件计数
+        if (this.uiManager.updateFileCount) {
+            this.uiManager.updateFileCount(filteredFiles.length, this.uiManager.totalFileCount || 0);
+        }
+        
+        // 切换空状态显示
+        if (this.uiManager.toggleEmptyState) {
+            this.uiManager.toggleEmptyState(filteredFiles.length);
         }
         
         // 检查是否为列表模式
@@ -544,43 +753,18 @@ class UICategories {
         const isListMode = fileGrid && (fileGrid.classList.contains('list-layout') || fileGrid.style.display === 'flex');
         
         if (isListMode) {
-            // 列表模式：重新渲染文件列表
-            if (this.uiManager && this.uiManager.fileRenderer && this.uiManager.allFiles) {
-                // 确保传递正确的布局模式
+            // 列表模式：重新渲染过滤后的文件列表
+            if (this.uiManager && this.uiManager.fileRenderer) {
                 const currentLayoutMode = this.uiManager.fileRenderer.layoutMode || 'list';
-        
-                this.uiManager.fileRenderer.renderFileList(this.uiManager.allFiles, currentLayoutMode);
+                this.uiManager.fileRenderer.renderFileList(filteredFiles, currentLayoutMode);
             }
-            return;
-        }
-        
-        // 卡片模式：使用DOM操作过滤
-        const fileCards = document.querySelectorAll('#files-grid > div');
-        let visibleCount = 0;
-        fileCards.forEach(card => {
-            const fileData = card.getAttribute('data-type');
-            let shouldShow = false;
-            if (type === 'document') {
-                shouldShow = ['document', 'word', 'excel', 'powerpoint', 'pdf'].includes(fileData);
-            } else {
-                shouldShow = fileData === type;
+        } else {
+            // 卡片模式：重新渲染过滤后的文件列表
+            if (this.uiManager && this.uiManager.fileRenderer) {
+                const currentLayoutMode = this.uiManager.fileRenderer.layoutMode || 'card';
+                this.uiManager.fileRenderer.renderFileList(filteredFiles, currentLayoutMode);
             }
-            if (shouldShow) {
-                card.classList.remove('hidden');
-                card.style.opacity = '1';
-                visibleCount++;
-            } else {
-                card.classList.add('hidden');
-                card.style.opacity = '0';
-            }
-        });
-        if (this.uiManager.updateFileCount) {
-            this.uiManager.updateFileCount(visibleCount, this.uiManager.totalFileCount);
         }
-        if (this.uiManager.toggleEmptyState) {
-            this.uiManager.toggleEmptyState(visibleCount);
-        }
-        this.forceUpdateCreateFolderButton();
     }
 
     // 禁用分类按钮

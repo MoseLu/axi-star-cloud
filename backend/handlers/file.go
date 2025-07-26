@@ -366,11 +366,11 @@ func (h *FileHandler) UploadFile(c *gin.Context) {
 	// 添加合理的速率限制，防止服务器过载
 	var reader io.Reader = file
 	if uploadConfig.MaxUploadRate > 0 {
-	rateLimitedReader := &RateLimitedReader{
-		Reader: file,
+		rateLimitedReader := &RateLimitedReader{
+			Reader: file,
 			Rate:   uploadConfig.MaxUploadRate,
 			last:   time.Now(),
-	}
+		}
 		reader = rateLimitedReader
 	}
 	written, err := io.CopyBuffer(dst, reader, buffer)
@@ -643,4 +643,247 @@ func (h *FileHandler) SearchFiles(c *gin.Context) {
 		Files:   files,
 	}
 	c.JSON(http.StatusOK, response)
+}
+
+// UploadFiles 批量上传文件
+func (h *FileHandler) UploadFiles(c *gin.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("UploadFiles panic: %+v\n", r)
+			debug.PrintStack()
+			c.JSON(500, gin.H{"error": "UploadFiles panic", "detail": fmt.Sprintf("%+v", r)})
+		}
+	}()
+
+	// 获取上传配置
+	uploadConfig := config.GetUploadConfig()
+
+	// 检查并发上传数量
+	currentUploads := atomic.LoadInt64(&uploadCounter)
+	if currentUploads >= uploadConfig.MaxConcurrentUploads {
+		c.JSON(http.StatusTooManyRequests, gin.H{"error": "服务器繁忙，请稍后重试"})
+		return
+	}
+
+	// 增加上传计数器
+	atomic.AddInt64(&uploadCounter, 1)
+	defer atomic.AddInt64(&uploadCounter, -1)
+
+	// 解析所有POST表单数据
+	if err := c.Request.ParseMultipartForm(32 << 20); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "解析表单失败"})
+		return
+	}
+
+	userID := c.PostForm("user_id")
+	folderIDStr := c.PostForm("folder_id")
+
+	// 验证用户ID
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "缺少用户ID"})
+		return
+	}
+
+	// 获取所有上传的文件
+	form := c.Request.MultipartForm
+	if form == nil || form.File == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "没有找到上传的文件"})
+		return
+	}
+
+	files := form.File["files"]
+	if len(files) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请选择要上传的文件"})
+		return
+	}
+
+	// 获取用户存储信息
+	storageInfo, err := h.userRepo.GetUserStorageInfo(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取存储信息失败"})
+		return
+	}
+
+	// 计算所有文件的总大小
+	var totalSize int64
+	for _, file := range files {
+		if file.Size == 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "文件不能为空"})
+			return
+		}
+		totalSize += file.Size
+	}
+
+	// 检查存储空间
+	if !utils.ValidateFileSize(totalSize, storageInfo.TotalSpace, storageInfo.UsedSpace) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "存储空间不足"})
+		return
+	}
+
+	// 批量处理结果
+	var results []gin.H
+	var totalUploadedSize int64
+	var successCount int
+	var failedCount int
+
+	// 处理每个文件
+	for _, file := range files {
+		fileResult := gin.H{
+			"filename": file.Filename,
+			"success":  false,
+		}
+
+		// 检查文件类型和大小限制
+		fileType := utils.GetFileType(file.Filename)
+
+		if fileType == "video" && file.Size > uploadConfig.MaxVideoSize {
+			fileResult["error"] = fmt.Sprintf("视频文件大小不能超过%.0fMB", float64(uploadConfig.MaxVideoSize)/1024/1024)
+			failedCount++
+			results = append(results, fileResult)
+			continue
+		}
+
+		if file.Size > uploadConfig.MaxFileSize {
+			fileResult["error"] = fmt.Sprintf("文件大小不能超过%.0fMB", float64(uploadConfig.MaxFileSize)/1024/1024)
+			failedCount++
+			results = append(results, fileResult)
+			continue
+		}
+
+		// 确定文件类型和路径
+		uploadPath := utils.GetUploadPath(file.Filename, fileType)
+
+		// 创建上传目录
+		uploadDir := utils.GetFileUploadDir(fileType)
+		if err := os.MkdirAll(uploadDir, 0755); err != nil {
+			fileResult["error"] = "创建上传目录失败"
+			failedCount++
+			results = append(results, fileResult)
+			continue
+		}
+
+		// 生成唯一文件名（避免重名）
+		fileName := file.Filename
+		ext := filepath.Ext(fileName)
+		nameWithoutExt := strings.TrimSuffix(fileName, ext)
+
+		// 检查文件是否已存在，如果存在则添加数字后缀
+		counter := 1
+		originalFileName := fileName
+		for {
+			filePath := filepath.Join(uploadDir, fileName)
+			if _, err := os.Stat(filePath); os.IsNotExist(err) {
+				break
+			}
+			fileName = fmt.Sprintf("%s_%d%s", nameWithoutExt, counter, ext)
+			counter++
+			if counter > 1000 { // 防止无限循环
+				fileResult["error"] = "无法生成唯一文件名"
+				failedCount++
+				results = append(results, fileResult)
+				continue
+			}
+		}
+
+		// 保存文件
+		filePath := filepath.Join(uploadDir, fileName)
+		dst, err := os.Create(filePath)
+		if err != nil {
+			fileResult["error"] = "保存文件失败"
+			failedCount++
+			results = append(results, fileResult)
+			continue
+		}
+
+		// 打开源文件
+		src, err := file.Open()
+		if err != nil {
+			dst.Close()
+			fileResult["error"] = "打开文件失败"
+			failedCount++
+			results = append(results, fileResult)
+			continue
+		}
+
+		// 使用缓冲写入，提高性能
+		buffer := make([]byte, 32*1024) // 32KB buffer
+		written, err := io.CopyBuffer(dst, src, buffer)
+		src.Close()
+		dst.Close()
+
+		if err != nil {
+			// 删除部分写入的文件
+			os.Remove(filePath)
+			fileResult["error"] = "保存文件失败"
+			failedCount++
+			results = append(results, fileResult)
+			continue
+		}
+
+		// 验证写入的文件大小
+		if written != file.Size {
+			// 删除不完整的文件
+			os.Remove(filePath)
+			fileResult["error"] = "文件写入不完整"
+			failedCount++
+			results = append(results, fileResult)
+			continue
+		}
+
+		// 创建文件记录
+		newFile := &models.File{
+			Name:     originalFileName, // 保存原始文件名
+			Size:     written,
+			Type:     fileType,
+			Path:     uploadPath,
+			UserID:   userID,
+			FolderID: nil,
+		}
+
+		// 如果指定了文件夹ID
+		if folderIDStr != "" {
+			if folderID, err := strconv.Atoi(folderIDStr); err == nil {
+				// 检查文件夹是否存在
+				if exists, _ := h.folderRepo.CheckFolderExists(folderID, userID); exists {
+					newFile.FolderID = &folderID
+				}
+			}
+		}
+
+		// 保存到数据库
+		if err := h.fileRepo.CreateFile(newFile); err != nil {
+			// 删除已保存的文件
+			os.Remove(filePath)
+			fileResult["error"] = "保存文件记录失败"
+			failedCount++
+			results = append(results, fileResult)
+			continue
+		}
+
+		// 更新统计信息
+		totalUploadedSize += written
+		successCount++
+
+		// 设置成功结果
+		fileResult["success"] = true
+		fileResult["file"] = newFile
+		results = append(results, fileResult)
+	}
+
+	// 更新用户存储使用量
+	if totalUploadedSize > 0 {
+		if err := h.userRepo.UpdateUserStorage(userID, totalUploadedSize); err != nil {
+			// 不返回错误，因为文件上传已经成功
+		}
+	}
+
+	// 返回批量上传结果
+	c.JSON(http.StatusOK, gin.H{
+		"success":       true,
+		"message":       fmt.Sprintf("批量上传完成！成功: %d 个，失败: %d 个", successCount, failedCount),
+		"total_files":   len(files),
+		"success_count": successCount,
+		"failed_count":  failedCount,
+		"results":       results,
+	})
 }

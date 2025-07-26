@@ -45,4 +45,7 @@ class ApiUtils {
         };
         return colorMap[type] || 'text-gray-400';
     }
-} 
+}
+
+// 导出ApiUtils类到全局作用域
+window.ApiUtils = ApiUtils; 

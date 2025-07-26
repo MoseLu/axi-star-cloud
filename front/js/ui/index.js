@@ -212,29 +212,6 @@ class UIManager {
 
     // 绑定个人资料模态框事件
     bindProfileEvents() {
-        // 使用事件委托，绑定到document上
-        document.addEventListener('click', (e) => {
-            // 取消按钮
-            if (e.target.id === 'cancel-profile-btn') {
-                this.hideProfileModal();
-            }
-            
-            // 保存按钮
-            if (e.target.id === 'save-profile-btn') {
-                if (this.profileManager) {
-                    this.profileManager.saveProfile();
-                }
-            }
-            
-            // 头像上传按钮
-            if (e.target.id === 'avatar-upload-btn') {
-                const fileInput = document.getElementById('avatar-file-input');
-                if (fileInput) {
-                    fileInput.click();
-                }
-            }
-        });
-
         // 头像文件选择
         document.addEventListener('change', (e) => {
             if (e.target.id === 'avatar-file-input') {
@@ -865,13 +842,7 @@ class UIManager {
     }
     
     async showSettingsModal() { 
-        // 检查是否为管理员
-        const currentUser = window.authSystem ? window.authSystem.getCurrentUser() : null;
-        
-        if (!currentUser || !currentUser.isAdmin) {
-            this.showMessage('只有管理员才能修改存储设置', 'warning');
-            return;
-        }
+        // 设置按钮只有管理员才能看到，所以不需要再次检查权限
         
         // 清理所有已存在的设置模态框
         const existingModals = document.querySelectorAll('.fixed[data-modal="settings"]');
@@ -1145,22 +1116,23 @@ class UIManager {
 
     // 全局存储同步方法
     async syncStorageDisplay(storageInfo) {
-        console.log('🔄 开始同步存储空间显示:', storageInfo);
-        
         if (!storageInfo || storageInfo.used_space === undefined || storageInfo.total_space === undefined) {
             console.warn('⚠️ 存储信息格式不正确:', storageInfo);
             return;
         }
 
         try {
+            // 更新存储信息到本地缓存
+            if (window.StorageManager && typeof window.StorageManager.setStorageInfo === 'function') {
+                window.StorageManager.setStorageInfo(storageInfo);
+            }
+            
             // 更新主页存储空间概览
             this.updateStorageDisplay(storageInfo);
-            console.log('✅ 主页存储空间概览已更新');
             
             // 更新用户管理页面的存储显示（如果存在）
             if (window.userManager && typeof window.userManager.updateStorageDisplay === 'function') {
                 window.userManager.updateStorageDisplay(storageInfo);
-                console.log('✅ 用户管理页面存储显示已更新');
             }
             
             // 更新管理员页面的存储显示（如果存在）
@@ -1170,22 +1142,17 @@ class UIManager {
                     used: storageInfo.used_space,
                     available: storageInfo.total_space - storageInfo.used_space
                 });
-                console.log('✅ 管理员页面存储显示已更新');
             }
             
             // 更新设置页面的存储显示（如果存在）
             if (window.settingsManager && typeof window.settingsManager.renderStorageData === 'function') {
                 window.settingsManager.renderStorageData(storageInfo);
-                console.log('✅ 设置页面存储显示已更新');
             }
             
             // 更新个人资料页面的存储显示（如果存在）
             if (window.profileManager && typeof window.profileManager.updateStorageInfo === 'function') {
                 window.profileManager.updateStorageInfo(storageInfo);
-                console.log('✅ 个人资料页面存储显示已更新');
             }
-            
-            console.log('✅ 所有存储空间显示同步完成');
             
         } catch (error) {
             console.error('❌ 同步存储空间显示失败:', error);
@@ -1392,6 +1359,20 @@ class UIManager {
         }
     }
 
+    // 从缓存更新用户信息（用于页面刷新时）
+    updateProfileDisplayFromCache(userData) {
+        // 调用 profileManager 的 updateProfileDisplayFromCache 方法
+        if (this.profileManager) {
+            this.profileManager.updateProfileDisplayFromCache(userData);
+        }
+        
+        // 更新欢迎模块中的用户名
+        const welcomeMessage = document.getElementById('welcome-message');
+        if (welcomeMessage && userData && userData.username) {
+            welcomeMessage.textContent = `欢迎回来，${userData.username}`;
+        }
+    }
+
     triggerAvatarUpload() {
         return this.profileManager.triggerAvatarUpload();
     }
@@ -1421,8 +1402,8 @@ class UIManager {
     }
     
     // 管理员功能相关
-    checkAndShowAdminMenu() { 
-        const result = this.adminManager.checkAdminPermissions();
+    async checkAndShowAdminMenu() { 
+        const result = await this.adminManager.checkAdminPermissions();
         
         // 同时控制设置按钮的显示
         this.checkAndShowSettingsButton();
@@ -2055,11 +2036,53 @@ class UIManager {
         }
     }
 
+    // 复制URL链接到剪贴板
+    async copyUrl(file) {
+        try {
+            if (!file || !file.url) {
+                this.showMessage('无效的URL文件', 'error');
+                return;
+            }
+
+            // 使用工具类的复制功能
+            if (this.utils && this.utils.copyToClipboard) {
+                const success = await this.utils.copyToClipboard(file.url);
+                if (success) {
+                    this.showMessage('URL链接已复制到剪贴板', 'success');
+                } else {
+                    this.showMessage('复制失败，请手动复制', 'error');
+                }
+            } else {
+                // 降级方案：使用原生剪贴板API
+                try {
+                    await navigator.clipboard.writeText(file.url);
+                    this.showMessage('URL链接已复制到剪贴板', 'success');
+                } catch (error) {
+                    // 如果原生API失败，使用传统方法
+                    const textArea = document.createElement('textarea');
+                    textArea.value = file.url;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    const success = document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    if (success) {
+                        this.showMessage('URL链接已复制到剪贴板', 'success');
+                    } else {
+                        this.showMessage('复制失败，请手动复制', 'error');
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('复制URL失败:', error);
+            this.showMessage('复制失败，请手动复制', 'error');
+        }
+    }
+
     // 设置管理相关
     // 存储空间渲染
     updateStorageDisplay(storageInfo) {
         if (!storageInfo) {
-            console.warn('存储信息为空');
             return;
         }
         
@@ -2130,40 +2153,83 @@ class UIManager {
      * @param {number} percentage - 使用百分比
      */
     updateStorageStatus(percentage) {
-        const statusElement = document.getElementById('storage-status');
-        if (!statusElement) return;
-
         // 计算剩余空间百分比
         const remainingPercentage = 100 - percentage;
         
-        let statusText, statusClass, textColor, bgColor, borderColor;
-        
+        let statusText;
         if (remainingPercentage > 30) {
-            // 充足：剩余空间大于30%
             statusText = '充足';
-            statusClass = 'success';
-            textColor = 'text-emerald-400';
-            bgColor = 'bg-emerald-500/20';
-            borderColor = 'border-emerald-400/30';
         } else if (remainingPercentage >= 10) {
-            // 不足：剩余空间在10%-30%之间
             statusText = '不足';
-            statusClass = 'warning';
-            textColor = 'text-yellow-400';
-            bgColor = 'bg-yellow-500/20';
-            borderColor = 'border-yellow-400/30';
         } else {
-            // 严重不足：剩余空间小于10%
             statusText = '严重不足';
-            statusClass = 'error';
-            textColor = 'text-red-400';
-            bgColor = 'bg-red-500/20';
-            borderColor = 'border-red-400/30';
         }
         
-        // 更新状态文本和样式
-        statusElement.textContent = statusText;
-        statusElement.className = `px-2 md:px-3 py-1 ${bgColor} ${textColor} text-xs rounded-full border ${borderColor}`;
+        // 更新存储空间概览状态
+        const statusElement = document.getElementById('storage-status');
+        if (statusElement) {
+            let statusClass, textColor, bgColor, borderColor;
+            
+            if (remainingPercentage > 30) {
+                statusClass = 'success';
+                textColor = 'text-emerald-400';
+                bgColor = 'bg-emerald-500/20';
+                borderColor = 'border-emerald-400/30';
+            } else if (remainingPercentage >= 10) {
+                statusClass = 'warning';
+                textColor = 'text-yellow-400';
+                bgColor = 'bg-yellow-500/20';
+                borderColor = 'border-yellow-400/30';
+            } else {
+                statusClass = 'error';
+                textColor = 'text-red-400';
+                bgColor = 'bg-red-500/20';
+                borderColor = 'border-red-400/30';
+            }
+            
+            statusElement.textContent = statusText;
+            statusElement.className = `px-2 md:px-3 py-1 ${bgColor} ${textColor} text-xs rounded-full border ${borderColor}`;
+        }
+        
+        // 将存储状态保存到本地缓存
+        const storageStatusData = {
+            status: statusText,
+            percentage: percentage,
+            remainingPercentage: remainingPercentage,
+            timestamp: Date.now()
+        };
+        window.StorageManager.setStorageStatus(storageStatusData);
+        
+        // 触发自定义事件，通知其他模块存储状态已更新
+        window.dispatchEvent(new CustomEvent('storageStatusUpdated', {
+            detail: storageStatusData
+        }));
+        
+        // 尝试立即更新欢迎模块
+        this.updateWelcomeStorageStatus(statusText);
+        
+        // 延迟重试，确保欢迎模块已加载
+        setTimeout(() => this.updateWelcomeStorageStatus(statusText), 100);
+        setTimeout(() => this.updateWelcomeStorageStatus(statusText), 500);
+        setTimeout(() => this.updateWelcomeStorageStatus(statusText), 1000);
+        setTimeout(() => this.updateWelcomeStorageStatus(statusText), 2000);
+    }
+    
+    /**
+     * 更新欢迎模块中的存储状态
+     * @param {string} statusText - 状态文本
+     */
+    updateWelcomeStorageStatus(statusText) {
+        const welcomeStorageStatus = document.getElementById('welcome-storage-status');
+        if (welcomeStorageStatus) {
+            // 确保传入的是正确的状态文本，而不是数字
+            let displayText = statusText;
+            if (typeof statusText === 'number' || (typeof statusText === 'string' && !isNaN(parseFloat(statusText)))) {
+                console.warn('💾 UIManager：检测到状态文本为数字，使用默认状态');
+                displayText = '充足';
+            }
+            welcomeStorageStatus.textContent = displayText;
+        }
     }
 
     // 分类管理相关方法

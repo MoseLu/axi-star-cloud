@@ -144,13 +144,30 @@ class Utils {
      * @returns {boolean} - 是否过期
      */
     static isSessionExpired(maxAge = 24 * 60 * 60 * 1000) {
-        const lastLogin = localStorage.getItem('lastLoginTime');
+        let lastLogin = null;
+        
+        // 优先从新的存储管理器获取
+        if (window.StorageManager && typeof window.StorageManager.getLastLogin === 'function') {
+            lastLogin = window.StorageManager.getLastLogin();
+        } else {
+            // 备用方案：从新的键结构获取
+            const userData = localStorage.getItem('userInfo');
+            if (userData) {
+                try {
+                    const userInfo = JSON.parse(userData);
+                    lastLogin = userInfo.lastLogin;
+                } catch (error) {
+                    console.warn('解析用户信息失败:', error);
+                }
+            }
+        }
+        
         if (!lastLogin) {
             return true;
         }
 
         try {
-            const loginTime = parseInt(lastLogin);
+            const loginTime = new Date(lastLogin).getTime();
             const now = Date.now();
             return (now - loginTime) > maxAge;
         } catch (error) {
@@ -165,7 +182,21 @@ class Utils {
         // 这个方法现在只用于检查会话是否过期，不再自动更新
         // 最后登录时间现在由后端在登录和退出时管理
         try {
-            localStorage.setItem('lastLoginTime', Date.now().toString());
+            if (window.StorageManager && typeof window.StorageManager.setLastLogin === 'function') {
+                window.StorageManager.setLastLogin(new Date().toISOString());
+            } else {
+                // 如果 StorageManager 未加载，直接更新 userInfo 中的最后登录时间
+                const userData = localStorage.getItem('userInfo');
+                if (userData) {
+                    try {
+                        const userInfo = JSON.parse(userData);
+                        userInfo.lastLogin = new Date().toISOString();
+                        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                    } catch (error) {
+                        console.warn('更新最后登录时间失败:', error);
+                    }
+                }
+            }
         } catch (error) {
             console.error('更新登录时间失败:', error);
         }

@@ -608,3 +608,188 @@
     border-radius: 50%;
     animation: spin 1s linear infinite;
 } 
+
+/* 暗色主题适配 */
+body.theme-dark .profile-card {
+    background: rgba(31, 41, 55, 0.95) !important;
+    border: 1px solid rgba(75, 85, 99, 0.5) !important;
+    color: #f3f4f6 !important;
+}
+
+body.theme-dark .user-avatar {
+    background-color: #374151 !important;
+    border: 3px solid #4b5563 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+}
+
+body.theme-dark .user-avatar:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+}
+
+body.theme-dark .info-item {
+    border-bottom: 1px solid #4b5563 !important;
+}
+
+body.theme-dark .info-label {
+    color: #d1d5db !important;
+}
+
+body.theme-dark .info-value {
+    color: #f3f4f6 !important;
+}
+
+body.theme-dark .username,
+body.theme-dark .user-name {
+    color: #f3f4f6 !important;
+}
+
+body.theme-dark .user-email {
+    color: #60a5fa !important;
+}
+
+body.theme-dark .user-role {
+    color: #9ca3af !important;
+}
+
+body.theme-dark .user-role.admin {
+    color: #fbbf24 !important;
+}
+
+body.theme-dark .user-role.user {
+    color: #34d399 !important;
+}
+
+body.theme-dark .user-role.guest {
+    color: #a78bfa !important;
+}
+
+body.theme-dark .last-login {
+    color: #9ca3af !important;
+}
+
+body.theme-dark .storage-section h4 {
+    color: #f3f4f6 !important;
+}
+
+body.theme-dark .storage-bar {
+    background: #374151 !important;
+}
+
+body.theme-dark .storage-progress {
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8) !important;
+}
+
+body.theme-dark .storage-info {
+    color: #d1d5db !important;
+}
+
+body.theme-dark .storage-used,
+body.theme-dark .storage-total {
+    color: #f3f4f6 !important;
+}
+
+body.theme-dark .storage-percentage {
+    color: #60a5fa !important;
+}
+
+body.theme-dark .profile-form h4 {
+    color: #f3f4f6 !important;
+}
+
+body.theme-dark .form-group label {
+    color: #d1d5db !important;
+}
+
+body.theme-dark .form-group input,
+body.theme-dark .form-group textarea {
+    background: rgba(55, 65, 81, 0.8) !important;
+    border: 1px solid #4b5563 !important;
+    color: #f3f4f6 !important;
+}
+
+body.theme-dark .form-group input:focus,
+body.theme-dark .form-group textarea:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+body.theme-dark .form-group input.error {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+}
+
+body.theme-dark .form-group input:disabled {
+    background: rgba(55, 65, 81, 0.4) !important;
+    color: #9ca3af !important;
+}
+
+body.theme-dark .form-group .help-text {
+    color: #9ca3af !important;
+}
+
+body.theme-dark .form-group .error-text {
+    color: #f87171 !important;
+}
+
+body.theme-dark .edit-profile-btn,
+body.theme-dark .save-profile-btn,
+body.theme-dark .cancel-profile-btn {
+    background: rgba(55, 65, 81, 0.8) !important;
+    border: 1px solid #4b5563 !important;
+    color: #f3f4f6 !important;
+}
+
+body.theme-dark .edit-profile-btn:hover {
+    background: rgba(59, 130, 246, 0.8) !important;
+    border-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+body.theme-dark .save-profile-btn:hover {
+    background: rgba(34, 197, 94, 0.8) !important;
+    border-color: #22c55e !important;
+    color: #ffffff !important;
+}
+
+body.theme-dark .cancel-profile-btn:hover {
+    background: rgba(239, 68, 68, 0.8) !important;
+    border-color: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+body.theme-dark .profile-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
+    border-color: #6b7280 !important;
+}
+
+body.theme-dark .profile-header {
+    background: rgba(31, 41, 55, 0.8) !important;
+    border-bottom: 1px solid #4b5563 !important;
+}
+
+body.theme-dark .profile-name {
+    color: #f3f4f6 !important;
+}
+
+body.theme-dark .profile-email {
+    color: #60a5fa !important;
+}
+
+body.theme-dark .profile-role {
+    color: #9ca3af !important;
+}
+
+body.theme-dark .profile-view,
+body.theme-dark .profile-form {
+    background: rgba(31, 41, 55, 0.95) !important;
+}
+
+body.theme-dark .avatar-upload-progress {
+    background: rgba(31, 41, 55, 0.95) !important;
+    border: 1px solid #4b5563 !important;
+}
+
+body.theme-dark .avatar-upload-spinner {
+    border: 2px solid #4b5563 !important;
+    border-top: 2px solid #3b82f6 !important;
+} 

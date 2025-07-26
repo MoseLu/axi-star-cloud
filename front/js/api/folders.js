@@ -121,4 +121,7 @@ class Folders {
             return 0;
         }
     }
-} 
+}
+
+// 导出Folders类到全局作用域
+window.Folders = Folders; 

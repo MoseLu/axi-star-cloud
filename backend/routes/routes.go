@@ -79,52 +79,62 @@ func (r *Router) SetupRoutes(
 	apiGroup.AddRoute("POST", "/login", authHandler.Login, "用户登录")
 	apiGroup.AddRoute("POST", "/register", authHandler.Register, "用户注册")
 	apiGroup.AddRoute("POST", "/logout", authHandler.Logout, "用户退出登录")
+	apiGroup.AddRoute("POST", "/refresh-token", authHandler.RefreshToken, "刷新普通用户token")
+	apiGroup.AddRoute("POST", "/refresh-admin-token", authHandler.RefreshAdminToken, "刷新管理员token")
+	apiGroup.AddRoute("POST", "/validate-token", authHandler.ValidateToken, "验证普通用户token")
+	apiGroup.AddRoute("POST", "/validate-admin-token", authHandler.ValidateAdminToken, "验证管理员token")
 
 	// 管理员相关路由（需要管理员权限）
 	adminGroup := r.RegisterGroup("admin", "/api/admin", authHandler.CheckAdminPermission())
 	adminGroup.AddRoute("GET", "/users", authHandler.GetAllUsers, "获取所有用户列表")
 	adminGroup.AddRoute("PUT", "/users/storage", authHandler.UpdateUserStorage, "更新用户存储限制")
 
-	// 文件相关路由
-	apiGroup.AddRoute("GET", "/files", fileHandler.GetFiles, "获取文件列表")
-	apiGroup.AddRoute("GET", "/files/count", fileHandler.GetTotalFileCount, "获取用户所有文件总数")
-	apiGroup.AddRoute("GET", "/files/:id", fileHandler.GetFile, "获取单个文件信息")
-	apiGroup.AddRoute("GET", "/files/:id/download", fileHandler.DownloadFile, "下载文件")
-	apiGroup.AddRoute("GET", "/download", fileHandler.DownloadFileRedirect, "下载文件重定向（优化版本）")
-	apiGroup.AddRoute("POST", "/upload", fileHandler.UploadFile, "上传文件")
-	apiGroup.AddRoute("DELETE", "/files/:id", fileHandler.DeleteFile, "删除文件")
-	apiGroup.AddRoute("PUT", "/files/:id/move", fileHandler.MoveFile, "移动文件")
+	// 用户相关路由（需要用户权限）
+	userGroup := r.RegisterGroup("user", "/api", authHandler.CheckUserPermission())
 
-	// URL文件相关路由
-	apiGroup.AddRoute("GET", "/url-files", urlFileHandler.GetUrlFiles, "获取URL文件列表")
-	apiGroup.AddRoute("GET", "/url-files/count", urlFileHandler.GetTotalUrlFileCount, "获取用户所有URL文件总数")
-	apiGroup.AddRoute("GET", "/url-files/:id", urlFileHandler.GetUrlFile, "获取单个URL文件信息")
-	apiGroup.AddRoute("POST", "/url-files", urlFileHandler.CreateUrlFile, "创建URL文件")
-	apiGroup.AddRoute("DELETE", "/url-files/:id", urlFileHandler.DeleteUrlFile, "删除URL文件")
+	// 文件相关路由（需要用户权限）
+	userGroup.AddRoute("GET", "/files", fileHandler.GetFiles, "获取文件列表")
+	userGroup.AddRoute("GET", "/files/count", fileHandler.GetTotalFileCount, "获取用户所有文件总数")
+	userGroup.AddRoute("GET", "/files/:id", fileHandler.GetFile, "获取单个文件信息")
+	userGroup.AddRoute("GET", "/files/:id/download", fileHandler.DownloadFile, "下载文件")
+	userGroup.AddRoute("GET", "/download", fileHandler.DownloadFileRedirect, "下载文件重定向（优化版本）")
+	userGroup.AddRoute("POST", "/upload", fileHandler.UploadFile, "上传文件")
+	userGroup.AddRoute("POST", "/upload/batch", fileHandler.UploadFiles, "批量上传文件")
+	userGroup.AddRoute("DELETE", "/files/:id", fileHandler.DeleteFile, "删除文件")
+	userGroup.AddRoute("PUT", "/files/:id/move", fileHandler.MoveFile, "移动文件")
 
-	// 上传进度相关路由
-	apiGroup.AddRoute("GET", "/upload/task/:task_id", uploadProgressHandler.GetUploadTask, "获取上传任务状态")
-	apiGroup.AddRoute("GET", "/upload/tasks", uploadProgressHandler.GetUserUploadTasks, "获取用户上传任务列表")
-	apiGroup.AddRoute("GET", "/upload/stats", uploadProgressHandler.GetQueueStats, "获取上传队列统计")
-	apiGroup.AddRoute("DELETE", "/upload/task/:task_id", uploadProgressHandler.CancelUploadTask, "取消上传任务")
-	adminGroup.AddRoute("POST", "/upload/cleanup", uploadProgressHandler.CleanupOldTasks, "清理旧上传任务")
-	apiGroup.AddRoute("PUT", "/url-files/:id/move", urlFileHandler.MoveUrlFile, "移动URL文件")
+	// URL文件相关路由（需要用户权限）
+	userGroup.AddRoute("GET", "/url-files", urlFileHandler.GetUrlFiles, "获取URL文件列表")
+	userGroup.AddRoute("GET", "/url-files/count", urlFileHandler.GetTotalUrlFileCount, "获取用户所有URL文件总数")
+	userGroup.AddRoute("GET", "/url-files/:id", urlFileHandler.GetUrlFile, "获取单个URL文件信息")
+	userGroup.AddRoute("POST", "/url-files", urlFileHandler.CreateUrlFile, "创建URL文件")
+	userGroup.AddRoute("DELETE", "/url-files/:id", urlFileHandler.DeleteUrlFile, "删除URL文件")
+	userGroup.AddRoute("PUT", "/url-files/:id/move", urlFileHandler.MoveUrlFile, "移动URL文件")
 
-	// 文件夹相关路由
-	apiGroup.AddRoute("GET", "/folders", folderHandler.GetFolders, "获取文件夹列表")
-	apiGroup.AddRoute("POST", "/folders", folderHandler.CreateFolder, "创建文件夹")
-	apiGroup.AddRoute("PUT", "/folders/:id", folderHandler.UpdateFolder, "更新文件夹")
-	apiGroup.AddRoute("DELETE", "/folders/:id", folderHandler.DeleteFolder, "删除文件夹")
-	apiGroup.AddRoute("GET", "/folders/:id/count", folderHandler.GetFolderFileCount, "获取文件夹文件数量")
+	// 上传进度相关路由（需要用户权限）
+	userGroup.AddRoute("GET", "/upload/task/:task_id", uploadProgressHandler.GetUploadTask, "获取上传任务状态")
+	userGroup.AddRoute("GET", "/upload/tasks", uploadProgressHandler.GetUserUploadTasks, "获取用户上传任务列表")
+	userGroup.AddRoute("GET", "/upload/stats", uploadProgressHandler.GetQueueStats, "获取上传队列统计")
+	userGroup.AddRoute("DELETE", "/upload/task/:task_id", uploadProgressHandler.CancelUploadTask, "取消上传任务")
 
-	// 存储相关路由
-	apiGroup.AddRoute("GET", "/storage", storageHandler.GetStorageInfo, "获取存储信息")
-	apiGroup.AddRoute("PUT", "/storage", storageHandler.UpdateStorageLimit, "更新存储限制")
+	// 文件夹相关路由（需要用户权限）
+	userGroup.AddRoute("GET", "/folders", folderHandler.GetFolders, "获取文件夹列表")
+	userGroup.AddRoute("POST", "/folders", folderHandler.CreateFolder, "创建文件夹")
+	userGroup.AddRoute("PUT", "/folders/:id", folderHandler.UpdateFolder, "更新文件夹")
+	userGroup.AddRoute("DELETE", "/folders/:id", folderHandler.DeleteFolder, "删除文件夹")
+	userGroup.AddRoute("GET", "/folders/:id/count", folderHandler.GetFolderFileCount, "获取文件夹文件数量")
 
-	// 个人资料相关路由
-	apiGroup.AddRoute("GET", "/profile", profileHandler.GetProfile, "获取个人资料")
-	apiGroup.AddRoute("PUT", "/profile", profileHandler.UpdateProfile, "更新个人资料")
-	apiGroup.AddRoute("POST", "/profile/avatar", profileHandler.UploadAvatar, "上传头像")
+	// 存储相关路由（需要用户权限）
+	userGroup.AddRoute("GET", "/storage", storageHandler.GetStorageInfo, "获取存储信息")
+	userGroup.AddRoute("PUT", "/storage", storageHandler.UpdateStorageLimit, "更新存储限制")
+
+	// 个人资料相关路由（需要用户权限）
+	userGroup.AddRoute("GET", "/profile", profileHandler.GetProfile, "获取个人资料")
+	userGroup.AddRoute("PUT", "/profile", profileHandler.UpdateProfile, "更新个人资料")
+	userGroup.AddRoute("POST", "/profile/avatar", profileHandler.UploadAvatar, "上传头像")
+
+	// 临时测试路由（公开，用于调试）
+	apiGroup.AddRoute("POST", "/test/avatar", profileHandler.UploadAvatar, "测试头像上传")
 
 	// 文档相关路由（需要管理员权限）
 	docGroup := r.RegisterGroup("documents", "/api/documents", authHandler.CheckAdminPermission())
@@ -133,8 +143,11 @@ func (r *Router) SetupRoutes(
 	docGroup.AddRoute("GET", "/:id", documentHandler.GetDocument, "获取单个文档")
 	docGroup.AddRoute("DELETE", "/:id", documentHandler.DeleteDocument, "删除文档")
 
-	// 更新日志相关路由
+	// 更新日志相关路由（公开）
 	apiGroup.AddRoute("GET", "/update-logs", updateLogHandler.GetUpdateLogs, "获取更新日志")
+
+	// 管理员清理任务路由
+	adminGroup.AddRoute("POST", "/upload/cleanup", uploadProgressHandler.CleanupOldTasks, "清理旧上传任务")
 
 	// 注册静态文件列表路由
 	r.registerStaticFilesRoutes()

@@ -66,26 +66,9 @@ class UIProfileManager {
      * 绑定个人资料相关事件
      */
     bindProfileEvents() {
-        // 先移除所有已存在的事件监听器，避免重复绑定
-        const welcomeAvatar = document.getElementById('profile-avatar');
-        if (welcomeAvatar) {
-            welcomeAvatar.removeEventListener('click', this._welcomeAvatarClickHandler);
-            this._welcomeAvatarClickHandler = () => {
-                this.showProfileModal();
-            };
-            welcomeAvatar.addEventListener('click', this._welcomeAvatarClickHandler);
-        }
-
-        const editIcon = document.querySelector('.edit-icon');
-        if (editIcon) {
-            editIcon.removeEventListener('click', this._editIconClickHandler);
-            this._editIconClickHandler = (e) => {
-                e.stopPropagation();
-                this.showProfileModal();
-            };
-            editIcon.addEventListener('click', this._editIconClickHandler);
-        }
-
+        // 注意：欢迎模块的头像和编辑图标事件由 bindWelcomeAvatarEvents 方法单独处理
+        // 这里只处理其他个人资料相关事件，避免冲突
+        
         // 绑定头像点击事件 - 排除欢迎模块的头像和编辑图标
         const avatarElements = document.querySelectorAll('[data-avatar-upload], #profile-avatar-upload');
         
@@ -160,24 +143,73 @@ class UIProfileManager {
      * @param {Object} userData - 用户数据
      */
     initUserProfile(userData) {
+        // 检查新的存储管理器中的用户数据
+        let currentUser = null;
+        if (window.StorageManager && typeof window.StorageManager.getUser === 'function') {
+            currentUser = window.StorageManager.getUser();
+        } else {
+            // 如果 StorageManager 未加载，直接使用新的键结构
+            const userData = localStorage.getItem('userInfo');
+            if (userData) {
+                try {
+                    currentUser = JSON.parse(userData);
+                } catch (error) {
+                    console.warn('解析用户信息失败:', error);
+                }
+            }
+        }
+        
         if (userData) {
-        this.currentUser = userData;
-        this.updateProfileDisplay(userData);
+            this.currentUser = userData;
+            // 页面刷新时，只恢复缓存的头像，不重新构建URL
+            this.updateProfileDisplayFromCache(userData);
+        } else if (currentUser) {
+            try {
+                this.currentUser = currentUser;
+                
+                // 优先从缓存恢复头像信息（缓存的是完整URL，但我们需要原始文件名）
+                let cachedAvatar = null;
+                if (window.StorageManager && typeof window.StorageManager.getAvatar === 'function') {
+                    cachedAvatar = window.StorageManager.getAvatar();
+                } else {
+                    // 如果 StorageManager 未加载，使用 localStorage 作为备用
+                    cachedAvatar = localStorage.getItem('cachedAvatar');
+                }
+                if (cachedAvatar && cachedAvatar !== 'null' && cachedAvatar !== 'undefined') {
+                    // 从完整URL中提取文件名
+                    const avatarFileName = cachedAvatar.split('/').pop();
+                    if (avatarFileName && avatarFileName !== 'null' && avatarFileName !== 'undefined') {
+                        currentUser.avatar = avatarFileName;
+                    }
+                }
+                
+                // 页面刷新时，只恢复缓存的头像，不重新构建URL
+                this.updateProfileDisplayFromCache(currentUser);
+            } catch (error) {
+                console.error('🖼️ 解析存储管理器用户数据失败:', error);
+            }
         }
         
         // 显示最后登录时间
         this.updateLastLogin();
     }
+    
+
+    
+
+    
+
+    
+
 
     /**
-     * 更新个人资料显示
+     * 更新个人资料显示（从缓存恢复，不重新构建URL）
      * @param {Object} userData - 用户数据
      */
-    updateProfileDisplay(userData) {
-        if (!userData) return;
-
-        // 更新头像
-        this.updateAvatar(userData.avatar || '/static/public/docs.png');
+    updateProfileDisplayFromCache(userData) {
+        if (!userData) {
+            return;
+        }
 
         // 更新用户信息
         this.updateUserInfo(userData);
@@ -187,6 +219,252 @@ class UIProfileManager {
 
         // 更新最后登录时间
         this.updateLastLogin(userData.lastLogin);
+        
+        // 只使用本地缓存，不重新构建URL
+        this.updateAvatarFromCacheOnly(userData.avatar);
+    }
+
+    /**
+     * 更新个人资料显示
+     * @param {Object} userData - 用户数据
+     */
+    updateProfileDisplay(userData) {
+        if (!userData) {
+            return;
+        }
+
+        // 更新用户信息
+        this.updateUserInfo(userData);
+
+        // 更新存储信息
+        this.updateStorageInfo(userData.storageInfo);
+
+        // 更新最后登录时间
+        this.updateLastLogin(userData.lastLogin);
+        
+        // 更新头像，优先使用缓存
+        this.updateAvatarFromCacheOnly(userData.avatar);
+    }
+
+    /**
+     * 只使用本地缓存更新头像显示（不重新构建URL）
+     * @param {string} avatarUrl - 头像URL
+     */
+    updateAvatarFromCacheOnly(avatarUrl) {
+        // 只使用本地缓存，不重新构建URL
+        let cachedAvatar = null;
+        if (window.StorageManager && typeof window.StorageManager.getAvatar === 'function') {
+            cachedAvatar = window.StorageManager.getAvatar();
+        } else {
+            // 如果 StorageManager 未加载，使用 localStorage 作为备用
+            cachedAvatar = localStorage.getItem('cachedAvatar');
+        }
+        let finalUrl = null;
+        
+        if (cachedAvatar && cachedAvatar !== 'null' && cachedAvatar !== 'undefined') {
+            // 直接使用缓存的完整URL
+            finalUrl = cachedAvatar;
+        }
+        
+        // 先显示loading状态，避免闪烁
+        this.showAvatarLoading();
+        
+        // 更新所有头像元素
+        const avatarElements = document.querySelectorAll('.user-avatar, .avatar-img, #user-avatar, #profile-avatar');
+        
+        avatarElements.forEach((avatar, index) => {
+            if (avatar.tagName === 'IMG') {
+                if (finalUrl) {
+                    // 直接设置缓存的URL，不重新构建
+                    avatar.src = finalUrl;
+                    avatar.alt = '用户头像';
+                    avatar.classList.remove('hidden');
+                    avatar.style.display = 'block';
+                    avatar.style.visibility = 'visible';
+                    avatar.style.opacity = '1';
+                } else {
+                    // 没有有效头像时隐藏图片元素，不设置src避免请求
+                    avatar.style.display = 'none';
+                    avatar.src = ''; // 清空src避免请求
+                    this.hideAvatarLoading();
+                }
+            } else {
+                // 对于profile-avatar，需要特殊处理
+                if (avatar.id === 'profile-avatar') {
+                    const avatarImage = avatar.querySelector('#avatar-image');
+                    const avatarIcon = avatar.querySelector('#avatar-icon');
+                    if (avatarImage && avatarIcon) {
+                        if (finalUrl) {
+                            avatarImage.src = finalUrl;
+                            avatarImage.classList.remove('hidden');
+                            avatarIcon.classList.add('hidden');
+                            avatarImage.style.display = 'block';
+                            avatarImage.style.visibility = 'visible';
+                            avatarImage.style.opacity = '1';
+                            avatarIcon.style.display = 'none';
+                        } else {
+                            avatarImage.classList.add('hidden');
+                            avatarIcon.classList.remove('hidden');
+                            avatarImage.style.display = 'none';
+                            avatarIcon.style.display = 'block';
+                            avatarImage.src = ''; // 清空src避免请求
+                            this.hideAvatarLoading();
+                        }
+                    }
+                } else {
+                    if (finalUrl) {
+                        avatar.style.backgroundImage = `url(${finalUrl})`;
+                    }
+                    this.hideAvatarLoading();
+                }
+            }
+        });
+        
+        // 直接更新欢迎模块头像
+        const welcomeAvatarImage = document.getElementById('welcome-avatar-image');
+        const welcomeAvatarIcon = document.getElementById('welcome-avatar-icon');
+        
+        if (welcomeAvatarImage && welcomeAvatarIcon) {
+            if (finalUrl) {
+                welcomeAvatarImage.src = finalUrl;
+                welcomeAvatarImage.classList.remove('hidden');
+                welcomeAvatarIcon.classList.add('hidden');
+                welcomeAvatarImage.style.display = 'block';
+                welcomeAvatarImage.style.visibility = 'visible';
+                welcomeAvatarImage.style.opacity = '1';
+                welcomeAvatarIcon.style.display = 'none';
+            } else {
+                welcomeAvatarImage.classList.add('hidden');
+                welcomeAvatarIcon.classList.remove('hidden');
+                welcomeAvatarImage.style.display = 'none';
+                welcomeAvatarIcon.style.display = 'block';
+                welcomeAvatarImage.src = ''; // 清空src避免请求
+                this.hideAvatarLoading();
+            }
+        }
+        
+        // 直接更新顶栏头像
+        const topbarAvatar = document.getElementById('user-avatar');
+        if (topbarAvatar) {
+            if (finalUrl) {
+                topbarAvatar.src = finalUrl;
+                topbarAvatar.style.display = 'block';
+            } else {
+                topbarAvatar.style.display = 'none';
+                this.hideAvatarLoading();
+            }
+        }
+        
+        this.hideAvatarLoading();
+    }
+
+    /**
+     * 从缓存更新头像显示（不重新构建URL）
+     * @param {string} avatarUrl - 头像URL
+     */
+    updateAvatarFromCache(avatarUrl) {
+        // 优先从缓存恢复头像信息
+        const cachedAvatar = localStorage.getItem('cachedAvatar');
+        let finalUrl = null;
+        
+        if (cachedAvatar && cachedAvatar !== 'null' && cachedAvatar !== 'undefined') {
+            // 直接使用缓存的完整URL
+            finalUrl = cachedAvatar;
+        } else if (avatarUrl && avatarUrl !== 'null' && avatarUrl !== 'undefined') {
+            // 如果没有缓存，不构建URL，避免localhost错误
+            finalUrl = null;
+        }
+        
+        // 先显示loading状态，避免闪烁
+        this.showAvatarLoading();
+        
+        // 更新所有头像元素
+        const avatarElements = document.querySelectorAll('.user-avatar, .avatar-img, #user-avatar, #profile-avatar');
+        
+        avatarElements.forEach((avatar, index) => {
+            if (avatar.tagName === 'IMG') {
+                if (finalUrl) {
+                    // 直接设置缓存的URL，不重新构建
+                    avatar.src = finalUrl;
+                    avatar.alt = '用户头像';
+                    avatar.classList.remove('hidden');
+                    avatar.style.display = 'block';
+                    avatar.style.visibility = 'visible';
+                    avatar.style.opacity = '1';
+                } else {
+                    // 没有有效头像时隐藏图片元素，不设置src避免请求
+                    avatar.style.display = 'none';
+                    avatar.src = ''; // 清空src避免请求
+                    this.hideAvatarLoading();
+                }
+            } else {
+                // 对于profile-avatar，需要特殊处理
+                if (avatar.id === 'profile-avatar') {
+                    const avatarImage = avatar.querySelector('#avatar-image');
+                    const avatarIcon = avatar.querySelector('#avatar-icon');
+                    if (avatarImage && avatarIcon) {
+                        if (finalUrl) {
+                            avatarImage.src = finalUrl;
+                            avatarImage.classList.remove('hidden');
+                            avatarIcon.classList.add('hidden');
+                            avatarImage.style.display = 'block';
+                            avatarImage.style.visibility = 'visible';
+                            avatarImage.style.opacity = '1';
+                            avatarIcon.style.display = 'none';
+                        } else {
+                            avatarImage.classList.add('hidden');
+                            avatarIcon.classList.remove('hidden');
+                            avatarImage.style.display = 'none';
+                            avatarIcon.style.display = 'block';
+                            avatarImage.src = ''; // 清空src避免请求
+                            this.hideAvatarLoading();
+                        }
+                    }
+                } else {
+                    if (finalUrl) {
+                        avatar.style.backgroundImage = `url(${finalUrl})`;
+                    }
+                    this.hideAvatarLoading();
+                }
+            }
+        });
+        
+        // 直接更新欢迎模块头像
+        const welcomeAvatarImage = document.getElementById('welcome-avatar-image');
+        const welcomeAvatarIcon = document.getElementById('welcome-avatar-icon');
+        
+        if (welcomeAvatarImage && welcomeAvatarIcon) {
+            if (finalUrl) {
+                welcomeAvatarImage.src = finalUrl;
+                welcomeAvatarImage.classList.remove('hidden');
+                welcomeAvatarIcon.classList.add('hidden');
+                welcomeAvatarImage.style.display = 'block';
+                welcomeAvatarImage.style.visibility = 'visible';
+                welcomeAvatarImage.style.opacity = '1';
+                welcomeAvatarIcon.style.display = 'none';
+            } else {
+                welcomeAvatarImage.classList.add('hidden');
+                welcomeAvatarIcon.classList.remove('hidden');
+                welcomeAvatarImage.style.display = 'none';
+                welcomeAvatarIcon.style.display = 'block';
+                welcomeAvatarImage.src = ''; // 清空src避免请求
+                this.hideAvatarLoading();
+            }
+        }
+        
+        // 直接更新顶栏头像
+        const topbarAvatar = document.getElementById('user-avatar');
+        if (topbarAvatar) {
+            if (finalUrl) {
+                topbarAvatar.src = finalUrl;
+                topbarAvatar.style.display = 'block';
+            } else {
+                topbarAvatar.style.display = 'none';
+                this.hideAvatarLoading();
+            }
+        }
+        
+        this.hideAvatarLoading();
     }
 
     /**
@@ -194,40 +472,153 @@ class UIProfileManager {
      * @param {string} avatarUrl - 头像URL
      */
     updateAvatar(avatarUrl) {
-        
         // 确保头像URL包含正确的路径
         let finalUrl = avatarUrl;
+        let hasValidAvatar = true;
+        
         if (!finalUrl || finalUrl === 'null' || finalUrl === 'undefined') {
-            finalUrl = '/static/public/docs.png';
-        } else if (!finalUrl.startsWith('http') && !finalUrl.startsWith('/uploads/') && finalUrl !== '/static/public/docs.png') {
-            finalUrl = window.apiGateway?.buildUrl('/uploads/avatars/' + finalUrl) || ('/uploads/avatars/' + finalUrl);
+            hasValidAvatar = false;
+        } else if (!finalUrl.startsWith('http') && !finalUrl.startsWith('/static/') && finalUrl !== '/static/public/docs.png') {
+            // 不构建URL，避免localhost错误
+            hasValidAvatar = false;
         }
+        
+        // 只有在有有效头像时才缓存，避免缓存无效头像
+        if (hasValidAvatar && avatarUrl && avatarUrl !== 'null' && avatarUrl !== 'undefined' && avatarUrl !== '/static/public/docs.png') {
+            // 延迟缓存，等待头像加载成功后再缓存
+            const cacheAvatarOnSuccess = () => {
+                // 缓存完整的URL，而不是原始文件名
+                if (window.StorageManager && typeof window.StorageManager.setAvatar === 'function') {
+                    window.StorageManager.setAvatar(finalUrl);
+                } else {
+                    // 如果 StorageManager 未加载，直接更新 userInfo 中的头像URL
+                    const userData = localStorage.getItem('userInfo');
+                    if (userData) {
+                        try {
+                            const userInfo = JSON.parse(userData);
+                            userInfo.avatarUrl = finalUrl;
+                            localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                        } catch (error) {
+                            console.warn('更新头像URL失败:', error);
+                        }
+                    }
+                }
+                
+                // 同时更新用户数据中的头像信息，保存原始文件名
+                let userData = null;
+                if (window.StorageManager && typeof window.StorageManager.getUser === 'function') {
+                    userData = window.StorageManager.getUser();
+                } else {
+                    const userDataStr = localStorage.getItem('userInfo');
+                    if (userDataStr) {
+                        try {
+                            userData = JSON.parse(userDataStr);
+                        } catch (error) {
+                            console.error('🖼️ 解析用户数据失败:', error);
+                        }
+                    }
+                }
+                
+                if (userData) {
+                    try {
+                        userData.avatar = avatarUrl; // 保存原始文件名
+                        if (window.StorageManager && typeof window.StorageManager.setUser === 'function') {
+                            window.StorageManager.setUser(userData);
+                        } else {
+                            // 如果 StorageManager 未加载，直接使用新的键结构
+                            localStorage.setItem('userInfo', JSON.stringify(userData));
+                        }
+                    } catch (error) {
+                        console.error('🖼️ 更新用户数据失败:', error);
+                    }
+                }
+            };
+            
+            // 将缓存函数保存到实例中，供onload事件调用
+            this.cacheAvatarOnSuccess = cacheAvatarOnSuccess;
+        }
+        
+        // 先显示loading状态，避免闪烁
+        this.showAvatarLoading();
         
         // 更新所有头像元素
         const avatarElements = document.querySelectorAll('.user-avatar, .avatar-img, #user-avatar, #profile-avatar');
         
-        avatarElements.forEach(avatar => {
+        avatarElements.forEach((avatar, index) => {
             if (avatar.tagName === 'IMG') {
-                avatar.src = finalUrl;
-                avatar.alt = '用户头像';
-                avatar.classList.remove('hidden');
+                if (hasValidAvatar) {
+                    // 设置加载事件
+                    avatar.onload = () => {
+                        this.hideAvatarLoading();
+                        // 头像加载成功时缓存
+                        if (this.cacheAvatarOnSuccess) {
+                            this.cacheAvatarOnSuccess();
+                        }
+                    };
+                    avatar.onerror = () => {
+                        // 加载失败时隐藏头像，显示默认图标
+                        avatar.style.display = 'none';
+                        this.hideAvatarLoading();
+                    };
+                    avatar.src = finalUrl;
+                    avatar.alt = '用户头像';
+                    avatar.classList.remove('hidden');
+                    // 强制设置样式确保显示
+                    avatar.style.display = 'block';
+                    avatar.style.visibility = 'visible';
+                    avatar.style.opacity = '1';
+                } else {
+                    // 没有有效头像时隐藏图片元素，不设置src避免请求
+                    avatar.style.display = 'none';
+                    avatar.src = ''; // 清空src避免请求
+                    this.hideAvatarLoading();
+                }
             } else {
                 // 对于profile-avatar，需要特殊处理
                 if (avatar.id === 'profile-avatar') {
                     const avatarImage = avatar.querySelector('#avatar-image');
                     const avatarIcon = avatar.querySelector('#avatar-icon');
                     if (avatarImage && avatarIcon) {
-                        if (finalUrl && finalUrl !== '/static/public/docs.png') {
+                        if (hasValidAvatar) {
+                            // 设置加载事件
+                            avatarImage.onload = () => {
+                                this.hideAvatarLoading();
+                                // 头像加载成功时缓存
+                                if (this.cacheAvatarOnSuccess) {
+                                    this.cacheAvatarOnSuccess();
+                                }
+                            };
+                            avatarImage.onerror = () => {
+                                // 加载失败时显示默认图标
+                                avatarImage.classList.add('hidden');
+                                avatarIcon.classList.remove('hidden');
+                                avatarImage.style.display = 'none';
+                                avatarIcon.style.display = 'block';
+                                this.hideAvatarLoading();
+                            };
                             avatarImage.src = finalUrl;
                             avatarImage.classList.remove('hidden');
                             avatarIcon.classList.add('hidden');
+                            // 强制设置样式确保显示
+                            avatarImage.style.display = 'block';
+                            avatarImage.style.visibility = 'visible';
+                            avatarImage.style.opacity = '1';
+                            avatarIcon.style.display = 'none';
                         } else {
+                            // 没有有效头像时显示默认图标，不设置src避免请求
                             avatarImage.classList.add('hidden');
                             avatarIcon.classList.remove('hidden');
+                            avatarImage.style.display = 'none';
+                            avatarIcon.style.display = 'block';
+                            avatarImage.src = ''; // 清空src避免请求
+                            this.hideAvatarLoading();
                         }
                     }
                 } else {
-                    avatar.style.backgroundImage = `url(${finalUrl})`;
+                    if (hasValidAvatar) {
+                        avatar.style.backgroundImage = `url(${finalUrl})`;
+                    }
+                    this.hideAvatarLoading();
                 }
             }
         });
@@ -236,26 +627,142 @@ class UIProfileManager {
         const welcomeAvatarImage = document.getElementById('avatar-image');
         const welcomeAvatarIcon = document.getElementById('avatar-icon');
         if (welcomeAvatarImage && welcomeAvatarIcon) {
-            if (finalUrl && finalUrl !== '/static/public/docs.png') {
+            if (hasValidAvatar) {
+                // 设置加载事件
+                welcomeAvatarImage.onload = () => {
+                    this.hideAvatarLoading();
+                    // 头像加载成功时缓存
+                    if (this.cacheAvatarOnSuccess) {
+                        this.cacheAvatarOnSuccess();
+                    }
+                };
+                welcomeAvatarImage.onerror = () => {
+                    // 加载失败时显示默认图标
+                    welcomeAvatarImage.classList.add('hidden');
+                    welcomeAvatarIcon.classList.remove('hidden');
+                    welcomeAvatarImage.style.display = 'none';
+                    welcomeAvatarIcon.style.display = 'block';
+                    this.hideAvatarLoading();
+                };
                 welcomeAvatarImage.src = finalUrl;
                 welcomeAvatarImage.classList.remove('hidden');
                 welcomeAvatarIcon.classList.add('hidden');
+                // 强制设置样式确保显示
+                welcomeAvatarImage.style.display = 'block';
+                welcomeAvatarImage.style.visibility = 'visible';
+                welcomeAvatarImage.style.opacity = '1';
+                welcomeAvatarIcon.style.display = 'none';
             } else {
+                // 没有有效头像时显示默认图标，不设置src避免请求
                 welcomeAvatarImage.classList.add('hidden');
                 welcomeAvatarIcon.classList.remove('hidden');
+                welcomeAvatarImage.style.display = 'none';
+                welcomeAvatarIcon.style.display = 'block';
+                welcomeAvatarImage.src = ''; // 清空src避免请求
+                this.hideAvatarLoading();
+            }
+        } else {
+            // 备用方案：通过profile-avatar容器查找
+            const profileAvatar = document.getElementById('profile-avatar');
+            if (profileAvatar) {
+                const avatarImage = profileAvatar.querySelector('#avatar-image');
+                const avatarIcon = profileAvatar.querySelector('#avatar-icon');
+                if (avatarImage && avatarIcon) {
+                    if (hasValidAvatar) {
+                        // 设置加载事件
+                        avatarImage.onload = () => {
+                            this.hideAvatarLoading();
+                            // 头像加载成功时缓存
+                            if (this.cacheAvatarOnSuccess) {
+                                this.cacheAvatarOnSuccess();
+                            }
+                        };
+                        avatarImage.onerror = () => {
+                            // 加载失败时显示默认图标
+                            avatarImage.classList.add('hidden');
+                            avatarIcon.classList.remove('hidden');
+                            avatarImage.style.display = 'none';
+                            avatarIcon.style.display = 'block';
+                            this.hideAvatarLoading();
+                        };
+                        avatarImage.src = finalUrl;
+                        avatarImage.classList.remove('hidden');
+                        avatarIcon.classList.add('hidden');
+                        // 强制设置样式确保显示
+                        avatarImage.style.display = 'block';
+                        avatarImage.style.visibility = 'visible';
+                        avatarImage.style.opacity = '1';
+                        avatarIcon.style.display = 'none';
+                    } else {
+                        // 没有有效头像时显示默认图标，不设置src避免请求
+                        avatarImage.classList.add('hidden');
+                        avatarIcon.classList.remove('hidden');
+                        avatarImage.style.display = 'none';
+                        avatarIcon.style.display = 'block';
+                        avatarImage.src = ''; // 清空src避免请求
+                        this.hideAvatarLoading();
+                    }
+                }
             }
         }
 
         // 更新顶栏头像
         const topbarAvatar = document.getElementById('user-avatar');
         if (topbarAvatar) {
-            topbarAvatar.src = finalUrl;
-            topbarAvatar.alt = '用户头像';
-            topbarAvatar.classList.remove('hidden');
+            if (hasValidAvatar) {
+                // 设置加载事件
+                topbarAvatar.onload = () => {
+                    this.hideAvatarLoading();
+                    // 头像加载成功时缓存
+                    if (this.cacheAvatarOnSuccess) {
+                        this.cacheAvatarOnSuccess();
+                    }
+                };
+                topbarAvatar.onerror = () => {
+                    // 加载失败时隐藏头像
+                    topbarAvatar.style.display = 'none';
+                    this.hideAvatarLoading();
+                };
+                topbarAvatar.src = finalUrl;
+                topbarAvatar.alt = '用户头像';
+                topbarAvatar.classList.remove('hidden');
+                // 强制设置样式确保显示
+                topbarAvatar.style.display = 'block';
+                topbarAvatar.style.visibility = 'visible';
+                topbarAvatar.style.opacity = '1';
+            } else {
+                // 没有有效头像时隐藏图片元素，不设置src避免请求
+                topbarAvatar.style.display = 'none';
+                topbarAvatar.src = ''; // 清空src避免请求
+                this.hideAvatarLoading();
+            }
         }
         
         // 同时更新个人资料弹窗中的头像
         this.updateProfileModalAvatar(finalUrl);
+    }
+    
+    /**
+     * 显示头像加载状态
+     */
+    showAvatarLoading() {
+        // 为头像元素添加loading样式
+        const avatarElements = document.querySelectorAll('#avatar-image, #user-avatar');
+        avatarElements.forEach(element => {
+            element.style.opacity = '0.5';
+            element.style.transition = 'opacity 0.3s ease';
+        });
+    }
+    
+    /**
+     * 隐藏头像加载状态
+     */
+    hideAvatarLoading() {
+        // 移除loading样式
+        const avatarElements = document.querySelectorAll('#avatar-image, #user-avatar');
+        avatarElements.forEach(element => {
+            element.style.opacity = '1';
+        });
     }
 
     /**
@@ -481,6 +988,8 @@ class UIProfileManager {
                 profileAvatarImage.src = previewUrl;
                 profileAvatarImage.classList.remove('hidden');
                 profileAvatarIcon.classList.add('hidden');
+                profileAvatarImage.style.display = 'block';
+                profileAvatarIcon.style.display = 'none';
             }
             
             // 更新欢迎模块的头像
@@ -491,6 +1000,8 @@ class UIProfileManager {
                 welcomeAvatarImage.src = previewUrl;
                 welcomeAvatarImage.classList.remove('hidden');
                 welcomeAvatarIcon.classList.add('hidden');
+                welcomeAvatarImage.style.display = 'block';
+                welcomeAvatarIcon.style.display = 'none';
             } else {
                 // 尝试通过profile-avatar查找
                 const profileAvatar = document.getElementById('profile-avatar');
@@ -501,6 +1012,8 @@ class UIProfileManager {
                         avatarImage.src = previewUrl;
                         avatarImage.classList.remove('hidden');
                         avatarIcon.classList.add('hidden');
+                        avatarImage.style.display = 'block';
+                        avatarIcon.style.display = 'none';
                     }
                 }
             }
@@ -516,44 +1029,122 @@ class UIProfileManager {
     async uploadAvatar(file) {
         const formData = new FormData();
         formData.append('avatar', file);
+        
 
-        // 获取当前用户ID - 从localStorage或当前用户数据中获取
+
+        // 获取当前用户ID - 使用多种可靠的方式
         let userId = null;
-        const userData = this.getCurrentUser();
-        if (userData?.uuid) {
-            userId = userData.uuid;
-        } else if (userData?.id) {
-            userId = userData.id;
-        } else {
-            // 从localStorage中获取用户ID
-            const storedUser = localStorage.getItem('user');
+        
+        // 方式1: 从API系统获取（最可靠）
+        if (window.apiSystem && typeof window.apiSystem.getCurrentUserId === 'function') {
+            userId = window.apiSystem.getCurrentUserId();
+        }
+        
+        // 方式2: 从localStorage获取userInfo（与登录系统一致）
+        if (!userId) {
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                try {
+                    const user = JSON.parse(userInfo);
+                    userId = user.uuid || user.id;
+                } catch (e) {
+                    console.warn('解析userInfo失败:', e);
+                }
+            }
+        }
+        
+        // 方式3: 从认证系统获取
+        if (!userId && window.authSystem && typeof window.authSystem.getCurrentUser === 'function') {
+            const currentUser = window.authSystem.getCurrentUser();
+            userId = currentUser?.uuid || currentUser?.id;
+        }
+        
+        // 方式4: 从当前用户数据获取
+        if (!userId) {
+            const userData = this.getCurrentUser();
+            if (userData?.uuid) {
+                userId = userData.uuid;
+            } else if (userData?.id) {
+                userId = userData.id;
+            }
+        }
+        
+        // 方式5: 从localStorage获取currentUser（兼容旧版本）
+        if (!userId) {
+            const storedUser = localStorage.getItem('currentUser');
             if (storedUser) {
                 try {
                     const parsedUser = JSON.parse(storedUser);
                     userId = parsedUser.uuid || parsedUser.id;
                 } catch (e) {
+                    console.warn('解析currentUser失败:', e);
                 }
             }
         }
 
         if (!userId) {
+            console.error('无法获取用户ID，尝试的所有方式都失败了');
             throw new Error('无法获取用户ID');
         }
+        
+
         
         const response = await window.apiGateway.upload(`/api/profile/avatar?user_id=${userId}`, formData);
 
         if (!response.ok) {
-            const errorData = await response.json();
-            const errorMessage = errorData.error || '上传失败';
+            let errorMessage = '上传失败';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.error || errorMessage;
+            } catch (e) {
+                console.error('解析错误响应失败:', e);
+                errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+            }
+            console.error('头像上传失败详情:', {
+                status: response.status,
+                statusText: response.statusText,
+                errorMessage: errorMessage
+            });
             throw new Error(errorMessage);
         }
 
         const result = await response.json();
         const avatarFileName = result.avatar_url || result.avatarUrl;
         
-        // 构建完整的头像URL
+        // 构建完整的头像URL并更新缓存
         if (avatarFileName) {
-            return window.apiGateway?.buildUrl('/uploads/avatars/' + avatarFileName) || ('/uploads/avatars/' + avatarFileName);
+            const fullAvatarUrl = window.apiGateway?.buildUrl('/uploads/avatars/' + avatarFileName) || ('/uploads/avatars/' + avatarFileName);
+            
+            // 更新本地缓存到用户信息中
+            if (window.StorageManager && typeof window.StorageManager.setAvatar === 'function') {
+                window.StorageManager.setAvatar(fullAvatarUrl);
+            } else {
+                // 如果 StorageManager 未加载，直接更新 userInfo 中的头像URL
+                const userData = localStorage.getItem('userInfo');
+                if (userData) {
+                    try {
+                        const userInfo = JSON.parse(userData);
+                        userInfo.avatarUrl = fullAvatarUrl;
+                        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                    } catch (error) {
+                        console.warn('更新头像URL失败:', error);
+                    }
+                }
+            }
+            
+            // 更新用户数据
+            const userDataStr = localStorage.getItem('userInfo');
+            if (userDataStr) {
+                try {
+                    const userData = JSON.parse(userDataStr);
+                    userData.avatar = avatarFileName; // 保存原始文件名
+                    localStorage.setItem('userInfo', JSON.stringify(userData));
+                } catch (error) {
+                    console.error('更新用户数据失败:', error);
+                }
+            }
+            
+            return fullAvatarUrl;
         }
         
         return avatarFileName;
@@ -564,7 +1155,10 @@ class UIProfileManager {
      */
     toggleEditMode() {
         if (this.isEditing) {
-            this.saveProfile();
+            // 如果正在保存中，不重复调用
+            if (!this._isSavingProfile) {
+                this.saveProfile();
+            }
         } else {
             this.startEditMode();
         }
@@ -594,9 +1188,15 @@ class UIProfileManager {
      * 保存个人资料
      */
     async saveProfile() {
+        // 防重复提交
+        if (this._isSavingProfile) {
+            return;
+        }
+        this._isSavingProfile = true;
         
         // 验证表单
         if (!this.validateProfileForm()) {
+            this._isSavingProfile = false;
             return;
         }
 
@@ -634,6 +1234,8 @@ class UIProfileManager {
             } else if (window.showMessage) {
                 window.showMessage('更新失败: ' + error.message, 'error');
             }
+        } finally {
+            this._isSavingProfile = false;
         }
     }
 
@@ -968,20 +1570,22 @@ class UIProfileManager {
         const now = new Date();
         const diffInMinutes = Math.floor((now - date) / (1000 * 60));
         
-        if (diffInMinutes < 1) {
-            return '刚刚';
-        } else if (diffInMinutes < 60) {
-            return `${diffInMinutes}分钟前`;
+        if (diffInMinutes < 60) {
+            // 1小时以内显示"xx分钟前"
+            if (diffInMinutes < 1) {
+                return '刚刚';
+            } else {
+                return `${diffInMinutes}分钟前`;
+            }
         } else {
-            // 超过1小时显示完整时间格式
-            return date.toLocaleString('zh-CN', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
+            // 1小时以外显示具体时间，使用 yyyy-mm-dd hh:mm 格式
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
         }
     }
 
@@ -1008,11 +1612,20 @@ class UIProfileManager {
      * 检查是否为管理员
      * @returns {boolean} 是否为管理员
      */
-    isAdmin() {
-        const currentUser = this.getCurrentUser();
-        // 只检查 isAdmin 字段
-        const isAdmin = currentUser?.isAdmin === true;
-        return isAdmin;
+    async isAdmin() {
+        try {
+            // 使用token验证管理员权限
+            if (window.tokenManager && typeof window.tokenManager.validateAdminTokens === 'function') {
+                return await window.tokenManager.validateAdminTokens();
+            } else {
+                // 兼容性处理：检查当前用户是否为管理员用户（Mose）
+                const currentUser = this.getCurrentUser();
+                return currentUser && currentUser.username === 'Mose';
+            }
+        } catch (error) {
+            console.error('验证管理员权限失败:', error);
+            return false;
+        }
     }
 
     /**
@@ -1089,13 +1702,19 @@ class UIProfileManager {
         modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/60';
         modal.setAttribute('data-modal', 'profile');
         
-        // 准备头像URL
+        // 准备头像URL - 优先使用缓存
         let avatarUrl = '/static/public/docs.png';
-        if (userData && userData.avatar) {
-            if (!userData.avatar.startsWith('http') && !userData.avatar.startsWith('/uploads/')) {
-                avatarUrl = window.apiGateway?.buildUrl('/uploads/avatars/' + userData.avatar) || ('/uploads/avatars/' + userData.avatar);
+        const cachedAvatar = localStorage.getItem('cachedAvatar');
+        
+        if (cachedAvatar && cachedAvatar !== 'null' && cachedAvatar !== 'undefined') {
+            // 直接使用缓存的完整URL
+            avatarUrl = cachedAvatar;
+        } else if (userData && userData.avatar && userData.avatar !== 'null' && userData.avatar !== 'undefined') {
+            // 构建头像URL
+            if (window.apiGateway && typeof window.apiGateway.buildUrl === 'function') {
+                avatarUrl = window.apiGateway.buildUrl('/uploads/avatars/' + userData.avatar);
             } else {
-                avatarUrl = userData.avatar;
+                avatarUrl = '/uploads/avatars/' + userData.avatar;
             }
         }
 
@@ -1112,39 +1731,39 @@ class UIProfileManager {
                     <!-- 头像上传区域 -->
                     <div class="flex flex-col items-center space-y-3">
                         <div class="relative group">
-                            <div class="w-20 h-20 bg-gradient-to-br from-purple-light to-blue-light rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:scale-105 transition-transform duration-300" id="profile-avatar-upload">
-                                <i class="fa fa-user-circle text-3xl text-white" id="profile-avatar-icon" ${avatarUrl !== '/static/public/docs.png' ? 'style="display: none;"' : ''}></i>
-                                <img id="profile-avatar-image" class="w-full h-full rounded-full object-cover ${avatarUrl === '/static/public/docs.png' ? 'hidden' : ''}" src="${avatarUrl}" alt="头像">
+                            <div class="w-20 h-20 bg-gradient-to-br from-purple-light to-blue-light rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:scale-105 transition-transform duration-300" id="profile-avatar-preview" onclick="window.uiManager.profileManager.showAvatarPreviewModal();">
+                                <i class="fa fa-user-circle text-3xl" id="profile-avatar-icon" ${avatarUrl !== '/static/public/docs.png' ? 'style="display: none;"' : ''}></i>
+                                <img id="profile-avatar-image" class="w-full h-full rounded-full object-cover ${avatarUrl === '/static/public/docs.png' ? 'hidden' : ''}" src="${avatarUrl}" alt="头像" ${avatarUrl === '/static/public/docs.png' ? 'style="display: none;"' : 'style="display: block;"'}>
                             </div>
-                            <!-- 悬停时显示的编辑遮罩 -->
-                            <div class="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                <i class="fa fa-camera text-white text-sm"></i>
+                            <!-- 悬停时显示的预览遮罩 -->
+                            <div class="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                                <i class="fa fa-eye text-sm"></i>
                             </div>
-                            <!-- 点击上传按钮 -->
-                            <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-r from-purple-500/80 to-blue-500/80 hover:from-purple-500 hover:to-blue-500 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-all duration-300 shadow-lg" id="avatar-upload-btn" title="更换头像">
-                                <i class="fa fa-pencil text-white text-xs"></i>
+                            <!-- 点击编辑按钮 -->
+                            <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-r from-purple-500/80 to-blue-500/80 hover:from-purple-500 hover:to-blue-500 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-all duration-300 shadow-lg" id="avatar-upload-btn" title="更换头像" onclick="event.stopPropagation(); window.uiManager.profileManager.triggerAvatarUpload();">
+                                <i class="fa fa-pencil text-xs"></i>
                             </div>
                         </div>
                         <input type="file" id="avatar-file-input" class="hidden" accept="image/*">
-                        <p class="text-xs text-gray-400 text-center">悬停头像或点击编辑按钮更换头像</p>
+                        <p class="text-xs text-gray-400 text-center">点击头像预览，点击编辑按钮更换头像</p>
                     </div>
                     
                     <!-- 用户名输入 -->
                     <div>
                         <label for="profile-username-input" class="block text-sm font-medium text-gray-300 mb-2">用户名</label>
-                        <input type="text" id="profile-username-input" class="w-full px-3 py-2 bg-dark-light/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-purple-light/50 focus:outline-none transition-colors text-sm" placeholder="请输入用户名" value="${userData ? (userData.username || '') : ''}">
+                        <input type="text" id="profile-username-input" class="w-full px-3 py-2 bg-dark-light/50 border border-gray-600/50 rounded-lg placeholder-gray-400 focus:border-purple-light/50 focus:outline-none transition-colors text-sm" placeholder="请输入用户名" value="${userData ? (userData.username || '') : ''}">
                     </div>
                     
                     <!-- 邮箱输入 -->
                     <div>
                         <label for="profile-email-input" class="block text-sm font-medium text-gray-300 mb-2">邮箱</label>
-                        <input type="email" id="profile-email-input" class="w-full px-3 py-2 bg-dark-light/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-purple-light/50 focus:outline-none transition-colors text-sm" placeholder="请输入邮箱" value="${userData ? (userData.email || '') : ''}">
+                        <input type="email" id="profile-email-input" class="w-full px-3 py-2 bg-dark-light/50 border border-gray-600/50 rounded-lg placeholder-gray-400 focus:border-purple-light/50 focus:outline-none transition-colors text-sm" placeholder="请输入邮箱" value="${userData ? (userData.email || '') : ''}">
                     </div>
                     
                     <!-- 个人简介 -->
                     <div>
                         <label for="profile-bio-input" class="block text-sm font-medium text-gray-300 mb-2">个人简介</label>
-                        <textarea id="profile-bio-input" rows="3" class="w-full px-3 py-2 bg-dark-light/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-purple-light/50 focus:outline-none transition-colors resize-none text-sm" placeholder="请输入个人简介（可选）">${userData ? (userData.bio || userData.description || '') : ''}</textarea>
+                        <textarea id="profile-bio-input" rows="3" class="w-full px-3 py-2 bg-dark-light/50 border border-gray-600/50 rounded-lg placeholder-gray-400 focus:border-purple-light/50 focus:outline-none transition-colors resize-none text-sm" placeholder="请输入个人简介（可选）">${userData ? (userData.bio || userData.description || '') : ''}</textarea>
                     </div>
                 </div>
                 
@@ -1152,7 +1771,7 @@ class UIProfileManager {
                     <button id="cancel-profile-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors text-sm">
                         取消
                     </button>
-                    <button id="save-profile-btn" class="px-4 py-2 bg-gradient-to-r from-purple-500/80 to-blue-500/80 hover:from-purple-500 hover:to-blue-500 text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-[1.03] text-sm">
+                    <button id="save-profile-btn" class="px-4 py-2 bg-gradient-to-r from-purple-500/80 to-blue-500/80 hover:from-purple-500 hover:to-blue-500 rounded-lg shadow-md transition-all duration-300 transform hover:scale-[1.03] text-sm">
                         <i class="fa fa-save mr-1"></i> 保存资料
                     </button>
                 </div>
@@ -1266,37 +1885,52 @@ class UIProfileManager {
      * 获取当前用户ID
      */
     getCurrentUserId() {
+        // 方式1: 从API系统获取（最可靠）
+        if (window.apiSystem && typeof window.apiSystem.getCurrentUserId === 'function') {
+            const userId = window.apiSystem.getCurrentUserId();
+            if (userId) {
+                return userId;
+            }
+        }
         
-        // 从localStorage获取用户ID - 使用userData键（与ui.js一致）
-        const storedUser = localStorage.getItem('userData');
-        
-        if (storedUser) {
+        // 方式2: 从localStorage获取userInfo（与登录系统一致）
+        const userInfo = localStorage.getItem('userInfo');
+        if (userInfo) {
             try {
-                const parsedUser = JSON.parse(storedUser);
-                
+                const parsedUser = JSON.parse(userInfo);
                 const userId = parsedUser.uuid || parsedUser.id;
                 if (userId) {
                     return userId;
                 }
             } catch (e) {
+                console.warn('解析userInfo失败:', e);
             }
         }
         
-        // 备用：从currentUser获取
+        // 方式3: 从认证系统获取
+        if (window.authSystem && typeof window.authSystem.getCurrentUser === 'function') {
+            const currentUser = window.authSystem.getCurrentUser();
+            const userId = currentUser?.uuid || currentUser?.id;
+            if (userId) {
+                return userId;
+            }
+        }
+        
+        // 方式4: 从localStorage获取currentUser（兼容旧版本）
         const currentUser = localStorage.getItem('currentUser');
         if (currentUser) {
             try {
                 const parsedCurrentUser = JSON.parse(currentUser);
-                
                 const userId = parsedCurrentUser.uuid || parsedCurrentUser.id;
                 if (userId) {
                     return userId;
                 }
             } catch (e) {
+                console.warn('解析currentUser失败:', e);
             }
         }
         
-        // 从当前用户数据获取
+        // 方式5: 从当前用户数据获取
         if (this.currentUser) {
             const userId = this.currentUser.uuid || this.currentUser.id;
             if (userId) {
@@ -1304,14 +1938,14 @@ class UIProfileManager {
             }
         }
         
-        // 尝试从URL参数获取
+        // 方式6: 尝试从URL参数获取
         const urlParams = new URLSearchParams(window.location.search);
         const userIdFromUrl = urlParams.get('user_id');
         if (userIdFromUrl) {
             return userIdFromUrl;
         }
         
-        // 尝试从页面元素获取
+        // 方式7: 尝试从页面元素获取
         const userElements = document.querySelectorAll('[data-user-id]');
         if (userElements.length > 0) {
             const userIdFromElement = userElements[0].getAttribute('data-user-id');
@@ -1350,17 +1984,8 @@ class UIProfileManager {
             bioInput.value = userData.bio || userData.description || '';
         }
         
-        // 头像
-        if (userData.avatar) {
-            // 确保头像URL包含正确的路径
-            let avatarUrl = userData.avatar;
-            if (!avatarUrl.startsWith('http') && !avatarUrl.startsWith('/uploads/')) {
-                avatarUrl = window.apiGateway?.buildUrl('/uploads/avatars/' + avatarUrl) || ('/uploads/avatars/' + avatarUrl);
-            }
-            this.updateProfileModalAvatar(avatarUrl);
-        } else {
-            this.updateProfileModalAvatar(null);
-        }
+        // 头像 - 优先使用缓存
+        this.updateProfileModalAvatar(userData.avatar);
         
     }
 
@@ -1370,23 +1995,36 @@ class UIProfileManager {
         const profileAvatarIcon = document.getElementById('profile-avatar-icon');
         
         if (profileAvatarImage && profileAvatarIcon) {
-            if (avatarUrl && avatarUrl !== '/static/public/docs.png' && avatarUrl !== 'null' && avatarUrl !== 'undefined') {
-                // 确保头像URL包含正确的路径
-                let fullAvatarUrl = avatarUrl;
-                if (!avatarUrl.startsWith('http') && !avatarUrl.startsWith('/uploads/')) {
-                    fullAvatarUrl = window.apiGateway?.buildUrl('/uploads/avatars/' + avatarUrl) || ('/uploads/avatars/' + avatarUrl);
-                } else if (avatarUrl.startsWith('/uploads/')) {
-                    fullAvatarUrl = avatarUrl;
+            // 优先从缓存恢复头像信息
+            const cachedAvatar = localStorage.getItem('cachedAvatar');
+            let fullAvatarUrl = null;
+            
+            if (cachedAvatar && cachedAvatar !== 'null' && cachedAvatar !== 'undefined') {
+                // 直接使用缓存的完整URL
+                fullAvatarUrl = cachedAvatar;
+            } else if (avatarUrl && avatarUrl !== 'null' && avatarUrl !== 'undefined') {
+                // 构建头像URL
+                if (window.apiGateway && typeof window.apiGateway.buildUrl === 'function') {
+                    fullAvatarUrl = window.apiGateway.buildUrl('/uploads/avatars/' + avatarUrl);
+                } else {
+                    fullAvatarUrl = '/uploads/avatars/' + avatarUrl;
                 }
-                
+            }
+            
+            if (fullAvatarUrl && fullAvatarUrl !== '/uploads/avatars/null' && fullAvatarUrl !== '/uploads/avatars/undefined') {
                 // 有头像时显示图片
                 profileAvatarImage.src = fullAvatarUrl;
                 profileAvatarImage.classList.remove('hidden');
                 profileAvatarIcon.classList.add('hidden');
+                profileAvatarImage.style.display = 'block';
+                profileAvatarIcon.style.display = 'none';
             } else {
-                // 没有头像时显示默认图标
+                // 没有头像时显示默认图标，不设置src避免请求
                 profileAvatarImage.classList.add('hidden');
                 profileAvatarIcon.classList.remove('hidden');
+                profileAvatarImage.src = ''; // 清空src避免请求
+                profileAvatarImage.style.display = 'none';
+                profileAvatarIcon.style.display = 'block';
             }
         }
     }
@@ -1407,19 +2045,23 @@ class UIProfileManager {
     bindWelcomeAvatarEvents() {
         // 延迟绑定，确保DOM已加载
         setTimeout(() => {
-            // 绑定欢迎模块头像点击事件 - 直接触发头像上传
+            // 绑定欢迎模块头像点击事件 - 显示头像预览
             const welcomeAvatar = document.getElementById('profile-avatar');
             if (welcomeAvatar) {
                 // 移除可能存在的旧事件监听器
                 if (this.welcomeAvatarClickHandler) {
                     welcomeAvatar.removeEventListener('click', this.welcomeAvatarClickHandler);
                 }
-                welcomeAvatar.addEventListener('click', this.welcomeAvatarClickHandler = () => {
-                    this.triggerAvatarUpload();
+                welcomeAvatar.addEventListener('click', this.welcomeAvatarClickHandler = (e) => {
+                    // 如果点击的是编辑图标，不触发预览
+                    if (e.target.closest('.edit-icon')) {
+                        return;
+                    }
+                    this.showAvatarPreviewModal();
                 });
             }
 
-            // 绑定编辑图标点击事件 - 直接触发头像上传
+            // 绑定编辑图标点击事件 - 触发头像上传
             const editIcons = document.querySelectorAll('.edit-icon');
             
             editIcons.forEach((editIcon, index) => {
@@ -1433,6 +2075,101 @@ class UIProfileManager {
                 });
             });
         }, 100);
+    }
+
+    /**
+     * 显示头像预览模态框
+     */
+    showAvatarPreviewModal() {
+        // 获取当前头像URL
+        let avatarUrl = null;
+        const cachedAvatar = localStorage.getItem('cachedAvatar');
+        
+        if (cachedAvatar && cachedAvatar !== 'null' && cachedAvatar !== 'undefined') {
+            avatarUrl = cachedAvatar;
+        } else {
+            // 如果没有缓存，尝试从当前用户数据获取
+            const userData = this.getCurrentUser();
+            if (userData && userData.avatar) {
+                if (window.apiGateway && typeof window.apiGateway.buildUrl === 'function') {
+                    avatarUrl = window.apiGateway.buildUrl('/uploads/avatars/' + userData.avatar);
+                } else {
+                    avatarUrl = '/uploads/avatars/' + userData.avatar;
+                }
+            }
+        }
+
+        // 如果没有头像，显示提示
+        if (!avatarUrl || avatarUrl === '/uploads/avatars/null' || avatarUrl === '/uploads/avatars/undefined') {
+            if (window.MessageBox && window.MessageBox.show) {
+                window.MessageBox.show({
+                    message: '暂无头像，请先上传头像',
+                    type: 'info',
+                    duration: 3000
+                });
+            } else if (window.$utils && window.$utils.showMessage) {
+                window.$utils.showMessage('暂无头像，请先上传头像', 'info');
+            } else if (window.showMessage) {
+                window.showMessage('暂无头像，请先上传头像', 'info');
+            }
+            return;
+        }
+
+        // 创建预览模态框
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/90 z-50 flex items-center justify-center';
+        modal.setAttribute('data-modal', 'avatar-preview');
+        
+        modal.innerHTML = `
+            <div class="relative w-full h-full flex items-center justify-center p-4">
+                <!-- 关闭按钮 -->
+                <button class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-20 transition-colors" onclick="this.closest('.fixed').remove()">
+                    <i class="fa fa-times"></i>
+                </button>
+                
+                <!-- 头像预览 -->
+                <div class="relative max-w-4xl max-h-full">
+                    <img src="${avatarUrl}" alt="头像预览" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="hidden flex items-center justify-center w-full h-full min-h-[300px]">
+                        <div class="text-center text-white">
+                            <i class="fa fa-image text-6xl mb-4 opacity-50"></i>
+                            <p class="text-lg">头像加载失败</p>
+                            <p class="text-sm opacity-75">文件可能不存在或格式不支持</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 底部操作按钮 -->
+                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-4">
+                    <button class="px-4 py-2 bg-gradient-to-r from-purple-500/80 to-blue-500/80 hover:from-purple-500 hover:to-blue-500 rounded-lg text-white transition-all duration-300 transform hover:scale-105" 
+                            onclick="window.uiManager.profileManager.triggerAvatarUpload(); this.closest('.fixed').remove();">
+                        <i class="fa fa-upload mr-2"></i>更换头像
+                    </button>
+                    <button class="px-4 py-2 bg-gray-600/80 hover:bg-gray-600 rounded-lg text-white transition-all duration-300" 
+                            onclick="this.closest('.fixed').remove();">
+                        关闭
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // 点击背景关闭模态框
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+        
+        // ESC键关闭模态框
+        document.addEventListener('keydown', function closeOnEsc(e) {
+            if (e.key === 'Escape') {
+                modal.remove();
+                document.removeEventListener('keydown', closeOnEsc);
+            }
+        });
     }
 }
 

@@ -55,4 +55,7 @@ class Auth {
         this.core.clearUserData();
         return { success: true, message: '已退出登录' };
     }
-} 
+}
+
+// 导出Auth类到全局作用域
+window.Auth = Auth; 

@@ -10,11 +10,18 @@ class ApiGateway {
     }
 
     init() {
-        // 延迟初始化，确保环境配置已准备好
-        setTimeout(() => {
-            this.updateBaseUrl();
+        // 立即尝试初始化，如果环境配置已准备好
+        this.updateBaseUrl();
+        
+        // 如果baseUrl为空，延迟重试
+        if (!this.baseUrl) {
+            setTimeout(() => {
+                this.updateBaseUrl();
+                this.isInitialized = true;
+            }, 100);
+        } else {
             this.isInitialized = true;
-        }, 100);
+        }
     }
 
     // 更新baseUrl（用于环境切换）
@@ -54,37 +61,102 @@ class ApiGateway {
 
     // 通用请求方法
     async request(endpoint, options = {}) {
+        // 等待API网关初始化完成
+        if (!this.isInitialized) {
+            await new Promise((resolve) => {
+                const checkInit = () => {
+                    if (this.isInitialized) {
+                        resolve();
+                    } else {
+                        setTimeout(checkInit, 50);
+                    }
+                };
+                checkInit();
+            });
+        }
+        
         const url = this.buildUrl(endpoint);
         
-        // 设置默认headers
-        const headers = {
-            'Content-Type': 'application/json',
-            ...options.headers
-        };
-
-        // 添加认证token（如果存在）
-        const token = localStorage.getItem('token');
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
+        // 设置默认headers（对于非文件上传请求）
+        const headers = {};
+        if (!options.body || !(options.body instanceof FormData)) {
+            headers['Content-Type'] = 'application/json';
         }
+        Object.assign(headers, options.headers);
 
+        // 设置默认配置
         const config = {
             ...options,
-            headers
+            headers,
+            credentials: 'include' // 包含cookie
         };
 
         try {
             const response = await fetch(url, config);
             
+            // 处理401未授权错误（token过期）
+            if (response.status === 401) {
+                console.warn('收到401错误，尝试刷新token...');
+                
+                // 尝试刷新token
+                if (window.tokenManager && typeof window.tokenManager.refreshTokens === 'function') {
+                    try {
+                        console.log('开始刷新token...');
+                        await window.tokenManager.refreshTokens();
+                        console.log('token刷新成功，重新发送请求');
+                        // 重新发送请求
+                        return await fetch(url, config);
+                    } catch (refreshError) {
+                        console.error('刷新token失败:', refreshError);
+                        // 清除所有认证数据
+                        if (window.StorageManager && typeof window.StorageManager.clearUser === 'function') {
+                            window.StorageManager.clearUser();
+                        } else {
+                            localStorage.removeItem('userInfo');
+                        }
+                        if (window.tokenManager && typeof window.tokenManager.clearTokens === 'function') {
+                            window.tokenManager.clearTokens();
+                        } else {
+                            localStorage.removeItem('tokens');
+                        }
+                        // 跳转到登录页
+                        window.location.href = '/';
+                        throw new Error('认证失败，请重新登录');
+                    }
+                } else {
+                    console.error('tokenManager未找到或refreshTokens方法不存在');
+                    // 清除认证数据并跳转到登录页
+                    if (window.StorageManager && typeof window.StorageManager.clearUser === 'function') {
+                        window.StorageManager.clearUser();
+                    } else {
+                        localStorage.removeItem('userInfo');
+                    }
+                    window.location.href = '/';
+                    throw new Error('认证失败，请重新登录');
+                }
+            }
+            
             // 处理404错误（环境切换时可能出现）
             if (response.status === 404) {
-                console.warn(`API网关404错误: ${url}`);
-                // 可以在这里添加404处理逻辑
+                console.warn(`⚠️ API端点不存在: ${endpoint}`);
+                throw new Error(`API端点不存在: ${endpoint}`);
+            }
+            
+            // 处理其他HTTP错误
+            if (!response.ok) {
+                const errorText = await response.text();
+                let errorData;
+                try {
+                    errorData = JSON.parse(errorText);
+                } catch (e) {
+                    errorData = { error: errorText };
+                }
+                throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
             }
             
             return response;
         } catch (error) {
-            console.error(`API网关请求失败: ${url}`, error);
+            console.error(`API请求失败 (${endpoint}):`, error);
             throw error;
         }
     }
@@ -158,6 +230,14 @@ class ApiGateway {
         // 移除Content-Type，让浏览器自动设置multipart/form-data
         delete config.headers?.['Content-Type'];
         
+        // 确保不设置任何Content-Type头，让浏览器自动处理
+        if (config.headers) {
+            delete config.headers['Content-Type'];
+            delete config.headers['content-type'];
+        }
+        
+
+        
         return this.request(endpoint, config);
     }
 
@@ -176,9 +256,20 @@ class ApiGateway {
     }
 
     // 检查是否为管理员
-    isAdmin() {
-        const currentUser = window.apiSystem?.getCurrentUser();
-        return currentUser?.isAdmin === true;
+    async isAdmin() {
+        try {
+            // 使用token验证管理员权限
+            if (window.tokenManager && typeof window.tokenManager.validateAdminTokens === 'function') {
+                return await window.tokenManager.validateAdminTokens();
+            } else {
+                // 兼容性处理：检查当前用户是否为管理员用户（Mose）
+                const currentUser = window.apiSystem?.getCurrentUser();
+                return currentUser && currentUser.username === 'Mose';
+            }
+        } catch (error) {
+            console.error('验证管理员权限失败:', error);
+            return false;
+        }
     }
 }
 

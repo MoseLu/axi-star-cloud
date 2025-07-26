@@ -85,4 +85,7 @@ class Documents {
             throw error;
         }
     }
-} 
+}
+
+// 导出Documents类到全局作用域
+window.Documents = Documents; 

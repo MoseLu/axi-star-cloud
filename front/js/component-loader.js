@@ -168,6 +168,8 @@ document.addEventListener('componentsLoaded', (event) => {
             // console.log('⚠️ uiManager或settingsManager尚未初始化');
         }
     }, 200);
+    
+
 });
 
 // 导出组件加载器类（如果使用模块系统）

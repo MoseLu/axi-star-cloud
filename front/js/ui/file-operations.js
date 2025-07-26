@@ -24,14 +24,61 @@ class UIFileOperations {
             // 显示下载进度
             this.showDownloadProgress(file.name);
             
-            // 获取用户ID
-            let userId = window.apiSystem?.getCurrentUserId();
-            if (!userId && localStorage.getItem('user_id')) userId = localStorage.getItem('user_id');
-            if (!userId && window.userId) userId = window.userId;
+            // 获取用户ID - 使用多种可靠的方式
+            let userId = null;
+            
+            // 方式1: 从API系统获取（最可靠）
+            if (window.apiSystem && typeof window.apiSystem.getCurrentUserId === 'function') {
+                userId = window.apiSystem.getCurrentUserId();
+            }
+            
+            // 方式2: 从localStorage获取userInfo（与登录系统一致）
+            if (!userId) {
+                const userInfo = localStorage.getItem('userInfo');
+                if (userInfo) {
+                    try {
+                        const user = JSON.parse(userInfo);
+                        userId = user.uuid || user.id;
+                    } catch (e) {
+                        console.warn('解析userInfo失败:', e);
+                    }
+                }
+            }
+            
+            // 方式3: 从认证系统获取
+            if (!userId && window.authSystem && typeof window.authSystem.getCurrentUser === 'function') {
+                const currentUser = window.authSystem.getCurrentUser();
+                userId = currentUser?.uuid || currentUser?.id;
+            }
+            
+            // 方式4: 从localStorage获取currentUser（兼容旧版本）
+            if (!userId) {
+                const currentUser = localStorage.getItem('currentUser');
+                if (currentUser) {
+                    try {
+                        const user = JSON.parse(currentUser);
+                        userId = user.uuid || user.id;
+                    } catch (e) {
+                        console.warn('解析currentUser失败:', e);
+                    }
+                }
+            }
+            
+            // 方式5: 从localStorage获取user_id（兼容旧版本）
+            if (!userId) {
+                userId = localStorage.getItem('user_id');
+            }
+            
+            // 方式6: 从全局变量获取
+            if (!userId && window.userId) {
+                userId = window.userId;
+            }
             
             if (!userId) {
                 throw new Error('未检测到用户ID，请重新登录');
             }
+            
+            console.log('文件下载时使用的用户ID:', userId);
             
             // 使用API网关构建正确的URL
             let downloadUrl;
@@ -128,10 +175,61 @@ class UIFileOperations {
      */
     async deleteFile(file, onSuccess) {
         try {
-            const userId = window.apiSystem?.getCurrentUserId();
+            // 获取用户ID - 使用多种可靠的方式
+            let userId = null;
+            
+            // 方式1: 从API系统获取（最可靠）
+            if (window.apiSystem && typeof window.apiSystem.getCurrentUserId === 'function') {
+                userId = window.apiSystem.getCurrentUserId();
+            }
+            
+            // 方式2: 从localStorage获取userInfo（与登录系统一致）
+            if (!userId) {
+                const userInfo = localStorage.getItem('userInfo');
+                if (userInfo) {
+                    try {
+                        const user = JSON.parse(userInfo);
+                        userId = user.uuid || user.id;
+                    } catch (e) {
+                        console.warn('解析userInfo失败:', e);
+                    }
+                }
+            }
+            
+            // 方式3: 从认证系统获取
+            if (!userId && window.authSystem && typeof window.authSystem.getCurrentUser === 'function') {
+                const currentUser = window.authSystem.getCurrentUser();
+                userId = currentUser?.uuid || currentUser?.id;
+            }
+            
+            // 方式4: 从localStorage获取currentUser（兼容旧版本）
+            if (!userId) {
+                const currentUser = localStorage.getItem('currentUser');
+                if (currentUser) {
+                    try {
+                        const user = JSON.parse(currentUser);
+                        userId = user.uuid || user.id;
+                    } catch (e) {
+                        console.warn('解析currentUser失败:', e);
+                    }
+                }
+            }
+            
+            // 方式5: 从localStorage获取user_id（兼容旧版本）
+            if (!userId) {
+                userId = localStorage.getItem('user_id');
+            }
+            
+            // 方式6: 从全局变量获取
+            if (!userId && window.userId) {
+                userId = window.userId;
+            }
+            
             if (!userId) {
                 throw new Error('用户未登录');
             }
+            
+            console.log('文件删除时使用的用户ID:', userId);
 
             // 显示删除进度
             this.showDeleteProgress(file.name);
@@ -380,6 +478,62 @@ class UIFileOperations {
             // 显示批量删除进度
             this.showBatchDeleteProgress(files.length);
 
+            // 获取用户ID - 使用多种可靠的方式
+            let userId = null;
+            
+            // 方式1: 从API系统获取（最可靠）
+            if (window.apiSystem && typeof window.apiSystem.getCurrentUserId === 'function') {
+                userId = window.apiSystem.getCurrentUserId();
+            }
+            
+            // 方式2: 从localStorage获取userInfo（与登录系统一致）
+            if (!userId) {
+                const userInfo = localStorage.getItem('userInfo');
+                if (userInfo) {
+                    try {
+                        const user = JSON.parse(userInfo);
+                        userId = user.uuid || user.id;
+                    } catch (e) {
+                        console.warn('解析userInfo失败:', e);
+                    }
+                }
+            }
+            
+            // 方式3: 从认证系统获取
+            if (!userId && window.authSystem && typeof window.authSystem.getCurrentUser === 'function') {
+                const currentUser = window.authSystem.getCurrentUser();
+                userId = currentUser?.uuid || currentUser?.id;
+            }
+            
+            // 方式4: 从localStorage获取currentUser（兼容旧版本）
+            if (!userId) {
+                const currentUser = localStorage.getItem('currentUser');
+                if (currentUser) {
+                    try {
+                        const user = JSON.parse(currentUser);
+                        userId = user.uuid || user.id;
+                    } catch (e) {
+                        console.warn('解析currentUser失败:', e);
+                    }
+                }
+            }
+            
+            // 方式5: 从localStorage获取user_id（兼容旧版本）
+            if (!userId) {
+                userId = localStorage.getItem('user_id');
+            }
+            
+            // 方式6: 从全局变量获取
+            if (!userId && window.userId) {
+                userId = window.userId;
+            }
+            
+            if (!userId) {
+                throw new Error('用户未登录');
+            }
+            
+            console.log('批量删除时使用的用户ID:', userId);
+
             let successCount = 0;
             let errorCount = 0;
 
@@ -393,12 +547,6 @@ class UIFileOperations {
                     } else {
                         // 普通文件使用标准API端点
                         endpoint = `/api/files/${file.id}`;
-                    }
-
-                    // 获取当前用户ID
-                    const userId = window.apiSystem?.getCurrentUserId();
-                    if (!userId) {
-                        throw new Error('用户未登录');
                     }
 
                     const response = await window.apiGateway.delete(`${endpoint}?user_id=${userId}`);

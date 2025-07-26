@@ -80,7 +80,7 @@
 
 .status-value {
     font-weight: 500;
-    color: #333;
+    color: #00FF41 !important;
 }
 
 .status-indicator {
@@ -718,4 +718,29 @@
     .doc-item {
         border: 1px solid #000;
     }
+}
+
+/* 同步文档模态框清空按钮样式 */
+#sync-docs-modal .relative {
+    position: relative;
+}
+
+#sync-docs-modal .relative button {
+    transition: all 0.2s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 移除这些规则，让JavaScript完全控制按钮显示 */
+
+#sync-docs-modal .relative button {
+    transform-origin: center; /* 设置旋转中心为元素中心 */
+}
+
+#sync-docs-modal .relative button:hover {
+    transform: rotate(90deg); /* 围绕圆心旋转动画 */
+}
+
+#sync-docs-modal .relative button:active {
+    transform: rotate(180deg); /* 点击时的围绕圆心旋转动画 */
 } 

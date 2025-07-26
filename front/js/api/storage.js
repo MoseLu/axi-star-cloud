@@ -21,7 +21,14 @@ class Storage {
                 throw new Error(`获取存储信息失败: ${response.status}`);
             }
             const data = await response.json();
-            return data;
+            
+            // 返回存储信息对象，而不是完整的响应
+            if (data.success && data.storage) {
+                return data.storage;
+            } else {
+                console.error('存储信息格式错误:', data);
+                return null;
+            }
         } catch (error) {
             console.error('获取存储信息失败:', error);
             return null;
@@ -76,4 +83,7 @@ class Storage {
             return 0;
         }
     }
-} 
+}
+
+// 导出Storage类到全局作用域
+window.Storage = Storage; 

@@ -46,7 +46,7 @@ window.ENV_MANAGER = (function() {
             hostname === '127.0.0.1' ||
             hostname.startsWith('192.168.') ||
             hostname.startsWith('10.') ||
-            (hostname === 'localhost' && (port === '8080' || port === '')) ||
+            (hostname === 'localhost' && (port === '8080' || port === '8081' || port === '')) ||
             protocol === 'file:') {
             return 'local';
         }
@@ -63,18 +63,60 @@ window.ENV_MANAGER = (function() {
 
     // 清除localStorage中的环境配置
     function clearStoredEnvironment() {
-        localStorage.removeItem('app_environment');
-
+        if (window.StorageManager && typeof window.StorageManager.setEnvironment === 'function') {
+            window.StorageManager.setEnvironment(null);
+        } else {
+            // 如果 StorageManager 未加载，清除新的键结构中的环境设置
+            const systemData = localStorage.getItem('systemInfo');
+            if (systemData) {
+                try {
+                    const systemInfo = JSON.parse(systemData);
+                    delete systemInfo.environment;
+                    localStorage.setItem('systemInfo', JSON.stringify(systemInfo));
+                } catch (error) {
+                    console.warn('清除环境设置失败:', error);
+                }
+            }
+        }
     }
 
     // 从localStorage获取保存的环境配置
     function getEnvFromStorage() {
-        return localStorage.getItem('app_environment');
+        if (window.StorageManager && typeof window.StorageManager.getEnvironment === 'function') {
+            return window.StorageManager.getEnvironment();
+        } else {
+            // 如果 StorageManager 未加载，直接使用新的键结构
+            const systemData = localStorage.getItem('systemInfo');
+            if (systemData) {
+                try {
+                    const systemInfo = JSON.parse(systemData);
+                    return systemInfo.environment || 'prod';
+                } catch (error) {
+                    console.warn('解析系统信息失败:', error);
+                }
+            }
+            return 'prod';
+        }
     }
 
     // 保存环境配置到localStorage
     function saveEnvToStorage(env) {
-        localStorage.setItem('app_environment', env);
+        if (window.StorageManager && typeof window.StorageManager.setEnvironment === 'function') {
+            window.StorageManager.setEnvironment(env);
+        } else {
+            // 如果 StorageManager 未加载，直接使用新的键结构
+            const systemData = localStorage.getItem('systemInfo');
+            let systemInfo = {};
+            if (systemData) {
+                try {
+                    systemInfo = JSON.parse(systemData);
+                } catch (error) {
+                    console.warn('解析系统信息失败:', error);
+                }
+            }
+            systemInfo.environment = env;
+            localStorage.setItem('systemInfo', JSON.stringify(systemInfo));
+        }
     }
 
     // 初始化环境配置
