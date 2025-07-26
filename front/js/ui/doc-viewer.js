@@ -355,16 +355,19 @@ class DocViewer {
 
             /* 全屏样式 */
             .doc-viewer-content.fullscreen {
-                width: 100vw;
-                height: 100vh;
-                max-width: none;
-                max-height: none;
-                border-radius: 0;
-                border: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                z-index: 10001;
+                width: 100vw !important;
+                height: 100vh !important;
+                max-width: none !important;
+                max-height: none !important;
+                border-radius: 0 !important;
+                border: none !important;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                z-index: 10001 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
             }
 
             /* 明亮主题适配 */
