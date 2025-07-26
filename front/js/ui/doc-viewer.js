@@ -13,7 +13,8 @@ class DocViewer {
             { id: 'LICENSE.md', title: '许可证', icon: '⚖️' },
             { id: 'ENV_USAGE_EXAMPLES.md', title: '环境使用示例', icon: '⚙️' },
             { id: 'CSS_README.md', title: 'CSS样式文档', icon: '🎨' },
-            { id: 'API_README.md', title: 'API接口文档', icon: '🔌' }
+            { id: 'API_README.md', title: 'API接口文档', icon: '🔌' },
+            { id: 'IS_ADMIN_REMOVAL_SUMMARY.md', title: 'is_admin移除总结', icon: '🔐' }
         ];
         this.init();
     }
@@ -32,9 +33,14 @@ class DocViewer {
             <div class="doc-viewer-content">
                 <div class="doc-viewer-header">
                     <h3 class="doc-viewer-title">系统文档</h3>
-                    <button class="doc-viewer-close" title="关闭">
-                        <i class="fa fa-times"></i>
-                    </button>
+                    <div class="doc-viewer-controls">
+                        <button class="doc-viewer-fullscreen" title="全屏">
+                            <i class="fa fa-expand"></i>
+                        </button>
+                        <button class="doc-viewer-close" title="关闭">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="doc-viewer-body">
                     <div class="doc-sidebar">
@@ -68,6 +74,11 @@ class DocViewer {
             this.hide();
         });
 
+        // 全屏按钮
+        this.modal.querySelector('.doc-viewer-fullscreen').addEventListener('click', () => {
+            this.toggleFullscreen();
+        });
+
         // 点击模态框外部关闭
         this.modal.addEventListener('click', (e) => {
             if (e.target === this.modal) {
@@ -86,7 +97,14 @@ class DocViewer {
         // ESC键关闭
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.isVisible()) {
-                this.hide();
+                const content = this.modal.querySelector('.doc-viewer-content');
+                if (content && content.classList.contains('fullscreen')) {
+                    // 如果处于全屏状态，先退出全屏
+                    this.exitFullscreen();
+                } else {
+                    // 否则关闭模态框
+                    this.hide();
+                }
             }
         });
     }
@@ -225,6 +243,64 @@ class DocViewer {
         document.body.style.overflow = '';
     }
 
+    /**
+     * 切换全屏状态
+     */
+    toggleFullscreen() {
+        const content = this.modal.querySelector('.doc-viewer-content');
+        if (!content) return;
+        
+        const isFullscreen = content.classList.contains('fullscreen');
+        
+        if (isFullscreen) {
+            // 退出全屏
+            this.exitFullscreen();
+        } else {
+            // 进入全屏
+            this.enterFullscreen();
+        }
+    }
+
+    /**
+     * 进入全屏模式
+     */
+    enterFullscreen() {
+        const content = this.modal.querySelector('.doc-viewer-content');
+        const fullscreenBtn = this.modal.querySelector('.doc-viewer-fullscreen');
+        
+        if (!content || !fullscreenBtn) return;
+        
+        // 添加全屏样式
+        content.classList.add('fullscreen');
+        
+        // 更新按钮图标和标题
+        const icon = fullscreenBtn.querySelector('i');
+        if (icon) {
+            icon.className = 'fa fa-compress';
+        }
+        fullscreenBtn.title = '最小化';
+    }
+
+    /**
+     * 退出全屏模式
+     */
+    exitFullscreen() {
+        const content = this.modal.querySelector('.doc-viewer-content');
+        const fullscreenBtn = this.modal.querySelector('.doc-viewer-fullscreen');
+        
+        if (!content || !fullscreenBtn) return;
+        
+        // 移除全屏样式
+        content.classList.remove('fullscreen');
+        
+        // 更新按钮图标和标题
+        const icon = fullscreenBtn.querySelector('i');
+        if (icon) {
+            icon.className = 'fa fa-expand';
+        }
+        fullscreenBtn.title = '全屏';
+    }
+
     isVisible() {
         return this.modal.style.display === 'flex';
     }
@@ -257,6 +333,17 @@ class DocViewer {
                 flex-direction: column;
                 border: 1px solid #333;
                 box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            /* 全屏样式 */
+            .doc-viewer-content.fullscreen {
+                width: 100%;
+                height: 100%;
+                max-width: none;
+                max-height: none;
+                border-radius: 0;
+                border: none;
             }
 
             /* 明亮主题适配 */
@@ -264,6 +351,10 @@ class DocViewer {
                 background: #ffffff;
                 border: 1px solid rgba(139, 92, 246, 0.2);
                 box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
+            }
+
+            body.theme-light .doc-viewer-content.fullscreen {
+                border: none;
             }
 
             .doc-viewer-header {
@@ -274,6 +365,11 @@ class DocViewer {
                 border-bottom: 1px solid #333;
                 background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
                 border-radius: 12px 12px 0 0;
+            }
+
+            /* 全屏时头部样式 */
+            .doc-viewer-content.fullscreen .doc-viewer-header {
+                border-radius: 0;
             }
 
             body.theme-light .doc-viewer-header {
@@ -292,6 +388,13 @@ class DocViewer {
                 color: #374151;
             }
 
+            .doc-viewer-controls {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .doc-viewer-fullscreen,
             .doc-viewer-close {
                 background: none;
                 border: none;
@@ -303,15 +406,18 @@ class DocViewer {
                 transition: all 0.3s ease;
             }
 
+            .doc-viewer-fullscreen:hover,
             .doc-viewer-close:hover {
                 color: #fff;
                 background: rgba(255, 255, 255, 0.1);
             }
 
+            body.theme-light .doc-viewer-fullscreen,
             body.theme-light .doc-viewer-close {
                 color: #6b7280;
             }
 
+            body.theme-light .doc-viewer-fullscreen:hover,
             body.theme-light .doc-viewer-close:hover {
                 color: #374151;
                 background: rgba(139, 92, 246, 0.1);
@@ -582,6 +688,11 @@ class DocViewer {
                 .doc-viewer-content {
                     width: 95%;
                     height: 90%;
+                }
+
+                .doc-viewer-content.fullscreen {
+                    width: 100%;
+                    height: 100%;
                 }
 
                 .doc-sidebar {
