@@ -215,3 +215,52 @@
 .help-content::-webkit-scrollbar-thumb:hover {
     background: #6d28d9;
 } 
+
+/* 全屏模式样式 */
+#help-modal-content.fullscreen {
+    border-radius: 0 !important;
+    margin: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    max-height: none !important;
+}
+
+#help-modal-content.fullscreen .overflow-y-auto {
+    max-height: calc(100vh - 120px) !important;
+}
+
+/* 全屏模式下的按钮样式 */
+#help-modal-content.fullscreen #help-fullscreen-btn,
+#help-modal-content.fullscreen #help-close-btn {
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+}
+
+#help-modal-content.fullscreen #help-fullscreen-btn:hover,
+#help-modal-content.fullscreen #help-close-btn:hover {
+    background-color: rgba(139, 92, 246, 0.1);
+    transform: scale(1.05);
+}
+
+/* 全屏模式下的标题样式 */
+#help-modal-content.fullscreen h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* 响应式全屏模式 */
+@media (max-width: 768px) {
+    #help-modal-content.fullscreen {
+        padding: 1rem !important;
+    }
+    
+    #help-modal-content.fullscreen h3 {
+        font-size: 1.25rem;
+    }
+    
+    #help-modal-content.fullscreen .overflow-y-auto {
+        max-height: calc(100vh - 100px) !important;
+    }
+} 

@@ -60,12 +60,17 @@ class UIHelpManager {
         // 创建模态框HTML
         const modalHTML = `
             <div id="help-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 hidden">
-                <div class="bg-dark-light rounded-xl p-6 w-full max-w-4xl max-h-[90vh] shadow-2xl border border-purple-400/30 overflow-hidden">
+                <div id="help-modal-content" class="bg-dark-light rounded-xl p-6 w-full max-w-4xl max-h-[90vh] shadow-2xl border border-purple-400/30 overflow-hidden transition-all duration-300">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-xl font-bold text-purple-300">帮助文档</h3>
-                        <button class="text-gray-400 hover:text-white transition-colors" onclick="document.getElementById('help-modal').classList.add('hidden')">
-                            <i class="fa fa-times text-xl"></i>
-                        </button>
+                        <div class="flex items-center space-x-2">
+                            <button id="help-fullscreen-btn" class="text-gray-400 hover:text-white transition-colors" title="全屏">
+                                <i class="fa fa-expand text-lg"></i>
+                            </button>
+                            <button id="help-close-btn" class="text-gray-400 hover:text-white transition-colors" title="关闭">
+                                <i class="fa fa-times text-xl"></i>
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="overflow-y-auto max-h-[calc(90vh-120px)] pr-2">
@@ -80,8 +85,141 @@ class UIHelpManager {
         // 添加到body
         document.body.insertAdjacentHTML('beforeend', modalHTML);
         
+        // 绑定全屏按钮事件
+        this.bindFullscreenButton();
+        this.bindCloseButton(); // 绑定关闭按钮事件
+        this.bindKeyboardEvents(); // 绑定键盘事件
+        
         // 渲染内容
         this.renderHelpContent();
+    }
+
+    /**
+     * 绑定全屏按钮事件
+     */
+    bindFullscreenButton() {
+        const fullscreenBtn = document.getElementById('help-fullscreen-btn');
+        const modal = document.getElementById('help-modal');
+        const modalContent = document.getElementById('help-modal-content');
+        
+        if (fullscreenBtn && modal && modalContent) {
+            fullscreenBtn.addEventListener('click', () => {
+                this.toggleFullscreen();
+            });
+        }
+    }
+
+    /**
+     * 绑定关闭按钮事件
+     */
+    bindCloseButton() {
+        const closeBtn = document.getElementById('help-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.hideHelpModal();
+            });
+        }
+    }
+
+    /**
+     * 绑定键盘事件
+     */
+    bindKeyboardEvents() {
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('help-modal');
+            if (!modal || modal.classList.contains('hidden')) return;
+            
+            if (e.key === 'Escape') {
+                const modalContent = document.getElementById('help-modal-content');
+                if (modalContent && modalContent.classList.contains('fullscreen')) {
+                    // 如果处于全屏状态，先退出全屏
+                    this.exitFullscreen();
+                } else {
+                    // 否则关闭模态框
+                    this.hideHelpModal();
+                }
+            }
+        });
+    }
+
+    /**
+     * 切换全屏状态
+     */
+    toggleFullscreen() {
+        const modal = document.getElementById('help-modal');
+        const modalContent = document.getElementById('help-modal-content');
+        const fullscreenBtn = document.getElementById('help-fullscreen-btn');
+        
+        if (!modal || !modalContent || !fullscreenBtn) return;
+        
+        const isFullscreen = modalContent.classList.contains('fullscreen');
+        
+        if (isFullscreen) {
+            // 退出全屏
+            this.exitFullscreen();
+        } else {
+            // 进入全屏
+            this.enterFullscreen();
+        }
+    }
+
+    /**
+     * 进入全屏模式
+     */
+    enterFullscreen() {
+        const modal = document.getElementById('help-modal');
+        const modalContent = document.getElementById('help-modal-content');
+        const fullscreenBtn = document.getElementById('help-fullscreen-btn');
+        
+        if (!modal || !modalContent || !fullscreenBtn) return;
+        
+        // 添加全屏样式
+        modalContent.classList.add('fullscreen');
+        modalContent.classList.remove('max-w-4xl', 'max-h-[90vh]');
+        modalContent.classList.add('w-full', 'h-full', 'max-w-none', 'max-h-none', 'rounded-none');
+        
+        // 更新按钮图标和标题
+        const icon = fullscreenBtn.querySelector('i');
+        if (icon) {
+            icon.className = 'fa fa-compress text-lg';
+        }
+        fullscreenBtn.title = '最小化';
+        
+        // 调整滚动容器高度
+        const scrollContainer = modalContent.querySelector('.overflow-y-auto');
+        if (scrollContainer) {
+            scrollContainer.classList.remove('max-h-[calc(90vh-120px)]');
+            scrollContainer.classList.add('max-h-[calc(100vh-120px)]');
+        }
+    }
+
+    /**
+     * 退出全屏模式
+     */
+    exitFullscreen() {
+        const modal = document.getElementById('help-modal');
+        const modalContent = document.getElementById('help-modal-content');
+        const fullscreenBtn = document.getElementById('help-fullscreen-btn');
+        
+        if (!modal || !modalContent || !fullscreenBtn) return;
+        
+        // 移除全屏样式
+        modalContent.classList.remove('fullscreen', 'w-full', 'h-full', 'max-w-none', 'max-h-none', 'rounded-none');
+        modalContent.classList.add('max-w-4xl', 'max-h-[90vh]');
+        
+        // 更新按钮图标和标题
+        const icon = fullscreenBtn.querySelector('i');
+        if (icon) {
+            icon.className = 'fa fa-expand text-lg';
+        }
+        fullscreenBtn.title = '全屏';
+        
+        // 恢复滚动容器高度
+        const scrollContainer = modalContent.querySelector('.overflow-y-auto');
+        if (scrollContainer) {
+            scrollContainer.classList.remove('max-h-[calc(100vh-120px)]');
+            scrollContainer.classList.add('max-h-[calc(90vh-120px)]');
+        }
     }
 
     /**
