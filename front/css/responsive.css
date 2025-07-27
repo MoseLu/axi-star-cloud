@@ -1,0 +1,291 @@
+/**
+ * 响应式布局样式
+ * 包含响应式设计、媒体查询和移动端适配
+ */
+
+/* ===== 移动端适配 (max-width: 640px) ===== */
+@media (max-width: 640px) {
+    /* 文件网格布局 */
+    .files-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+        padding: 0.5rem;
+        justify-content: center;
+    }
+    
+    #folders-grid {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        padding: 0.5rem !important;
+    }
+
+    /* 头部导航适配 */
+    .container {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    /* 搜索框适配 */
+    .max-w-xl {
+        max-width: 100% !important;
+        margin-left: 0.5rem !important;
+        margin-right: 0.5rem !important;
+    }
+
+    /* 按钮文字隐藏，只显示图标 */
+    #upload-btn span,
+    #sync-docs-btn span {
+        display: none;
+    }
+
+    /* 用户菜单适配 */
+    .w-48 {
+        width: 200px !important;
+        right: -1rem !important;
+    }
+
+    /* 文件卡片适配 */
+    .file-card {
+        min-height: 160px;
+        max-width: 100%;
+    }
+    
+    .folder-card {
+        min-height: 120px;
+        max-width: 100%;
+    }
+
+    /* 文件信息适配 */
+    .file-info span,
+    .folder-info span {
+        max-width: none;
+        font-size: 0.75rem;
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* 模态框适配 */
+    .max-w-6xl {
+        max-width: 95vw !important;
+    }
+
+    .max-h-\[90vh\] {
+        max-height: 95vh !important;
+    }
+}
+
+/* ===== 小屏幕平板适配 (640px - 768px) ===== */
+@media (min-width: 641px) and (max-width: 768px) {
+    .files-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        justify-content: center;
+    }
+    
+    #folders-grid {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 16px !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+    }
+
+    /* 搜索框适配 */
+    .max-w-xl {
+        max-width: 300px !important;
+    }
+}
+
+/* ===== 平板端适配 (768px - 1024px) ===== */
+@media (min-width: 769px) and (max-width: 1023px) {
+    .files-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        justify-content: center;
+    }
+    
+    #folders-grid {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 16px !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+    }
+
+    /* 搜索框适配 */
+    .max-w-xl {
+        max-width: 400px !important;
+    }
+}
+
+/* ===== 桌面端适配 (min-width: 1024px) ===== */
+@media (min-width: 1024px) {
+    .files-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+        justify-content: center;
+    }
+    
+    #folders-grid {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 16px !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+    }
+
+    /* 搜索框适配 */
+    .max-w-xl {
+        max-width: 500px !important;
+    }
+}
+
+/* ===== 大屏幕适配 (min-width: 1280px) ===== */
+@media (min-width: 1280px) {
+    .files-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2.5rem;
+        justify-content: center;
+    }
+    
+    #folders-grid {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 16px !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+    }
+
+    /* 搜索框适配 */
+    .max-w-xl {
+        max-width: 600px !important;
+    }
+}
+
+/* ===== 超宽屏适配 (min-width: 1536px) ===== */
+@media (min-width: 1536px) {
+    .files-grid {
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 3rem;
+        justify-content: center;
+    }
+    
+    #folders-grid {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 16px !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+    }
+
+    /* 搜索框适配 */
+    .max-w-xl {
+        max-width: 700px !important;
+    }
+}
+
+/* ===== 移动端通知样式 ===== */
+@media (max-width: 600px) {
+    #global-message-box {
+        padding: 0.5rem;
+    }
+    
+    #global-message-box > div {
+        margin: 0 0.5rem;
+        padding: 1rem;
+        max-width: calc(100vw - 1rem);
+        border-radius: 1rem;
+    }
+    
+    #global-message-box > div::before {
+        border-radius: 1rem;
+    }
+    
+    #global-notify-container {
+        right: 4vw !important;
+        top: 4vw !important;
+    }
+    
+    #global-notify-container > div {
+        max-width: calc(100vw - 2rem);
+        margin: 0 0.5rem;
+    }
+    
+    #global-notify-container > div::before {
+        border-radius: 0.75rem;
+    }
+}
+
+/* ===== 触摸设备适配 ===== */
+@media (hover: none) and (pointer: coarse) {
+    /* 增大触摸目标 */
+    button, a, .file-card, .folder-card {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* 文件卡片触摸优化 */
+    .file-card,
+    .folder-card {
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* 按钮触摸优化 */
+    #upload-btn,
+    #sync-docs-btn {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* ===== 高分辨率屏幕适配 ===== */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    /* 优化高分辨率屏幕的显示 */
+    .file-card img,
+    .folder-card img {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* ===== 横屏模式适配 ===== */
+@media (orientation: landscape) and (max-height: 500px) {
+    /* 横屏且高度较小时优化布局 */
+    .file-card,
+    .folder-card {
+        min-height: 120px;
+    }
+
+    /* 减少垂直间距 */
+    .files-grid,
+    #folders-grid {
+        gap: 0.75rem;
+    }
+}
+
+/* ===== 打印样式 ===== */
+@media print {
+    /* 隐藏不必要的元素 */
+    #upload-btn,
+    #sync-docs-btn,
+    .file-actions,
+    .folder-actions {
+        display: none !important;
+    }
+
+    /* 优化打印布局 */
+    .file-card,
+    .folder-card {
+        break-inside: avoid;
+        border: 1px solid #ccc;
+    }
+} 

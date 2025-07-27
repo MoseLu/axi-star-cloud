@@ -1,0 +1,50 @@
+<!-- 文件列表 -->
+<div class="bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-2xl p-2 md:p-4 border border-purple-400/30 shadow-xl relative overflow-hidden backdrop-blur-sm">
+    <!-- 背景装饰 -->
+    <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-blue-500/5 to-cyan-500/5"></div>
+    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
+    <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-cyan-500/10 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
+    
+    <div class="relative z-10">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-3 sm:space-y-0">
+            <h3 class="text-base md:text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400">文件列表</h3>
+            <div class="flex items-center justify-center sm:justify-end">
+                <div class="bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-xl px-2 md:px-4 py-1.5 md:py-2 border border-purple-400/30 hover:border-purple-400/50 transition-all duration-300 shadow-lg">
+                    <div class="flex items-center space-x-2 md:space-x-3">
+                        <button id="sort-switch-btn" class="w-5 h-5 md:w-8 md:h-8 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-lg flex items-center justify-center border border-purple-400/30 hover:border-purple-400/50 transition-all duration-300 p-0 min-w-0 min-h-0" title="切换排序方式">
+                            <i class="fa fa-sort-alpha-asc text-purple-300 text-xs md:text-sm" id="sort-name-icon"></i>
+                            <i class="fa fa-clock-o text-purple-300 text-xs md:text-sm hidden" id="sort-time-icon"></i>
+                            <i class="fa fa-file-o text-purple-300 text-xs md:text-sm hidden" id="sort-type-icon"></i>
+                        </button>
+                        <button id="layout-switch-btn" class="w-5 h-5 md:w-8 md:h-8 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-lg flex items-center justify-center border border-purple-400/30 hover:border-purple-400/50 transition-all duration-300 p-0 min-w-0 min-h-0" title="切换卡片/列表视图">
+                            <i class="fa fa-th-large text-purple-300 text-xs md:text-sm"></i>
+                            <i class="fa fa-list text-purple-300 text-xs md:text-sm hidden"></i>
+                        </button>
+                        <div class="w-5 h-5 md:w-8 md:h-8 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-lg flex items-center justify-center p-0">
+                            <i class="fa fa-files-o text-purple-300 text-xs md:text-sm"></i>
+                        </div>
+                        <span class="text-xs md:text-sm font-medium text-gray-300" id="file-count-desc">
+                            <span class="hidden xs:inline">共 </span><span id="file-count-display" class="text-purple-300 font-bold">0</span><span class="hidden xs:inline"> 个文件</span><span class="xs:hidden">个</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 文件网格容器 -->
+        <div id="files-container">
+            <div id="files-grid" class="files-grid">
+                <!-- 文件卡片将通过JavaScript动态生成 -->
+            </div>
+        </div>
+        
+        <!-- 空状态 -->
+        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-12 md:py-16 text-center">
+            <div class="w-16 h-16 md:w-24 md:h-24 mb-4 md:mb-6 rounded-full bg-purple-light/10 flex items-center justify-center animate-pulse">
+                <i class="fa fa-folder-open-o text-2xl md:text-4xl text-purple-light/70"></i>
+            </div>
+            <h2 class="text-lg md:text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300 mb-2">暂无文件</h2>
+            <p class="text-gray-400 max-w-md mb-4 md:mb-6 text-sm md:text-base px-4">你的云盘是空的。点击上传按钮添加文件，或拖放文件到此处。</p>
+        </div>
+    </div>
+</div> 

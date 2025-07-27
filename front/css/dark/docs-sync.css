@@ -1,0 +1,746 @@
+/* 文档同步模块样式 */
+
+/* 同步面板 */
+.docs-sync-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 450px;
+    height: 100vh;
+    background: white;
+    box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+}
+
+.docs-sync-panel.show {
+    transform: translateX(0);
+}
+
+.sync-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    background: #f8f9fa;
+}
+
+.sync-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 18px;
+}
+
+.sync-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.sync-close:hover {
+    background: #e9ecef;
+    color: #333;
+}
+
+.sync-content {
+    height: calc(100vh - 80px);
+    overflow-y: auto;
+    padding: 20px;
+}
+
+/* 同步状态区域 */
+.sync-status-section {
+    margin-bottom: 20px;
+}
+
+.sync-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.status-label {
+    font-size: 14px;
+    color: #666;
+}
+
+.status-value {
+    font-weight: 500;
+    color: #00FF41 !important;
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+
+.status-indicator.idle {
+    background: #6c757d;
+}
+
+.status-indicator.syncing {
+    background: #ffc107;
+    animation: pulse 1.5s infinite;
+}
+
+.status-indicator.success {
+    background: #28a745;
+}
+
+.status-indicator.error {
+    background: #dc3545;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.sync-progress {
+    margin-bottom: 20px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #007bff;
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
+
+.progress-text {
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+    display: block;
+}
+
+/* 同步控制按钮 */
+.sync-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.sync-controls .btn {
+    flex: 1;
+    min-width: 100px;
+}
+
+/* 同步统计 */
+.sync-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-item {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    text-align: center;
+    border: 1px solid #e9ecef;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* 外部文档区域 */
+.external-docs-section {
+    margin-bottom: 20px;
+}
+
+.external-docs-section h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 8px;
+}
+
+.docs-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    background: white;
+    margin-bottom: 15px;
+}
+
+.doc-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s ease;
+}
+
+.doc-item:last-child {
+    border-bottom: none;
+}
+
+.doc-item:hover {
+    background: #f8f9fa;
+}
+
+.doc-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.doc-title {
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+}
+
+.doc-url {
+    font-size: 12px;
+    color: #666;
+    word-break: break-all;
+}
+
+.doc-status {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: #28a745;
+    color: white;
+    text-transform: uppercase;
+    font-weight: 500;
+    display: inline-block;
+    width: fit-content;
+}
+
+.doc-status.pending {
+    background: #ffc107;
+    color: black;
+}
+
+.doc-status.syncing {
+    background: #17a2b8;
+    color: white;
+}
+
+.doc-status.failed {
+    background: #dc3545;
+    color: white;
+}
+
+.doc-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.doc-actions .btn {
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+.add-doc-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.add-doc-controls input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.add-doc-controls input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+}
+
+.add-doc-controls .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+/* 同步队列区域 */
+.sync-queue-section {
+    margin-bottom: 20px;
+}
+
+.sync-queue-section h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 8px;
+}
+
+.sync-queue {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    background: white;
+}
+
+.queue-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s ease;
+}
+
+.queue-item:last-child {
+    border-bottom: none;
+}
+
+.queue-item:hover {
+    background: #f8f9fa;
+}
+
+.queue-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.queue-index {
+    background: #007bff;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.queue-doc {
+    font-size: 14px;
+    color: #333;
+    flex: 1;
+}
+
+.queue-status {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 8px;
+    background: #28a745;
+    color: white;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.queue-status.syncing {
+    background: #ffc107;
+    color: black;
+}
+
+.queue-status.failed {
+    background: #dc3545;
+    color: white;
+}
+
+.queue-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.queue-actions .btn {
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+/* 同步设置模态框 */
+.sync-settings-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    max-width: 90vw;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    z-index: 1100;
+    overflow: hidden;
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    background: #f8f9fa;
+}
+
+.settings-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 18px;
+}
+
+.settings-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.settings-close:hover {
+    background: #e9ecef;
+    color: #333;
+}
+
+.settings-content {
+    padding: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.setting-group {
+    margin: 20px 0;
+}
+
+.setting-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.setting-group input,
+.setting-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.setting-group input:focus,
+.setting-group select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+}
+
+.setting-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+}
+
+.setting-group label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.settings-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: flex-end;
+}
+
+.settings-actions .btn {
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
+/* 空状态 */
+.no-docs,
+.no-queue {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
+/* 按钮样式 */
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #1e7e34;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: black;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+}
+
+.btn-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background: #138496;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+.btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .docs-sync-panel {
+        width: 100%;
+        height: 100vh;
+    }
+    
+    .sync-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .doc-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .doc-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .queue-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .queue-info {
+        width: 100%;
+    }
+    
+    .add-doc-controls {
+        flex-direction: column;
+    }
+    
+    .add-doc-controls input {
+        width: 100%;
+    }
+    
+    .sync-controls {
+        flex-direction: column;
+    }
+    
+    .sync-controls .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .sync-header {
+        padding: 15px;
+    }
+    
+    .sync-content {
+        padding: 15px;
+    }
+    
+    .sync-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .settings-content {
+        padding: 15px;
+    }
+}
+
+/* 动画效果 */
+.docs-sync-panel {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* 加载状态 */
+.sync-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.sync-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid #007bff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* 无障碍支持 */
+.docs-sync-panel:focus-within {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+.sync-close:focus,
+.settings-close:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+    .docs-sync-panel {
+        border: 2px solid #000;
+    }
+    
+    .stat-item {
+        border: 2px solid #000;
+    }
+    
+    .doc-item {
+        border: 1px solid #000;
+    }
+}
+
+/* 同步文档模态框清空按钮样式 */
+#sync-docs-modal .relative {
+    position: relative;
+}
+
+#sync-docs-modal .relative button {
+    transition: all 0.2s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 移除这些规则，让JavaScript完全控制按钮显示 */
+
+#sync-docs-modal .relative button {
+    transform-origin: center; /* 设置旋转中心为元素中心 */
+}
+
+#sync-docs-modal .relative button:hover {
+    transform: rotate(90deg); /* 围绕圆心旋转动画 */
+}
+
+#sync-docs-modal .relative button:active {
+    transform: rotate(180deg); /* 点击时的围绕圆心旋转动画 */
+} 

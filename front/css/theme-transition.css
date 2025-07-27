@@ -1,0 +1,189 @@
+/**
+ * 主题切换圆弧扩散动画
+ * 从右上角开始扩散，直接切换CSS主题
+ */
+
+/* 主题切换按钮样式 */
+.theme-toggle-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10000;
+}
+
+/* 动画期间的按钮效果 */
+.theme-toggle-btn.animating {
+    transform: scale(1.2);
+    pointer-events: none;
+}
+
+.theme-toggle-btn.animating .icon {
+    animation: icon-rotate 0.8s ease-in-out;
+}
+
+/* 扩散动画效果 */
+@keyframes theme-diffuse {
+    0% {
+        clip-path: circle(0% at 100% 0%);
+    }
+    100% {
+        clip-path: circle(150% at 100% 0%);
+    }
+}
+
+/* 主题切换时的页面动画 */
+body.theme-transitioning {
+    animation: theme-diffuse 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.theme-toggle-btn:hover {
+    transform: scale(1.1);
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* 悬停时的图标效果 */
+.theme-toggle-btn:hover .fa-sun-o {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 30%, #FF8C00 60%, #FF6B35 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    text-shadow: 
+        0 0 15px rgba(255, 215, 0, 0.9),
+        0 0 25px rgba(255, 215, 0, 0.7),
+        0 0 35px rgba(255, 215, 0, 0.5),
+        0 0 45px rgba(255, 215, 0, 0.3);
+}
+
+.theme-toggle-btn:hover .fa-moon-o {
+    background: linear-gradient(135deg, #4A90E2 0%, #5B9BD5 25%, #7BB3E8 50%, #9CC3F0 75%, #B8D4F5 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    text-shadow: 
+        0 0 15px rgba(74, 144, 226, 0.9),
+        0 0 25px rgba(74, 144, 226, 0.7),
+        0 0 35px rgba(74, 144, 226, 0.5),
+        0 0 45px rgba(74, 144, 226, 0.3);
+}
+
+.theme-toggle-btn:active {
+    transform: scale(0.95);
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.theme-toggle-btn:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* 图标样式 */
+.theme-toggle-btn .icon {
+    font-size: 20px;
+    transition: all 0.3s ease;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: block !important;
+}
+
+/* 太阳图标样式 - 金色质感 */
+.theme-toggle-btn .fa-sun-o {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    color: transparent !important;
+    text-shadow: 
+        0 0 10px rgba(255, 215, 0, 0.8),
+        0 0 20px rgba(255, 215, 0, 0.6),
+        0 0 30px rgba(255, 215, 0, 0.4),
+        0 0 40px rgba(255, 215, 0, 0.2);
+}
+
+/* 月亮图标样式 - 星空蓝质感 */
+.theme-toggle-btn .fa-moon-o {
+    background: linear-gradient(135deg, #4A90E2 0%, #5B9BD5 30%, #7BB3E8 60%, #9CC3F0 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    color: transparent !important;
+    text-shadow: 
+        0 0 10px rgba(74, 144, 226, 0.8),
+        0 0 20px rgba(74, 144, 226, 0.6),
+        0 0 30px rgba(74, 144, 226, 0.4),
+        0 0 40px rgba(74, 144, 226, 0.2);
+}
+
+/* 暗色主题下的按钮样式（默认） */
+.theme-toggle-btn.dark {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* 亮色主题下的按钮样式 */
+.theme-toggle-btn.light {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* 图标旋转动画 */
+@keyframes icon-rotate {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* 图标渐变动画 */
+@keyframes gradient-shift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.theme-toggle-btn .fa-sun-o,
+.theme-toggle-btn .fa-moon-o {
+    background-size: 200% 200% !important;
+    animation: gradient-shift 3s ease infinite;
+}
+
+.theme-toggle-btn:hover .fa-sun-o,
+.theme-toggle-btn:hover .fa-moon-o {
+    animation: gradient-shift 1.5s ease infinite;
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+    .theme-toggle-btn {
+        width: 44px;
+        height: 44px;
+    }
+    
+    .theme-toggle-btn .icon {
+        font-size: 22px;
+    }
+} 

@@ -1,0 +1,21 @@
+server:
+  port: '8080'
+  host: '0.0.0.0'  # 允许外部访问
+  cors_origins: 
+    - 'http://localhost:3000'
+    - 'http://localhost:8080'
+    - 'http://127.0.0.1:8080'
+
+database:
+  driver: 'sqlite3'
+  dsn: './star-cloud.db'
+
+jwt:
+  secret: 'your-secret-key'
+
+# 本地开发配置
+deployment:
+  type: 'local'
+  domain: 'localhost'
+  static_path: './front'
+  upload_path: './uploads' 

@@ -1,0 +1,1597 @@
+/* 响应式布局优化 */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1600px !important;
+    }
+}
+
+@media (min-width: 1600px) {
+    .container {
+        max-width: 1800px !important;
+    }
+}
+
+@media (min-width: 1920px) {
+    .container {
+        max-width: 2000px !important;
+    }
+}
+
+@media (min-width: 2560px) {
+    .container {
+        max-width: 2800px !important;
+    }
+}
+
+@media (min-width: 3200px) {
+    .container {
+        max-width: 3400px !important;
+    }
+}
+
+@media (min-width: 3840px) {
+    .container {
+        max-width: 4000px !important;
+    }
+}
+
+@media (min-width: 4096px) {
+    .container {
+        max-width: 4200px !important;
+    }
+}
+
+/* 自定义滑块样式 */
+.slider {
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(to right, #3B82F6, #7B61FF);
+    outline: none;
+    border-radius: 8px;
+    height: 8px;
+    width: 100%;
+}
+
+.slider::-webkit-slider-track {
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(to right, #3B82F6, #7B61FF);
+    border-radius: 8px;
+    height: 8px;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #7B61FF;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    border: 2px solid #ffffff;
+}
+
+.slider::-webkit-slider-thumb:hover {
+    background: #8B5CF6;
+    box-shadow: 0 4px 8px rgba(139, 92, 246, 0.4);
+    transform: scale(1.1);
+}
+
+.slider::-moz-range-track {
+    background: linear-gradient(to right, #3B82F6, #7B61FF);
+    border-radius: 8px;
+    height: 8px;
+    border: none;
+}
+
+.slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #7B61FF;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.slider::-moz-range-thumb:hover {
+    background: #8B5CF6;
+    box-shadow: 0 4px 8px rgba(139, 92, 246, 0.4);
+}
+
+/* 确保滑块在深色主题下可见 */
+.slider {
+    background: linear-gradient(to right, #3B82F6, #7B61FF);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+/* 滑块焦点状态 */
+.slider:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+/* 滑块激活状态 */
+.slider:active::-webkit-slider-thumb {
+    background: #8B5CF6;
+    transform: scale(1.2);
+}
+
+/* Markdown 样式 */
+.markdown-preview {
+    color: #e5e7eb;
+    line-height: 1.6;
+}
+
+.markdown-preview h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #60a5fa;
+    margin: 1.5rem 0 1rem 0;
+    border-bottom: 2px solid #374151;
+    padding-bottom: 0.5rem;
+}
+
+.markdown-preview h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #60a5fa;
+    margin: 1.25rem 0 0.75rem 0;
+    border-bottom: 1px solid #374151;
+    padding-bottom: 0.25rem;
+}
+
+.markdown-preview h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #818cf8;
+    margin: 1rem 0 0.5rem 0;
+}
+
+.markdown-preview h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #a78bfa;
+    margin: 0.75rem 0 0.5rem 0;
+}
+
+.markdown-preview h5, .markdown-preview h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #c4b5fd;
+    margin: 0.5rem 0 0.25rem 0;
+}
+
+.markdown-preview p {
+    margin: 0.75rem 0;
+}
+
+.markdown-preview ul, .markdown-preview ol {
+    margin: 0.75rem 0;
+    padding-left: 1.5rem;
+}
+
+.markdown-preview li {
+    margin: 0.25rem 0;
+}
+
+.markdown-preview blockquote {
+    border-left: 4px solid #60a5fa;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.markdown-preview code {
+    background-color: #374151;
+    color: #fbbf24;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+}
+
+.markdown-preview pre {
+    background-color: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+}
+
+.markdown-preview pre code {
+    background-color: transparent;
+    color: #e5e7eb;
+    padding: 0;
+}
+
+.markdown-preview strong {
+    color: #fbbf24;
+    font-weight: 600;
+}
+
+.markdown-preview em {
+    color: #a78bfa;
+    font-style: italic;
+}
+
+.markdown-preview a {
+    color: #60a5fa;
+    text-decoration: underline;
+}
+
+.markdown-preview a:hover {
+    color: #93c5fd;
+}
+
+.markdown-preview hr {
+    border: none;
+    border-top: 1px solid #374151;
+    margin: 2rem 0;
+}
+
+.markdown-preview table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1rem 0;
+}
+
+.markdown-preview th, .markdown-preview td {
+    border: 1px solid #374151;
+    padding: 0.5rem;
+    text-align: left;
+}
+
+.markdown-preview th {
+    background-color: #374151;
+    color: #60a5fa;
+    font-weight: 600;
+}
+
+/* 拖拽样式 */
+.drop-zone {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.drop-zone.drag-over {
+    border-color: #3b82f6 !important;
+    background-color: rgba(59, 130, 246, 0.1) !important;
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+/* 自定义确认对话框样式 */
+.custom-confirm {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.custom-confirm-content {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: slideIn 0.3s ease;
+}
+
+.custom-confirm-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 1rem;
+}
+
+.custom-confirm-message {
+    color: #94a3b8;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.custom-confirm-buttons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.custom-confirm-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    font-size: 0.875rem;
+}
+
+.custom-confirm-btn-cancel {
+    background: #374151;
+    color: #d1d5db;
+}
+
+.custom-confirm-btn-cancel:hover {
+    background: #4b5563;
+}
+
+.custom-confirm-btn-confirm {
+    background: #dc2626;
+    color: white;
+}
+
+.custom-confirm-btn-confirm:hover {
+    background: #b91c1c;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { 
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* 文件类型标签样式 */
+.file-type-tag {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.file-type-image {
+    background: rgba(52, 211, 153, 0.2);
+    color: #34d399;
+}
+
+.file-type-video {
+    background: rgba(248, 113, 113, 0.2);
+    color: #f87171;
+}
+
+.file-type-audio {
+    background: rgba(139, 92, 246, 0.2);
+    color: #8b5cf6;
+}
+
+.file-type-document {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+}
+
+.file-type-other {
+    background: rgba(148, 163, 184, 0.2);
+    color: #94a3b8;
+}
+
+/* 文件类型按钮激活状态样式 - 全部文件 */
+.file-type-btn[data-type="all"].active,
+.file-type-btn[data-type="all"].active.bg-gradient-to-r,
+.file-type-btn[data-type="all"].active.from-primary,
+.file-type-btn[data-type="all"].active.to-secondary {
+    background: rgba(59, 130, 246, 0.8) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.02) !important;
+    border: 1px solid rgba(59, 130, 246, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+    position: relative !important;
+    z-index: 10 !important;
+    font-weight: 600 !important;
+}
+
+.file-type-btn[data-type="all"].active::before,
+.file-type-btn[data-type="all"].active.bg-gradient-to-r::before,
+.file-type-btn[data-type="all"].active.from-primary::before,
+.file-type-btn[data-type="all"].active.to-secondary::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(59, 130, 246, 0.2) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.5 !important;
+    filter: blur(4px) !important;
+}
+
+/* 图片分类 - 绿色发光 */
+.file-type-btn[data-type="image"].active,
+.file-type-btn[data-type="image"].active.bg-gradient-to-r,
+.file-type-btn[data-type="image"].active.from-primary,
+.file-type-btn[data-type="image"].active.to-secondary {
+    background: rgba(34, 197, 94, 0.8) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.02) !important;
+    border: 1px solid rgba(34, 197, 94, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+    position: relative !important;
+    z-index: 10 !important;
+    font-weight: 600 !important;
+}
+
+.file-type-btn[data-type="image"].active::before,
+.file-type-btn[data-type="image"].active.bg-gradient-to-r::before,
+.file-type-btn[data-type="image"].active.from-primary::before,
+.file-type-btn[data-type="image"].active.to-secondary::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(34, 197, 94, 0.2) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.5 !important;
+    filter: blur(4px) !important;
+}
+
+/* 视频分类 - 紫色发光 */
+.file-type-btn[data-type="video"].active,
+.file-type-btn[data-type="video"].active.bg-gradient-to-r,
+.file-type-btn[data-type="video"].active.from-primary,
+.file-type-btn[data-type="video"].active.to-secondary {
+    background: rgba(168, 85, 247, 0.8) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.02) !important;
+    border: 1px solid rgba(168, 85, 247, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+    position: relative !important;
+    z-index: 10 !important;
+    font-weight: 600 !important;
+}
+
+.file-type-btn[data-type="video"].active::before,
+.file-type-btn[data-type="video"].active.bg-gradient-to-r::before,
+.file-type-btn[data-type="video"].active.from-primary::before,
+.file-type-btn[data-type="video"].active.to-secondary::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(168, 85, 247, 0.2) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.5 !important;
+    filter: blur(4px) !important;
+}
+
+/* 文档分类 - 蓝色发光 */
+.file-type-btn[data-type="document"].active,
+.file-type-btn[data-type="document"].active.bg-gradient-to-r,
+.file-type-btn[data-type="document"].active.from-primary,
+.file-type-btn[data-type="document"].active.to-secondary {
+    background: rgba(59, 130, 246, 0.8) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.02) !important;
+    border: 1px solid rgba(59, 130, 246, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+    position: relative !important;
+    z-index: 10 !important;
+    font-weight: 600 !important;
+}
+
+.file-type-btn[data-type="document"].active::before,
+.file-type-btn[data-type="document"].active.bg-gradient-to-r::before,
+.file-type-btn[data-type="document"].active.from-primary::before,
+.file-type-btn[data-type="document"].active.to-secondary::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(59, 130, 246, 0.2) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.5 !important;
+    filter: blur(4px) !important;
+}
+
+/* Word分类 - 绿色发光 */
+.file-type-btn[data-type="word"].active,
+.sub-file-type-btn[data-type="word"].active,
+.file-type-btn[data-type="word"].active.bg-gradient-to-r,
+.sub-file-type-btn[data-type="word"].active.bg-gradient-to-r,
+.file-type-btn[data-type="word"].active.from-primary,
+.sub-file-type-btn[data-type="word"].active.from-primary,
+.file-type-btn[data-type="word"].active.to-secondary,
+.sub-file-type-btn[data-type="word"].active.to-secondary {
+    background: rgba(34, 197, 94, 1) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.05) !important;
+    border: 2px solid rgba(34, 197, 94, 0.8) !important;
+    backdrop-filter: blur(8px) !important;
+    position: relative !important;
+    z-index: 10 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 15px 5px rgba(34, 197, 94, 0.5), 0 4px 8px rgba(0,0,0,0.3) !important;
+}
+
+.file-type-btn[data-type="word"].active::before,
+.sub-file-type-btn[data-type="word"].active::before,
+.file-type-btn[data-type="word"].active.bg-gradient-to-r::before,
+.sub-file-type-btn[data-type="word"].active.bg-gradient-to-r::before,
+.file-type-btn[data-type="word"].active.from-primary::before,
+.sub-file-type-btn[data-type="word"].active.from-primary::before,
+.file-type-btn[data-type="word"].active.to-secondary::before,
+.sub-file-type-btn[data-type="word"].active.to-secondary::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(34, 197, 94, 0.2) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.5 !important;
+    filter: blur(4px) !important;
+}
+
+/* Excel分类 - 橙色发光 */
+.file-type-btn[data-type="excel"].active,
+.sub-file-type-btn[data-type="excel"].active,
+.file-type-btn[data-type="excel"].active.bg-gradient-to-r,
+.sub-file-type-btn[data-type="excel"].active.bg-gradient-to-r,
+.file-type-btn[data-type="excel"].active.from-primary,
+.sub-file-type-btn[data-type="excel"].active.from-primary,
+.file-type-btn[data-type="excel"].active.to-secondary,
+.sub-file-type-btn[data-type="excel"].active.to-secondary {
+    background: rgba(249, 115, 22, 1) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.05) !important;
+    border: 2px solid rgba(249, 115, 22, 0.8) !important;
+    backdrop-filter: blur(8px) !important;
+    position: relative !important;
+    z-index: 10 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 15px 5px rgba(249, 115, 22, 0.5), 0 4px 8px rgba(0,0,0,0.3) !important;
+}
+
+.file-type-btn[data-type="excel"].active::before,
+.sub-file-type-btn[data-type="excel"].active::before,
+.file-type-btn[data-type="excel"].active.bg-gradient-to-r::before,
+.sub-file-type-btn[data-type="excel"].active.bg-gradient-to-r::before,
+.file-type-btn[data-type="excel"].active.from-primary::before,
+.sub-file-type-btn[data-type="excel"].active.from-primary::before,
+.file-type-btn[data-type="excel"].active.to-secondary::before,
+.sub-file-type-btn[data-type="excel"].active.to-secondary::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(249, 115, 22, 0.2) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.5 !important;
+    filter: blur(4px) !important;
+}
+
+/* PDF分类 - 红色发光 */
+.file-type-btn[data-type="pdf"].active,
+.sub-file-type-btn[data-type="pdf"].active,
+.file-type-btn[data-type="pdf"].active.bg-gradient-to-r,
+.sub-file-type-btn[data-type="pdf"].active.bg-gradient-to-r,
+.file-type-btn[data-type="pdf"].active.from-primary,
+.sub-file-type-btn[data-type="pdf"].active.from-primary,
+.file-type-btn[data-type="pdf"].active.to-secondary,
+.sub-file-type-btn[data-type="pdf"].active.to-secondary {
+    background: rgba(239, 68, 68, 1) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.05) !important;
+    border: 2px solid rgba(239, 68, 68, 0.8) !important;
+    backdrop-filter: blur(8px) !important;
+    position: relative !important;
+    z-index: 10 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 15px 5px rgba(239, 68, 68, 0.5), 0 4px 8px rgba(0,0,0,0.3) !important;
+}
+
+.file-type-btn[data-type="pdf"].active::before,
+.sub-file-type-btn[data-type="pdf"].active::before,
+.file-type-btn[data-type="pdf"].active.bg-gradient-to-r::before,
+.sub-file-type-btn[data-type="pdf"].active.bg-gradient-to-r::before,
+.file-type-btn[data-type="pdf"].active.from-primary::before,
+.sub-file-type-btn[data-type="pdf"].active.from-primary::before,
+.file-type-btn[data-type="pdf"].active.to-secondary::before,
+.sub-file-type-btn[data-type="pdf"].active.to-secondary::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.5 !important;
+    filter: blur(4px) !important;
+}
+
+/* PowerPoint分类 - 红色发光 */
+.file-type-btn[data-type="powerpoint"].active,
+.sub-file-type-btn[data-type="powerpoint"].active,
+.file-type-btn[data-type="powerpoint"].active.bg-gradient-to-r,
+.sub-file-type-btn[data-type="powerpoint"].active.bg-gradient-to-r,
+.file-type-btn[data-type="powerpoint"].active.from-primary,
+.sub-file-type-btn[data-type="powerpoint"].active.from-primary,
+.file-type-btn[data-type="powerpoint"].active.to-secondary,
+.sub-file-type-btn[data-type="powerpoint"].active.to-secondary {
+    background: rgba(245, 158, 11, 1) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.05) !important;
+    border: 2px solid rgba(245, 158, 11, 0.8) !important;
+    backdrop-filter: blur(8px) !important;
+    position: relative !important;
+    z-index: 10 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 15px 5px rgba(245, 158, 11, 0.5), 0 4px 8px rgba(0,0,0,0.3) !important;
+}
+
+.file-type-btn[data-type="powerpoint"].active::before,
+.sub-file-type-btn[data-type="powerpoint"].active::before,
+.file-type-btn[data-type="powerpoint"].active.bg-gradient-to-r::before,
+.sub-file-type-btn[data-type="powerpoint"].active.bg-gradient-to-r::before,
+.file-type-btn[data-type="powerpoint"].active.from-primary::before,
+.sub-file-type-btn[data-type="powerpoint"].active.from-primary::before,
+.file-type-btn[data-type="powerpoint"].active.to-secondary::before,
+.sub-file-type-btn[data-type="powerpoint"].active.to-secondary::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(245, 158, 11, 0.2) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.5 !important;
+    filter: blur(4px) !important;
+}
+
+/* 音频分类 - 黄色发光 */
+.file-type-btn[data-type="audio"].active,
+.file-type-btn[data-type="audio"].active.bg-gradient-to-r,
+.file-type-btn[data-type="audio"].active.from-primary,
+.file-type-btn[data-type="audio"].active.to-secondary {
+    background: rgba(234, 179, 8, 0.8) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.02) !important;
+    border: 1px solid rgba(234, 179, 8, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+    position: relative !important;
+    z-index: 10 !important;
+    font-weight: 600 !important;
+}
+
+.file-type-btn[data-type="audio"].active::before,
+.file-type-btn[data-type="audio"].active.bg-gradient-to-r::before,
+.file-type-btn[data-type="audio"].active.from-primary::before,
+.file-type-btn[data-type="audio"].active.to-secondary::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(234, 179, 8, 0.2) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.5 !important;
+    filter: blur(4px) !important;
+}
+
+/* URL分类 - 青色发光 */
+.file-type-btn[data-type="url"].active,
+.file-type-btn[data-type="url"].active.bg-gradient-to-r,
+.file-type-btn[data-type="url"].active.from-primary,
+.file-type-btn[data-type="url"].active.to-secondary {
+    background: rgba(6, 182, 212, 0.8) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.02) !important;
+    border: 1px solid rgba(6, 182, 212, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+    position: relative !important;
+    z-index: 10 !important;
+    font-weight: 600 !important;
+}
+
+.file-type-btn[data-type="url"].active::before,
+.file-type-btn[data-type="url"].active.bg-gradient-to-r::before,
+.file-type-btn[data-type="url"].active.from-primary::before,
+.file-type-btn[data-type="url"].active.to-secondary::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(6, 182, 212, 0.2) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.5 !important;
+    filter: blur(4px) !important;
+}
+
+/* 其他分类 - 灰色发光 */
+.file-type-btn[data-type="other"].active,
+.file-type-btn[data-type="other"].active.bg-gradient-to-r,
+.file-type-btn[data-type="other"].active.from-primary,
+.file-type-btn[data-type="other"].active.to-secondary {
+    background: rgba(107, 114, 128, 0.8) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.02) !important;
+    border: 1px solid rgba(107, 114, 128, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+    position: relative !important;
+    z-index: 10 !important;
+    font-weight: 600 !important;
+}
+
+.file-type-btn[data-type="other"].active::before,
+.file-type-btn[data-type="other"].active.bg-gradient-to-r::before,
+.file-type-btn[data-type="other"].active.from-primary::before,
+.file-type-btn[data-type="other"].active.to-secondary::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(107, 114, 128, 0.2) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.5 !important;
+    filter: blur(4px) !important;
+}
+
+/* 外站文档分类 - 靛蓝色发光 */
+.file-type-btn[data-type="external-docs"].active,
+.file-type-btn[data-type="external-docs"].active.bg-gradient-to-r,
+.file-type-btn[data-type="external-docs"].active.from-primary,
+.file-type-btn[data-type="external-docs"].active.to-secondary {
+    background: rgba(99, 102, 241, 0.8) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.02) !important;
+    border: 1px solid rgba(99, 102, 241, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+    position: relative !important;
+    z-index: 10 !important;
+    font-weight: 600 !important;
+}
+
+.file-type-btn[data-type="external-docs"].active::before,
+.file-type-btn[data-type="external-docs"].active.bg-gradient-to-r::before,
+.file-type-btn[data-type="external-docs"].active.from-primary::before,
+.file-type-btn[data-type="external-docs"].active.to-secondary::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(99, 102, 241, 0.2) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.5 !important;
+    filter: blur(4px) !important;
+}
+
+/* 子分类按钮通用样式 */
+.sub-file-type-btn.active,
+.sub-file-type-btn.active.bg-gradient-to-r,
+.sub-file-type-btn.active.from-primary,
+.sub-file-type-btn.active.to-secondary {
+    background: rgba(59, 130, 246, 1) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.05) !important;
+    border: 2px solid rgba(59, 130, 246, 0.8) !important;
+    backdrop-filter: blur(8px) !important;
+    position: relative !important;
+    z-index: 10 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 15px 5px rgba(59, 130, 246, 0.5), 0 4px 8px rgba(0,0,0,0.3) !important;
+}
+
+.sub-file-type-btn.active::before,
+.sub-file-type-btn.active.bg-gradient-to-r::before,
+.sub-file-type-btn.active.from-primary::before,
+.sub-file-type-btn.active.to-secondary::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(59, 130, 246, 0.2) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.5 !important;
+    filter: blur(4px) !important;
+}
+
+/* 非激活状态样式 */
+.file-type-btn:not(.active),
+.sub-file-type-btn:not(.active) {
+    transition: all 0.3s ease !important;
+    backdrop-filter: blur(8px) !important;
+    font-weight: 500 !important;
+    position: relative !important;
+    opacity: 0.8 !important;
+}
+
+/* 全部文件默认白色背景 */
+.file-type-btn[data-type="all"]:not(.active) {
+    background: #FFFFFF !important;
+    color: #374151 !important;
+    border: 1px solid #D1D5DB !important;
+}
+
+/* 图片分类默认绿色背景 */
+.file-type-btn[data-type="image"]:not(.active) {
+    background: rgba(34, 197, 94, 0.9) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(34, 197, 94, 0.6) !important;
+}
+
+/* 视频分类默认紫色背景 */
+.file-type-btn[data-type="video"]:not(.active) {
+    background: rgba(168, 85, 247, 0.9) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(168, 85, 247, 0.6) !important;
+}
+
+/* 文档分类默认蓝色背景 */
+.file-type-btn[data-type="document"]:not(.active) {
+    background: rgba(59, 130, 246, 0.9) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(59, 130, 246, 0.6) !important;
+}
+
+/* Word分类默认绿色背景 */
+.file-type-btn[data-type="word"]:not(.active),
+.sub-file-type-btn[data-type="word"]:not(.active) {
+    background: rgba(34, 197, 94, 0.6) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(34, 197, 94, 0.4) !important;
+}
+
+/* Excel分类默认橙色背景 */
+.file-type-btn[data-type="excel"]:not(.active),
+.sub-file-type-btn[data-type="excel"]:not(.active) {
+    background: rgba(249, 115, 22, 0.6) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(249, 115, 22, 0.4) !important;
+}
+
+/* PDF分类默认红色背景 */
+.file-type-btn[data-type="pdf"]:not(.active),
+.sub-file-type-btn[data-type="pdf"]:not(.active) {
+    background: rgba(239, 68, 68, 0.6) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(239, 68, 68, 0.4) !important;
+}
+
+/* PowerPoint分类默认橙色背景 */
+.file-type-btn[data-type="powerpoint"]:not(.active),
+.sub-file-type-btn[data-type="powerpoint"]:not(.active) {
+    background: rgba(245, 158, 11, 0.6) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(245, 158, 11, 0.4) !important;
+}
+
+/* 音频分类默认黄色背景 */
+.file-type-btn[data-type="audio"]:not(.active) {
+    background: rgba(234, 179, 8, 0.9) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(234, 179, 8, 0.6) !important;
+}
+
+/* URL分类默认青色背景 */
+.file-type-btn[data-type="url"]:not(.active) {
+    background: rgba(6, 182, 212, 0.9) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(6, 182, 212, 0.6) !important;
+}
+
+/* 其他分类默认灰色背景 */
+.file-type-btn[data-type="other"]:not(.active) {
+    background: rgba(107, 114, 128, 0.9) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(107, 114, 128, 0.6) !important;
+}
+
+/* 外站文档分类默认靛蓝色背景 */
+.file-type-btn[data-type="external-docs"]:not(.active) {
+    background: rgba(99, 102, 241, 0.9) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(99, 102, 241, 0.6) !important;
+}
+
+.file-type-btn:not(.active):hover,
+.sub-file-type-btn:not(.active):hover {
+    position: relative !important;
+    z-index: 5 !important;
+    transform: scale(1.02) !important;
+    font-weight: 600 !important;
+}
+
+/* 全部文件悬浮发光 */
+.file-type-btn[data-type="all"]:not(.active):hover {
+    background: rgba(59, 130, 246, 0.3) !important;
+    border-color: rgba(59, 130, 246, 0.4) !important;
+    color: #E2E8F0 !important;
+}
+
+.file-type-btn[data-type="all"]:not(.active):hover::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(59, 130, 246, 0.1) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.3 !important;
+    filter: blur(3px) !important;
+}
+
+/* 图片分类悬浮发光 */
+.file-type-btn[data-type="image"]:not(.active):hover {
+    background: rgba(34, 197, 94, 0.3) !important;
+    border-color: rgba(34, 197, 94, 0.4) !important;
+    color: #E2E8F0 !important;
+}
+
+.file-type-btn[data-type="image"]:not(.active):hover::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(34, 197, 94, 0.1) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.3 !important;
+    filter: blur(3px) !important;
+}
+
+/* 视频分类悬浮发光 */
+.file-type-btn[data-type="video"]:not(.active):hover {
+    background: rgba(168, 85, 247, 0.3) !important;
+    border-color: rgba(168, 85, 247, 0.4) !important;
+    color: #E2E8F0 !important;
+}
+
+.file-type-btn[data-type="video"]:not(.active):hover::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(168, 85, 247, 0.1) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.3 !important;
+    filter: blur(3px) !important;
+}
+
+/* 文档分类悬浮发光 */
+.file-type-btn[data-type="document"]:not(.active):hover {
+    background: rgba(59, 130, 246, 0.3) !important;
+    border-color: rgba(59, 130, 246, 0.4) !important;
+    color: #E2E8F0 !important;
+}
+
+.file-type-btn[data-type="document"]:not(.active):hover::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(59, 130, 246, 0.1) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.3 !important;
+    filter: blur(3px) !important;
+}
+
+/* Word分类悬浮发光 */
+.file-type-btn[data-type="word"]:not(.active):hover,
+.sub-file-type-btn[data-type="word"]:not(.active):hover {
+    background: rgba(34, 197, 94, 0.3) !important;
+    border-color: rgba(34, 197, 94, 0.4) !important;
+    color: #E2E8F0 !important;
+}
+
+.file-type-btn[data-type="word"]:not(.active):hover::before,
+.sub-file-type-btn[data-type="word"]:not(.active):hover::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(34, 197, 94, 0.1) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.3 !important;
+    filter: blur(3px) !important;
+}
+
+/* Excel分类悬浮发光 */
+.file-type-btn[data-type="excel"]:not(.active):hover,
+.sub-file-type-btn[data-type="excel"]:not(.active):hover {
+    background: rgba(249, 115, 22, 0.3) !important;
+    border-color: rgba(249, 115, 22, 0.4) !important;
+    color: #E2E8F0 !important;
+}
+
+.file-type-btn[data-type="excel"]:not(.active):hover::before,
+.sub-file-type-btn[data-type="excel"]:not(.active):hover::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(249, 115, 22, 0.1) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.3 !important;
+    filter: blur(3px) !important;
+}
+
+/* PDF分类悬浮发光 */
+.file-type-btn[data-type="pdf"]:not(.active):hover,
+.sub-file-type-btn[data-type="pdf"]:not(.active):hover {
+    background: rgba(239, 68, 68, 0.3) !important;
+    border-color: rgba(239, 68, 68, 0.4) !important;
+    color: #E2E8F0 !important;
+}
+
+.file-type-btn[data-type="pdf"]:not(.active):hover::before,
+.sub-file-type-btn[data-type="pdf"]:not(.active):hover::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.3 !important;
+    filter: blur(3px) !important;
+}
+
+/* PowerPoint分类悬浮发光 */
+.file-type-btn[data-type="powerpoint"]:not(.active):hover,
+.sub-file-type-btn[data-type="powerpoint"]:not(.active):hover {
+    background: rgba(245, 158, 11, 0.3) !important;
+    border-color: rgba(245, 158, 11, 0.4) !important;
+    color: #E2E8F0 !important;
+}
+
+.file-type-btn[data-type="powerpoint"]:not(.active):hover::before,
+.sub-file-type-btn[data-type="powerpoint"]:not(.active):hover::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(245, 158, 11, 0.1) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.3 !important;
+    filter: blur(3px) !important;
+}
+
+/* 音频分类悬浮发光 */
+.file-type-btn[data-type="audio"]:not(.active):hover {
+    background: rgba(234, 179, 8, 0.3) !important;
+    border-color: rgba(234, 179, 8, 0.4) !important;
+    color: #E2E8F0 !important;
+}
+
+.file-type-btn[data-type="audio"]:not(.active):hover::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(234, 179, 8, 0.1) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.3 !important;
+    filter: blur(3px) !important;
+}
+
+/* URL分类悬浮发光 */
+.file-type-btn[data-type="url"]:not(.active):hover {
+    background: rgba(6, 182, 212, 0.3) !important;
+    border-color: rgba(6, 182, 212, 0.4) !important;
+    color: #E2E8F0 !important;
+}
+
+.file-type-btn[data-type="url"]:not(.active):hover::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(6, 182, 212, 0.1) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.3 !important;
+    filter: blur(3px) !important;
+}
+
+/* 其他分类悬浮发光 */
+.file-type-btn[data-type="other"]:not(.active):hover {
+    background: rgba(107, 114, 128, 0.3) !important;
+    border-color: rgba(107, 114, 128, 0.4) !important;
+    color: #E2E8F0 !important;
+}
+
+.file-type-btn[data-type="other"]:not(.active):hover::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(107, 114, 128, 0.1) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.3 !important;
+    filter: blur(3px) !important;
+}
+
+/* 外站文档分类悬浮发光 */
+.file-type-btn[data-type="external-docs"]:not(.active):hover {
+    background: rgba(99, 102, 241, 0.3) !important;
+    border-color: rgba(99, 102, 241, 0.4) !important;
+    color: #E2E8F0 !important;
+}
+
+.file-type-btn[data-type="external-docs"]:not(.active):hover::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(99, 102, 241, 0.1) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.3 !important;
+    filter: blur(3px) !important;
+}
+
+/* 进度条动画 */
+@keyframes progress-animation {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+.animate-progress {
+    animation: progress-animation 1.5s ease-out forwards;
+}
+
+/* 音频波形脉冲动画 */
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+.animate-pulse {
+    animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 文件卡片悬停效果 */
+.file-card {
+    transition: all 0.3s ease, opacity 0.3s ease-in-out;
+}
+
+.file-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* 文件网格过渡效果 */
+#files-grid {
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* 空状态过渡效果 */
+#empty-state {
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* 按钮发光效果 */
+.btn-glow {
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+}
+
+.btn-glow:hover {
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.7);
+}
+
+/* 滚动条样式 */
+.scrollbar-thin {
+    scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 2px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background-color: rgba(75, 85, 99, 0.1);
+    border-radius: 2px;
+}
+
+/* 星空背景样式 */
+.bg-stars {
+    background-image: 
+        radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+        radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+        radial-gradient(2px 2px at 160px 30px, #ddd, transparent);
+    background-repeat: repeat;
+    background-size: 200px 100px;
+    animation: twinkle 4s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+} 
+
+/* 消息提示样式 */
+.ui-message {
+    position: fixed;
+    z-index: 9999;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+    max-width: 400px;
+    word-wrap: break-word;
+}
+
+.ui-message.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.ui-message-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border-left: 4px solid #047857;
+}
+
+.ui-message-error {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border-left: 4px solid #b91c1c;
+}
+
+.ui-message-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border-left: 4px solid #b45309;
+}
+
+.ui-message-info {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border-left: 4px solid #1d4ed8;
+}
+
+.ui-message .message-content {
+    flex: 1;
+    margin-right: 8px;
+}
+
+.ui-message .message-close {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 18px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ui-message .message-close:hover {
+    opacity: 1;
+}
+
+/* 位置样式 */
+.ui-message {
+    top: 20px;
+    right: 20px;
+}
+
+/* 加载状态样式 */
+.ui-loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.ui-loading.show {
+    opacity: 1;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 12px;
+}
+
+.loading-message {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 文件卡片大小强制覆盖 */
+.file-card {
+    max-width: 240px !important;
+    width: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+}
+
+.file-card:hover {
+    border-color: transparent !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* 文件夹卡片大小强制覆盖 */
+.folder-card {
+    max-width: 240px !important;
+    width: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+}
+
+.folder-card:hover {
+    border-color: transparent !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* 文件夹卡片选中状态样式 */
+.folder-card.selected,
+.folder-card.active {
+    background: rgba(59, 130, 246, 0.8) !important;
+    border: 1px solid rgba(59, 130, 246, 0.6) !important;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25) !important;
+    transform: scale(1.02) !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+.folder-card.selected::before,
+.folder-card.active::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    background: rgba(59, 130, 246, 0.2) !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+    opacity: 0.5 !important;
+    filter: blur(4px) !important;
+}
+
+/* 文件夹卡片选中状态下的文字颜色 */
+.folder-card.selected h4,
+.folder-card.active h4 {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+}
+
+.folder-card.selected .folder-icon-container i,
+.folder-card.active .folder-icon-container i {
+    color: #FFFFFF !important;
+}
+
+.folder-card.selected .folder-icon-container > div:last-child span,
+.folder-card.active .folder-icon-container > div:last-child span {
+    color: #E2E8F0 !important;
+    font-weight: 600 !important;
+}
+
+/* 欢迎模块文字颜色强制覆盖 */
+.welcome-title {
+    color: transparent !important;
+    background: linear-gradient(135deg, #a855f7, #3b82f6, #06b6d4) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+}
+
+.welcome-date {
+    color: #e5e7eb !important;
+}
+
+/* 状态卡片文字颜色强制覆盖 */
+.status-label {
+    color: #E5E7EB !important;
+    font-weight: 500 !important;
+}
+
+/* 日历图标颜色调整 - 暗色主题 */
+.file-info .fa-calendar,
+.folder-info .fa-calendar {
+    color: #10B981 !important;
+}
+
+/* 文件创建日期文字颜色 - 暗色主题 */
+.file-info span[style*="color: #86efac"],
+.folder-info span[style*="color: #86efac"] {
+    color: #10B981 !important;
+}
+
+/* 文件夹图标颜色 - 暗色主题 */
+.fa-folder {
+    color: #60A5FA !important;
+}
+
+/* 文件夹图标容器背景 - 暗色主题 */
+.bg-gradient-to-br.from-blue-500\/30.to-blue-600\/30 {
+    background: linear-gradient(to bottom right, rgba(96, 165, 250, 0.4), rgba(59, 130, 246, 0.4)) !important;
+}
+
+/* 文件卡片右上角文件夹图标样式优化 - 暗色主题 */
+.file-card .absolute[data-folder-id] {
+    background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
+    border: 1px solid rgba(96, 165, 250, 0.4) !important;
+    box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3) !important;
+}
+
+.file-card .absolute[data-folder-id] .fa-folder {
+    color: #FFFFFF !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 文件卡片右上角红色文件夹图标样式优化 - 暗色主题 */
+.file-card .absolute[data-folder-id].bg-gradient-to-r.from-red-400.to-red-500 {
+    background: linear-gradient(135deg, #F87171 0%, #EF4444 100%) !important;
+    border: 1px solid rgba(248, 113, 113, 0.4) !important;
+    box-shadow: 0 2px 8px rgba(248, 113, 113, 0.3) !important;
+}
+
+.file-card .absolute[data-folder-id].bg-gradient-to-r.from-red-400.to-red-500 .fa-folder {
+    color: #FFFFFF !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 文件数标签文字颜色 - 暗色主题 */
+.text-blue-200 {
+    color: #93C5FD !important;
+    font-weight: 600 !important;
+}
+
+/* 日期文字颜色 - 暗色主题 */
+span[style*="color: #86efac"] {
+    color: #10B981 !important;
+    font-weight: 600 !important;
+}
+
+/* 文字颜色强制覆盖 - 暗色主题 */
+.text-gray-300 {
+    color: #D1D5DB !important;
+}
+
+.text-gray-400 {
+    color: #9CA3AF !important;
+}
+
+.hover\:text-gray-300:hover {
+    color: #E5E7EB !important;
+}
+
+/* 统计标签样式 - 暗色主题 */
+.stats-label {
+    color: #10B981 !important;
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    opacity: 1 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* 统计数字样式 - 暗色主题 */
+.stats-number {
+    color: #10B981 !important;
+    text-shadow: 0 1px 3px rgba(16, 185, 129, 0.3) !important;
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    margin-bottom: 0.25rem !important;
+    line-height: 1 !important;
+    letter-spacing: -0.025em !important;
+} 

@@ -1,0 +1,138 @@
+/**
+ * 通知系统样式
+ * 包含消息框、通知容器和响应式设计
+ */
+
+/* MessageBox 样式 - 无模态顶部通知 */
+#global-message-box {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  pointer-events: none;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#global-message-box > div {
+  pointer-events: auto;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(229, 231, 235, 0.3);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 
+    0 8px 32px -4px rgba(0, 0, 0, 0.1),
+    0 4px 16px -2px rgba(0, 0, 0, 0.05),
+    0 0 0 1px rgba(229, 231, 235, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  width: 100%;
+  max-width: 28rem;
+  margin: 0 auto;
+  border-radius: 1.25rem;
+  overflow: hidden;
+}
+
+/* 添加微妙的边框发光效果 */
+#global-message-box > div::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 1.25rem;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(59, 130, 246, 0.1));
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* 炫光效果 */
+#global-message-box .glow-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+#global-message-box .glow-effect::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: rotate 3s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+#global-message-box .glow-effect:hover::before {
+  opacity: 1;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Notify 样式 - 右上角通知 */
+#global-notify-container {
+  /* 由js控制定位 */
+}
+
+#global-notify-container > div {
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(229, 231, 235, 0.3);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 
+    0 8px 32px -4px rgba(0, 0, 0, 0.1),
+    0 4px 16px -2px rgba(0, 0, 0, 0.05),
+    0 0 0 1px rgba(229, 231, 235, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+/* 添加微妙的边框发光效果 */
+#global-notify-container > div::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0.75rem;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(59, 130, 246, 0.1));
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  #global-message-box {
+    padding: 0.5rem;
+  }
+  
+  #global-message-box > div {
+    margin: 0 0.5rem;
+    padding: 1rem;
+    max-width: calc(100vw - 1rem);
+    border-radius: 1rem;
+  }
+  
+  #global-message-box > div::before {
+    border-radius: 1rem;
+  }
+  
+  #global-notify-container {
+    right: 4vw !important;
+    top: 4vw !important;
+  }
+  
+  #global-notify-container > div {
+    max-width: calc(100vw - 2rem);
+    margin: 0 0.5rem;
+  }
+  
+  #global-notify-container > div::before {
+    border-radius: 0.75rem;
+  }
+} 

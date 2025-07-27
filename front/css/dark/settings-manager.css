@@ -1,0 +1,1045 @@
+/* 设置管理模块样式 */
+
+/* 设置面板 */
+.settings-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 500px;
+    height: 100vh;
+    background: white;
+    box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+}
+
+.settings-panel.show {
+    transform: translateX(0);
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    background: #f8f9fa;
+}
+
+.settings-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 18px;
+}
+
+.settings-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.settings-close:hover {
+    background: #e9ecef;
+    color: #333;
+}
+
+.settings-content {
+    height: calc(100vh - 80px);
+    overflow-y: auto;
+    padding: 20px;
+    /* 添加滚动条样式 */
+    scrollbar-width: thin;
+}
+
+.settings-content::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.settings-content::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.2);
+    border-radius: 4px;
+}
+
+.settings-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(59, 130, 246, 0.6));
+    border-radius: 4px;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    transition: all 0.3s ease;
+}
+
+.settings-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(59, 130, 246, 0.8));
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
+}
+
+.settings-content::-webkit-scrollbar-button {
+    display: none;
+}
+
+.settings-content::-webkit-scrollbar-corner {
+    background: rgba(15, 23, 42, 0.2);
+}
+
+/* 设置模态框滚动条样式 - 使用更高优先级的选择器 */
+#settings-modal .modal-content::-webkit-scrollbar,
+#settings-modal .glass-effect::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+}
+
+#settings-modal .modal-content::-webkit-scrollbar-track,
+#settings-modal .glass-effect::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.2) !important;
+    border-radius: 4px !important;
+}
+
+#settings-modal .modal-content::-webkit-scrollbar-thumb,
+#settings-modal .glass-effect::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(59, 130, 246, 0.6)) !important;
+    border-radius: 4px !important;
+    border: 1px solid rgba(139, 92, 246, 0.2) !important;
+    transition: all 0.3s ease !important;
+}
+
+#settings-modal .modal-content::-webkit-scrollbar-thumb:hover,
+#settings-modal .glass-effect::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(59, 130, 246, 0.8)) !important;
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.4) !important;
+}
+
+#settings-modal .modal-content::-webkit-scrollbar-button,
+#settings-modal .glass-effect::-webkit-scrollbar-button {
+    display: none !important;
+}
+
+#settings-modal .modal-content::-webkit-scrollbar-corner,
+#settings-modal .glass-effect::-webkit-scrollbar-corner {
+    background: rgba(15, 23, 42, 0.2) !important;
+}
+
+/* 设置模态框Firefox滚动条样式 */
+#settings-modal .modal-content,
+#settings-modal .glass-effect {
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(139, 92, 246, 0.6) rgba(15, 23, 42, 0.2) !important;
+}
+
+/* 确保滚动条可见 */
+#settings-modal .modal-content,
+#settings-modal .glass-effect {
+    overflow-y: auto !important;
+    scrollbar-width: thin !important;
+}
+
+/* 强制覆盖全局滚动条样式 */
+#settings-modal .modal-content::-webkit-scrollbar,
+#settings-modal .glass-effect::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+    background: transparent !important;
+}
+
+#settings-modal .modal-content::-webkit-scrollbar-track,
+#settings-modal .glass-effect::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.2) !important;
+    border-radius: 4px !important;
+}
+
+#settings-modal .modal-content::-webkit-scrollbar-thumb,
+#settings-modal .glass-effect::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(59, 130, 246, 0.6)) !important;
+    border-radius: 4px !important;
+    border: 1px solid rgba(139, 92, 246, 0.2) !important;
+    transition: all 0.3s ease !important;
+}
+
+/* 删除重复的滑块样式，让custom.css中的.slider样式生效 */
+
+/* 设置标签 */
+.settings-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 10px;
+    overflow-x: auto;
+}
+
+.tab-btn {
+    padding: 10px 16px;
+    border: none;
+    background: #e9ecef;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    color: #666;
+}
+
+.tab-btn:hover {
+    background: #dee2e6;
+    color: #333;
+}
+
+.tab-btn.active {
+    background: #007bff;
+    color: white;
+}
+
+/* 设置表单容器 */
+.settings-form-container {
+    margin-bottom: 20px;
+}
+
+.settings-form-container form {
+    margin: 0;
+}
+
+/* 设置区域 */
+.settings-section {
+    margin-bottom: 30px;
+}
+
+.settings-section h4 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 8px;
+}
+
+/* 表单组 */
+.form-group {
+    margin: 20px 0;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+}
+
+.form-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+}
+
+/* 删除重复的滑块样式，让custom.css中的.slider样式生效 */
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.form-group .range-value {
+    margin-left: 10px;
+    font-size: 12px;
+    color: #666;
+    min-width: 30px;
+}
+
+/* 复选框样式 */
+.form-group input[type="checkbox"] {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ddd;
+    border-radius: 3px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-group input[type="checkbox"]:checked {
+    background: #007bff;
+    border-color: #007bff;
+}
+
+.form-group input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* 设置操作按钮 */
+.settings-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    justify-content: flex-end;
+}
+
+.settings-actions .btn {
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
+/* 按钮样式 */
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #1e7e34;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: black;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+}
+
+.btn-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background: #138496;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+/* 设置项样式 */
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s ease;
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-item:hover {
+    background: #f8f9fa;
+}
+
+.setting-path {
+    font-weight: 500;
+    color: #333;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+}
+
+.setting-value {
+    color: #666;
+    font-size: 12px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 设置分类样式 */
+.settings-category {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.settings-category h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 8px;
+}
+
+.settings-category .form-group {
+    margin: 15px 0;
+}
+
+/* 设置状态指示器 */
+.settings-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #e9ecef;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.settings-status .status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #28a745;
+}
+
+.settings-status .status-indicator.dirty {
+    background: #ffc107;
+}
+
+.settings-status .status-indicator.error {
+    background: #dc3545;
+}
+
+/* 设置导入导出样式 */
+.settings-import-export {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.settings-import-export h5 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 14px;
+}
+
+.settings-import-export .btn {
+    margin-right: 10px;
+    margin-bottom: 5px;
+}
+
+/* 设置验证样式 */
+.form-group.error input,
+.form-group.error select,
+.form-group.error textarea {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220,53,69,0.1);
+}
+
+.form-group.error .error-message {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.form-group.success input,
+.form-group.success select,
+.form-group.success textarea {
+    border-color: #28a745;
+    box-shadow: 0 0 0 3px rgba(40,167,69,0.1);
+}
+
+/* 设置帮助文本 */
+.form-group .help-text {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/* 设置分组样式 */
+.settings-group {
+    margin-bottom: 25px;
+    padding: 15px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.settings-group h5 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .settings-panel {
+        width: 100%;
+        height: 100vh;
+    }
+    
+    .settings-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .tab-btn {
+        flex: 1;
+        min-width: 80px;
+        text-align: center;
+    }
+    
+    .settings-actions {
+        flex-direction: column;
+    }
+    
+    .settings-actions .btn {
+        width: 100%;
+    }
+    
+    .form-group {
+        margin: 15px 0;
+    }
+    
+    .setting-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .setting-value {
+        max-width: 100%;
+        word-break: break-all;
+        white-space: normal;
+    }
+}
+
+@media (max-width: 480px) {
+    .settings-header {
+        padding: 15px;
+    }
+    
+    .settings-content {
+        padding: 15px;
+    }
+    
+    .settings-tabs {
+        gap: 3px;
+    }
+    
+    .tab-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    .form-group label {
+        font-size: 13px;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+}
+
+/* 动画效果 */
+.settings-panel {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* 设置项动画 */
+.settings-section {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 加载状态 */
+.settings-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.settings-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid #007bff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* 无障碍支持 */
+.settings-panel:focus-within {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+.settings-close:focus,
+.tab-btn:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+    .settings-panel {
+        border: 2px solid #000;
+    }
+    
+    .settings-section {
+        border: 1px solid #000;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        border: 2px solid #000;
+    }
+}
+
+/* 深色主题支持 */
+@media (prefers-color-scheme: dark) {
+    .settings-panel {
+        background: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .settings-header {
+        background: #4a5568;
+        border-bottom-color: #718096;
+    }
+    
+    .settings-header h3 {
+        color: #e2e8f0;
+    }
+    
+    .settings-close {
+        color: #a0aec0;
+    }
+    
+    .settings-close:hover {
+        background: #4a5568;
+        color: #e2e8f0;
+    }
+    
+    .tab-btn {
+        background: #4a5568;
+        color: #a0aec0;
+    }
+    
+    .tab-btn:hover {
+        background: #718096;
+        color: #e2e8f0;
+    }
+    
+    .tab-btn.active {
+        background: #3182ce;
+        color: white;
+    }
+    
+    .settings-section h4 {
+        color: #e2e8f0;
+        border-bottom-color: #3182ce;
+    }
+    
+    .form-group label {
+        color: #e2e8f0;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        background: #4a5568;
+        border-color: #718096;
+        color: #e2e8f0;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #3182ce;
+        box-shadow: 0 0 0 3px rgba(49,130,206,0.1);
+    }
+    
+    .setting-item {
+        border-bottom-color: #718096;
+    }
+    
+    .setting-item:hover {
+        background: #4a5568;
+    }
+    
+    .setting-path {
+        color: #e2e8f0;
+    }
+    
+    .setting-value {
+        color: #a0aec0;
+    }
+} 
+
+/* 亮色主题适配 */
+body.theme-light .settings-panel {
+    background: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: -2px 0 8px rgba(0,0,0,0.1) !important;
+}
+
+body.theme-light .settings-header {
+    background: rgba(249, 250, 251, 0.8) !important;
+    border-bottom: 1px solid #e5e7eb !important;
+}
+
+body.theme-light .settings-header h3 {
+    color: #1f2937 !important;
+}
+
+body.theme-light .settings-close {
+    color: #6b7280 !important;
+}
+
+body.theme-light .settings-close:hover {
+    background: rgba(229, 231, 235, 0.8) !important;
+    color: #1f2937 !important;
+}
+
+body.theme-light .settings-content {
+    background: rgba(255, 255, 255, 0.95) !important;
+}
+
+body.theme-light .settings-content::-webkit-scrollbar-track {
+    background: rgba(229, 231, 235, 0.3) !important;
+}
+
+body.theme-light .settings-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(59, 130, 246, 0.6)) !important;
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+}
+
+body.theme-light .settings-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(59, 130, 246, 0.8)) !important;
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.5) !important;
+}
+
+body.theme-light .settings-content::-webkit-scrollbar-corner {
+    background: rgba(229, 231, 235, 0.3) !important;
+}
+
+body.theme-light .settings-tabs {
+    background: rgba(249, 250, 251, 0.8) !important;
+    border-bottom: 1px solid #e5e7eb !important;
+}
+
+body.theme-light .tab-btn {
+    color: #6b7280 !important;
+    border-bottom: 2px solid transparent !important;
+}
+
+body.theme-light .tab-btn:hover {
+    color: #2563eb !important;
+    background: rgba(229, 231, 235, 0.8) !important;
+}
+
+body.theme-light .tab-btn.active {
+    color: #2563eb !important;
+    border-bottom-color: #2563eb !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+}
+
+body.theme-light .settings-section h4 {
+    color: #1f2937 !important;
+}
+
+body.theme-light .form-group label {
+    color: #374151 !important;
+}
+
+body.theme-light .form-group input,
+body.theme-light .form-group textarea,
+body.theme-light .form-group select {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid #d1d5db !important;
+    color: #1f2937 !important;
+}
+
+body.theme-light .form-group input:focus,
+body.theme-light .form-group textarea:focus,
+body.theme-light .form-group select:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+body.theme-light .form-group input[type="checkbox"] {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid #d1d5db !important;
+}
+
+body.theme-light .form-group input[type="checkbox"]:checked {
+    background: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+}
+
+body.theme-light .form-group input[type="checkbox"]:checked::after {
+    border-color: #ffffff !important;
+}
+
+body.theme-light .form-group .range-value {
+    color: #1f2937 !important;
+}
+
+body.theme-light .settings-actions {
+    background: rgba(249, 250, 251, 0.8) !important;
+    border-top: 1px solid #e5e7eb !important;
+}
+
+body.theme-light .settings-actions .btn {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid #d1d5db !important;
+    color: #374151 !important;
+}
+
+body.theme-light .btn-primary {
+    background: rgba(59, 130, 246, 0.8) !important;
+    border-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+body.theme-light .btn-primary:hover {
+    background: rgba(59, 130, 246, 1) !important;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.3) !important;
+}
+
+body.theme-light .btn-success {
+    background: rgba(34, 197, 94, 0.8) !important;
+    border-color: #22c55e !important;
+    color: #ffffff !important;
+}
+
+body.theme-light .btn-success:hover {
+    background: rgba(34, 197, 94, 1) !important;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.3) !important;
+}
+
+body.theme-light .btn-danger {
+    background: rgba(239, 68, 68, 0.8) !important;
+    border-color: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+body.theme-light .btn-danger:hover {
+    background: rgba(239, 68, 68, 1) !important;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.3) !important;
+}
+
+body.theme-light .btn-warning {
+    background: rgba(245, 158, 11, 0.8) !important;
+    border-color: #f59e0b !important;
+    color: #ffffff !important;
+}
+
+body.theme-light .btn-warning:hover {
+    background: rgba(245, 158, 11, 1) !important;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.3) !important;
+}
+
+body.theme-light .btn-info {
+    background: rgba(6, 182, 212, 0.8) !important;
+    border-color: #06b6d4 !important;
+    color: #ffffff !important;
+}
+
+body.theme-light .btn-info:hover {
+    background: rgba(6, 182, 212, 1) !important;
+    box-shadow: 0 0 8px rgba(6, 182, 212, 0.3) !important;
+}
+
+body.theme-light .btn-secondary {
+    background: rgba(107, 114, 128, 0.8) !important;
+    border-color: #6b7280 !important;
+    color: #f3f4f6 !important;
+}
+
+body.theme-light .btn-secondary:hover {
+    background: rgba(107, 114, 128, 1) !important;
+    box-shadow: 0 0 8px rgba(107, 114, 128, 0.3) !important;
+}
+
+body.theme-light .setting-item {
+    background: rgba(249, 250, 251, 0.5) !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+body.theme-light .setting-item:hover {
+    background: rgba(229, 231, 235, 0.8) !important;
+    border-color: #d1d5db !important;
+}
+
+body.theme-light .setting-path {
+    color: #374151 !important;
+}
+
+body.theme-light .setting-value {
+    color: #1f2937 !important;
+}
+
+body.theme-light .settings-category {
+    background: rgba(249, 250, 251, 0.3) !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+body.theme-light .settings-category h4 {
+    color: #1f2937 !important;
+}
+
+body.theme-light .settings-status {
+    background: rgba(249, 250, 251, 0.5) !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+body.theme-light .settings-status .status-indicator {
+    background: rgba(34, 197, 94, 0.8) !important;
+}
+
+body.theme-light .settings-status .status-indicator.dirty {
+    background: rgba(245, 158, 11, 0.8) !important;
+}
+
+body.theme-light .settings-status .status-indicator.error {
+    background: rgba(239, 68, 68, 0.8) !important;
+}
+
+body.theme-light .settings-import-export {
+    background: rgba(249, 250, 251, 0.3) !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+body.theme-light .settings-import-export h5 {
+    color: #1f2937 !important;
+}
+
+body.theme-light .settings-import-export .btn {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid #d1d5db !important;
+    color: #374151 !important;
+}
+
+body.theme-light .form-group.error input {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+}
+
+body.theme-light .form-group.error .error-message {
+    color: #dc2626 !important;
+}
+
+body.theme-light .form-group.success input {
+    border-color: #22c55e !important;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2) !important;
+}
+
+body.theme-light .form-group .help-text {
+    color: #6b7280 !important;
+}
+
+body.theme-light .settings-group {
+    background: rgba(249, 250, 251, 0.3) !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+body.theme-light .settings-group h5 {
+    color: #1f2937 !important;
+} 

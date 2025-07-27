@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="星际云盘 - 文件存储与管理">
+    <title>星际云盘 - 文件存储与管理</title>
+    <link rel="icon" type="image/x-icon" href="/static/public/favicon.ico?v=20250714">
+    
+    <!-- 预加载关键字体文件 -->
+    <link rel="preload" href="/static/public/libs/fonts/fontawesome-webfont.woff2?v=4.7.0" as="font" type="font/woff2" crossorigin>
+    
+    <!-- DNS预解析 -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="//unpkg.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    
+    <!-- Tailwind CSS - 使用多个CDN源作为备用 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // 如果Tailwind加载失败，尝试备用CDN
+        if (typeof tailwind === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/3.3.0/tailwind.min.js';
+            document.head.appendChild(script);
+        }
+        
+        // 等待Tailwind加载完成后再配置
+        function configureTailwind() {
+            if (typeof tailwind !== 'undefined') {
+                tailwind.config = {
+                    theme: {
+                        extend: {
+                            screens: {
+                                'xs': '480px',
+                            },
+                            colors: {
+                                primary: '#165DFF',
+                                secondary: '#7B61FF',
+                                dark: '#0F172A',
+                                'dark-light': '#1E293B',
+                                'purple-deep': '#4338CA',
+                                'purple-light': '#818CF8',
+                                'blue-light': '#3B82F6',
+                                'blue-deep': '#0A2463',
+                            },
+                            fontFamily: {
+                                inter: ['Inter', 'sans-serif'],
+                            },
+                            animation: {
+                                'float': 'float 6s ease-in-out infinite',
+                                'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                                'glow': 'glow 2s ease-in-out infinite alternate',
+                            },
+                            keyframes: {
+                                float: {
+                                    '0%, 100%': { transform: 'translateY(0)' },
+                                    '50%': { transform: 'translateY(-10px)' },
+                                },
+                                glow: {
+                                    '0%': { boxShadow: '0 0 5px rgba(123, 97, 255, 0.5)' },
+                                    '100%': { boxShadow: '0 0 20px rgba(123, 97, 255, 0.8), 0 0 30px rgba(59, 130, 246, 0.6)' },
+                                }
+                            }
+                        },
+                    }
+                };
+            } else {
+                // 如果Tailwind还没加载，等待一下再试
+                setTimeout(configureTailwind, 100);
+            }
+        }
+        
+        // 立即尝试配置，如果失败则等待
+        configureTailwind();
+    </script>
+    
+    <script src="/static/public/libs/chart.umd.min.js"></script>
+    <script src="/static/public/libs/marked.min.js"></script>
+    <script src="/static/public/libs/particles.min.js"></script>
+    <script src="/static/public/libs/xlsx.full.min.js"></script>
+    
+    <!-- Day.js - 使用多个CDN源作为备用 -->
+    <script src="https://unpkg.com/dayjs@1.11.10/dayjs.min.js"></script>
+    <script>
+        // 如果Day.js加载失败，尝试备用CDN
+        if (typeof dayjs === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/dayjs.min.js';
+            document.head.appendChild(script);
+        }
+    </script>
+    
+    <!-- Google Fonts - 添加备用方案 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 备用字体方案 */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        /* 如果Google Fonts加载失败，使用系统字体 */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+    </style>
+    
+    <!-- Tailwind配置 -->
+    
+    <!-- 引入公共样式 -->
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    <link rel="stylesheet" href="/static/css/font-optimization.css">
+    <link rel="stylesheet" href="/static/css/theme-toggle.css">
+    <link rel="stylesheet" href="/static/css/theme-transition.css">
+    
+    <!-- 主题样式由主题管理器动态加载 -->
+    <!-- 暗色主题: /static/css/dark/ -->
+    <!-- 亮色主题: /static/css/light/ -->
+    
+    <!-- 字体优化CSS，必须在Font Awesome之前加载 -->
+    <link rel="stylesheet" href="/static/css/font-optimization.css">
+    <link rel="stylesheet" href="/static/public/libs/font-awesome.min.css">
+    <!-- 引入消息盒子组件 -->
+    <script src="/static/js/utils/message-box.js"></script>
+    <!-- 只保留 Notify，不再引入 MessageBox 以避免登录成功弹中央提示 -->
+    <script src="/static/js/utils/notify.js"></script>
+    <!-- 引入主题管理器 -->
+    <script src="/static/js/ui/theme/theme-manager.js"></script>
+    
+    <!-- 引入存储管理器 -->
+    <script src="/static/js/ui/managers/storage.js"></script>
+    
+    <!-- 引入主题切换动画 -->
+    <script src="/static/js/ui/theme/theme-transition.js"></script>
+    
+    <!-- 引入环境切换器 -->
+    <script src="/static/js/ui/components/env-switcher.js"></script>
+    
+    <!-- 字体加载测试脚本 -->
+    <script src="/static/js/core/font-load-test.js"></script>
+    
+    <!-- 性能优化模块 -->
+    <script src="/static/js/performance/optimizer.js"></script>
+    <script src="/static/js/performance/monitor.js"></script>
+    
+
+</head>
+<body class="bg-dark text-white font-inter">
+    <!-- 登录页面 -->
+    <div id="login-page" class="hidden">
+        <!-- 登录页面内容将通过JavaScript动态加载 -->
+    </div>
+
+    <!-- 主应用 -->
+    <div id="app" class="hidden">
+        <!-- 页面头部 -->
+        <header id="header"></header>
+        <!-- 主内容区域 -->
+        <main id="main-content" class="flex-1 px-4 py-8">
+            <!-- 主内容将通过JavaScript动态加载 -->
+        </main>
+    </div>
+
+    <!-- 模态框容器 -->
+    <div id="modals">
+        <!-- 各种模态框将在这里动态创建 -->
+    </div>
+
+    <!-- 加载配置文件 -->
+    <script src="/static/js/core/env.js"></script>
+    
+    <!-- 加载错误管理模块（必须在API网关之前加载） -->
+    <script src="/static/js/api/error-manager.js"></script>
+    
+    <!-- 加载API网关（必须在其他API模块之前加载） -->
+    <script src="/static/js/api/gateway.js"></script>
+    
+    <!-- API模块（必须在auth模块之前加载） -->
+    <script src="/static/js/api/utils.js?v=20250718"></script>
+    <script src="/static/js/api/core.js?v=20250722"></script>
+    <script src="/static/js/api/auth.js?v=20250718"></script>
+    
+    <!-- 加载JavaScript模块 -->
+    <script src="/static/js/auth/utils.js?v=20250718"></script>
+    <script src="/static/js/auth/manager.js?v=20250718"></script>
+    <script src="/static/js/auth/token.js?v=20250718"></script>
+    <script src="/static/js/auth/particles.js?v=20250718"></script>
+    <script src="/static/js/auth/events.js?v=20250718"></script>
+    <script src="/static/js/auth/index.js?v=20250718"></script>
+    <script src="/static/js/api/files.js?v=20250718"></script>
+    <script src="/static/js/api/folders.js?v=20250718"></script>
+    <script src="/static/js/api/storage.js?v=20250718"></script>
+    <script src="/static/js/api/profile.js?v=20250718"></script>
+    <script src="/static/js/api/admin.js?v=20250718"></script>
+    <script src="/static/js/api/url-files.js?v=20250718"></script>
+    <script src="/static/js/api/documents.js?v=20250718"></script>
+    <script src="/static/js/api/index.js?v=20250718"></script>
+    
+    <!-- 模块化UI系统 -->
+    <script>
+        if (!window.api) window.api = {};
+        if (!window.api.core && window.Core) {
+            window.api.core = new window.Core();
+        }
+        if (!window.api.files && window.Files && window.api.core) {
+            window.api.files = new window.Files(window.api.core);
+        }
+    </script>
+    <script src="/static/js/ui/core.js?v=20250722"></script>
+    <script src="/static/js/ui/components/categories.js?v=20250720"></script>
+    		<script src="/static/js/ui/handlers/file-renderer.js?v=20250720"></script>
+		<script src="/static/js/ui/handlers/folder-manager.js?v=20250720"></script>
+		<script src="/static/js/ui/handlers/file-preview.js?v=20250720"></script>
+		<script src="/static/js/ui/handlers/file-operations.js?v=20250720"></script>
+    <!-- 上传队列管理器 -->
+    <script src="/static/js/ui/components/upload-queue.js?v=20250722"></script>
+    <script src="/static/js/ui/managers/upload.js?v=20250722-20"></script>
+    <script src="/static/js/ui/modals/modal-manager.js?v=20250720"></script>
+    <script src="/static/js/ui/managers/profile.js?v=20250720"></script>
+    <script src="/static/js/ui/admin/admin-manager.js?v=20250720"></script>
+    <script src="/static/js/ui/components/docs-sync.js?v=20250720"></script>
+    <script src="/static/js/ui/utils.js?v=20250720"></script>
+    <script src="/static/js/ui/managers/settings.js?v=20250720"></script>
+    <script src="/static/js/ui/managers/user.js?v=20250720"></script>
+    <script src="/static/js/ui/managers/help.js?v=20250722"></script>
+    <script src="/static/js/ui/components/doc-viewer.js?v=20250723"></script>
+    <script src="/static/js/ui/index.js?v=20250722"></script>
+    
+    <!-- 应用模块 -->
+    <script src="/static/js/core/core.js?v=20250718"></script>
+    <script src="/static/js/core/env-manager.js?v=20250718"></script>
+    <script src="/static/js/core/app.js?v=20250718"></script>
+    <script src="/static/js/core/component-loader.js?v=20250718"></script>
+    <script src="/static/js/mobile/enhancement.js?v=20250718"></script>
+
+
+
+    <script>
+        // 注册Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(registration => {
+                        // console.log('Service Worker registered:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+        
+        // 动态加载HTML模板
+        async function loadTemplate(templateName) {
+            try {
+                const response = await fetch(`/static/html/${templateName}.html`);
+                return await response.text();
+            } catch (error) {
+                return '';
+            }
+        }
+
+        // 立即初始化粒子效果
+        function initParticlesImmediately() {
+            // 检查particlesJS库是否已加载
+            if (typeof particlesJS !== 'undefined') {
+                const particlesContainer = document.getElementById('particles-js');
+                if (particlesContainer && particlesContainer.children.length === 0) {
+
+                    try {
+                        particlesContainer.style.position = 'fixed';
+                        particlesContainer.style.top = '0';
+                        particlesContainer.style.left = '0';
+                        particlesContainer.style.width = '100%';
+                        particlesContainer.style.height = '100%';
+                        particlesContainer.style.zIndex = '0';
+                        particlesContainer.style.pointerEvents = 'none';
+                        
+                        particlesJS('particles-js', {
+                            particles: {
+                                number: { value: 80, density: { enable: true, value_area: 800 } },
+                                color: { value: '#ffffff' },
+                                shape: { type: 'circle', stroke: { width: 0, color: '#000000' } },
+                                opacity: { value: 0.5, random: false, anim: { enable: false, speed: 1, opacity_min: 0.1, sync: false } },
+                                size: { value: 3, random: true, anim: { enable: false, speed: 40, size_min: 0.1, sync: false } },
+                                line_linked: { enable: true, distance: 150, color: '#ffffff', opacity: 0.4, width: 1 },
+                                move: { enable: true, speed: 6, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false, attract: { enable: false, rotateX: 600, rotateY: 1200 } }
+                            },
+                            interactivity: {
+                                detect_on: 'canvas',
+                                events: {
+                                    onhover: { enable: true, mode: 'repulse' },
+                                    onclick: { enable: true, mode: 'push' },
+                                    resize: true
+                                },
+                                modes: {
+                                    grab: { distance: 400, line_linked: { opacity: 1 } },
+                                    bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 },
+                                    repulse: { distance: 200, duration: 0.4 },
+                                    push: { particles_nb: 4 },
+                                    remove: { particles_nb: 2 }
+                                }
+                            },
+                            retina_detect: true
+                        });
+
+                    } catch (error) {
+
+                    }
+                }
+            }
+        }
+
+        // 初始化页面模板
+        async function initializeTemplates() {
+            try {
+                // 加载登录页面
+                const loginTemplate = await loadTemplate('login');
+                document.getElementById('login-page').innerHTML = loginTemplate;
+
+                // 加载头部
+                const headerTemplate = await loadTemplate('header');
+                document.getElementById('header').innerHTML = headerTemplate;
+
+                // 加载主内容
+                const mainContentTemplate = await loadTemplate('main-content');
+                document.getElementById('main-content').innerHTML = mainContentTemplate;
+
+                // 显示登录页，隐藏主应用
+                document.getElementById('login-page').classList.remove('hidden');
+                document.getElementById('app').classList.add('hidden');
+
+                // 立即尝试初始化粒子效果
+                initParticlesImmediately();
+
+                // 模板加载完成后初始化应用
+
+                window.app = new App();
+                
+                // 应用初始化完成后，确保AuthManager存在
+                // AuthManager由auth/index.js统一管理，避免重复初始化
+                // if (!window.authManager) {
+                //     window.authManager = new AuthManager();
+                // }
+            } catch (error) {
+                // 静默处理错误
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initializeTemplates();
+        });
+
+        // 在window load事件中也尝试初始化粒子效果
+        window.addEventListener('load', function() {
+            setTimeout(initParticlesImmediately, 100);
+        });
+
+        // 页面加载完成后初始化UI管理器（由App统一管理，避免重复初始化）
+        // window.addEventListener('load', function() {
+        //     setTimeout(() => {
+        //         if (window.UIManager && !window.uiManager) {
+        //             window.uiManager = new UIManager();
+        //             console.log('模块化UI管理器已初始化');
+        //         }
+        //     }, 1000);
+        // });
+    </script>
+    
+    <!-- 调试脚本 -->
+
+</body>
+</html> 

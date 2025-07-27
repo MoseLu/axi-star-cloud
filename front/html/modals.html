@@ -1,0 +1,157 @@
+<!-- 设置模态框 -->
+<div id="settings-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center opacity-0 invisible transition-all duration-300 p-4" style="z-index: 10000 !important;">
+    <div class="glass-effect rounded-2xl modal-content w-full mx-4 border border-purple-light/20 shadow-2xl transform scale-100 transition-all duration-300 max-h-[90vh] overflow-y-auto" style="max-width: 480px !important; width: 480px !important;">
+        <div class="p-4 md:p-6 border-b border-purple-light/20 flex justify-between items-center">
+            <h3 class="text-lg md:text-xl font-semibold text-white">存储空间设置</h3>
+            <button id="close-settings-btn" class="text-gray-400 hover:text-white transition-colors">
+                <i class="fa fa-times text-lg md:text-xl"></i>
+            </button>
+        </div>
+        <div class="p-4 md:p-6">
+            <div class="space-y-4 md:space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">存储空间限制</label>
+                    <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                        <input type="range" id="storage-slider" min="1" max="20" value="1" 
+                               class="flex-1 h-2 bg-dark-light rounded-lg appearance-none cursor-pointer slider">
+                        <div class="flex items-center space-x-2">
+                            <input type="number" id="storage-input" min="1" max="20" value="1" 
+                                   class="w-20 bg-dark-light border border-purple-light/30 text-gray-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-light/50 focus:border-purple-light transition-all duration-300">
+                            <span class="text-gray-400 text-sm">GB</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">设置范围：1GB - 20GB</p>
+                </div>
+                
+                <div class="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl p-3 md:p-4 border border-blue-400/20">
+                    <h4 class="text-sm font-medium text-gray-300 mb-2">当前存储状态</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 text-sm">
+                        <div>
+                            <div class="text-gray-400">总空间</div>
+                            <div id="settings-total-storage" class="text-blue-300 font-medium">--</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-400">已使用</div>
+                            <div id="settings-used-storage" class="text-purple-300 font-medium">--</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-400">使用率</div>
+                            <div id="settings-usage-percentage" class="text-emerald-300 font-medium">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 md:p-6 border-t border-purple-light/20 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+            <button id="cancel-settings-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors text-sm md:text-base">
+                取消
+            </button>
+            <button id="save-settings-btn" class="px-4 py-2 bg-gradient-to-r from-primary/80 to-secondary/80 hover:from-primary to-secondary text-white rounded-lg shadow-md shadow-primary/20 transition-all duration-300 transform hover:scale-[1.03] text-sm md:text-base">
+                <i class="fa fa-save mr-1"></i> 保存设置
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 同步文档模态框 -->
+<div id="sync-docs-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center opacity-0 invisible transition-all duration-300 p-4" style="z-index: 10000 !important;">
+    <div class="glass-effect rounded-2xl w-full mx-4 border border-emerald-light/20 shadow-2xl transform scale-95 transition-all duration-300 max-h-[90vh] overflow-y-auto" style="max-width: 480px !important; width: 480px !important;">
+        <div class="p-4 md:p-6 border-b border-emerald-light/20 flex justify-between items-center">
+            <h3 class="text-lg md:text-xl font-semibold text-white">同步文档</h3>
+            <button id="close-sync-docs-btn" class="text-gray-400 hover:text-white transition-colors">
+                <i class="fa fa-times text-lg md:text-xl"></i>
+            </button>
+        </div>
+        <div class="p-4 md:p-6">
+            <form id="sync-docs-form" class="space-y-4 md:space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">文档标题 <span class="text-red-400">*</span></label>
+                                                <div class="relative group">
+                                <input type="text" id="doc-title" name="title" required
+                                       class="w-full bg-dark-light border border-emerald-light/30 text-gray-100 rounded-lg px-3 md:px-4 py-2 md:py-3 pr-10 focus:ring-2 focus:ring-emerald-light/50 focus:border-emerald-light transition-all duration-300 text-sm md:text-base"
+                                       placeholder="请输入文档标题">
+                                <button type="button" id="clear-doc-title" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-400 transition-colors opacity-0" title="清空标题">
+                                    <i class="fa fa-times text-sm"></i>
+                                </button>
+                            </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">文档分类 <span class="text-red-400">*</span></label>
+                    <div class="relative group">
+                        <input type="text" id="doc-category" name="category" required
+                               class="w-full bg-dark-light border border-emerald-light/30 text-gray-100 rounded-lg px-3 md:px-4 py-2 md:py-3 pr-10 focus:ring-2 focus:ring-emerald-light/50 focus:border-emerald-light transition-all duration-300 text-sm md:text-base"
+                               placeholder="请输入文档分类">
+                        <button type="button" id="clear-doc-category" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-400 transition-colors opacity-0" title="清空分类">
+                            <i class="fa fa-times text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">排序序号</label>
+                    <input type="number" id="doc-order" name="order" min="0"
+                           class="w-full bg-dark-light border border-emerald-light/30 text-gray-100 rounded-lg px-3 md:px-4 py-2 md:py-3 focus:ring-2 focus:ring-emerald-light/50 focus:border-emerald-light transition-all duration-300 text-sm md:text-base"
+                           placeholder="请输入排序序号（可选）">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Markdown文件 <span class="text-red-400">*</span></label>
+                    <div class="border-2 border-dashed border-emerald-light/30 rounded-lg p-4 md:p-6 text-center cursor-pointer hover:border-emerald-light/60 transition-colors" id="doc-drop-area">
+                        <i class="fa fa-file-text-o text-2xl md:text-3xl text-emerald-light/60 mb-2 md:mb-3"></i>
+                        <p class="text-gray-300 mb-2 text-sm md:text-base">点击选择或拖放.md文件</p>
+                        <p class="text-emerald-light text-xs md:text-sm">仅支持.md格式文件</p>
+                        <input type="file" id="doc-file-input" class="hidden" accept=".md" required>
+                    </div>
+                    <div id="doc-file-info" class="hidden mt-3 p-3 bg-emerald-500/10 rounded-lg border border-emerald-400/30">
+                        <div class="flex items-center justify-between">
+                            <span class="text-emerald-300 text-xs md:text-sm" id="doc-file-name"></span>
+                            <button type="button" id="doc-remove-file" class="text-red-400 hover:text-red-300">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="p-4 md:p-6 border-t border-emerald-light/20 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+            <button id="cancel-sync-docs-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors text-sm md:text-base">
+                取消
+            </button>
+            <button id="submit-sync-docs-btn" class="px-4 py-2 bg-gradient-to-r from-emerald-500/80 to-teal-500/80 hover:from-emerald-500 to-teal-500 text-white rounded-lg shadow-md shadow-emerald-500/20 transition-all duration-300 transform hover:scale-[1.03] text-sm md:text-base">
+                <i class="fa fa-sync mr-1"></i> 同步文档
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 新建分组模态框 -->
+<div id="create-folder-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center opacity-0 invisible transition-all duration-300 p-4" style="z-index: 10000 !important;">
+    <div class="bg-dark-light rounded-xl p-5 w-full border border-purple-light/20 shadow-2xl backdrop-blur-sm" style="max-width: 320px !important; width: 320px !important;">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-semibold text-white">新建分组</h3>
+            <button id="close-create-folder-btn" class="text-gray-400 hover:text-white transition-colors">
+                <i class="fa fa-times text-sm"></i>
+            </button>
+        </div>
+        <div class="mb-3">
+            <div id="current-category-info" class="text-xs text-gray-400 mb-2" style="display: none;">
+                当前分类：文档
+            </div>
+        </div>
+        <div class="mb-4">
+            <label for="folder-name-input" class="block text-sm font-medium text-gray-300 mb-2">分组名称</label>
+            <input type="text" id="folder-name-input" class="w-full px-3 py-2 bg-dark-light/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-purple-light/50 focus:outline-none transition-colors text-sm" placeholder="请输入分组名称">
+        </div>
+        <div class="flex justify-end space-x-2">
+            <button id="cancel-create-folder-btn" class="px-3 py-1.5 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors text-sm">
+                取消
+            </button>
+            <button id="confirm-create-folder-btn" class="px-3 py-1.5 bg-gradient-to-r from-blue-500/80 to-cyan-500/80 hover:from-blue-500 to-cyan-500 text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-[1.02] text-sm">
+                创建分组
+            </button>
+        </div>
+    </div>
+</div>
+
+ 
