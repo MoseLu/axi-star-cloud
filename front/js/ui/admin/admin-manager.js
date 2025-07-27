@@ -181,20 +181,35 @@ class UIAdminManager {
         if (adminMenu && settingsBtn) {
             if (this.isAdmin) {
                 // 管理员：显示设置按钮、同步文档按钮、管理存储空间按钮和管理员菜单
-                settingsBtn.style.display = 'block';
+                // 使用更强力的显示方式，确保CSS不会覆盖
+                settingsBtn.style.display = 'block !important';
+                settingsBtn.style.visibility = 'visible';
                 settingsBtn.classList.remove('hidden');
+                settingsBtn.removeAttribute('hidden');
+                
+                adminMenu.style.display = 'block !important';
+                adminMenu.style.visibility = 'visible';
                 adminMenu.classList.remove('hidden');
+                adminMenu.removeAttribute('hidden');
+                
                 if (syncDocsBtn) {
+                    syncDocsBtn.style.display = 'block !important';
+                    syncDocsBtn.style.visibility = 'visible';
                     syncDocsBtn.classList.remove('hidden');
+                    syncDocsBtn.removeAttribute('hidden');
                 }
                 if (storageSettingsBtn) {
-                    storageSettingsBtn.style.display = 'block';
+                    storageSettingsBtn.style.display = 'block !important';
+                    storageSettingsBtn.style.visibility = 'visible';
+                    storageSettingsBtn.classList.remove('hidden');
+                    storageSettingsBtn.removeAttribute('hidden');
                 }
 
             } else {
                 // 非管理员：隐藏设置按钮、管理员菜单、同步文档按钮和管理存储空间按钮
                 settingsBtn.style.display = 'none';
                 settingsBtn.classList.add('hidden');
+                adminMenu.style.display = 'none';
                 adminMenu.classList.add('hidden');
                 if (syncDocsBtn) {
                     syncDocsBtn.classList.add('hidden');
@@ -224,7 +239,10 @@ class UIAdminManager {
         // 显示同步文档按钮
         const syncDocsBtn = document.getElementById('sync-docs-btn');
         if (syncDocsBtn) {
+            syncDocsBtn.style.display = 'flex !important';
+            syncDocsBtn.style.visibility = 'visible';
             syncDocsBtn.classList.remove('hidden');
+            syncDocsBtn.removeAttribute('hidden');
         }
         
         // 显示环境切换器（如果存在）

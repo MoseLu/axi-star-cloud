@@ -383,6 +383,9 @@ class AppAuthManager {
                 if (this.uiManager.adminManager) {
                     this.uiManager.adminManager.isAdmin = true;
                 }
+                
+                // 强制显示管理员元素
+                this.forceShowAdminElements();
             }
             
             await this.uiManager.checkAndShowAdminMenu().catch(error => {
@@ -396,6 +399,8 @@ class AppAuthManager {
                 // 再次强制检查管理员状态
                 if (user.username === 'Mose' && this.uiManager.adminManager) {
                     this.uiManager.adminManager.isAdmin = true;
+                    // 再次强制显示管理员元素
+                    this.forceShowAdminElements();
                 }
                 
                 await this.uiManager.delayedCheckAndShowAdminMenu().catch(error => {
@@ -413,6 +418,8 @@ class AppAuthManager {
                         // 强制重新检查管理员权限
                         if (user.username === 'Mose') {
                             this.uiManager.adminManager.isAdmin = true;
+                            // 再次强制显示管理员元素
+                            this.forceShowAdminElements();
                         }
                         
                         await this.uiManager.adminManager.checkAdminPermissions();
@@ -423,18 +430,7 @@ class AppAuthManager {
                         if (this.uiManager.adminManager.isAdmin) {
                             this.uiManager.adminManager.showAdminFloatingButtons();
                             // 强制显示管理员菜单按钮
-                            const adminMenu = document.getElementById('admin-menu');
-                            const settingsBtn = document.getElementById('settings-btn');
-                            const syncDocsBtn = document.getElementById('sync-docs-btn');
-                            const storageSettingsBtn = document.getElementById('storage-settings-btn');
-                            
-                            if (adminMenu) adminMenu.classList.remove('hidden');
-                            if (settingsBtn) {
-                                settingsBtn.style.display = 'block';
-                                settingsBtn.classList.remove('hidden');
-                            }
-                            if (syncDocsBtn) syncDocsBtn.classList.remove('hidden');
-                            if (storageSettingsBtn) storageSettingsBtn.style.display = 'block';
+                            this.forceShowAdminElements();
                         }
                     } catch (error) {
                         console.error('生产环境管理员权限检查失败:', error);
@@ -449,6 +445,44 @@ class AppAuthManager {
         // 显示登录成功消息
         if (window.Notify) {
             window.Notify.show({ message: '登录成功', type: 'success' });
+        }
+    }
+    
+    /**
+     * 强制显示管理员元素
+     */
+    forceShowAdminElements() {
+        const adminMenu = document.getElementById('admin-menu');
+        const settingsBtn = document.getElementById('settings-btn');
+        const syncDocsBtn = document.getElementById('sync-docs-btn');
+        const storageSettingsBtn = document.getElementById('storage-settings-btn');
+        
+        if (settingsBtn) {
+            settingsBtn.style.display = 'block !important';
+            settingsBtn.style.visibility = 'visible';
+            settingsBtn.classList.remove('hidden');
+            settingsBtn.removeAttribute('hidden');
+        }
+        
+        if (adminMenu) {
+            adminMenu.style.display = 'block !important';
+            adminMenu.style.visibility = 'visible';
+            adminMenu.classList.remove('hidden');
+            adminMenu.removeAttribute('hidden');
+        }
+        
+        if (syncDocsBtn) {
+            syncDocsBtn.style.display = 'flex !important';
+            syncDocsBtn.style.visibility = 'visible';
+            syncDocsBtn.classList.remove('hidden');
+            syncDocsBtn.removeAttribute('hidden');
+        }
+        
+        if (storageSettingsBtn) {
+            storageSettingsBtn.style.display = 'block !important';
+            storageSettingsBtn.style.visibility = 'visible';
+            storageSettingsBtn.classList.remove('hidden');
+            storageSettingsBtn.removeAttribute('hidden');
         }
     }
 
