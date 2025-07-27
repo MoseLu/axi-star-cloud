@@ -17,7 +17,10 @@ class AppAuthManager {
     init() {
         this.setupLoginForm();
         this.setupEventListeners();
-        this.checkLoginStatus();
+        // 异步检查登录状态
+        this.checkLoginStatus().catch(error => {
+            console.error('检查登录状态失败:', error);
+        });
     }
 
     /**
@@ -61,8 +64,44 @@ class AppAuthManager {
     /**
      * 检查登录状态
      */
-    checkLoginStatus() {
-        // 从新的存储管理器获取用户信息
+    async checkLoginStatus() {
+        // 首先尝试从cookie中获取token并验证
+        if (window.tokenManager && typeof window.tokenManager.validateTokens === 'function') {
+            try {
+                const isTokenValid = await window.tokenManager.validateTokens();
+                if (isTokenValid) {
+                    // Token有效，尝试获取用户信息
+                    const userInfo = await this.getUserInfoFromToken();
+                    if (userInfo) {
+                        // 保存用户信息到本地存储
+                        this.saveUserInfo(userInfo);
+                        
+                        // 更新API管理器的用户信息
+                        if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
+                            this.apiManager.setCurrentUser(userInfo);
+                        }
+                        
+                        // 立即显示主界面，避免闪烁
+                        this.showMainInterface();
+                        
+                        // 立即检查并显示管理员菜单
+                        if (this.uiManager) {
+                            this.uiManager.checkAndShowAdminMenu().catch(error => {
+                                console.error('检查管理员权限失败:', error);
+                            });
+                        }
+                        
+                        // 页面刷新时，只使用本地缓存，不重新获取数据
+                        this.loadUserDataFromCache(userInfo);
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.warn('Token验证失败:', error);
+            }
+        }
+        
+        // 如果token验证失败，尝试从本地存储获取用户信息
         let savedUser = null;
         if (window.StorageManager && typeof window.StorageManager.getUser === 'function') {
             savedUser = window.StorageManager.getUser();
@@ -87,11 +126,7 @@ class AppAuthManager {
                 const userId = userData.uuid || userData.id;
                 if (!userId || !userData.username) {
                     console.error('用户数据不完整，清除登录状态');
-                    if (window.StorageManager && typeof window.StorageManager.clearUser === 'function') {
-                        window.StorageManager.clearUser();
-                    } else {
-                        localStorage.removeItem('userInfo');
-                    }
+                    this.clearUserData();
                     this.showLoginInterface();
                     return;
                 }
@@ -108,10 +143,10 @@ class AppAuthManager {
                     }, 100);
                 }
                 
-                // 显示主界面（静默登录，不显示消息）
+                // 立即显示主界面，避免闪烁
                 this.showMainInterface();
                 
-                // 检查并显示管理员菜单
+                // 立即检查并显示管理员菜单
                 if (this.uiManager) {
                     this.uiManager.checkAndShowAdminMenu().catch(error => {
                         console.error('检查管理员权限失败:', error);
@@ -121,17 +156,80 @@ class AppAuthManager {
                 // 页面刷新时，只使用本地缓存，不重新获取数据
                 this.loadUserDataFromCache(userData);
                 
+                // 如果有本地用户数据但token无效，尝试静默刷新token
+                if (window.tokenManager && typeof window.tokenManager.refreshTokens === 'function') {
+                    setTimeout(async () => {
+                        try {
+                            await window.tokenManager.refreshTokens();
+                            console.log('静默刷新token成功');
+                        } catch (refreshError) {
+                            console.warn('静默刷新token失败，但用户仍可继续使用:', refreshError);
+                        }
+                    }, 1000);
+                }
+                
             } catch (error) {
                 console.error('解析用户数据失败:', error);
-                if (window.StorageManager && typeof window.StorageManager.clearUser === 'function') {
-                    window.StorageManager.clearUser();
-                } else {
-                    localStorage.removeItem('userInfo');
-                }
+                this.clearUserData();
                 this.showLoginInterface();
             }
         } else {
             this.showLoginInterface();
+        }
+    }
+
+    /**
+     * 从token获取用户信息
+     */
+    async getUserInfoFromToken() {
+        try {
+            if (window.tokenManager && typeof window.tokenManager.getValidAccessToken === 'function') {
+                const accessToken = await window.tokenManager.getValidAccessToken();
+                if (accessToken) {
+                    // 调用token验证API获取用户信息
+                    const response = await fetch('/api/validate-token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            access_token: accessToken
+                        }),
+                        credentials: 'include'
+                    });
+
+                    const data = await response.json();
+                    if (data.success && data.valid && data.user) {
+                        return data.user;
+                    }
+                }
+            }
+        } catch (error) {
+            // 如果没有token或token无效，这是正常情况，不需要报错
+            console.log('从token获取用户信息失败（可能是正常情况）:', error.message);
+        }
+        return null;
+    }
+
+    /**
+     * 保存用户信息
+     */
+    saveUserInfo(userInfo) {
+        if (window.StorageManager && typeof window.StorageManager.setUser === 'function') {
+            window.StorageManager.setUser(userInfo);
+        } else {
+            localStorage.setItem('userInfo', JSON.stringify(userInfo));
+        }
+    }
+
+    /**
+     * 清除用户数据
+     */
+    clearUserData() {
+        if (window.StorageManager && typeof window.StorageManager.clearUser === 'function') {
+            window.StorageManager.clearUser();
+        } else {
+            localStorage.removeItem('userInfo');
         }
     }
 
@@ -223,6 +321,9 @@ class AppAuthManager {
         // 从事件详情中获取用户数据
         const user = userData.user || userData;
         
+        // 立即保存用户信息到本地存储，确保状态持久化
+        this.saveUserInfo(user);
+        
         // 同步用户信息到API管理器
         if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
             this.apiManager.setCurrentUser(user);
@@ -231,9 +332,9 @@ class AppAuthManager {
         // 立即显示主界面，不等待数据加载
         this.showMainInterface();
         
-        // 检查并显示管理员菜单
+        // 立即检查并显示管理员菜单和悬浮按钮
         if (this.uiManager) {
-            this.uiManager.checkAndShowAdminMenu().catch(error => {
+            await this.uiManager.checkAndShowAdminMenu().catch(error => {
                 console.error('检查管理员权限失败:', error);
             });
         }
@@ -245,6 +346,22 @@ class AppAuthManager {
         if (window.Notify) {
             window.Notify.show({ message: '登录成功', type: 'success' });
         }
+        
+        // 延迟验证token，确保cookie已经设置完成
+        setTimeout(async () => {
+            try {
+                // 验证token是否有效
+                if (window.tokenManager && typeof window.tokenManager.validateTokens === 'function') {
+                    const isTokenValid = await window.tokenManager.validateTokens();
+                    if (!isTokenValid) {
+                        console.warn('登录后token验证失败，可能需要重新登录');
+                        // 不清除用户数据，让用户继续使用
+                    }
+                }
+            } catch (error) {
+                console.warn('Token验证检查失败:', error);
+            }
+        }, 2000); // 延迟2秒验证
         
         // 异步加载用户数据，不阻塞界面切换
         this.loadUserDataAndCacheAvatar(user).catch(error => {
@@ -327,8 +444,14 @@ class AppAuthManager {
         const loginPage = document.getElementById('login-page');
         const app = document.getElementById('app');
         
-        if (loginPage) loginPage.classList.add('hidden');
-        if (app) app.classList.remove('hidden');
+        if (loginPage) {
+            loginPage.classList.add('hidden');
+            loginPage.style.display = 'none';
+        }
+        if (app) {
+            app.classList.remove('hidden');
+            app.style.display = 'block';
+        }
     }
 
     /**
@@ -338,8 +461,14 @@ class AppAuthManager {
         const loginPage = document.getElementById('login-page');
         const app = document.getElementById('app');
         
-        if (loginPage) loginPage.classList.remove('hidden');
-        if (app) app.classList.add('hidden');
+        if (loginPage) {
+            loginPage.classList.remove('hidden');
+            loginPage.style.display = 'block';
+        }
+        if (app) {
+            app.classList.add('hidden');
+            app.style.display = 'none';
+        }
     }
 
     /**

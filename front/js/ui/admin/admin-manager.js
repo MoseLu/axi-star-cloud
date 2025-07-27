@@ -43,10 +43,20 @@ class UIAdminManager {
                 this.isAdmin = currentUser && currentUser.username === 'Mose';
             }
             
+            // 立即更新UI显示
+            this.updateAvatarAdminMenu();
+            
+            // 如果是管理员，显示悬浮按钮
+            if (this.isAdmin) {
+                this.showAdminFloatingButtons();
+            } else {
+                this.hideAdminFloatingButtons();
+            }
 
         } catch (error) {
             console.error('验证管理员权限失败:', error);
             this.isAdmin = false;
+            this.hideAdminFloatingButtons();
         }
         
         // 处理头像下拉菜单中的管理员菜单显示
@@ -56,6 +66,8 @@ class UIAdminManager {
         if (!this.isAdmin) {
             this.hideAdminMenu();
         }
+        
+        return this.isAdmin;
     }
 
     /**
@@ -122,6 +134,38 @@ class UIAdminManager {
                     storageSettingsBtn.style.display = 'none';
                 }
             }
+        }
+    }
+
+    /**
+     * 显示管理员悬浮按钮
+     */
+    showAdminFloatingButtons() {
+        // 显示同步文档按钮
+        const syncDocsBtn = document.getElementById('sync-docs-btn');
+        if (syncDocsBtn) {
+            syncDocsBtn.classList.remove('hidden');
+        }
+        
+        // 显示环境切换器（如果存在）
+        if (window.envSwitcher && typeof window.envSwitcher.show === 'function') {
+            window.envSwitcher.show();
+        }
+    }
+    
+    /**
+     * 隐藏管理员悬浮按钮
+     */
+    hideAdminFloatingButtons() {
+        // 隐藏同步文档按钮
+        const syncDocsBtn = document.getElementById('sync-docs-btn');
+        if (syncDocsBtn) {
+            syncDocsBtn.classList.add('hidden');
+        }
+        
+        // 隐藏环境切换器（如果存在）
+        if (window.envSwitcher && typeof window.envSwitcher.hide === 'function') {
+            window.envSwitcher.hide();
         }
     }
 

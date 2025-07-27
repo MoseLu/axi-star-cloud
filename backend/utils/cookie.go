@@ -1,12 +1,12 @@
 /**
  * Cookie管理器
- * 
+ *
  * 负责处理HTTP cookie的设置和清除，包括：
  * - 设置认证cookie
  * - 清除认证cookie
  * - 设置管理员cookie
  * - 清除管理员cookie
- * 
+ *
  * 该管理器统一管理所有cookie操作，确保cookie设置的一致性
  */
 
@@ -34,11 +34,11 @@ func NewCookieManager() *CookieManager {
 	if os.Getenv("ENV") == "production" || os.Getenv("ENV") == "prod" {
 		secure = true
 	}
-	
+
 	return &CookieManager{
-		domain:   "",
+		domain:   "", // 空域名表示当前域名
 		secure:   secure,
-		sameSite: http.SameSiteStrictMode,
+		sameSite: http.SameSiteLaxMode, // 改为Lax模式，更宽松
 	}
 }
 
@@ -54,6 +54,7 @@ func (cm *CookieManager) SetUserTokens(w http.ResponseWriter, tokens models.Toke
 		Secure:   cm.secure,
 		SameSite: cm.sameSite,
 		Expires:  tokens.ExpiresAt,
+		MaxAge:   int(tokens.ExpiresAt.Sub(time.Now()).Seconds()), // 添加MaxAge
 	})
 
 	// 设置刷新token cookie
@@ -66,6 +67,7 @@ func (cm *CookieManager) SetUserTokens(w http.ResponseWriter, tokens models.Toke
 		Secure:   cm.secure,
 		SameSite: cm.sameSite,
 		Expires:  time.Now().Add(7 * 24 * time.Hour), // 7天
+		MaxAge:   7 * 24 * 60 * 60,                   // 7天的秒数
 	})
 }
 
@@ -171,4 +173,4 @@ func (cm *CookieManager) SetNewAdminTokens(w http.ResponseWriter, adminTokens mo
 		SameSite: cm.sameSite,
 		Expires:  adminTokens.AdminExpiresAt,
 	})
-} 
+}

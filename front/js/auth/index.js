@@ -268,6 +268,9 @@ class SimpleAuthManager {
                 // 保存到localStorage
                 localStorage.setItem('userInfo', JSON.stringify(this.currentUser));
                 
+                // 等待cookie设置完成
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
                 // 移除重复的消息显示，由AppAuthManager统一处理
                 // this.showMessage(loginResult.message || '登录成功', 'success');
                 

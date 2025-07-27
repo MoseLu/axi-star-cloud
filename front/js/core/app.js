@@ -17,7 +17,8 @@ class App {
      */
     async init() {
         try {
-    
+            // 立即隐藏登录页面，避免闪烁
+            this.hideLoginPageInitially();
             
             // 等待DOM完全加载
             if (document.readyState === 'loading') {
@@ -45,13 +46,27 @@ class App {
             
             this.isInitialized = true;
 
-            
             // 触发应用就绪事件
             this.dispatchEvent('app:ready');
             
         } catch (error) {
             console.error('❌ 应用初始化失败:', error);
             this.handleInitError(error);
+        }
+    }
+    
+    /**
+     * 初始时隐藏登录页面，避免闪烁
+     */
+    hideLoginPageInitially() {
+        const loginPage = document.getElementById('login-page');
+        const app = document.getElementById('app');
+        
+        if (loginPage) {
+            loginPage.style.display = 'none';
+        }
+        if (app) {
+            app.style.display = 'block';
         }
     }
 
