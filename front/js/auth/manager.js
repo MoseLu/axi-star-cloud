@@ -62,13 +62,34 @@ class AppAuthManager {
     }
 
     /**
+     * 调试登录状态
+     */
+    debugLoginStatus() {
+        // 检查cookie
+        const cookies = document.cookie.split(';');
+        const accessToken = cookies.find(cookie => cookie.trim().startsWith('access_token='));
+        const refreshToken = cookies.find(cookie => cookie.trim().startsWith('refresh_token='));
+        
+        // 检查localStorage
+        const userInfo = localStorage.getItem('userInfo');
+        
+        // 检查tokenManager
+        // 检查API网关
+        // 检查环境配置
+    }
+
+    /**
      * 检查登录状态
      */
     async checkLoginStatus() {
+        // 减少延迟，从1000ms优化到300ms
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
         // 首先尝试从cookie中获取token并验证
         if (window.tokenManager && typeof window.tokenManager.validateTokens === 'function') {
             try {
                 const isTokenValid = await window.tokenManager.validateTokens();
+                
                 if (isTokenValid) {
                     // Token有效，尝试获取用户信息
                     const userInfo = await this.getUserInfoFromToken();
@@ -93,12 +114,39 @@ class AppAuthManager {
                         
                         // 页面刷新时，只使用本地缓存，不重新获取数据
                         this.loadUserDataFromCache(userInfo);
+                        
+                        // 延迟再次检查管理员权限，确保用户信息已完全加载
+                        setTimeout(async () => {
+                            if (this.uiManager) {
+                                await this.uiManager.delayedCheckAndShowAdminMenu().catch(error => {
+                                    console.error('延迟检查管理员权限失败:', error);
+                                });
+                            }
+                        }, 1000); // 1秒后再次检查
+                        
+                        // 如果有本地用户数据但token无效，尝试静默刷新token
+                        if (window.tokenManager && typeof window.tokenManager.refreshTokens === 'function') {
+                            setTimeout(async () => {
+                                try {
+                                    await window.tokenManager.refreshTokens();
+                                } catch (refreshError) {
+                                    console.warn('静默刷新token失败，但用户仍可继续使用:', refreshError);
+                                }
+                            }, 1000); // 减少延迟到1秒
+                        }
+                        
                         return;
+                    } else {
+                        // 无法获取用户信息
                     }
+                } else {
+                    // Token无效
                 }
             } catch (error) {
                 console.warn('Token验证失败:', error);
             }
+        } else {
+            // TokenManager不可用
         }
         
         // 如果token验证失败，尝试从本地存储获取用户信息
@@ -156,17 +204,14 @@ class AppAuthManager {
                 // 页面刷新时，只使用本地缓存，不重新获取数据
                 this.loadUserDataFromCache(userData);
                 
-                // 如果有本地用户数据但token无效，尝试静默刷新token
-                if (window.tokenManager && typeof window.tokenManager.refreshTokens === 'function') {
-                    setTimeout(async () => {
-                        try {
-                            await window.tokenManager.refreshTokens();
-                            console.log('静默刷新token成功');
-                        } catch (refreshError) {
-                            console.warn('静默刷新token失败，但用户仍可继续使用:', refreshError);
-                        }
-                    }, 1000);
-                }
+                // 延迟再次检查管理员权限，确保用户信息已完全加载
+                setTimeout(async () => {
+                    if (this.uiManager) {
+                        await this.uiManager.delayedCheckAndShowAdminMenu().catch(error => {
+                            console.error('延迟检查管理员权限失败:', error);
+                        });
+                    }
+                }, 1000); // 1秒后再次检查
                 
             } catch (error) {
                 console.error('解析用户数据失败:', error);
@@ -206,7 +251,6 @@ class AppAuthManager {
             }
         } catch (error) {
             // 如果没有token或token无效，这是正常情况，不需要报错
-            console.log('从token获取用户信息失败（可能是正常情况）:', error.message);
         }
         return null;
     }
@@ -339,6 +383,15 @@ class AppAuthManager {
             });
         }
         
+        // 延迟再次检查管理员权限，确保用户信息已完全保存
+        setTimeout(async () => {
+            if (this.uiManager) {
+                await this.uiManager.delayedCheckAndShowAdminMenu().catch(error => {
+                    console.error('延迟检查管理员权限失败:', error);
+                });
+            }
+        }, 1000); // 1秒后再次检查
+        
         // 设置日期显示
         this.appCore.initDateDisplay();
         
@@ -361,7 +414,7 @@ class AppAuthManager {
             } catch (error) {
                 console.warn('Token验证检查失败:', error);
             }
-        }, 2000); // 延迟2秒验证
+        }, 1500); // 减少延迟到1.5秒
         
         // 异步加载用户数据，不阻塞界面切换
         this.loadUserDataAndCacheAvatar(user).catch(error => {
@@ -912,3 +965,36 @@ class AppAuthManager {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = AppAuthManager;
 } 
+
+// 添加全局调试工具
+window.DEBUG_TOOLS = {
+    // 调试登录状态
+    debugLogin: () => {
+        if (window.appAuthManager) {
+            window.appAuthManager.debugLoginStatus();
+        }
+    },
+    
+    // 检查环境配置
+    debugEnvironment: () => {
+        // 环境配置调试
+    },
+    
+    // 检查cookie状态
+    debugCookies: () => {
+        // Cookie调试
+    },
+    
+    // 检查localStorage
+    debugStorage: () => {
+        // localStorage调试
+    },
+    
+    // 完整调试
+    debugAll: () => {
+        window.DEBUG_TOOLS.debugEnvironment();
+        window.DEBUG_TOOLS.debugCookies();
+        window.DEBUG_TOOLS.debugStorage();
+        window.DEBUG_TOOLS.debugLogin();
+    }
+}; 

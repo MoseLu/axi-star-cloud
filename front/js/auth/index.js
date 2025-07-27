@@ -159,8 +159,6 @@ class AuthSystem {
                 message: message,
                 duration: 3000
             });
-        } else {
-            console.log(`[${type.toUpperCase()}] ${message}`);
         }
     }
 }
@@ -219,11 +217,6 @@ class SimpleAuthManager {
                 }
             } else {
                 if (retryCount < maxRetries) {
-                    console.log(`⏳ 等待API系统加载... (${retryCount}/${maxRetries})`, {
-                        apiGateway: hasApiGateway,
-                        Auth: hasAuth,
-                        TokenManager: hasTokenManager
-                    });
                     setTimeout(checkAPISystem, 100);
                 } else {
                     console.error('❌ API系统加载超时', {
@@ -254,6 +247,9 @@ class SimpleAuthManager {
                 return false;
             }
 
+            // 显示loading状态
+            this.showLoginLoading(true);
+
             // 调用真实的登录API
             const loginResult = await this.authAPI.login(username, password);
             
@@ -268,8 +264,8 @@ class SimpleAuthManager {
                 // 保存到localStorage
                 localStorage.setItem('userInfo', JSON.stringify(this.currentUser));
                 
-                // 等待cookie设置完成
-                await new Promise(resolve => setTimeout(resolve, 500));
+                // 等待cookie设置完成，减少延迟
+                await new Promise(resolve => setTimeout(resolve, 800));
                 
                 // 移除重复的消息显示，由AppAuthManager统一处理
                 // this.showMessage(loginResult.message || '登录成功', 'success');
@@ -288,6 +284,9 @@ class SimpleAuthManager {
             console.error('登录失败:', error);
             this.showMessage(error.message || '登录失败，请重试', 'error');
             return false;
+        } finally {
+            // 隐藏loading状态
+            this.showLoginLoading(false);
         }
     }
 
@@ -315,6 +314,9 @@ class SimpleAuthManager {
                 return false;
             }
 
+            // 显示loading状态
+            this.showRegisterLoading(true);
+
             // 调用真实的注册API
             const registerResult = await this.authAPI.register(username, password, email);
             
@@ -331,6 +333,9 @@ class SimpleAuthManager {
             console.error('注册失败:', error);
             this.showMessage(error.message || '注册失败，请重试', 'error');
             return false;
+        } finally {
+            // 隐藏loading状态
+            this.showRegisterLoading(false);
         }
     }
 
@@ -431,8 +436,42 @@ class SimpleAuthManager {
                 message: message,
                 duration: 3000
             });
+        }
+    }
+
+    // 显示/隐藏登录loading状态
+    showLoginLoading(show) {
+        const loginBtn = document.getElementById('loginBtn');
+        if (!loginBtn) return;
+
+        if (show) {
+            // 显示loading状态
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>登录中...';
+            loginBtn.classList.add('opacity-75', 'cursor-not-allowed');
         } else {
-            console.log(`[${type.toUpperCase()}] ${message}`);
+            // 恢复原始状态
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<i class="fa fa-sign-in mr-2"></i>登录';
+            loginBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+        }
+    }
+
+    // 显示/隐藏注册loading状态
+    showRegisterLoading(show) {
+        const registerBtn = document.getElementById('registerBtn');
+        if (!registerBtn) return;
+
+        if (show) {
+            // 显示loading状态
+            registerBtn.disabled = true;
+            registerBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>注册中...';
+            registerBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        } else {
+            // 恢复原始状态
+            registerBtn.disabled = false;
+            registerBtn.innerHTML = '<i class="fa fa-user-plus mr-2"></i>注册';
+            registerBtn.classList.remove('opacity-75', 'cursor-not-allowed');
         }
     }
 }

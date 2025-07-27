@@ -24,26 +24,72 @@ class TokenManager {
         return this.baseUrl ? this.baseUrl + endpoint : endpoint;
     }
 
-    // 获取token信息
+    // 获取token信息（从cookie）
     getTokens() {
-        if (window.StorageManager && typeof window.StorageManager.getSystemInfo === 'function') {
-            const systemInfo = window.StorageManager.getSystemInfo() || {};
-            return systemInfo.tokens || null;
-        } else {
-            const tokensStr = localStorage.getItem('tokens');
-            return tokensStr ? JSON.parse(tokensStr) : null;
+        // 从cookie中获取token
+        const cookies = document.cookie.split(';');
+        const accessToken = cookies.find(cookie => cookie.trim().startsWith('access_token='));
+        const refreshToken = cookies.find(cookie => cookie.trim().startsWith('refresh_token='));
+        
+        if (accessToken && refreshToken) {
+            const accessTokenValue = accessToken.split('=')[1];
+            const refreshTokenValue = refreshToken.split('=')[1];
+            
+            // 从本地存储获取过期时间（可选）
+            let tokens = null;
+            let expiresAt = null;
+            if (window.StorageManager && typeof window.StorageManager.getSystemInfo === 'function') {
+                const systemInfo = window.StorageManager.getSystemInfo() || {};
+                tokens = systemInfo.tokens || null;
+                expiresAt = tokens ? tokens.expiresAt : null;
+            } else {
+                const tokensStr = localStorage.getItem('tokens');
+                tokens = tokensStr ? JSON.parse(tokensStr) : null;
+                expiresAt = tokens ? tokens.expiresAt : null;
+            }
+            
+            return {
+                accessToken: accessTokenValue,
+                refreshToken: refreshTokenValue,
+                expiresAt: expiresAt
+            };
         }
+        
+        return null;
     }
 
-    // 获取管理员token信息
+    // 获取管理员token信息（从cookie）
     getAdminTokens() {
-        if (window.StorageManager && typeof window.StorageManager.getSystemInfo === 'function') {
-            const systemInfo = window.StorageManager.getSystemInfo() || {};
-            return systemInfo.adminTokens || null;
-        } else {
-            const adminTokensStr = localStorage.getItem('adminTokens');
-            return adminTokensStr ? JSON.parse(adminTokensStr) : null;
+        // 从cookie中获取管理员token
+        const cookies = document.cookie.split(';');
+        const adminAccessToken = cookies.find(cookie => cookie.trim().startsWith('admin_access_token='));
+        const adminRefreshToken = cookies.find(cookie => cookie.trim().startsWith('admin_refresh_token='));
+        
+        if (adminAccessToken && adminRefreshToken) {
+            const adminAccessTokenValue = adminAccessToken.split('=')[1];
+            const adminRefreshTokenValue = adminRefreshToken.split('=')[1];
+            
+            // 从本地存储获取过期时间（可选）
+            let adminTokens = null;
+            let adminExpiresAt = null;
+            if (window.StorageManager && typeof window.StorageManager.getSystemInfo === 'function') {
+                const systemInfo = window.StorageManager.getSystemInfo() || {};
+                adminTokens = systemInfo.adminTokens || null;
+                adminExpiresAt = adminTokens ? adminTokens.adminExpiresAt : null;
+            } else {
+                const adminTokensStr = localStorage.getItem('adminTokens');
+                adminTokens = adminTokensStr ? JSON.parse(adminTokensStr) : null;
+                adminExpiresAt = adminTokens ? adminTokens.adminExpiresAt : null;
+            }
+            
+            return {
+                adminAccessToken: adminAccessTokenValue,
+                adminRefreshToken: adminRefreshTokenValue,
+                adminExpiresAt: adminExpiresAt
+            };
         }
+        
+        return null;
     }
 
     // 检查token是否过期
@@ -306,12 +352,17 @@ class TokenManager {
     async getValidAccessToken() {
         const tokens = this.getTokens();
         if (!tokens) {
-            throw new Error('没有可用的token');
+            return null;
         }
 
         if (this.isTokenExpired(tokens)) {
-            const newTokens = await this.refreshTokens();
-            return newTokens.accessToken;
+            try {
+                const newTokens = await this.refreshTokens();
+                return newTokens.accessToken;
+            } catch (error) {
+                console.warn('刷新token失败:', error);
+                return null;
+            }
         }
 
         return tokens.accessToken;
@@ -321,12 +372,17 @@ class TokenManager {
     async getValidAdminAccessToken() {
         const adminTokens = this.getAdminTokens();
         if (!adminTokens) {
-            throw new Error('没有可用的管理员token');
+            return null;
         }
 
         if (this.isAdminTokenExpired(adminTokens)) {
-            const newAdminTokens = await this.refreshAdminTokens();
-            return newAdminTokens.adminAccessToken;
+            try {
+                const newAdminTokens = await this.refreshAdminTokens();
+                return newAdminTokens.adminAccessToken;
+            } catch (error) {
+                console.warn('刷新管理员token失败:', error);
+                return null;
+            }
         }
 
         return adminTokens.adminAccessToken;

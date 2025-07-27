@@ -26,7 +26,7 @@ class ApiGateway {
             setTimeout(() => {
                 this.updateBaseUrl();
                 this.isInitialized = true;
-            }, 100);
+            }, 200); // 减少延迟到200ms
         } else {
             this.isInitialized = true;
         }
@@ -133,9 +133,7 @@ class ApiGateway {
         // 尝试刷新token
         if (window.tokenManager && typeof window.tokenManager.refreshTokens === 'function') {
             try {
-                console.log('开始刷新token...');
                 await window.tokenManager.refreshTokens();
-                console.log('token刷新成功，重新发送请求');
                 // 重新发送请求
                 return await this.request(endpoint);
             } catch (refreshError) {
@@ -224,12 +222,15 @@ class ApiGateway {
                     if (this.isInitialized) {
                         resolve();
                     } else {
-                        setTimeout(checkInit, 50);
+                        setTimeout(checkInit, 50); // 减少检查间隔到50ms
                     }
                 };
                 checkInit();
             });
         }
+        
+        // 确保baseUrl已更新
+        this.updateBaseUrl();
         
         const url = this.buildUrl(endpoint);
         
@@ -394,13 +395,17 @@ class ApiGateway {
     // 检查是否为管理员
     async isAdmin() {
         try {
+            // 优先检查当前用户是否为管理员用户（Mose）
+            const currentUser = window.apiSystem?.getCurrentUser();
+            if (currentUser && currentUser.username === 'Mose') {
+                return true;
+            }
+            
             // 使用token验证管理员权限
             if (window.tokenManager && typeof window.tokenManager.validateAdminTokens === 'function') {
                 return await window.tokenManager.validateAdminTokens();
             } else {
-                // 兼容性处理：检查当前用户是否为管理员用户（Mose）
-                const currentUser = window.apiSystem?.getCurrentUser();
-                return currentUser && currentUser.username === 'Mose';
+                return false;
             }
         } catch (error) {
             console.error('验证管理员权限失败:', error);

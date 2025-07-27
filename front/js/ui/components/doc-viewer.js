@@ -28,7 +28,6 @@ class DocViewer {
             const data = await response.json();
             if (data.success && data.docs) {
                 this.docs = data.docs;
-                console.log('动态加载文档列表成功:', this.docs.length, '个文档');
                 
                 // 如果模态框已存在，重新渲染文档列表
                 if (this.modal) {
@@ -52,7 +51,6 @@ class DocViewer {
                     { id: 'MAIN_SIMPLIFICATION.md', title: '主要简化文档', icon: '📝' },
                     { id: 'IS_ADMIN_REMOVAL_SUMMARY.md', title: 'is_admin移除总结', icon: '🗑️' }
                 ];
-                console.log('使用默认文档列表作为后备');
                 
                 // 如果模态框已存在，重新渲染文档列表
                 if (this.modal) {
@@ -78,7 +76,6 @@ class DocViewer {
                 { id: 'MAIN_SIMPLIFICATION.md', title: '主要简化文档', icon: '📝' },
                 { id: 'IS_ADMIN_REMOVAL_SUMMARY.md', title: 'is_admin移除总结', icon: '🗑️' }
             ];
-            console.log('使用默认文档列表作为后备');
             
             // 如果模态框已存在，重新渲染文档列表
             if (this.modal) {
@@ -162,7 +159,6 @@ class DocViewer {
     bindEvents() {
         // 关闭按钮
         this.modal.querySelector('.doc-viewer-close').addEventListener('click', (e) => {
-            console.log('关闭按钮被点击');
             e.preventDefault();
             e.stopPropagation();
             this.hide();

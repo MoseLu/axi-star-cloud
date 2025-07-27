@@ -1418,14 +1418,29 @@ class UIManager {
     }
 
     /**
+     * 延迟检查并显示管理员菜单（用于登录后确保用户信息已保存）
+     */
+    async delayedCheckAndShowAdminMenu() {
+        const result = await this.adminManager.delayedCheckAdminPermissions();
+        
+        // 同时控制设置按钮的显示
+        this.checkAndShowSettingsButton();
+        
+        return result;
+    }
+
+    /**
      * 检查并显示设置按钮（仅管理员可见）
      */
     checkAndShowSettingsButton() {
         const settingsBtn = document.getElementById('settings-btn');
         if (settingsBtn) {
-            if (this.isAdmin()) {
+            // 使用adminManager的isAdmin状态
+            if (this.adminManager && this.adminManager.isAdmin) {
+                settingsBtn.style.display = 'block';
                 settingsBtn.classList.remove('hidden');
             } else {
+                settingsBtn.style.display = 'none';
                 settingsBtn.classList.add('hidden');
             }
         }

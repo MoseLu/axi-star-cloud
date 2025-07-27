@@ -176,7 +176,6 @@ class AppCore {
      * 重启应用
      */
     async restart() {
-        console.log('🔄 重启应用中...');
         this.isInitialized = false;
         this.modules = {};
         

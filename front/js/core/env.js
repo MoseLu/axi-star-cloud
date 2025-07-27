@@ -41,18 +41,26 @@ window.ENV_MANAGER = (function() {
         const port = window.location.port;
         const protocol = window.location.protocol;
         
-        // 开发环境检测
+        // 开发环境检测 - localhost
         if (hostname === 'localhost' || 
             hostname === '127.0.0.1' ||
             hostname.startsWith('192.168.') ||
             hostname.startsWith('10.') ||
-            (hostname === 'localhost' && (port === '8080' || port === '8081' || port === '')) ||
-            protocol === 'file:') {
+            (hostname === 'localhost' && (port === '8080' || port === '8081' || port === '' || port === '3000')) ||
+            protocol === 'file:' ||
+            hostname.includes('localhost')) {
             return 'local';
         }
         
-        // 生产环境（默认）
-        return 'prod';
+        // 生产环境检测 - redamancy.com.cn
+        if (hostname === 'redamancy.com.cn' || 
+            hostname === 'www.redamancy.com.cn' ||
+            hostname.includes('redamancy.com.cn')) {
+            return 'prod';
+        }
+        
+        // 其他情况默认使用开发环境（更安全）
+        return 'local';
     }
 
     // 从URL参数获取环境配置

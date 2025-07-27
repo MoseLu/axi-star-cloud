@@ -320,9 +320,9 @@ class PerformanceMonitor {
             };
             
             // 发送到分析服务器（如果有的话）
-            if (window.ENV_MANAGER && window.ENV_MANAGER.config.debug) {
-                console.log('Performance Report:', reportData);
-            }
+            // if (window.ENV_MANAGER && window.ENV_MANAGER.config.debug) {
+            //     console.log('Performance Report:', reportData);
+            // }
             
             // 这里可以添加实际的数据上报逻辑
             // await fetch('/api/analytics/performance', {
@@ -455,8 +455,6 @@ class PerformanceMonitor {
         
         // 清理数据
         this.clearMetrics();
-        
-        console.log('Performance Monitor destroyed');
     }
 }
 

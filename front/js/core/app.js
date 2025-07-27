@@ -66,7 +66,7 @@ class App {
             loginPage.style.display = 'none';
         }
         if (app) {
-            app.style.display = 'block';
+            app.style.display = 'none'; // 先隐藏主应用，等检查完登录状态后再显示
         }
     }
 
@@ -130,7 +130,6 @@ class App {
      * 重启应用
      */
     async restart() {
-        console.log('🔄 重启应用中...');
         this.isInitialized = false;
         
         // 清理现有实例

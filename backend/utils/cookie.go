@@ -24,6 +24,7 @@ import (
 type CookieManager struct {
 	domain   string
 	secure   bool
+	httpOnly bool
 	sameSite http.SameSite
 }
 
@@ -31,13 +32,16 @@ type CookieManager struct {
 func NewCookieManager() *CookieManager {
 	// 根据环境动态设置secure标志
 	secure := false
+	httpOnly := false // 开发环境允许JavaScript访问
 	if os.Getenv("ENV") == "production" || os.Getenv("ENV") == "prod" {
 		secure = true
+		httpOnly = true // 生产环境使用HttpOnly
 	}
 
 	return &CookieManager{
 		domain:   "", // 空域名表示当前域名
 		secure:   secure,
+		httpOnly: httpOnly,
 		sameSite: http.SameSiteLaxMode, // 改为Lax模式，更宽松
 	}
 }
@@ -50,7 +54,7 @@ func (cm *CookieManager) SetUserTokens(w http.ResponseWriter, tokens models.Toke
 		Value:    tokens.AccessToken,
 		Path:     "/",
 		Domain:   cm.domain,
-		HttpOnly: true,
+		HttpOnly: cm.httpOnly,
 		Secure:   cm.secure,
 		SameSite: cm.sameSite,
 		Expires:  tokens.ExpiresAt,
@@ -63,7 +67,7 @@ func (cm *CookieManager) SetUserTokens(w http.ResponseWriter, tokens models.Toke
 		Value:    tokens.RefreshToken,
 		Path:     "/",
 		Domain:   cm.domain,
-		HttpOnly: true,
+		HttpOnly: cm.httpOnly,
 		Secure:   cm.secure,
 		SameSite: cm.sameSite,
 		Expires:  time.Now().Add(7 * 24 * time.Hour), // 7天
@@ -79,7 +83,7 @@ func (cm *CookieManager) SetAdminTokens(w http.ResponseWriter, adminTokens model
 		Value:    adminTokens.AdminAccessToken,
 		Path:     "/",
 		Domain:   cm.domain,
-		HttpOnly: true,
+		HttpOnly: cm.httpOnly,
 		Secure:   cm.secure,
 		SameSite: cm.sameSite,
 		Expires:  adminTokens.AdminExpiresAt,
@@ -91,7 +95,7 @@ func (cm *CookieManager) SetAdminTokens(w http.ResponseWriter, adminTokens model
 		Value:    adminTokens.AdminRefreshToken,
 		Path:     "/",
 		Domain:   cm.domain,
-		HttpOnly: true,
+		HttpOnly: cm.httpOnly,
 		Secure:   cm.secure,
 		SameSite: cm.sameSite,
 		Expires:  time.Now().Add(24 * time.Hour), // 24小时
@@ -106,7 +110,7 @@ func (cm *CookieManager) ClearAllTokens(w http.ResponseWriter) {
 		Value:    "",
 		Path:     "/",
 		Domain:   cm.domain,
-		HttpOnly: true,
+		HttpOnly: cm.httpOnly,
 		Secure:   cm.secure,
 		SameSite: cm.sameSite,
 		Expires:  time.Now().Add(-1 * time.Hour), // 立即过期
@@ -117,7 +121,7 @@ func (cm *CookieManager) ClearAllTokens(w http.ResponseWriter) {
 		Value:    "",
 		Path:     "/",
 		Domain:   cm.domain,
-		HttpOnly: true,
+		HttpOnly: cm.httpOnly,
 		Secure:   cm.secure,
 		SameSite: cm.sameSite,
 		Expires:  time.Now().Add(-1 * time.Hour), // 立即过期
@@ -129,7 +133,7 @@ func (cm *CookieManager) ClearAllTokens(w http.ResponseWriter) {
 		Value:    "",
 		Path:     "/",
 		Domain:   cm.domain,
-		HttpOnly: true,
+		HttpOnly: cm.httpOnly,
 		Secure:   cm.secure,
 		SameSite: cm.sameSite,
 		Expires:  time.Now().Add(-1 * time.Hour), // 立即过期
@@ -140,7 +144,7 @@ func (cm *CookieManager) ClearAllTokens(w http.ResponseWriter) {
 		Value:    "",
 		Path:     "/",
 		Domain:   cm.domain,
-		HttpOnly: true,
+		HttpOnly: cm.httpOnly,
 		Secure:   cm.secure,
 		SameSite: cm.sameSite,
 		Expires:  time.Now().Add(-1 * time.Hour), // 立即过期
@@ -154,7 +158,7 @@ func (cm *CookieManager) SetNewUserTokens(w http.ResponseWriter, tokens models.T
 		Value:    tokens.AccessToken,
 		Path:     "/",
 		Domain:   cm.domain,
-		HttpOnly: true,
+		HttpOnly: cm.httpOnly,
 		Secure:   cm.secure,
 		SameSite: cm.sameSite,
 		Expires:  tokens.ExpiresAt,
@@ -168,7 +172,7 @@ func (cm *CookieManager) SetNewAdminTokens(w http.ResponseWriter, adminTokens mo
 		Value:    adminTokens.AdminAccessToken,
 		Path:     "/",
 		Domain:   cm.domain,
-		HttpOnly: true,
+		HttpOnly: cm.httpOnly,
 		Secure:   cm.secure,
 		SameSite: cm.sameSite,
 		Expires:  adminTokens.AdminExpiresAt,

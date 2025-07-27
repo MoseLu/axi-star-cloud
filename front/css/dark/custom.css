@@ -1595,3 +1595,42 @@ span[style*="color: #86efac"] {
     line-height: 1 !important;
     letter-spacing: -0.025em !important;
 } 
+
+/* 登录和注册按钮loading状态样式 */
+#loginBtn:disabled,
+#registerBtn:disabled {
+    opacity: 0.75 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    pointer-events: none !important;
+}
+
+#loginBtn:disabled:hover,
+#registerBtn:disabled:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* 确保loading图标正确显示 */
+#loginBtn .fa-spinner,
+#registerBtn .fa-spinner {
+    animation: spin 1s linear infinite;
+    color: #FFFFFF !important;
+}
+
+/* 确保loading状态下的文字颜色 */
+#loginBtn:disabled,
+#registerBtn:disabled {
+    color: #FFFFFF !important;
+}
+
+/* 亮色主题下的loading状态 */
+body.theme-light #loginBtn:disabled,
+body.theme-light #registerBtn:disabled {
+    color: #FFFFFF !important;
+}
+
+body.theme-light #loginBtn .fa-spinner,
+body.theme-light #registerBtn .fa-spinner {
+    color: #FFFFFF !important;
+} 

@@ -381,15 +381,8 @@ class StorageManager {
             if (localStorage.getItem(key) !== null) {
                 localStorage.removeItem(key);
                 cleanedCount++;
-                console.log(`🧹 清理旧存储键: ${key}`);
             }
         });
-        
-        if (cleanedCount > 0) {
-            console.log(`✅ 清理完成，共清理了 ${cleanedCount} 个旧存储键`);
-        } else {
-            console.log('✅ 没有发现需要清理的旧存储键');
-        }
         
         return cleanedCount;
     }
@@ -448,29 +441,11 @@ window.StorageManager = new StorageManager();
 
 // 添加测试方法
 window.StorageManager.testMigration = function() {
-    console.log('🔍 存储管理器测试:');
-    console.log('用户信息:', this.getUserInfo());
-    console.log('系统信息:', this.getSystemInfo());
-    console.log('头像URL:', this.getAvatar());
-    console.log('最后登录:', this.getLastLogin());
-    console.log('当前环境:', this.getEnvironment());
-    console.log('当前主题:', this.getTheme());
-    console.log('存储信息:', this.getStorageInfo());
-    console.log('存储使用情况:', this.getStorageUsage());
-    
     // 检查是否还有旧的存储键
     const oldKeys = ['currentUser', 'userData', 'cachedAvatar', 'lastLoginTime', 'app_environment', 'storageInfo', 'storageStatus', 'theme', 'currentTheme'];
     const remainingOldKeys = oldKeys.filter(key => localStorage.getItem(key) !== null);
     
     if (remainingOldKeys.length > 0) {
         console.warn('⚠️ 发现旧的存储键:', remainingOldKeys);
-        console.log('💡 运行 window.StorageManager.cleanupOldKeys() 来清理这些旧键');
-    } else {
-        console.log('✅ 所有旧存储键已成功迁移');
     }
-    
-    // 显示当前存储键
-    const currentKeys = ['userInfo', 'systemInfo', 'thumbnails', 'token'];
-    const currentKeysData = currentKeys.map(key => ({key, exists: localStorage.getItem(key) !== null}));
-    console.log('当前存储键:', currentKeysData);
 }; 

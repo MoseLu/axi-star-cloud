@@ -24,7 +24,6 @@ class AppEnvironmentManager {
     setupEnvironmentChangeListener() {
         window.addEventListener('environmentChanged', async (event) => {
             try {
-                console.log('🔄 环境切换事件触发');
                 
                 // 更新API网关的baseUrl
                 if (window.apiGateway && typeof window.apiGateway.updateBaseUrl === 'function') {
@@ -106,8 +105,6 @@ class AppEnvironmentManager {
                     }
                 }
                 
-                console.log('🔄 环境切换事件处理完成');
-                
             } catch (error) {
                 console.error('❌ 环境切换后数据重新加载失败:', error);
             }
@@ -119,8 +116,6 @@ class AppEnvironmentManager {
      */
     async switchEnvironment(env, customApiUrl = null) {
         try {
-            console.log(`🔄 切换到环境: ${env}`);
-            
             // 更新环境配置
             if (window.ENV_MANAGER && typeof window.ENV_MANAGER.switchEnvironment === 'function') {
                 window.ENV_MANAGER.switchEnvironment(env, customApiUrl);
@@ -131,8 +126,6 @@ class AppEnvironmentManager {
                 detail: { environment: env, customApiUrl } 
             });
             window.dispatchEvent(event);
-            
-            console.log(`✅ 环境切换完成: ${env}`);
             
         } catch (error) {
             console.error('❌ 环境切换失败:', error);
@@ -286,8 +279,6 @@ class AppEnvironmentManager {
                 localStorage.removeItem(key);
             });
             
-            console.log('🧹 环境缓存已清除');
-            
         } catch (error) {
             console.error('❌ 清除环境缓存失败:', error);
         }
@@ -298,8 +289,6 @@ class AppEnvironmentManager {
      */
     async resetEnvironment() {
         try {
-            console.log('🔄 重置环境配置...');
-            
             // 清除环境缓存
             this.clearEnvironmentCache();
             
@@ -311,8 +300,6 @@ class AppEnvironmentManager {
             // 触发环境重置事件
             const event = new CustomEvent('environmentReset');
             window.dispatchEvent(event);
-            
-            console.log('✅ 环境配置已重置');
             
         } catch (error) {
             console.error('❌ 重置环境配置失败:', error);

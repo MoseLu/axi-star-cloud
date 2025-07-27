@@ -34,13 +34,17 @@ class UIAdminManager {
         this.hideStorageSettingsButton();
         
         try {
-            // 使用token验证管理员权限
-            if (window.tokenManager && typeof window.tokenManager.validateAdminTokens === 'function') {
-                this.isAdmin = await window.tokenManager.validateAdminTokens();
+            // 优先检查当前用户是否为管理员用户（Mose）
+            const currentUser = this.getCurrentUser();
+            if (currentUser && currentUser.username === 'Mose') {
+                this.isAdmin = true;
             } else {
-                // 兼容性处理：检查当前用户是否为管理员用户（Mose）
-                const currentUser = this.getCurrentUser();
-                this.isAdmin = currentUser && currentUser.username === 'Mose';
+                // 使用token验证管理员权限
+                if (window.tokenManager && typeof window.tokenManager.validateAdminTokens === 'function') {
+                    this.isAdmin = await window.tokenManager.validateAdminTokens();
+                } else {
+                    this.isAdmin = false;
+                }
             }
             
             // 立即更新UI显示
@@ -68,6 +72,17 @@ class UIAdminManager {
         }
         
         return this.isAdmin;
+    }
+
+    /**
+     * 延迟检查管理员权限（用于登录后确保用户信息已保存）
+     */
+    async delayedCheckAdminPermissions() {
+        // 等待一段时间确保用户信息已保存到localStorage
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // 重新检查管理员权限
+        return await this.checkAdminPermissions();
     }
 
     /**
@@ -115,6 +130,7 @@ class UIAdminManager {
             if (this.isAdmin) {
                 // 管理员：显示设置按钮、同步文档按钮、管理存储空间按钮和管理员菜单
                 settingsBtn.style.display = 'block';
+                settingsBtn.classList.remove('hidden');
                 adminMenu.classList.remove('hidden');
                 if (syncDocsBtn) {
                     syncDocsBtn.classList.remove('hidden');
@@ -126,6 +142,7 @@ class UIAdminManager {
             } else {
                 // 非管理员：隐藏设置按钮、管理员菜单、同步文档按钮和管理存储空间按钮
                 settingsBtn.style.display = 'none';
+                settingsBtn.classList.add('hidden');
                 adminMenu.classList.add('hidden');
                 if (syncDocsBtn) {
                     syncDocsBtn.classList.add('hidden');
@@ -183,7 +200,7 @@ class UIAdminManager {
      * 设置管理员菜单
      */
     setupAdminMenu() {
-        this.adminMenu = document.querySelector('.admin-menu');
+        this.adminMenu = document.getElementById('admin-menu');
         if (!this.adminMenu) {
             this.createAdminMenu();
         }
@@ -194,11 +211,19 @@ class UIAdminManager {
      */
     createAdminMenu() {
         // 检查是否已经存在管理员菜单
-        if (document.querySelector('.admin-menu')) {
-            this.adminMenu = document.querySelector('.admin-menu');
+        if (document.getElementById('admin-menu')) {
+            this.adminMenu = document.getElementById('admin-menu');
             return;
         }
 
+        // 如果header中已经有admin-menu，就不需要创建新的
+        const existingAdminMenu = document.getElementById('admin-menu');
+        if (existingAdminMenu) {
+            this.adminMenu = existingAdminMenu;
+            return;
+        }
+
+        // 创建新的管理员菜单（如果需要的话）
         const menuHTML = `
             <div class="admin-menu" style="display: none; position: fixed; top: 0; right: 0; width: 400px; height: 100vh; background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.1); z-index: 1000; overflow-y: auto;">
                 <div class="admin-menu-header" style="padding: 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
@@ -320,6 +345,7 @@ class UIAdminManager {
             </div>
         `;
         
+        // 将菜单添加到页面
         document.body.insertAdjacentHTML('beforeend', menuHTML);
         this.adminMenu = document.querySelector('.admin-menu');
     }

@@ -24,10 +24,6 @@ class UIFileOperations {
             // 显示下载进度
             this.showDownloadProgress(file.name);
             
-            // 添加调试信息
-            console.log('下载文件信息:', file);
-            console.log('文件ID类型:', typeof file.id, '值:', file.id);
-            
             // 获取用户ID
             let userId = null;
             
@@ -91,8 +87,6 @@ class UIFileOperations {
             } else {
                 downloadUrl = `/api/files/${file.id}/download?user_id=${userId}`;
             }
-            
-            console.log('下载URL:', downloadUrl);
             
             const response = await fetch(downloadUrl, {
                 method: 'GET'
@@ -440,12 +434,6 @@ class UIFileOperations {
 
             const data = await response.json();
             this.searchResults = data.files || [];
-            
-            // 添加调试信息
-            console.log('搜索结果:', this.searchResults);
-            if (this.searchResults.length > 0) {
-                console.log('第一个文件的ID类型:', typeof this.searchResults[0].id, '值:', this.searchResults[0].id);
-            }
             
             // 隐藏进度条
             this.hideSearchProgress();

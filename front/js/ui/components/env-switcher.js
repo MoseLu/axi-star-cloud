@@ -40,19 +40,13 @@ class EnvSwitcher {
             return true;
         }
         
-        // 优先使用token验证管理员权限
-        if (window.tokenManager && typeof window.tokenManager.validateAdminTokens === 'function') {
-            // 异步验证，这里暂时返回false，实际使用时应该等待验证结果
-            return false;
-        }
-        
-        // 备用方案：检查当前用户是否为管理员用户（Mose）
+        // 优先检查当前用户是否为管理员用户（Mose）
         let currentUser = null;
         if (window.StorageManager && typeof window.StorageManager.getUser === 'function') {
             currentUser = window.StorageManager.getUser();
         } else {
             // 如果 StorageManager 未加载，使用 localStorage 作为备用
-            const userData = localStorage.getItem('currentUser');
+            const userData = localStorage.getItem('userInfo');
             if (userData) {
                 try {
                     currentUser = JSON.parse(userData);
@@ -64,6 +58,12 @@ class EnvSwitcher {
         
         if (currentUser && currentUser.username === 'Mose') {
             return true;
+        }
+        
+        // 使用token验证管理员权限
+        if (window.tokenManager && typeof window.tokenManager.validateAdminTokens === 'function') {
+            // 异步验证，这里暂时返回false，实际使用时应该等待验证结果
+            return false;
         }
         
         // 如果authManager不存在，在开发环境下也显示
@@ -697,7 +697,6 @@ class EnvSwitcher {
         // 延迟重新加载数据，确保环境切换完成
         setTimeout(async () => {
             try {
-                console.log('开始重新加载数据...');
                 
                 // 获取当前用户信息
                 let currentUser = window.apiManager?.currentUser;
@@ -719,7 +718,6 @@ class EnvSwitcher {
                 if (!currentUser) currentUser = {};
                 
                 // 直接手动重新加载各个组件，避免循环调用
-                console.log('手动重新加载各个组件');
                 
                 // 重新加载文件列表
                 if (window.uiManager && window.uiManager.api && window.uiManager.api.files) {
@@ -821,8 +819,6 @@ class EnvSwitcher {
                         }
                     }
                 }, 500); // 延迟500ms确保DOM完全加载
-                
-                console.log('数据重新加载完成');
                 
             } catch (error) {
                 console.error('重新加载数据时出错:', error);

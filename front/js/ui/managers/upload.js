@@ -610,7 +610,6 @@ class UIUploadManager {
      * 处理批量上传成功
      */
     handleBatchUploadSuccess(response) {
-        console.log('批量上传成功:', response);
         
         // 更新队列中所有文件的状态
         for (const item of this.uploadQueue) {
@@ -635,14 +634,12 @@ class UIUploadManager {
             setTimeout(async () => {
                 try {
                     await this.refreshFileListAndStorage();
-                    console.log('✅ 批量上传后文件列表刷新完成');
                 } catch (error) {
                     console.error('❌ 批量上传后刷新文件列表失败:', error);
                     // 如果刷新失败，尝试直接刷新
                     setTimeout(async () => {
                         try {
                             await this.refreshFileListDirect();
-                            console.log('✅ 批量上传后直接刷新文件列表完成');
                         } catch (retryError) {
                             console.error('❌ 批量上传后直接刷新文件列表也失败:', retryError);
                         }
@@ -1794,14 +1791,12 @@ class UIUploadManager {
         setTimeout(async () => {
             try {
                 await this.refreshFileListAndStorage();
-                console.log('✅ 文件列表刷新完成');
             } catch (error) {
                 console.error('❌ 刷新文件列表失败:', error);
                 // 如果刷新失败，尝试直接刷新
                 setTimeout(async () => {
                     try {
                         await this.refreshFileListDirect();
-                        console.log('✅ 直接刷新文件列表完成');
                     } catch (retryError) {
                         console.error('❌ 直接刷新文件列表也失败:', retryError);
                     }
