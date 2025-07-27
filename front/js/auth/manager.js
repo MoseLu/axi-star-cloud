@@ -365,8 +365,6 @@ class AppAuthManager {
         // 从事件详情中获取用户数据
         const user = userData.user || userData;
         
-        console.log('登录成功，用户信息:', user);
-        
         // 立即保存用户信息到本地存储，确保状态持久化
         this.saveUserInfo(user);
         
@@ -384,7 +382,6 @@ class AppAuthManager {
             if (user.username === 'Mose') {
                 if (this.uiManager.adminManager) {
                     this.uiManager.adminManager.isAdmin = true;
-                    console.log('设置管理员状态为true');
                 }
             }
             
@@ -399,7 +396,6 @@ class AppAuthManager {
                 // 再次强制检查管理员状态
                 if (user.username === 'Mose' && this.uiManager.adminManager) {
                     this.uiManager.adminManager.isAdmin = true;
-                    console.log('延迟设置管理员状态为true');
                 }
                 
                 await this.uiManager.delayedCheckAndShowAdminMenu().catch(error => {
@@ -417,7 +413,6 @@ class AppAuthManager {
                         // 强制重新检查管理员权限
                         if (user.username === 'Mose') {
                             this.uiManager.adminManager.isAdmin = true;
-                            console.log('生产环境强制设置管理员状态为true');
                         }
                         
                         await this.uiManager.adminManager.checkAdminPermissions();

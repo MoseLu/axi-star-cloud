@@ -34,7 +34,6 @@ class Events {
             this._loginHandler = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('登录表单提交事件被触发');
                 this.authManager.handleLogin();
                 return false;
             };
@@ -46,7 +45,6 @@ class Events {
                 this._loginBtnHandler = (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('登录按钮点击事件被触发');
                     this.authManager.handleLogin();
                     return false;
                 };
@@ -66,7 +64,6 @@ class Events {
             this._registerHandler = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('注册表单提交事件被触发');
                 this.authManager.handleRegister();
                 return false;
             };
@@ -78,7 +75,6 @@ class Events {
                 this._registerBtnHandler = (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('注册按钮点击事件被触发');
                     this.authManager.handleRegister();
                     return false;
                 };

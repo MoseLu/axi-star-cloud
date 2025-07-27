@@ -36,11 +36,9 @@ class UIAdminManager {
         try {
             // 优先检查当前用户是否为管理员用户（Mose）
             const currentUser = this.getCurrentUser();
-            console.log('检查管理员权限，当前用户:', currentUser);
             
             if (currentUser && currentUser.username === 'Mose') {
                 this.isAdmin = true;
-                console.log('设置为管理员用户');
             } else {
                 // 使用token验证管理员权限
                 if (window.tokenManager && typeof window.tokenManager.validateAdminTokens === 'function') {
@@ -55,10 +53,8 @@ class UIAdminManager {
             
             // 如果是管理员，显示悬浮按钮
             if (this.isAdmin) {
-                console.log('显示管理员悬浮按钮');
                 this.showAdminFloatingButtons();
             } else {
-                console.log('隐藏管理员悬浮按钮');
                 this.hideAdminFloatingButtons();
             }
 
@@ -173,23 +169,18 @@ class UIAdminManager {
         const syncDocsBtn = document.getElementById('sync-docs-btn');
         const storageSettingsBtn = document.getElementById('storage-settings-btn');
         
-        console.log('更新头像管理员菜单，isAdmin:', this.isAdmin);
-        console.log('找到的元素:', { adminMenu, settingsBtn, syncDocsBtn, storageSettingsBtn });
-        
         // 生产环境特殊处理：确保管理员状态正确
         if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
             // 重新验证管理员状态
             const currentUser = this.getCurrentUser();
             if (currentUser && currentUser.username === 'Mose') {
                 this.isAdmin = true;
-                console.log('生产环境重新设置为管理员用户');
             }
         }
         
         if (adminMenu && settingsBtn) {
             if (this.isAdmin) {
                 // 管理员：显示设置按钮、同步文档按钮、管理存储空间按钮和管理员菜单
-                console.log('显示管理员相关元素');
                 settingsBtn.style.display = 'block';
                 settingsBtn.classList.remove('hidden');
                 adminMenu.classList.remove('hidden');
@@ -202,7 +193,6 @@ class UIAdminManager {
 
             } else {
                 // 非管理员：隐藏设置按钮、管理员菜单、同步文档按钮和管理存储空间按钮
-                console.log('隐藏管理员相关元素');
                 settingsBtn.style.display = 'none';
                 settingsBtn.classList.add('hidden');
                 adminMenu.classList.add('hidden');
@@ -220,7 +210,6 @@ class UIAdminManager {
         // 生产环境：如果元素不存在，延迟重试
         if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
             if (!adminMenu || !settingsBtn) {
-                console.log('生产环境延迟重试更新管理员菜单');
                 setTimeout(() => {
                     this.updateAvatarAdminMenu();
                 }, 500);
