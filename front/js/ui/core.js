@@ -57,6 +57,39 @@ class UICore {
                     console.error('检查管理员权限失败:', error);
                 });
             }
+            
+            // 生产环境特殊处理：延迟再次检查管理员权限
+            if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                setTimeout(async () => {
+                    if (this.uiManager && this.uiManager.adminManager) {
+                        try {
+                            // 重新检查管理员权限
+                            await this.uiManager.adminManager.checkAdminPermissions();
+                            this.uiManager.adminManager.updateAvatarAdminMenu();
+                            
+                            // 如果是管理员，确保显示所有相关元素
+                            if (this.uiManager.adminManager.isAdmin) {
+                                this.uiManager.adminManager.showAdminFloatingButtons();
+                                
+                                const adminMenu = document.getElementById('admin-menu');
+                                const settingsBtn = document.getElementById('settings-btn');
+                                const syncDocsBtn = document.getElementById('sync-docs-btn');
+                                const storageSettingsBtn = document.getElementById('storage-settings-btn');
+                                
+                                if (adminMenu) adminMenu.classList.remove('hidden');
+                                if (settingsBtn) {
+                                    settingsBtn.style.display = 'block';
+                                    settingsBtn.classList.remove('hidden');
+                                }
+                                if (syncDocsBtn) syncDocsBtn.classList.remove('hidden');
+                                if (storageSettingsBtn) storageSettingsBtn.style.display = 'block';
+                            }
+                        } catch (error) {
+                            console.error('生产环境管理员权限检查失败:', error);
+                        }
+                    }
+                }, 2000); // 生产环境等待2秒
+            }
         }, 100);
         
         // 页面加载完成后再次确保滚动条可见

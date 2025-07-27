@@ -86,6 +86,50 @@ class UIAdminManager {
     }
 
     /**
+     * 获取当前用户信息（增强版）
+     */
+    getCurrentUser() {
+        // 尝试多种方式获取用户信息
+        let userData = null;
+        
+        // 1. 优先从StorageManager获取
+        if (window.StorageManager && typeof window.StorageManager.getUser === 'function') {
+            userData = window.StorageManager.getUser();
+        }
+        
+        // 2. 如果StorageManager不可用，从localStorage获取
+        if (!userData) {
+            const userDataStr = localStorage.getItem('userInfo');
+            if (userDataStr) {
+                try {
+                    userData = JSON.parse(userDataStr);
+                } catch (error) {
+                    console.warn('解析用户信息失败:', error);
+                }
+            }
+        }
+        
+        // 3. 如果还是获取不到，尝试从API管理器获取
+        if (!userData && window.apiManager && window.apiManager.currentUser) {
+            userData = window.apiManager.currentUser;
+        }
+        
+        // 4. 生产环境特殊处理：如果用户信息不完整，尝试重新获取
+        if (userData && (!userData.username || !userData.uuid) && 
+            window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            console.warn('用户信息不完整，尝试重新获取');
+            // 清除不完整的数据
+            localStorage.removeItem('userInfo');
+            if (window.StorageManager && typeof window.StorageManager.clearUser === 'function') {
+                window.StorageManager.clearUser();
+            }
+            return null;
+        }
+        
+        return userData;
+    }
+
+    /**
      * 隐藏同步文档按钮（初始化时调用）
      */
     hideSyncDocsButton() {
@@ -124,7 +168,14 @@ class UIAdminManager {
         const syncDocsBtn = document.getElementById('sync-docs-btn');
         const storageSettingsBtn = document.getElementById('storage-settings-btn');
         
-
+        // 生产环境特殊处理：确保管理员状态正确
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            // 重新验证管理员状态
+            const currentUser = this.getCurrentUser();
+            if (currentUser && currentUser.username === 'Mose') {
+                this.isAdmin = true;
+            }
+        }
         
         if (adminMenu && settingsBtn) {
             if (this.isAdmin) {
@@ -150,6 +201,15 @@ class UIAdminManager {
                 if (storageSettingsBtn) {
                     storageSettingsBtn.style.display = 'none';
                 }
+            }
+        }
+        
+        // 生产环境：如果元素不存在，延迟重试
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            if (!adminMenu || !settingsBtn) {
+                setTimeout(() => {
+                    this.updateAvatarAdminMenu();
+                }, 500);
             }
         }
     }
@@ -184,16 +244,6 @@ class UIAdminManager {
         if (window.envSwitcher && typeof window.envSwitcher.hide === 'function') {
             window.envSwitcher.hide();
         }
-    }
-
-    /**
-     * 获取当前用户信息
-     * @returns {Object|null} 用户信息
-     */
-    getCurrentUser() {
-        // 从localStorage获取用户信息
-        const userData = localStorage.getItem('userInfo');
-        return userData ? JSON.parse(userData) : null;
     }
 
     /**

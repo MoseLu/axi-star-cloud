@@ -420,6 +420,41 @@ class AppAuthManager {
         this.loadUserDataAndCacheAvatar(user).catch(error => {
             console.error('加载用户数据失败:', error);
         });
+        
+        // 生产环境特殊处理：确保管理员权限检查在数据加载完成后再次执行
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            // 生产环境：等待更长时间确保所有组件加载完成
+            setTimeout(async () => {
+                if (this.uiManager && this.uiManager.adminManager) {
+                    try {
+                        // 强制重新检查管理员权限
+                        await this.uiManager.adminManager.checkAdminPermissions();
+                        // 再次更新UI显示
+                        this.uiManager.adminManager.updateAvatarAdminMenu();
+                        
+                        // 如果是管理员，确保显示所有管理员相关元素
+                        if (this.uiManager.adminManager.isAdmin) {
+                            this.uiManager.adminManager.showAdminFloatingButtons();
+                            // 强制显示管理员菜单按钮
+                            const adminMenu = document.getElementById('admin-menu');
+                            const settingsBtn = document.getElementById('settings-btn');
+                            const syncDocsBtn = document.getElementById('sync-docs-btn');
+                            const storageSettingsBtn = document.getElementById('storage-settings-btn');
+                            
+                            if (adminMenu) adminMenu.classList.remove('hidden');
+                            if (settingsBtn) {
+                                settingsBtn.style.display = 'block';
+                                settingsBtn.classList.remove('hidden');
+                            }
+                            if (syncDocsBtn) syncDocsBtn.classList.remove('hidden');
+                            if (storageSettingsBtn) storageSettingsBtn.style.display = 'block';
+                        }
+                    } catch (error) {
+                        console.error('生产环境管理员权限检查失败:', error);
+                    }
+                }
+            }, 3000); // 生产环境等待3秒
+        }
     }
 
     /**
@@ -996,5 +1031,47 @@ window.DEBUG_TOOLS = {
         window.DEBUG_TOOLS.debugCookies();
         window.DEBUG_TOOLS.debugStorage();
         window.DEBUG_TOOLS.debugLogin();
+    },
+    
+    // 生产环境管理员权限调试
+    debugAdminPermissions: () => {
+        console.log('=== 管理员权限调试 ===');
+        
+        // 检查当前用户
+        const currentUser = localStorage.getItem('userInfo');
+        console.log('当前用户信息:', currentUser ? JSON.parse(currentUser) : '无');
+        
+        // 检查管理员状态
+        if (window.uiManager && window.uiManager.adminManager) {
+            console.log('管理员状态:', window.uiManager.adminManager.isAdmin);
+            console.log('管理员管理器:', window.uiManager.adminManager);
+        }
+        
+        // 检查相关DOM元素
+        const adminMenu = document.getElementById('admin-menu');
+        const settingsBtn = document.getElementById('settings-btn');
+        const syncDocsBtn = document.getElementById('sync-docs-btn');
+        const storageSettingsBtn = document.getElementById('storage-settings-btn');
+        
+        console.log('管理员菜单元素:', adminMenu);
+        console.log('设置按钮元素:', settingsBtn);
+        console.log('同步文档按钮元素:', syncDocsBtn);
+        console.log('存储设置按钮元素:', storageSettingsBtn);
+        
+        // 检查元素显示状态
+        if (adminMenu) console.log('管理员菜单显示状态:', adminMenu.classList.contains('hidden'));
+        if (settingsBtn) console.log('设置按钮显示状态:', settingsBtn.style.display);
+        if (syncDocsBtn) console.log('同步文档按钮显示状态:', syncDocsBtn.classList.contains('hidden'));
+        if (storageSettingsBtn) console.log('存储设置按钮显示状态:', storageSettingsBtn.style.display);
+        
+        // 强制重新检查管理员权限
+        if (window.uiManager && window.uiManager.adminManager) {
+            window.uiManager.adminManager.checkAdminPermissions().then(() => {
+                console.log('重新检查管理员权限完成');
+                window.uiManager.adminManager.updateAvatarAdminMenu();
+            }).catch(error => {
+                console.error('重新检查管理员权限失败:', error);
+            });
+        }
     }
 }; 

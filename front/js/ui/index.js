@@ -1426,6 +1426,28 @@ class UIManager {
         // 同时控制设置按钮的显示
         this.checkAndShowSettingsButton();
         
+        // 生产环境特殊处理：确保管理员菜单正确显示
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            if (result && this.adminManager && this.adminManager.isAdmin) {
+                // 强制更新管理员菜单显示
+                this.adminManager.updateAvatarAdminMenu();
+                
+                // 确保所有管理员相关元素都显示
+                const adminMenu = document.getElementById('admin-menu');
+                const settingsBtn = document.getElementById('settings-btn');
+                const syncDocsBtn = document.getElementById('sync-docs-btn');
+                const storageSettingsBtn = document.getElementById('storage-settings-btn');
+                
+                if (adminMenu) adminMenu.classList.remove('hidden');
+                if (settingsBtn) {
+                    settingsBtn.style.display = 'block';
+                    settingsBtn.classList.remove('hidden');
+                }
+                if (syncDocsBtn) syncDocsBtn.classList.remove('hidden');
+                if (storageSettingsBtn) storageSettingsBtn.style.display = 'block';
+            }
+        }
+        
         return result;
     }
 
