@@ -226,7 +226,12 @@ class UIAdminManager {
         
         // 显示环境切换器（如果存在）
         if (window.envSwitcher && typeof window.envSwitcher.show === 'function') {
-            window.envSwitcher.show();
+            try {
+                window.envSwitcher.show();
+            } catch (error) {
+                console.warn('显示环境切换器失败:', error);
+                // 不抛出错误，避免影响其他功能
+            }
         }
     }
     
@@ -242,7 +247,12 @@ class UIAdminManager {
         
         // 隐藏环境切换器（如果存在）
         if (window.envSwitcher && typeof window.envSwitcher.hide === 'function') {
-            window.envSwitcher.hide();
+            try {
+                window.envSwitcher.hide();
+            } catch (error) {
+                console.warn('隐藏环境切换器失败:', error);
+                // 不抛出错误，避免影响其他功能
+            }
         }
     }
 

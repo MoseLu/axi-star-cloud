@@ -596,14 +596,24 @@ class EnvSwitcher {
     show() {
         this.isExpanded = true;
         this.showEnvOptions = false; // 默认显示菜单，不显示路由卡片
-        this.container.classList.add('expanded');
+        
+        // 安全检查：确保container存在
+        if (this.container && this.container.classList) {
+            this.container.classList.add('expanded');
+        }
+        
         this.updateDisplay();
     }
 
     hide() {
         this.isExpanded = false;
         this.showEnvOptions = false;
-        this.container.classList.remove('expanded');
+        
+        // 安全检查：确保container存在
+        if (this.container && this.container.classList) {
+            this.container.classList.remove('expanded');
+        }
+        
         this.updateDisplay();
     }
 
@@ -855,8 +865,13 @@ class EnvSwitcher {
     }
 
     updateDisplay() {
+        // 安全检查：确保container存在
+        if (!this.container) {
+            return;
+        }
+        
         const switcher = this.container;
-        const currentEnv = window.ENV_MANAGER.currentEnv;
+        const currentEnv = window.ENV_MANAGER?.currentEnv || 'local';
         
         // 更新展开状态
         if (this.isExpanded) {
@@ -873,14 +888,17 @@ class EnvSwitcher {
         }
         
         // 更新选项状态
-        this.container.querySelectorAll('.env-option').forEach(option => {
-            const env = option.dataset.env;
-            if (env === currentEnv) {
-                option.classList.add('active');
-            } else {
-                option.classList.remove('active');
-            }
-        });
+        const envOptions = this.container.querySelectorAll('.env-option');
+        if (envOptions.length > 0) {
+            envOptions.forEach(option => {
+                const env = option.dataset.env;
+                if (env === currentEnv) {
+                    option.classList.add('active');
+                } else {
+                    option.classList.remove('active');
+                }
+            });
+        }
         
         // 更新API图标
         this.updateApiIcon();
