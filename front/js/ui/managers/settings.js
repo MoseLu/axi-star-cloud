@@ -891,6 +891,13 @@ class UISettingsManager {
      * 渲染设置表单
      */
     renderSettingsForm() {
+        // 检查是否已存在settingsForm
+        const existingForm = document.getElementById('settingsForm');
+        if (existingForm) {
+            console.warn('settingsForm已存在，跳过重复创建');
+            return;
+        }
+        
         // 表单已经在HTML中定义，这里主要是更新值
         this.updateFormValues();
     }

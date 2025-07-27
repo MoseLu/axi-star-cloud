@@ -4,9 +4,14 @@
  */
 class Core {
     constructor() {
-        // 从环境配置获取baseUrl
-        this.baseUrl = window.APP_CONFIG?.API_BASE_URL || '';
-        this.currentUser = this.getCurrentUser();
+        this.currentUser = null;
+        this.baseUrl = '';
+        
+        // 立即加载用户信息
+        this.loadUserFromStorage();
+        
+        // 更新baseUrl
+        this.updateBaseUrl();
     }
 
     // 构建API URL的通用方法
@@ -127,6 +132,44 @@ class Core {
     // 更新baseUrl（用于环境切换）
     updateBaseUrl() {
         this.baseUrl = window.APP_CONFIG?.API_BASE_URL || '';
+    }
+    
+    // 从存储中加载用户信息
+    loadUserFromStorage() {
+        // 优先使用新的存储管理器
+        if (window.StorageManager && typeof window.StorageManager.getUser === 'function') {
+            const user = window.StorageManager.getUser();
+            if (user && user.uuid && user.username) {
+                this.currentUser = user;
+                return user;
+            }
+        }
+        
+        // 备用方案：从新的键结构获取
+        const savedUser = localStorage.getItem('userInfo');
+        if (savedUser) {
+            try {
+                const user = JSON.parse(savedUser);
+                // 验证用户数据完整性
+                if (user && (user.uuid || user.id) && user.username) {
+                    // 同步到实例变量
+                    this.currentUser = user;
+                    return user;
+                } else {
+                    console.warn('用户数据不完整，清除登录状态');
+                    localStorage.removeItem('userInfo');
+                    this.currentUser = null;
+                    return null;
+                }
+            } catch (error) {
+                console.error('解析用户数据失败:', error);
+                localStorage.removeItem('userInfo');
+                this.currentUser = null;
+                return null;
+            }
+        }
+        this.currentUser = null;
+        return null;
     }
 } 
 window.Core = Core; 
