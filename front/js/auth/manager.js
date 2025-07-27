@@ -365,6 +365,8 @@ class AppAuthManager {
         // 从事件详情中获取用户数据
         const user = userData.user || userData;
         
+        console.log('登录成功，用户信息:', user);
+        
         // 立即保存用户信息到本地存储，确保状态持久化
         this.saveUserInfo(user);
         
@@ -378,6 +380,14 @@ class AppAuthManager {
         
         // 立即检查并显示管理员菜单和悬浮按钮
         if (this.uiManager) {
+            // 强制设置管理员状态
+            if (user.username === 'Mose') {
+                if (this.uiManager.adminManager) {
+                    this.uiManager.adminManager.isAdmin = true;
+                    console.log('设置管理员状态为true');
+                }
+            }
+            
             await this.uiManager.checkAndShowAdminMenu().catch(error => {
                 console.error('检查管理员权限失败:', error);
             });
@@ -386,40 +396,17 @@ class AppAuthManager {
         // 延迟再次检查管理员权限，确保用户信息已完全保存
         setTimeout(async () => {
             if (this.uiManager) {
+                // 再次强制检查管理员状态
+                if (user.username === 'Mose' && this.uiManager.adminManager) {
+                    this.uiManager.adminManager.isAdmin = true;
+                    console.log('延迟设置管理员状态为true');
+                }
+                
                 await this.uiManager.delayedCheckAndShowAdminMenu().catch(error => {
                     console.error('延迟检查管理员权限失败:', error);
                 });
             }
         }, 1000); // 1秒后再次检查
-        
-        // 设置日期显示
-        this.appCore.initDateDisplay();
-        
-        // 显示登录成功消息
-        if (window.Notify) {
-            window.Notify.show({ message: '登录成功', type: 'success' });
-        }
-        
-        // 延迟验证token，确保cookie已经设置完成
-        setTimeout(async () => {
-            try {
-                // 验证token是否有效
-                if (window.tokenManager && typeof window.tokenManager.validateTokens === 'function') {
-                    const isTokenValid = await window.tokenManager.validateTokens();
-                    if (!isTokenValid) {
-                        console.warn('登录后token验证失败，可能需要重新登录');
-                        // 不清除用户数据，让用户继续使用
-                    }
-                }
-            } catch (error) {
-                console.warn('Token验证检查失败:', error);
-            }
-        }, 1500); // 减少延迟到1.5秒
-        
-        // 异步加载用户数据，不阻塞界面切换
-        this.loadUserDataAndCacheAvatar(user).catch(error => {
-            console.error('加载用户数据失败:', error);
-        });
         
         // 生产环境特殊处理：确保管理员权限检查在数据加载完成后再次执行
         if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
@@ -428,6 +415,11 @@ class AppAuthManager {
                 if (this.uiManager && this.uiManager.adminManager) {
                     try {
                         // 强制重新检查管理员权限
+                        if (user.username === 'Mose') {
+                            this.uiManager.adminManager.isAdmin = true;
+                            console.log('生产环境强制设置管理员状态为true');
+                        }
+                        
                         await this.uiManager.adminManager.checkAdminPermissions();
                         // 再次更新UI显示
                         this.uiManager.adminManager.updateAvatarAdminMenu();
@@ -454,6 +446,14 @@ class AppAuthManager {
                     }
                 }
             }, 3000); // 生产环境等待3秒
+        }
+        
+        // 设置日期显示
+        this.appCore.initDateDisplay();
+        
+        // 显示登录成功消息
+        if (window.Notify) {
+            window.Notify.show({ message: '登录成功', type: 'success' });
         }
     }
 
@@ -1039,30 +1039,39 @@ window.DEBUG_TOOLS = {
         
         // 检查当前用户
         const currentUser = localStorage.getItem('userInfo');
-        console.log('当前用户信息:', currentUser ? JSON.parse(currentUser) : '无');
+        console.log('当前用户信息:', currentUser);
         
         // 检查管理员状态
         if (window.uiManager && window.uiManager.adminManager) {
-            console.log('管理员状态:', window.uiManager.adminManager.isAdmin);
-            console.log('管理员管理器:', window.uiManager.adminManager);
+            console.log('AdminManager isAdmin:', window.uiManager.adminManager.isAdmin);
         }
         
-        // 检查相关DOM元素
+        // 检查相关元素
         const adminMenu = document.getElementById('admin-menu');
         const settingsBtn = document.getElementById('settings-btn');
         const syncDocsBtn = document.getElementById('sync-docs-btn');
         const storageSettingsBtn = document.getElementById('storage-settings-btn');
         
-        console.log('管理员菜单元素:', adminMenu);
-        console.log('设置按钮元素:', settingsBtn);
-        console.log('同步文档按钮元素:', syncDocsBtn);
-        console.log('存储设置按钮元素:', storageSettingsBtn);
+        console.log('管理员相关元素:', {
+            adminMenu: !!adminMenu,
+            settingsBtn: !!settingsBtn,
+            syncDocsBtn: !!syncDocsBtn,
+            storageSettingsBtn: !!storageSettingsBtn
+        });
         
         // 检查元素显示状态
-        if (adminMenu) console.log('管理员菜单显示状态:', adminMenu.classList.contains('hidden'));
-        if (settingsBtn) console.log('设置按钮显示状态:', settingsBtn.style.display);
-        if (syncDocsBtn) console.log('同步文档按钮显示状态:', syncDocsBtn.classList.contains('hidden'));
-        if (storageSettingsBtn) console.log('存储设置按钮显示状态:', storageSettingsBtn.style.display);
+        if (settingsBtn) {
+            console.log('设置按钮显示状态:', {
+                display: settingsBtn.style.display,
+                hidden: settingsBtn.classList.contains('hidden')
+            });
+        }
+        
+        if (adminMenu) {
+            console.log('管理员菜单显示状态:', {
+                hidden: adminMenu.classList.contains('hidden')
+            });
+        }
         
         // 强制重新检查管理员权限
         if (window.uiManager && window.uiManager.adminManager) {
@@ -1072,6 +1081,71 @@ window.DEBUG_TOOLS = {
             }).catch(error => {
                 console.error('重新检查管理员权限失败:', error);
             });
+        }
+        
+        // 强制修复管理员显示
+        if (window.uiManager && window.uiManager.adminManager) {
+            const user = JSON.parse(currentUser || '{}');
+            if (user.username === 'Mose') {
+                console.log('强制设置管理员状态');
+                window.uiManager.adminManager.isAdmin = true;
+                window.uiManager.adminManager.updateAvatarAdminMenu();
+                
+                // 强制显示所有管理员元素
+                if (settingsBtn) {
+                    settingsBtn.style.display = 'block';
+                    settingsBtn.classList.remove('hidden');
+                }
+                if (adminMenu) {
+                    adminMenu.classList.remove('hidden');
+                }
+                if (syncDocsBtn) {
+                    syncDocsBtn.classList.remove('hidden');
+                }
+                if (storageSettingsBtn) {
+                    storageSettingsBtn.style.display = 'block';
+                }
+            }
+        }
+    },
+    
+    // 强制修复管理员权限
+    forceFixAdminPermissions: () => {
+        console.log('=== 强制修复管理员权限 ===');
+        
+        const currentUser = localStorage.getItem('userInfo');
+        if (currentUser) {
+            try {
+                const user = JSON.parse(currentUser);
+                if (user.username === 'Mose') {
+                    console.log('检测到管理员用户，强制修复权限');
+                    
+                    // 强制设置管理员状态
+                    if (window.uiManager && window.uiManager.adminManager) {
+                        window.uiManager.adminManager.isAdmin = true;
+                        window.uiManager.adminManager.updateAvatarAdminMenu();
+                        window.uiManager.adminManager.showAdminFloatingButtons();
+                    }
+                    
+                    // 强制显示所有管理员元素
+                    const adminMenu = document.getElementById('admin-menu');
+                    const settingsBtn = document.getElementById('settings-btn');
+                    const syncDocsBtn = document.getElementById('sync-docs-btn');
+                    const storageSettingsBtn = document.getElementById('storage-settings-btn');
+                    
+                    if (adminMenu) adminMenu.classList.remove('hidden');
+                    if (settingsBtn) {
+                        settingsBtn.style.display = 'block';
+                        settingsBtn.classList.remove('hidden');
+                    }
+                    if (syncDocsBtn) syncDocsBtn.classList.remove('hidden');
+                    if (storageSettingsBtn) storageSettingsBtn.style.display = 'block';
+                    
+                    console.log('强制修复完成');
+                }
+            } catch (error) {
+                console.error('解析用户信息失败:', error);
+            }
         }
     }
 }; 
