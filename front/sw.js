@@ -51,8 +51,6 @@ const CACHE_CONFIG = {
 
 // 安装事件
 self.addEventListener('install', event => {
-    console.log('Service Worker: Installing...');
-    
     event.waitUntil(
         Promise.all([
             // 缓存静态资源
@@ -60,7 +58,6 @@ self.addEventListener('install', event => {
             // 缓存离线页面
             cacheOfflinePage()
         ]).then(() => {
-            console.log('Service Worker: Installation completed');
             return self.skipWaiting();
         })
     );
@@ -68,17 +65,13 @@ self.addEventListener('install', event => {
 
 // 激活事件
 self.addEventListener('activate', event => {
-    console.log('Service Worker: Activating...');
-    
     event.waitUntil(
         Promise.all([
             // 清理旧缓存
             cleanupOldCaches(),
             // 立即控制页面
             self.clients.claim()
-        ]).then(() => {
-            console.log('Service Worker: Activation completed');
-        })
+        ])
     );
 });
 
@@ -142,7 +135,6 @@ async function cacheStaticResources() {
             const response = await fetch(url);
             if (response.ok) {
                 await cache.put(url, response);
-                console.log(`Cached: ${url}`);
             }
         } catch (error) {
             console.warn(`Failed to cache: ${url}`, error);
@@ -241,7 +233,6 @@ async function cleanupOldCaches() {
     
     const promises = cacheNames.map(cacheName => {
         if (!currentCaches.includes(cacheName)) {
-            console.log(`Deleting old cache: ${cacheName}`);
             return caches.delete(cacheName);
         }
     });

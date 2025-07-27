@@ -503,11 +503,13 @@ class UIHelpManager {
                 // 更新最后更新时间和版本信息
                 this.updateLastUpdateInfo(result.data);
             } else {
-                console.error('❌ 获取更新日志失败:', result.message);
+                const errorMessage = result.message || result.error || '未知错误';
+                console.error('❌ 获取更新日志失败:', errorMessage);
                 this.renderUpdateLogs([]);
             }
         } catch (error) {
-            console.error('❌ 获取更新日志出错:', error);
+            const errorMessage = error.message || error.toString() || '网络请求失败';
+            console.error('❌ 获取更新日志出错:', errorMessage);
             this.renderUpdateLogs([]);
         }
     }

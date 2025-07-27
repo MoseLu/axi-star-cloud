@@ -17,7 +17,7 @@ class AppCore {
      */
     async init() {
         try {
-            console.log('🚀 应用核心初始化中...');
+    
             
             // 等待API系统准备就绪
             await this.waitForApiSystem();
@@ -32,7 +32,7 @@ class AppCore {
             this.initBasicFeatures();
             
             this.isInitialized = true;
-            console.log('✅ 应用核心初始化完成');
+
             
             // 触发核心就绪事件
             this.dispatchEvent('app:core:ready');

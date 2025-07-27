@@ -17,7 +17,7 @@ class App {
      */
     async init() {
         try {
-            console.log('🚀 星际云盘应用启动中...');
+    
             
             // 等待DOM完全加载
             if (document.readyState === 'loading') {
@@ -44,7 +44,7 @@ class App {
             }
             
             this.isInitialized = true;
-            console.log('✅ 星际云盘应用启动完成');
+
             
             // 触发应用就绪事件
             this.dispatchEvent('app:ready');

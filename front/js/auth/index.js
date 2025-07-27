@@ -208,7 +208,7 @@ class SimpleAuthManager {
                     
                     this.authAPI = new window.Auth(simpleCore);
                     this.tokenManager = new window.TokenManager();
-                    console.log('✅ 认证系统初始化完成');
+            
                 } catch (error) {
                     console.error('❌ 认证系统初始化失败:', error);
                     if (retryCount < maxRetries) {
