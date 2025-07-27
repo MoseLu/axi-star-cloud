@@ -3,6 +3,8 @@
 *.dll
 *.so
 *.dylib
+star-cloud
+star-cloud-linux
 
 # 测试文件
 *.test

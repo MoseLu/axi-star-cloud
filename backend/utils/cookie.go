@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"backend/models"
+	"os"
 )
 
 // CookieManager cookie管理器
@@ -28,9 +29,15 @@ type CookieManager struct {
 
 // NewCookieManager 创建cookie管理器
 func NewCookieManager() *CookieManager {
+	// 根据环境动态设置secure标志
+	secure := false
+	if os.Getenv("ENV") == "production" || os.Getenv("ENV") == "prod" {
+		secure = true
+	}
+	
 	return &CookieManager{
 		domain:   "",
-		secure:   false, // 在生产环境中应该设置为true
+		secure:   secure,
 		sameSite: http.SameSiteStrictMode,
 	}
 }
