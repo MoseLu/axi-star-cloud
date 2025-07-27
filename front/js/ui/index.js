@@ -2230,8 +2230,15 @@ class UIManager {
             // 确保传入的是正确的状态文本，而不是数字
             let displayText = statusText;
             if (typeof statusText === 'number' || (typeof statusText === 'string' && !isNaN(parseFloat(statusText)))) {
-                console.warn('💾 UIManager：检测到状态文本为数字，使用默认状态');
-                displayText = '充足';
+                // 根据百分比确定状态文本
+                const percent = typeof statusText === 'number' ? statusText : parseFloat(statusText);
+                if (percent >= 90) {
+                    displayText = '严重不足';
+                } else if (percent >= 70) {
+                    displayText = '不足';
+                } else {
+                    displayText = '充足';
+                }
             }
             welcomeStorageStatus.textContent = displayText;
         }

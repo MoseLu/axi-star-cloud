@@ -197,7 +197,16 @@ function renderStorageFromCache() {
                 const used = storageData.used_space || storageData.used_bytes || 0;
                 const total = storageData.total_space || storageData.limit_bytes || 1073741824;
                 const percent = total > 0 ? (used / total) * 100 : 0;
-                window.uiManager.updateWelcomeStorageStatus(percent);
+                
+                // 根据百分比确定状态文本
+                let statusText = '充足';
+                if (percent >= 90) {
+                    statusText = '严重不足';
+                } else if (percent >= 70) {
+                    statusText = '不足';
+                }
+                
+                window.uiManager.updateWelcomeStorageStatus(statusText);
             }
         } catch (e) {
             // 忽略解析错误
