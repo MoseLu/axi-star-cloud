@@ -33,9 +33,28 @@ class Events {
             }
             this._loginHandler = (e) => {
                 e.preventDefault();
+                e.stopPropagation();
+                console.log('登录表单提交事件被触发');
                 this.authManager.handleLogin();
+                return false;
             };
             loginForm.addEventListener('submit', this._loginHandler);
+            
+            // 同时绑定按钮点击事件作为备用
+            const loginBtn = document.getElementById('loginBtn');
+            if (loginBtn && !this._loginBtnHandler) {
+                this._loginBtnHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('登录按钮点击事件被触发');
+                    this.authManager.handleLogin();
+                    return false;
+                };
+                loginBtn.addEventListener('click', this._loginBtnHandler);
+            }
+        } else {
+            console.warn('登录表单未找到，将在100ms后重试');
+            setTimeout(() => this.setupFormEvents(), 100);
         }
 
         // 注册表单提交
@@ -46,9 +65,28 @@ class Events {
             }
             this._registerHandler = (e) => {
                 e.preventDefault();
+                e.stopPropagation();
+                console.log('注册表单提交事件被触发');
                 this.authManager.handleRegister();
+                return false;
             };
             registerForm.addEventListener('submit', this._registerHandler);
+            
+            // 同时绑定按钮点击事件作为备用
+            const registerBtn = document.getElementById('registerBtn');
+            if (registerBtn && !this._registerBtnHandler) {
+                this._registerBtnHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('注册按钮点击事件被触发');
+                    this.authManager.handleRegister();
+                    return false;
+                };
+                registerBtn.addEventListener('click', this._registerBtnHandler);
+            }
+        } else {
+            console.warn('注册表单未找到，将在100ms后重试');
+            setTimeout(() => this.setupFormEvents(), 100);
         }
     }
 
@@ -111,12 +149,20 @@ class Events {
         const registerForm = document.getElementById('registerForm');
         const showRegisterBtn = document.getElementById('showRegisterBtn');
         const showLoginBtn = document.getElementById('showLoginBtn');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
 
-        if (loginForm) {
-            loginForm.removeEventListener('submit', this.authManager.handleLogin);
+        if (loginForm && this._loginHandler) {
+            loginForm.removeEventListener('submit', this._loginHandler);
         }
-        if (registerForm) {
-            registerForm.removeEventListener('submit', this.authManager.handleRegister);
+        if (registerForm && this._registerHandler) {
+            registerForm.removeEventListener('submit', this._registerHandler);
+        }
+        if (loginBtn && this._loginBtnHandler) {
+            loginBtn.removeEventListener('click', this._loginBtnHandler);
+        }
+        if (registerBtn && this._registerBtnHandler) {
+            registerBtn.removeEventListener('click', this._registerBtnHandler);
         }
         if (showRegisterBtn) {
             showRegisterBtn.removeEventListener('click', this.authManager.showRegisterForm);
