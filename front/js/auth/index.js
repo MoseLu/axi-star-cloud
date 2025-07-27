@@ -268,7 +268,8 @@ class SimpleAuthManager {
                 // 保存到localStorage
                 localStorage.setItem('userInfo', JSON.stringify(this.currentUser));
                 
-                this.showMessage(loginResult.message || '登录成功', 'success');
+                // 移除重复的消息显示，由AppAuthManager统一处理
+                // this.showMessage(loginResult.message || '登录成功', 'success');
                 
                 // 触发登录成功事件
                 document.dispatchEvent(new CustomEvent('loginSuccess', {
