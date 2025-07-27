@@ -105,6 +105,9 @@ class AppAuthManager {
                         // 立即显示主界面，避免闪烁
                         this.showMainInterface();
                         
+                        // 立即更新用户信息显示
+                        this.updateUserDisplayImmediately();
+                        
                         // 立即检查并显示管理员菜单
                         if (this.uiManager) {
                             this.uiManager.checkAndShowAdminMenu().catch(error => {
@@ -151,6 +154,7 @@ class AppAuthManager {
         
         // 如果token验证失败，尝试从本地存储获取用户信息
         let savedUser = null;
+        
         if (window.StorageManager && typeof window.StorageManager.getUser === 'function') {
             savedUser = window.StorageManager.getUser();
         } else {
@@ -193,6 +197,9 @@ class AppAuthManager {
                 
                 // 立即显示主界面，避免闪烁
                 this.showMainInterface();
+                
+                // 立即更新用户信息显示
+                this.updateUserDisplayImmediately();
                 
                 // 立即检查并显示管理员菜单
                 if (this.uiManager) {
@@ -375,6 +382,9 @@ class AppAuthManager {
         
         // 立即显示主界面，不等待数据加载
         this.showMainInterface();
+        
+        // 立即更新用户信息显示
+        this.updateUserDisplayImmediately();
         
         // 立即检查并显示管理员菜单和悬浮按钮
         if (this.uiManager) {
@@ -568,6 +578,62 @@ class AppAuthManager {
         if (app) {
             app.classList.remove('hidden');
             app.style.display = 'block';
+        }
+        
+        // 立即更新用户信息显示
+        this.updateUserDisplayImmediately();
+    }
+    
+    /**
+     * 立即更新用户信息显示
+     */
+    updateUserDisplayImmediately() {
+        // 从localStorage获取用户信息
+        const userData = localStorage.getItem('userInfo');
+        if (userData) {
+            try {
+                const user = JSON.parse(userData);
+                
+                // 立即更新用户名和头像
+                const userName = document.getElementById('user-name');
+                const userAvatar = document.getElementById('user-avatar');
+                
+                if (userName) {
+                    userName.textContent = user.username;
+                    userName.className = 'hidden sm:inline text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500';
+                }
+                
+                if (userAvatar) {
+                    // 优先使用缓存的头像URL
+                    let avatarUrl = null;
+                    if (window.StorageManager && typeof window.StorageManager.getAvatar === 'function') {
+                        avatarUrl = window.StorageManager.getAvatar();
+                    } else {
+                        // 从用户信息中获取头像URL
+                        avatarUrl = user.avatarUrl;
+                    }
+                    
+                    if (avatarUrl && avatarUrl !== 'null' && avatarUrl !== 'undefined') {
+                        userAvatar.src = avatarUrl;
+                        userAvatar.style.display = 'block';
+                        userAvatar.style.visibility = 'visible';
+                    } else {
+                        // 没有头像时显示默认图标
+                        userAvatar.style.display = 'block';
+                        userAvatar.style.visibility = 'visible';
+                        // 不设置src，让浏览器显示默认图标
+                    }
+                }
+                
+                // 更新欢迎信息
+                const welcomeMessage = document.getElementById('welcome-message');
+                if (welcomeMessage) {
+                    welcomeMessage.textContent = `欢迎回来，${user.username}`;
+                }
+                
+            } catch (error) {
+                console.warn('更新用户显示失败:', error);
+            }
         }
     }
 
