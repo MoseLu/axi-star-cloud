@@ -17,6 +17,7 @@ class AppAuthManager {
     init() {
         this.setupLoginForm();
         this.setupEventListeners();
+        this.setupVisibilityChangeListener();
         // 异步检查登录状态
         this.checkLoginStatus().catch(error => {
             console.error('检查登录状态失败:', error);
@@ -62,171 +63,288 @@ class AppAuthManager {
     }
 
     /**
+     * 设置页面可见性变化监听器
+     */
+    setupVisibilityChangeListener() {
+        // 监听页面可见性变化，当页面重新获得焦点时恢复用户信息
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                // 页面重新可见时，检查并恢复用户信息
+                setTimeout(() => {
+                    this.checkAndRestoreUserInfo();
+                }, 100);
+            }
+        });
+    }
+
+    /**
+     * 检查并恢复用户信息
+     */
+    async checkAndRestoreUserInfo() {
+        try {
+            // 检查是否有用户信息但界面显示异常
+            const userData = this.getUserFromStorage();
+            if (userData && userData.username) {
+                // 检查用户名是否显示
+                const userName = document.getElementById('user-name');
+                if (userName && userName.textContent !== userData.username) {
+                    console.log('检测到用户信息显示异常，正在恢复...');
+                    this.updateUserDisplayImmediately();
+                    
+                    // 如果是管理员，恢复管理员权限
+                    if (userData.username === 'Mose' && this.uiManager) {
+                        await this.uiManager.restoreAdminMenuAfterForceRefresh();
+                    }
+                }
+                
+                // 检查欢迎模块是否显示正确
+                const welcomeMessage = document.getElementById('welcome-message');
+                if (welcomeMessage && !welcomeMessage.textContent.includes(userData.username)) {
+                    console.log('检测到欢迎模块显示异常，正在恢复...');
+                    welcomeMessage.textContent = `欢迎回来，${userData.username}`;
+                }
+                
+                // 检查文件统计是否显示
+                const fileCountElement = document.getElementById('file-count');
+                if (fileCountElement && fileCountElement.textContent === '0' && this.uiManager && this.uiManager.allFiles) {
+                    console.log('检测到文件统计显示异常，正在恢复...');
+                    fileCountElement.textContent = this.uiManager.allFiles.length;
+                }
+            }
+        } catch (error) {
+            console.error('检查并恢复用户信息失败:', error);
+        }
+    }
+
+    /**
      * 调试登录状态
      */
     debugLoginStatus() {
-        // 检查cookie
-        const cookies = document.cookie.split(';');
-        const accessToken = cookies.find(cookie => cookie.trim().startsWith('access_token='));
-        const refreshToken = cookies.find(cookie => cookie.trim().startsWith('refresh_token='));
+        console.log('=== 登录状态调试信息 ===');
         
-        // 检查localStorage
-        const userInfo = localStorage.getItem('userInfo');
+        // 检查用户信息
+        const userData = this.getUserFromStorage();
+        console.log('用户信息:', userData);
         
-        // 检查tokenManager
-        // 检查API网关
-        // 检查环境配置
+        // 检查token状态
+        if (window.tokenManager && typeof window.tokenManager.debugCookies === 'function') {
+            const cookieStatus = window.tokenManager.debugCookies();
+            console.log('Cookie状态:', cookieStatus);
+        }
+        
+        // 检查UI管理器状态
+        if (this.uiManager) {
+            console.log('UI管理器状态:', {
+                allFiles: this.uiManager.allFiles?.length || 0,
+                folders: this.uiManager.folders?.length || 0,
+                profile: this.uiManager.profile,
+                storageInfo: this.uiManager.storageInfo,
+                adminManager: this.uiManager.adminManager ? '已初始化' : '未初始化'
+            });
+            
+            // 检查管理员状态
+            if (this.uiManager.adminManager) {
+                console.log('管理员状态:', {
+                    isAdmin: this.uiManager.adminManager.isAdmin,
+                    currentUser: this.uiManager.adminManager.getCurrentUser()
+                });
+            }
+        }
+        
+        // 检查API管理器状态
+        if (this.apiManager) {
+            console.log('API管理器状态:', {
+                currentUser: this.apiManager.currentUser,
+                baseUrl: this.apiManager.baseUrl
+            });
+        }
+        
+        // 检查DOM元素状态
+        const domStatus = {
+            loginPage: !!document.getElementById('login-page'),
+            app: !!document.getElementById('app'),
+            welcomeMessage: !!document.getElementById('welcome-message'),
+            fileCount: !!document.getElementById('file-count'),
+            userAvatar: !!document.getElementById('user-avatar'),
+            userName: !!document.getElementById('user-name'),
+            adminMenu: !!document.getElementById('admin-menu'),
+            settingsBtn: !!document.getElementById('settings-btn'),
+            syncDocsBtn: !!document.getElementById('sync-docs-btn'),
+            storageSettingsBtn: !!document.getElementById('storage-settings-btn')
+        };
+        console.log('DOM元素状态:', domStatus);
+        
+        console.log('=== 调试信息结束 ===');
     }
 
     /**
      * 检查登录状态
      */
     async checkLoginStatus() {
-        // 减少延迟，从1000ms优化到300ms
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // 首先尝试从cookie中获取token并验证
-        if (window.tokenManager && typeof window.tokenManager.validateTokens === 'function') {
-            try {
-                const isTokenValid = await window.tokenManager.validateTokens();
-                
-                if (isTokenValid) {
-                    // Token有效，尝试获取用户信息
-                    const userInfo = await this.getUserInfoFromToken();
-                    if (userInfo) {
-                        // 保存用户信息到本地存储
-                        this.saveUserInfo(userInfo);
-                        
-                        // 更新API管理器的用户信息
-                        if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
-                            this.apiManager.setCurrentUser(userInfo);
-                        }
-                        
-                        // 立即显示主界面，避免闪烁
-                        this.showMainInterface();
-                        
-                        // 立即更新用户信息显示
-                        this.updateUserDisplayImmediately();
-                        
-                        // 立即检查并显示管理员菜单
-                        if (this.uiManager) {
-                            this.uiManager.checkAndShowAdminMenu().catch(error => {
-                                console.error('检查管理员权限失败:', error);
-                            });
-                        }
-                        
-                        // 页面刷新时，只使用本地缓存，不重新获取数据
-                        this.loadUserDataFromCache(userInfo);
-                        
-                        // 延迟再次检查管理员权限，确保用户信息已完全加载
-                        setTimeout(async () => {
-                            if (this.uiManager) {
-                                await this.uiManager.delayedCheckAndShowAdminMenu().catch(error => {
-                                    console.error('延迟检查管理员权限失败:', error);
-                                });
-                            }
-                        }, 1000); // 1秒后再次检查
-                        
-                        // 如果有本地用户数据但token无效，尝试静默刷新token
-                        if (window.tokenManager && typeof window.tokenManager.refreshTokens === 'function') {
-                            setTimeout(async () => {
-                                try {
-                                    await window.tokenManager.refreshTokens();
-                                } catch (refreshError) {
-                                    console.warn('静默刷新token失败，但用户仍可继续使用:', refreshError);
-                                }
-                            }, 1000); // 减少延迟到1秒
-                        }
-                        
-                        return;
-                    } else {
-                        // 无法获取用户信息
+        try {
+            // 检查是否有有效的token
+            let isTokenValid = false;
+            if (window.tokenManager && typeof window.tokenManager.validateTokens === 'function') {
+                isTokenValid = await window.tokenManager.validateTokens();
+            }
+            
+            if (isTokenValid) {
+                // Token有效，尝试获取用户信息
+                const userInfo = await this.getUserInfoFromToken();
+                if (userInfo) {
+                    // 保存用户信息到本地存储
+                    this.saveUserInfo(userInfo);
+                    
+                    // 更新API管理器的用户信息
+                    if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
+                        this.apiManager.setCurrentUser(userInfo);
                     }
-                } else {
-                    // Token无效
-                }
-            } catch (error) {
-                console.warn('Token验证失败:', error);
-            }
-        } else {
-            // TokenManager不可用
-        }
-        
-        // 如果token验证失败，尝试从本地存储获取用户信息
-        let savedUser = null;
-        
-        if (window.StorageManager && typeof window.StorageManager.getUser === 'function') {
-            savedUser = window.StorageManager.getUser();
-        } else {
-            // 如果 StorageManager 未加载，直接使用新的键结构
-            const userData = localStorage.getItem('userInfo');
-            if (userData) {
-                try {
-                    savedUser = JSON.parse(userData);
-                } catch (error) {
-                    console.warn('解析用户信息失败:', error);
-                }
-            }
-        }
-        
-        if (savedUser) {
-            try {
-                const userData = savedUser;
-
-                // 验证用户数据完整性
-                // 兼容 id 和 uuid 字段
-                const userId = userData.uuid || userData.id;
-                if (!userId || !userData.username) {
-                    console.error('用户数据不完整，清除登录状态');
-                    this.clearUserData();
-                    this.showLoginInterface();
-                    return;
-                }
-
-                // 更新API管理器的用户信息
-                if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
-                    this.apiManager.setCurrentUser(userData);
-                } else {
-                    // 延迟重试
-                    setTimeout(() => {
-                        if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
-                            this.apiManager.setCurrentUser(userData);
-                        }
-                    }, 100);
-                }
-                
-                // 立即显示主界面，避免闪烁
-                this.showMainInterface();
-                
-                // 立即更新用户信息显示
-                this.updateUserDisplayImmediately();
-                
-                // 立即检查并显示管理员菜单
-                if (this.uiManager) {
-                    this.uiManager.checkAndShowAdminMenu().catch(error => {
-                        console.error('检查管理员权限失败:', error);
-                    });
-                }
-                
-                // 页面刷新时，只使用本地缓存，不重新获取数据
-                this.loadUserDataFromCache(userData);
-                
-                // 延迟再次检查管理员权限，确保用户信息已完全加载
-                setTimeout(async () => {
+                    
+                    // 立即显示主界面，避免闪烁
+                    this.showMainInterface();
+                    
+                    // 立即更新用户信息显示
+                    this.updateUserDisplayImmediately();
+                    
+                    // 立即检查并显示管理员菜单
                     if (this.uiManager) {
-                        await this.uiManager.delayedCheckAndShowAdminMenu().catch(error => {
-                            console.error('延迟检查管理员权限失败:', error);
+                        this.uiManager.checkAndShowAdminMenu().catch(error => {
+                            console.error('检查管理员权限失败:', error);
                         });
                     }
-                }, 1000); // 1秒后再次检查
-                
-            } catch (error) {
-                console.error('解析用户数据失败:', error);
-                this.clearUserData();
-                this.showLoginInterface();
+                    
+                    // 页面刷新时，只使用本地缓存，不重新获取数据
+                    this.loadUserDataFromCache(userInfo);
+                    
+                    // 延迟再次检查管理员权限，确保用户信息已完全加载
+                    setTimeout(async () => {
+                        if (this.uiManager) {
+                            await this.uiManager.delayedCheckAndShowAdminMenu().catch(error => {
+                                console.error('延迟检查管理员权限失败:', error);
+                            });
+                        }
+                    }, 1000);
+                    
+                    return true;
+                }
             }
-        } else {
+            
+            // 检查本地存储的用户信息
+            const savedUser = this.getUserFromStorage();
+            
+            if (savedUser) {
+                try {
+                    const userData = savedUser;
+
+                    // 验证用户数据完整性
+                    // 兼容 id 和 uuid 字段
+                    const userId = userData.uuid || userData.id;
+                    if (!userId || !userData.username) {
+                        console.error('用户数据不完整，清除登录状态');
+                        this.clearUserData();
+                        this.showLoginInterface();
+                        return false;
+                    }
+
+                    // 更新API管理器的用户信息
+                    if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
+                        this.apiManager.setCurrentUser(userData);
+                    } else {
+                        // 延迟重试
+                        setTimeout(() => {
+                            if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
+                                this.apiManager.setCurrentUser(userData);
+                            }
+                        }, 100);
+                    }
+                    
+                    // 立即显示主界面，避免闪烁
+                    this.showMainInterface();
+                    
+                    // 立即更新用户信息显示
+                    this.updateUserDisplayImmediately();
+                    
+                    // 立即检查并显示管理员菜单
+                    if (this.uiManager) {
+                        this.uiManager.checkAndShowAdminMenu().catch(error => {
+                            console.error('检查管理员权限失败:', error);
+                        });
+                    }
+                    
+                    // 页面刷新时，只使用本地缓存，不重新获取数据
+                    this.loadUserDataFromCache(userData);
+                    
+                    // 延迟再次检查管理员权限，确保用户信息已完全加载
+                    setTimeout(async () => {
+                        if (this.uiManager) {
+                            await this.uiManager.delayedCheckAndShowAdminMenu().catch(error => {
+                                console.error('延迟检查管理员权限失败:', error);
+                            });
+                        }
+                    }, 1000);
+                    
+                    return true;
+                } catch (error) {
+                    console.error('处理本地用户数据失败:', error);
+                    this.clearUserData();
+                    this.showLoginInterface();
+                    return false;
+                }
+            }
+            
+            // 没有有效的登录状态，显示登录界面
             this.showLoginInterface();
+            return false;
+            
+        } catch (error) {
+            console.error('检查登录状态失败:', error);
+            this.showLoginInterface();
+            return false;
+        }
+    }
+
+    /**
+     * 强制刷新后恢复用户信息
+     */
+    async restoreUserInfoAfterForceRefresh() {
+        try {
+            // 从localStorage获取用户信息
+            const userData = this.getUserFromStorage();
+            if (!userData || !userData.username) {
+                return false;
+            }
+
+            // 更新API管理器的用户信息
+            if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
+                this.apiManager.setCurrentUser(userData);
+            }
+
+            // 立即更新用户信息显示
+            this.updateUserDisplayImmediately();
+
+            // 强制检查管理员权限
+            if (this.uiManager) {
+                // 如果是管理员用户，强制设置状态
+                if (userData.username === 'Mose') {
+                    if (this.uiManager.adminManager) {
+                        this.uiManager.adminManager.isAdmin = true;
+                    }
+                    this.forceShowAdminElements();
+                }
+                
+                // 使用专门的恢复方法
+                await this.uiManager.restoreAdminMenuAfterForceRefresh().catch(error => {
+                    console.error('强制刷新后恢复管理员菜单失败:', error);
+                });
+            }
+
+            // 从缓存加载用户数据
+            this.loadUserDataFromCache(userData);
+
+            return true;
+        } catch (error) {
+            console.error('强制刷新后恢复用户信息失败:', error);
+            return false;
         }
     }
 
@@ -235,41 +353,46 @@ class AppAuthManager {
      */
     async getUserInfoFromToken() {
         try {
-            if (window.tokenManager && typeof window.tokenManager.getValidAccessToken === 'function') {
-                const accessToken = await window.tokenManager.getValidAccessToken();
-                if (accessToken) {
-                    // 调用token验证API获取用户信息
-                    const response = await fetch('/api/validate-token', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            access_token: accessToken
-                        }),
-                        credentials: 'include'
-                    });
-
-                    const data = await response.json();
-                    if (data.success && data.valid && data.user) {
-                        return data.user;
-                    }
-                }
+            if (!this.apiManager) {
+                return null;
             }
+            
+            // 使用API管理器获取用户信息
+            const userInfo = await this.apiManager.getProfile();
+            if (userInfo) {
+                return userInfo;
+            }
+            
+            return null;
         } catch (error) {
-            // 如果没有token或token无效，这是正常情况，不需要报错
+            console.error('从token获取用户信息失败:', error);
+            return null;
         }
-        return null;
     }
 
     /**
-     * 保存用户信息
+     * 保存用户信息到本地存储
      */
     saveUserInfo(userInfo) {
-        if (window.StorageManager && typeof window.StorageManager.setUser === 'function') {
-            window.StorageManager.setUser(userInfo);
-        } else {
-            localStorage.setItem('userInfo', JSON.stringify(userInfo));
+        try {
+            // 优先使用StorageManager
+            if (window.StorageManager && typeof window.StorageManager.setUser === 'function') {
+                window.StorageManager.setUser(userInfo);
+            } else {
+                // 如果 StorageManager 未加载，直接使用新的键结构
+                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            }
+            
+            // 如果是管理员，确保立即更新显示
+            if (userInfo && userInfo.username === 'Mose') {
+                // 立即更新用户信息显示
+                this.updateUserDisplayImmediately();
+                
+                // 强制显示管理员相关元素
+                this.forceShowAdminElements();
+            }
+        } catch (error) {
+            console.error('保存用户信息失败:', error);
         }
     }
 
@@ -277,210 +400,181 @@ class AppAuthManager {
      * 清除用户数据
      */
     clearUserData() {
-        if (window.StorageManager && typeof window.StorageManager.clearUser === 'function') {
-            window.StorageManager.clearUser();
-        } else {
+        try {
+            // 清除StorageManager中的数据
+            if (window.StorageManager && typeof window.StorageManager.clearUser === 'function') {
+                window.StorageManager.clearUser();
+            }
+            
+            // 清除localStorage中的数据
             localStorage.removeItem('userInfo');
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('userData');
+            localStorage.removeItem('cachedAvatar');
+            localStorage.removeItem('lastLoginTime');
+            
+            // 清除API管理器的用户信息
+            if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
+                this.apiManager.setCurrentUser(null);
+            }
+            
+            // 隐藏管理员相关元素
+            if (this.uiManager && this.uiManager.adminManager) {
+                this.uiManager.adminManager.hideAdminFloatingButtons();
+            }
+            
+        } catch (error) {
+            console.error('清除用户数据失败:', error);
         }
     }
 
     /**
-     * 从缓存加载用户数据
+     * 从缓存加载用户数据（页面刷新时使用）
      */
     loadUserDataFromCache(userData) {
-        let userDataFromStorage = null;
-        let storageInfoFromStorage = null;
-        
-        if (window.StorageManager && typeof window.StorageManager.getUser === 'function') {
-            userDataFromStorage = window.StorageManager.getUser();
-        } else {
-            // 如果 StorageManager 未加载，直接使用新的键结构
-            const userData = localStorage.getItem('userInfo');
+        try {
+            if (!this.uiManager) {
+                return;
+            }
+            
+            // 更新UIManager缓存
             if (userData) {
-                try {
-                    userDataFromStorage = JSON.parse(userData);
-                } catch (error) {
-                    console.warn('解析用户数据失败:', error);
-                }
+                this.uiManager.profile = userData;
             }
-        }
-        
-        if (window.StorageManager && typeof window.StorageManager.getStorageInfo === 'function') {
-            storageInfoFromStorage = window.StorageManager.getStorageInfo();
-        } else {
-            // 如果 StorageManager 未加载，直接使用新的键结构
-            const systemData = localStorage.getItem('systemInfo');
-            if (systemData) {
-                try {
-                    const systemInfo = JSON.parse(systemData);
-                    storageInfoFromStorage = systemInfo.storageInfo || null;
-                } catch (error) {
-                    console.warn('解析系统信息失败:', error);
-                }
+            
+            // 从缓存获取文件列表
+            const cachedFiles = this.getCachedFiles();
+            if (cachedFiles && cachedFiles.length > 0) {
+                this.uiManager.allFiles = cachedFiles;
+                this.uiManager.renderFileList(cachedFiles);
+                this.uiManager.updateFileCount(cachedFiles.length, cachedFiles.length);
             }
-        }
-        
-        if (userDataFromStorage) {
-            try {
-                const localUserData = userDataFromStorage;
-                
-                // 只使用本地缓存，不重新获取
-                this.updateUserDisplayFromCache(localUserData);
-                if (this.uiManager) {
-                    this.uiManager.updateProfileDisplayFromCache(localUserData);
-                }
-                
-                // 如果有缓存的存储信息，也更新存储显示
-                if (storageInfoFromStorage) {
-                    try {
-                        const cachedStorageInfo = storageInfoFromStorage;
-                        this.updateStorageAfterComponentsLoad(cachedStorageInfo);
-                    } catch (error) {
-                        console.warn('从存储管理器获取存储信息失败:', error);
-                    }
-                }
-                
-                // 延迟检查存储组件是否已加载
-                setTimeout(() => {
-                    if (document.getElementById('welcome-storage-status')) {
-                        if (storageInfoFromStorage) {
-                            try {
-                                const cachedStorageInfo = JSON.parse(storageInfoFromStorage);
-                                this.uiManager.updateStorageDisplay(cachedStorageInfo);
-                            } catch (error) {
-                                console.warn('延迟更新存储信息失败:', error);
-                            }
-                        }
-                    }
-                }, 500);
-            } catch (error) {
-                console.warn('从localStorage获取用户数据失败:', error);
+            
+            // 从缓存获取文件夹列表
+            const cachedFolders = this.getCachedFolders();
+            if (cachedFolders && cachedFolders.length > 0) {
+                this.uiManager.folders = cachedFolders;
+                this.uiManager.renderFolderList(cachedFolders);
             }
-        } else {
-            // 如果没有userData，只更新基本用户信息
-            this.updateUserDisplayFromCache(userData);
+            
+            // 从缓存获取存储信息
+            const cachedStorageInfo = this.getCachedStorageInfo();
+            if (cachedStorageInfo) {
+                this.uiManager.storageInfo = cachedStorageInfo;
+                this.uiManager.updateStorageDisplay(cachedStorageInfo);
+            }
+            
+            // 更新用户信息显示
+            if (userData) {
+                this.updateUserDisplay(userData);
+                this.uiManager.updateProfileDisplay(userData);
+            }
+            
+            // 如果是管理员，确保所有数据都已正确加载
+            if (userData && userData.username === 'Mose' && this.uiManager && this.uiManager.adminManager) {
+                this.uiManager.adminManager.ensureAdminDataLoaded();
+            }
+            
+        } catch (error) {
+            console.error('从缓存加载用户数据失败:', error);
         }
-        
-        // 页面刷新时重新加载用户数据，确保文件列表正确显示
-        this.loadUserData(userData);
     }
 
     /**
      * 登录成功处理
      */
-    async onLoginSuccess(userData) {
-        // 从事件详情中获取用户数据
-        const user = userData.user || userData;
-        
-        // 立即保存用户信息到本地存储，确保状态持久化
-        this.saveUserInfo(user);
-        
-        // 同步用户信息到API管理器
-        if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
-            this.apiManager.setCurrentUser(user);
-        }
-        
-        // 立即显示主界面，不等待数据加载
-        this.showMainInterface();
-        
-        // 立即更新用户信息显示
-        this.updateUserDisplayImmediately();
-        
-        // 立即检查并显示管理员菜单和悬浮按钮
-        if (this.uiManager) {
-            // 强制设置管理员状态
-            if (user.username === 'Mose') {
-                if (this.uiManager.adminManager) {
-                    this.uiManager.adminManager.isAdmin = true;
+    async onLoginSuccess(user) {
+        try {
+            // 立即保存用户信息到本地存储
+            this.saveUserInfo(user);
+            
+            // 更新API管理器的用户信息
+            if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
+                this.apiManager.setCurrentUser(user);
+            }
+            
+            // 立即显示主界面，不等待数据加载
+            this.showMainInterface()
+            
+            // 立即更新用户信息显示
+            this.updateUserDisplayImmediately();
+            
+            // 立即检查并显示管理员菜单和悬浮按钮
+            if (this.uiManager) {
+                // 强制设置管理员状态
+                if (user.username === 'Mose') {
+                    if (this.uiManager.adminManager) {
+                        this.uiManager.adminManager.isAdmin = true;
+                        console.log('设置管理员状态为true');
+                    }
+                    
+                    // 强制显示管理员元素
+                    this.forceShowAdminElements();
+                    
+                    // 强制更新头像显示
+                    if (this.uiManager.adminManager) {
+                        this.uiManager.adminManager.forceUpdateAvatarDisplay(user);
+                    }
                 }
                 
-                // 强制显示管理员元素
+                await this.uiManager.checkAndShowAdminMenu().catch(error => {
+                    console.error('检查管理员权限失败:', error);
+                });
+            }
+            
+            // 延迟验证token，确保cookie已经设置完成
+            setTimeout(async () => {
+                try {
+                    // 调试cookie状态
+                    if (window.tokenManager && typeof window.tokenManager.debugCookies === 'function') {
+                        const cookieStatus = window.tokenManager.debugCookies();
+                        console.log('登录后cookie状态:', cookieStatus);
+                        
+                        // 如果cookie没有正确设置，尝试重新获取
+                        if (!cookieStatus.hasAccessToken || !cookieStatus.hasRefreshToken) {
+                            console.warn('登录后cookie未正确设置，尝试重新获取...');
+                            
+                            // 等待更长时间后再次检查
+                            setTimeout(async () => {
+                                const retryStatus = window.tokenManager.debugCookies();
+                                console.log('重试后cookie状态:', retryStatus);
+                                
+                                if (!retryStatus.hasAccessToken || !retryStatus.hasRefreshToken) {
+                                    console.error('登录后cookie设置失败，可能需要重新登录');
+                                }
+                            }, 2000);
+                        }
+                    }
+                } catch (error) {
+                    console.warn('调试cookie状态失败:', error);
+                }
+            }, 1000);
+            
+            // 立即加载用户数据，不等待token验证
+            await this.loadUserData(user);
+            
+            // 如果是管理员，确保所有数据都已正确加载
+            if (user.username === 'Mose' && this.uiManager && this.uiManager.adminManager) {
+                await this.uiManager.adminManager.ensureAdminDataLoaded();
+                
+                // 再次强制更新头像显示
+                this.uiManager.adminManager.forceUpdateAvatarDisplay(user);
+                
+                // 再次强制显示管理员元素
                 this.forceShowAdminElements();
             }
             
-            await this.uiManager.checkAndShowAdminMenu().catch(error => {
-                console.error('检查管理员权限失败:', error);
-            });
-        }
-        
-        // 延迟再次检查管理员权限，确保用户信息已完全保存
-        setTimeout(async () => {
-            if (this.uiManager) {
-                // 再次强制检查管理员状态
-                if (user.username === 'Mose' && this.uiManager.adminManager) {
-                    this.uiManager.adminManager.isAdmin = true;
-                    // 再次强制显示管理员元素
-                    this.forceShowAdminElements();
-                }
-                
-                await this.uiManager.delayedCheckAndShowAdminMenu().catch(error => {
-                    console.error('延迟检查管理员权限失败:', error);
-                });
-            }
-        }, 1000); // 1秒后再次检查
-        
-        // 生产环境特殊处理：确保管理员权限检查在数据加载完成后再次执行
-        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-            // 生产环境：等待更长时间确保所有组件加载完成
-            setTimeout(async () => {
-                if (this.uiManager && this.uiManager.adminManager) {
-                    try {
-                        // 强制重新检查管理员权限
-                        if (user.username === 'Mose') {
-                            this.uiManager.adminManager.isAdmin = true;
-                            // 再次强制显示管理员元素
-                            this.forceShowAdminElements();
-                        }
-                        
-                        await this.uiManager.adminManager.checkAdminPermissions();
-                        // 再次更新UI显示
-                        this.uiManager.adminManager.updateAvatarAdminMenu();
-                        
-                        // 如果是管理员，确保显示所有管理员相关元素
-                        if (this.uiManager.adminManager.isAdmin) {
-                            this.uiManager.adminManager.showAdminFloatingButtons();
-                            // 强制显示管理员菜单按钮
-                            this.forceShowAdminElements();
-                        }
-                    } catch (error) {
-                        console.error('生产环境管理员权限检查失败:', error);
-                    }
-                }
-            }, 3000); // 生产环境等待3秒
-        }
-        
-        // 设置日期显示
-        this.appCore.initDateDisplay();
-        
-        // 显示登录成功消息
-        if (window.Notify) {
-            window.Notify.show({ message: '登录成功', type: 'success' });
+        } catch (error) {
+            console.error('登录成功处理失败:', error);
         }
     }
     
     /**
-     * 强制显示管理员元素
+     * 强制显示管理员相关元素
      */
     forceShowAdminElements() {
-        const adminMenu = document.getElementById('admin-menu');
-        const settingsBtn = document.getElementById('settings-btn');
+        // 显示同步文档按钮
         const syncDocsBtn = document.getElementById('sync-docs-btn');
-        const storageSettingsBtn = document.getElementById('storage-settings-btn');
-        
-        if (settingsBtn) {
-            settingsBtn.style.display = 'block !important';
-            settingsBtn.style.visibility = 'visible';
-            settingsBtn.classList.remove('hidden');
-            settingsBtn.removeAttribute('hidden');
-        }
-        
-        if (adminMenu) {
-            adminMenu.style.display = 'block !important';
-            adminMenu.style.visibility = 'visible';
-            adminMenu.classList.remove('hidden');
-            adminMenu.removeAttribute('hidden');
-        }
-        
         if (syncDocsBtn) {
             syncDocsBtn.style.display = 'flex !important';
             syncDocsBtn.style.visibility = 'visible';
@@ -488,11 +582,40 @@ class AppAuthManager {
             syncDocsBtn.removeAttribute('hidden');
         }
         
+        // 显示管理存储空间按钮
+        const storageSettingsBtn = document.getElementById('storage-settings-btn');
         if (storageSettingsBtn) {
             storageSettingsBtn.style.display = 'block !important';
             storageSettingsBtn.style.visibility = 'visible';
             storageSettingsBtn.classList.remove('hidden');
             storageSettingsBtn.removeAttribute('hidden');
+        }
+        
+        // 显示设置按钮
+        const settingsBtn = document.getElementById('settings-btn');
+        if (settingsBtn) {
+            settingsBtn.style.display = 'block !important';
+            settingsBtn.style.visibility = 'visible';
+            settingsBtn.classList.remove('hidden');
+            settingsBtn.removeAttribute('hidden');
+        }
+        
+        // 显示管理员菜单
+        const adminMenu = document.getElementById('admin-menu');
+        if (adminMenu) {
+            adminMenu.style.display = 'block !important';
+            adminMenu.style.visibility = 'visible';
+            adminMenu.classList.remove('hidden');
+            adminMenu.removeAttribute('hidden');
+        }
+        
+        // 显示环境切换器（如果存在）
+        if (window.envSwitcher && typeof window.envSwitcher.show === 'function') {
+            try {
+                window.envSwitcher.show();
+            } catch (error) {
+                console.warn('显示环境切换器失败:', error);
+            }
         }
     }
 
@@ -575,65 +698,202 @@ class AppAuthManager {
             loginPage.classList.add('hidden');
             loginPage.style.display = 'none';
         }
+        
         if (app) {
             app.classList.remove('hidden');
             app.style.display = 'block';
         }
         
-        // 立即更新用户信息显示
-        this.updateUserDisplayImmediately();
+        // 确保欢迎模块正确显示
+        const welcomeSection = document.getElementById('welcome-section-card');
+        if (welcomeSection) {
+            welcomeSection.style.display = 'block';
+            welcomeSection.classList.remove('hidden');
+        }
+        
+        // 确保文件列表区域正确显示
+        const fileListContainer = document.getElementById('file-list-container');
+        if (fileListContainer) {
+            fileListContainer.style.display = 'block';
+            fileListContainer.classList.remove('hidden');
+        }
+        
+        // 确保存储概览区域正确显示
+        const storageOverview = document.getElementById('storage-overview-card');
+        if (storageOverview) {
+            storageOverview.style.display = 'block';
+            storageOverview.classList.remove('hidden');
+        }
     }
     
     /**
-     * 立即更新用户信息显示
+     * 立即更新用户信息显示（不等待组件加载）
      */
     updateUserDisplayImmediately() {
-        // 从localStorage获取用户信息
-        const userData = localStorage.getItem('userInfo');
-        if (userData) {
-            try {
-                const user = JSON.parse(userData);
-                
-                // 立即更新用户名和头像
-                const userName = document.getElementById('user-name');
-                const userAvatar = document.getElementById('user-avatar');
-                
-                if (userName) {
-                    userName.textContent = user.username;
-                    userName.className = 'hidden sm:inline text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500';
-                }
-                
-                if (userAvatar) {
-                    // 优先使用缓存的头像URL
-                    let avatarUrl = null;
-                    if (window.StorageManager && typeof window.StorageManager.getAvatar === 'function') {
-                        avatarUrl = window.StorageManager.getAvatar();
-                    } else {
-                        // 从用户信息中获取头像URL
-                        avatarUrl = user.avatarUrl;
-                    }
-                    
-                    if (avatarUrl && avatarUrl !== 'null' && avatarUrl !== 'undefined') {
-                        userAvatar.src = avatarUrl;
-                        userAvatar.style.display = 'block';
-                        userAvatar.style.visibility = 'visible';
-                    } else {
-                        // 没有头像时显示默认图标
-                        userAvatar.style.display = 'block';
-                        userAvatar.style.visibility = 'visible';
-                        // 不设置src，让浏览器显示默认图标
+        try {
+            // 获取用户信息
+            let user = null;
+            if (window.StorageManager && typeof window.StorageManager.getUser === 'function') {
+                user = window.StorageManager.getUser();
+            } else {
+                const userData = localStorage.getItem('userInfo');
+                if (userData) {
+                    try {
+                        user = JSON.parse(userData);
+                    } catch (error) {
+                        console.warn('解析用户信息失败:', error);
                     }
                 }
-                
-                // 更新欢迎信息
-                const welcomeMessage = document.getElementById('welcome-message');
-                if (welcomeMessage) {
-                    welcomeMessage.textContent = `欢迎回来，${user.username}`;
-                }
-                
-            } catch (error) {
-                console.warn('更新用户显示失败:', error);
             }
+            
+            if (!user) {
+                console.warn('没有找到用户信息');
+                return;
+            }
+            
+            console.log('立即更新用户显示:', user);
+            
+            // 更新顶栏用户名
+            const userName = document.getElementById('user-name');
+            if (userName) {
+                userName.textContent = user.username;
+                // 确保金色渐变样式保持
+                userName.className = 'text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500';
+                console.log('更新顶栏用户名:', user.username);
+            }
+            
+            // 更新顶栏头像
+            const userAvatar = document.getElementById('user-avatar');
+            if (userAvatar) {
+                // 优先从新的存储管理器获取头像
+                let cachedAvatar = null;
+                if (window.StorageManager && typeof window.StorageManager.getAvatar === 'function') {
+                    cachedAvatar = window.StorageManager.getAvatar();
+                } else {
+                    // 如果 StorageManager 未加载，直接使用新的键结构
+                    const userData = localStorage.getItem('userInfo');
+                    if (userData) {
+                        try {
+                            const userInfo = JSON.parse(userData);
+                            cachedAvatar = userInfo.avatarUrl;
+                        } catch (error) {
+                            console.warn('解析用户信息失败:', error);
+                        }
+                    }
+                }
+                
+                let avatarUrl = null;
+                
+                if (cachedAvatar && cachedAvatar !== 'null' && cachedAvatar !== 'undefined') {
+                    // 直接使用缓存的完整URL
+                    avatarUrl = cachedAvatar;
+                    console.log('使用缓存头像URL:', avatarUrl);
+                } else if (user.avatar && window.APP_UTILS && window.APP_UTILS.buildAvatarUrl) {
+                    // 如果没有缓存，使用原始文件名构建URL
+                    avatarUrl = window.APP_UTILS.buildAvatarUrl(user.avatar);
+                    console.log('构建头像URL:', avatarUrl);
+                } else if (user.avatar) {
+                    // 备用方案：直接构建URL
+                    avatarUrl = `/api/avatars/${user.avatar}`;
+                    console.log('使用备用头像URL:', avatarUrl);
+                }
+                
+                if (avatarUrl) {
+                    userAvatar.src = avatarUrl;
+                    userAvatar.style.display = 'block';
+                    userAvatar.style.visibility = 'visible';
+                    userAvatar.style.opacity = '1';
+                    console.log('更新顶栏头像成功:', avatarUrl);
+                } else {
+                    userAvatar.style.display = 'none';
+                    console.log('隐藏顶栏头像');
+                }
+            }
+            
+            // 更新欢迎模块的用户名
+            const welcomeMessage = document.getElementById('welcome-message');
+            if (welcomeMessage) {
+                welcomeMessage.textContent = `欢迎回来，${user.username}`;
+                console.log('更新欢迎模块用户名:', user.username);
+            }
+            
+            // 更新欢迎模块的头像
+            const welcomeAvatarImage = document.getElementById('avatar-image');
+            const welcomeAvatarIcon = document.getElementById('avatar-icon');
+            
+            if (welcomeAvatarImage && welcomeAvatarIcon) {
+                // 优先从新的存储管理器获取头像
+                let cachedAvatar = null;
+                if (window.StorageManager && typeof window.StorageManager.getAvatar === 'function') {
+                    cachedAvatar = window.StorageManager.getAvatar();
+                } else {
+                    // 如果 StorageManager 未加载，直接使用新的键结构
+                    const userData = localStorage.getItem('userInfo');
+                    if (userData) {
+                        try {
+                            const userInfo = JSON.parse(userData);
+                            cachedAvatar = userInfo.avatarUrl;
+                        } catch (error) {
+                            console.warn('解析用户信息失败:', error);
+                        }
+                    }
+                }
+                
+                let avatarUrl = null;
+                
+                if (cachedAvatar && cachedAvatar !== 'null' && cachedAvatar !== 'undefined') {
+                    // 直接使用缓存的完整URL
+                    avatarUrl = cachedAvatar;
+                    console.log('欢迎模块使用缓存头像URL:', avatarUrl);
+                } else if (user.avatar && window.APP_UTILS && window.APP_UTILS.buildAvatarUrl) {
+                    // 如果没有缓存，使用原始文件名构建URL
+                    avatarUrl = window.APP_UTILS.buildAvatarUrl(user.avatar);
+                    console.log('欢迎模块构建头像URL:', avatarUrl);
+                } else if (user.avatar) {
+                    // 备用方案：直接构建URL
+                    avatarUrl = `/api/avatars/${user.avatar}`;
+                    console.log('欢迎模块使用备用头像URL:', avatarUrl);
+                }
+                
+                if (avatarUrl) {
+                    welcomeAvatarImage.src = avatarUrl;
+                    welcomeAvatarImage.classList.remove('hidden');
+                    welcomeAvatarIcon.classList.add('hidden');
+                    welcomeAvatarImage.style.display = 'block';
+                    welcomeAvatarImage.style.visibility = 'visible';
+                    welcomeAvatarImage.style.opacity = '1';
+                    welcomeAvatarIcon.style.display = 'none';
+                    console.log('更新欢迎模块头像成功:', avatarUrl);
+                } else {
+                    welcomeAvatarImage.classList.add('hidden');
+                    welcomeAvatarIcon.classList.remove('hidden');
+                    welcomeAvatarImage.style.display = 'none';
+                    welcomeAvatarIcon.style.display = 'block';
+                    welcomeAvatarImage.src = ''; // 清空src避免请求
+                    console.log('显示欢迎模块默认图标');
+                }
+            }
+            
+            // 确保当前日期显示
+            const currentDateElement = document.getElementById('current-date');
+            if (currentDateElement) {
+                const today = new Date();
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                currentDateElement.textContent = today.toLocaleDateString('zh-CN', options);
+                console.log('更新当前日期');
+            }
+            
+            // 如果是管理员，确保所有管理员相关元素都显示
+            if (user.username === 'Mose') {
+                console.log('检测到管理员用户，显示管理员功能');
+                // 强制显示管理员相关元素
+                if (this.uiManager && this.uiManager.adminManager) {
+                    this.uiManager.adminManager.forceShowAdminElements();
+                }
+            }
+            
+        } catch (error) {
+            console.warn('立即更新用户显示失败:', error);
         }
     }
 
@@ -648,50 +908,146 @@ class AppAuthManager {
             loginPage.classList.remove('hidden');
             loginPage.style.display = 'block';
         }
+        
         if (app) {
             app.classList.add('hidden');
             app.style.display = 'none';
         }
+        
+        // 隐藏所有管理员相关元素
+        if (this.uiManager && this.uiManager.adminManager) {
+            this.uiManager.adminManager.hideAdminFloatingButtons();
+        }
     }
 
     /**
-     * 更新用户显示（从缓存）
+     * 从缓存更新用户显示
      */
-    updateUserDisplayFromCache(user) {
-        const userName = document.getElementById('user-name');
-        const userAvatar = document.getElementById('user-avatar');
-        
-        if (userName) {
-            userName.textContent = user.username;
-            // 确保金色渐变样式保持
-            userName.className = 'text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500';
-        }
-        
-        if (userAvatar) {
-            // 只使用本地缓存，不重新构建URL
-            let cachedAvatar = null;
-            if (window.StorageManager && typeof window.StorageManager.getAvatar === 'function') {
-                cachedAvatar = window.StorageManager.getAvatar();
-            } else {
-                // 如果 StorageManager 未加载，直接使用新的键结构
-                const userData = localStorage.getItem('userInfo');
-                if (userData) {
-                    try {
-                        const userInfo = JSON.parse(userData);
-                        cachedAvatar = userInfo.avatarUrl;
-                    } catch (error) {
-                        console.warn('解析用户信息失败:', error);
+    updateUserDisplayFromCache(userData) {
+        try {
+            if (!userData) {
+                return;
+            }
+            
+            // 更新顶栏用户名
+            const userName = document.getElementById('user-name');
+            if (userName) {
+                userName.textContent = userData.username;
+                // 确保金色渐变样式保持
+                userName.className = 'text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500';
+            }
+            
+            // 更新顶栏头像
+            const userAvatar = document.getElementById('user-avatar');
+            if (userAvatar) {
+                // 优先从新的存储管理器获取头像
+                let cachedAvatar = null;
+                if (window.StorageManager && typeof window.StorageManager.getAvatar === 'function') {
+                    cachedAvatar = window.StorageManager.getAvatar();
+                } else {
+                    // 如果 StorageManager 未加载，直接使用新的键结构
+                    const userInfo = localStorage.getItem('userInfo');
+                    if (userInfo) {
+                        try {
+                            const parsedUserInfo = JSON.parse(userInfo);
+                            cachedAvatar = parsedUserInfo.avatarUrl;
+                        } catch (error) {
+                            console.warn('解析用户信息失败:', error);
+                        }
                     }
+                }
+                
+                let avatarUrl = null;
+                
+                if (cachedAvatar && cachedAvatar !== 'null' && cachedAvatar !== 'undefined') {
+                    // 直接使用缓存的完整URL
+                    avatarUrl = cachedAvatar;
+                } else if (userData.avatar && window.APP_UTILS && window.APP_UTILS.buildAvatarUrl) {
+                    // 如果没有缓存，使用原始文件名构建URL
+                    avatarUrl = window.APP_UTILS.buildAvatarUrl(userData.avatar);
+                }
+                
+                if (avatarUrl) {
+                    userAvatar.src = avatarUrl;
+                    userAvatar.style.display = 'block';
+                } else {
+                    userAvatar.style.display = 'none';
                 }
             }
             
-            if (cachedAvatar && cachedAvatar !== 'null' && cachedAvatar !== 'undefined') {
-                // 直接使用缓存的完整URL
-                userAvatar.src = cachedAvatar;
-            } else {
-                // 没有缓存时显示默认图标，不设置src避免请求
-                userAvatar.style.display = 'none';
+            // 更新欢迎模块的用户名
+            const welcomeMessage = document.getElementById('welcome-message');
+            if (welcomeMessage) {
+                welcomeMessage.textContent = `欢迎回来，${userData.username}`;
             }
+            
+            // 更新欢迎模块的头像
+            const welcomeAvatarImage = document.getElementById('avatar-image');
+            const welcomeAvatarIcon = document.getElementById('avatar-icon');
+            
+            if (welcomeAvatarImage && welcomeAvatarIcon) {
+                // 优先从新的存储管理器获取头像
+                let cachedAvatar = null;
+                if (window.StorageManager && typeof window.StorageManager.getAvatar === 'function') {
+                    cachedAvatar = window.StorageManager.getAvatar();
+                } else {
+                    // 如果 StorageManager 未加载，直接使用新的键结构
+                    const userInfo = localStorage.getItem('userInfo');
+                    if (userInfo) {
+                        try {
+                            const parsedUserInfo = JSON.parse(userInfo);
+                            cachedAvatar = parsedUserInfo.avatarUrl;
+                        } catch (error) {
+                            console.warn('解析用户信息失败:', error);
+                        }
+                    }
+                }
+                
+                let avatarUrl = null;
+                
+                if (cachedAvatar && cachedAvatar !== 'null' && cachedAvatar !== 'undefined') {
+                    // 直接使用缓存的完整URL
+                    avatarUrl = cachedAvatar;
+                } else if (userData.avatar && window.APP_UTILS && window.APP_UTILS.buildAvatarUrl) {
+                    // 如果没有缓存，使用原始文件名构建URL
+                    avatarUrl = window.APP_UTILS.buildAvatarUrl(userData.avatar);
+                }
+                
+                if (avatarUrl) {
+                    welcomeAvatarImage.src = avatarUrl;
+                    welcomeAvatarImage.classList.remove('hidden');
+                    welcomeAvatarIcon.classList.add('hidden');
+                    welcomeAvatarImage.style.display = 'block';
+                    welcomeAvatarImage.style.visibility = 'visible';
+                    welcomeAvatarImage.style.opacity = '1';
+                    welcomeAvatarIcon.style.display = 'none';
+                } else {
+                    welcomeAvatarImage.classList.add('hidden');
+                    welcomeAvatarIcon.classList.remove('hidden');
+                    welcomeAvatarImage.style.display = 'none';
+                    welcomeAvatarIcon.style.display = 'block';
+                    welcomeAvatarImage.src = ''; // 清空src避免请求
+                }
+            }
+            
+            // 确保当前日期显示
+            const currentDateElement = document.getElementById('current-date');
+            if (currentDateElement) {
+                const today = new Date();
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                currentDateElement.textContent = today.toLocaleDateString('zh-CN', options);
+            }
+            
+            // 如果是管理员，确保所有管理员相关元素都显示
+            if (userData.username === 'Mose') {
+                // 强制显示管理员相关元素
+                if (this.uiManager && this.uiManager.adminManager) {
+                    this.uiManager.adminManager.forceShowAdminElements();
+                }
+            }
+            
+        } catch (error) {
+            console.warn('从缓存更新用户显示失败:', error);
         }
     }
 
@@ -738,8 +1094,81 @@ class AppAuthManager {
             
             if (avatarUrl) {
                 userAvatar.src = avatarUrl;
+                userAvatar.style.display = 'block';
+            } else {
+                userAvatar.style.display = 'none';
             }
-            // 如果avatarUrl为null，不设置src，避免404错误
+        }
+        
+        // 更新欢迎模块的用户名
+        const welcomeMessage = document.getElementById('welcome-message');
+        if (welcomeMessage) {
+            welcomeMessage.textContent = `欢迎回来，${user.username}`;
+        }
+        
+        // 更新欢迎模块的头像
+        const welcomeAvatarImage = document.getElementById('avatar-image');
+        const welcomeAvatarIcon = document.getElementById('avatar-icon');
+        
+        if (welcomeAvatarImage && welcomeAvatarIcon) {
+            // 优先从新的存储管理器获取头像
+            let cachedAvatar = null;
+            if (window.StorageManager && typeof window.StorageManager.getAvatar === 'function') {
+                cachedAvatar = window.StorageManager.getAvatar();
+            } else {
+                // 如果 StorageManager 未加载，直接使用新的键结构
+                const userData = localStorage.getItem('userInfo');
+                if (userData) {
+                    try {
+                        const userInfo = JSON.parse(userData);
+                        cachedAvatar = userInfo.avatarUrl;
+                    } catch (error) {
+                        console.warn('解析用户信息失败:', error);
+                    }
+                }
+            }
+            
+            let avatarUrl = null;
+            
+            if (cachedAvatar && cachedAvatar !== 'null' && cachedAvatar !== 'undefined') {
+                // 直接使用缓存的完整URL
+                avatarUrl = cachedAvatar;
+            } else if (user.avatar && window.APP_UTILS && window.APP_UTILS.buildAvatarUrl) {
+                // 如果没有缓存，使用原始文件名构建URL
+                avatarUrl = window.APP_UTILS.buildAvatarUrl(user.avatar);
+            }
+            
+            if (avatarUrl) {
+                welcomeAvatarImage.src = avatarUrl;
+                welcomeAvatarImage.classList.remove('hidden');
+                welcomeAvatarIcon.classList.add('hidden');
+                welcomeAvatarImage.style.display = 'block';
+                welcomeAvatarImage.style.visibility = 'visible';
+                welcomeAvatarImage.style.opacity = '1';
+                welcomeAvatarIcon.style.display = 'none';
+            } else {
+                welcomeAvatarImage.classList.add('hidden');
+                welcomeAvatarIcon.classList.remove('hidden');
+                welcomeAvatarImage.style.display = 'none';
+                welcomeAvatarIcon.style.display = 'block';
+                welcomeAvatarImage.src = ''; // 清空src避免请求
+            }
+        }
+        
+        // 确保当前日期显示
+        const currentDateElement = document.getElementById('current-date');
+        if (currentDateElement) {
+            const today = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            currentDateElement.textContent = today.toLocaleDateString('zh-CN', options);
+        }
+        
+        // 如果是管理员，确保所有管理员相关元素都显示
+        if (user.username === 'Mose') {
+            // 强制显示管理员相关元素
+            if (this.uiManager && this.uiManager.adminManager) {
+                this.uiManager.adminManager.forceShowAdminElements();
+            }
         }
     }
 
@@ -749,13 +1178,17 @@ class AppAuthManager {
     updateStorageAfterComponentsLoad(storageInfo) {
         // 如果组件已加载，直接更新
         if (document.getElementById('welcome-storage-status')) {
-            this.uiManager.updateStorageDisplay(storageInfo);
+            if (this.uiManager) {
+                this.uiManager.updateStorageDisplay(storageInfo);
+            }
             return;
         }
         
         // 否则等待组件加载完成
         const handleComponentsLoaded = () => {
-            this.uiManager.updateStorageDisplay(storageInfo);
+            if (this.uiManager) {
+                this.uiManager.updateStorageDisplay(storageInfo);
+            }
             document.removeEventListener('componentsLoaded', handleComponentsLoaded);
         };
         
@@ -763,28 +1196,23 @@ class AppAuthManager {
         
         // 设置超时，避免无限等待
         setTimeout(() => {
-            document.removeEventListener('componentsLoaded', handleComponentsLoaded);
-            console.warn('⚠️ 组件加载超时，尝试直接更新存储状态');
-            this.uiManager.updateStorageDisplay(storageInfo);
-        }, 5000);
-        
-        // 立即尝试更新，以防组件已经加载
-        setTimeout(() => {
-            if (document.getElementById('welcome-storage-status')) {
+            if (this.uiManager) {
                 this.uiManager.updateStorageDisplay(storageInfo);
             }
-        }, 100);
+            document.removeEventListener('componentsLoaded', handleComponentsLoaded);
+        }, 5000);
     }
 
     /**
-     * 加载用户数据（只从接口拉取，全部同步到UIManager缓存）
+     * 加载用户数据
      */
     async loadUserData(userData) {
         try {
             if (!this.uiManager || !this.apiManager) {
+                console.warn('UI管理器或API管理器未初始化');
                 return;
             }
-            
+
             // 拉取所有数据，使用Promise.allSettled避免单个API失败影响整体
             const results = await Promise.allSettled([
                 this.apiManager.getFiles(),
@@ -844,21 +1272,16 @@ class AppAuthManager {
             
             // 渲染文件夹 - 确保folders是数组
             if (folders && Array.isArray(folders)) {
-                this.uiManager.folders = folders; // 保存到uiManager中
-            } else {
-                this.uiManager.folders = [];
+                await this.uiManager.renderFolderList(folders);
             }
             
-            // 等待组件加载完成后再更新存储空间显示
+            // 等待组件加载完成后再更新用户资料显示
             const waitForComponents = () => {
                 return new Promise((resolve) => {
                     const checkComponents = () => {
-                        const storageContainer = document.getElementById('storage-overview-container');
-                        const welcomeContainer = document.getElementById('welcome-section-container');
-                        const fileTypeContainer = document.getElementById('file-type-filters-container');
-                        if (storageContainer && storageContainer.children.length > 0 && 
-                            welcomeContainer && welcomeContainer.children.length > 0 &&
-                            fileTypeContainer && fileTypeContainer.children.length > 0) {
+                        const welcomeSection = document.getElementById('welcome-section-card');
+                        const storageOverview = document.getElementById('storage-overview-card');
+                        if (welcomeSection && storageOverview) {
                             resolve();
                         } else {
                             setTimeout(checkComponents, 100);
@@ -873,28 +1296,7 @@ class AppAuthManager {
             
             // 更新头像和用户名（在组件加载完成后）
             if (profile) {
-                // 确保缓存头像URL到用户信息中
-                if (profile.avatar) {
-                    const avatarUrl = window.apiGateway?.buildUrl('/uploads/avatars/' + profile.avatar);
-                    if (avatarUrl) {
-                        // 更新用户信息中的头像URL
-                        if (window.StorageManager && typeof window.StorageManager.setAvatar === 'function') {
-                            window.StorageManager.setAvatar(avatarUrl);
-                        } else {
-                            // 如果 StorageManager 未加载，直接更新 userInfo
-                            const userData = localStorage.getItem('userInfo');
-                            if (userData) {
-                                try {
-                                    const userInfo = JSON.parse(userData);
-                                    userInfo.avatarUrl = avatarUrl;
-                                    localStorage.setItem('userInfo', JSON.stringify(userInfo));
-                                } catch (error) {
-                                    console.warn('更新头像URL失败:', error);
-                                }
-                            }
-                        }
-                    }
-                }
+                this.updateUserDisplay(profile);
                 this.uiManager.updateProfileDisplay(profile);
             } else {
                 // 如果API调用失败，尝试从localStorage获取用户信息
@@ -902,17 +1304,8 @@ class AppAuthManager {
                 if (userData) {
                     try {
                         const localUserData = JSON.parse(userData);
-                        
-                        // 从用户信息中获取头像URL
-                        if (localUserData.avatarUrl) {
-                            // 从完整URL中提取文件名
-                            const avatarFileName = localUserData.avatarUrl.split('/').pop();
-                            if (avatarFileName && avatarFileName !== 'null' && avatarFileName !== 'undefined') {
-                                localUserData.avatar = avatarFileName;
-                            }
-                        }
-                        
-                        this.uiManager.updateProfileDisplayFromCache(localUserData);
+                        this.updateUserDisplay(localUserData);
+                        this.uiManager.updateProfileDisplay(localUserData);
                     } catch (error) {
                         console.warn('从localStorage获取用户数据失败:', error);
                     }
@@ -928,6 +1321,11 @@ class AppAuthManager {
             // 在组件加载完成后渲染文件夹列表
             if (this.uiManager && this.uiManager.folders) {
                 await this.uiManager.renderFolderList(this.uiManager.folders);
+            }
+            
+            // 如果是管理员，确保所有数据都已正确加载
+            if (userData && userData.username === 'Mose' && this.uiManager && this.uiManager.adminManager) {
+                await this.uiManager.adminManager.ensureAdminDataLoaded();
             }
             
         } catch (error) {
@@ -1088,6 +1486,88 @@ class AppAuthManager {
         } catch (error) {
             console.error('❌ 加载用户数据失败:', error);
         }
+    }
+
+    /**
+     * 从存储中获取用户信息
+     */
+    getUserFromStorage() {
+        let userData = null;
+        
+        // 优先从StorageManager获取
+        if (window.StorageManager && typeof window.StorageManager.getUser === 'function') {
+            userData = window.StorageManager.getUser();
+        } else {
+            // 如果 StorageManager 未加载，直接使用新的键结构
+            const userDataStr = localStorage.getItem('userInfo');
+            if (userDataStr) {
+                try {
+                    userData = JSON.parse(userDataStr);
+                } catch (error) {
+                    console.warn('解析用户信息失败:', error);
+                }
+            }
+        }
+        
+        return userData;
+    }
+
+    /**
+     * 获取缓存的文件列表
+     */
+    getCachedFiles() {
+        try {
+            if (window.StorageManager && typeof window.StorageManager.getFiles === 'function') {
+                return window.StorageManager.getFiles();
+            } else {
+                const filesData = localStorage.getItem('cachedFiles');
+                if (filesData) {
+                    return JSON.parse(filesData);
+                }
+            }
+        } catch (error) {
+            console.warn('获取缓存文件列表失败:', error);
+        }
+        return [];
+    }
+
+    /**
+     * 获取缓存的文件夹列表
+     */
+    getCachedFolders() {
+        try {
+            if (window.StorageManager && typeof window.StorageManager.getFolders === 'function') {
+                return window.StorageManager.getFolders();
+            } else {
+                const foldersData = localStorage.getItem('cachedFolders');
+                if (foldersData) {
+                    return JSON.parse(foldersData);
+                }
+            }
+        } catch (error) {
+            console.warn('获取缓存文件夹列表失败:', error);
+        }
+        return [];
+    }
+
+    /**
+     * 获取缓存的存储信息
+     */
+    getCachedStorageInfo() {
+        try {
+            if (window.StorageManager && typeof window.StorageManager.getStorageInfo === 'function') {
+                return window.StorageManager.getStorageInfo();
+            } else {
+                const systemData = localStorage.getItem('systemInfo');
+                if (systemData) {
+                    const systemInfo = JSON.parse(systemData);
+                    return systemInfo.storageInfo || null;
+                }
+            }
+        } catch (error) {
+            console.warn('获取缓存存储信息失败:', error);
+        }
+        return null;
     }
 }
 

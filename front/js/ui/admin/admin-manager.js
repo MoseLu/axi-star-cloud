@@ -23,6 +23,286 @@ class UIAdminManager {
         this.setupAdminMenu();
         this.bindAdminEvents();
         this.loadSystemStats();
+        
+        // 如果是管理员，确保加载所有必要的数据
+        if (this.isAdmin) {
+            await this.ensureAdminDataLoaded();
+        }
+        
+        // 延迟检查，确保登录后能够正确显示
+        setTimeout(() => {
+            this.delayedInitCheck();
+        }, 2000);
+    }
+
+    /**
+     * 延迟初始化检查
+     */
+    async delayedInitCheck() {
+        console.log('执行延迟初始化检查');
+        
+        const currentUser = this.getCurrentUser();
+        if (currentUser && currentUser.username === 'Mose') {
+            console.log('延迟检查发现管理员用户，强制更新显示');
+            this.isAdmin = true;
+            
+            // 强制更新头像显示
+            this.forceUpdateAvatarDisplay(currentUser);
+            
+            // 强制显示管理员元素
+            this.forceShowAdminElements();
+            
+            // 确保管理员数据已加载
+            await this.ensureAdminDataLoaded();
+        }
+    }
+
+    /**
+     * 确保管理员数据已加载
+     */
+    async ensureAdminDataLoaded() {
+        try {
+            // 确保文件列表已加载
+            if (window.uiManager && window.uiManager.allFiles) {
+                // 重新渲染文件列表
+                window.uiManager.renderFileList(window.uiManager.allFiles);
+                
+                // 更新文件统计
+                const totalFiles = window.uiManager.allFiles.length;
+                window.uiManager.updateFileCount(totalFiles, totalFiles);
+                
+                // 更新欢迎模块的文件统计
+                const fileCountElement = document.getElementById('file-count');
+                if (fileCountElement) {
+                    fileCountElement.textContent = totalFiles;
+                }
+            }
+            
+            // 确保用户信息已正确显示
+            const currentUser = this.getCurrentUser();
+            if (currentUser) {
+                // 更新欢迎模块的用户名
+                const welcomeMessage = document.getElementById('welcome-message');
+                if (welcomeMessage) {
+                    welcomeMessage.textContent = `欢迎回来，${currentUser.username}`;
+                }
+                
+                // 强制更新头像显示
+                this.forceUpdateAvatarDisplay(currentUser);
+                
+                // 更新头像显示
+                if (window.uiManager && window.uiManager.profileManager) {
+                    window.uiManager.profileManager.updateProfileDisplay(currentUser);
+                }
+            }
+            
+            // 确保存储信息已显示
+            if (window.uiManager && window.uiManager.storageInfo) {
+                window.uiManager.updateStorageDisplay(window.uiManager.storageInfo);
+            }
+            
+            // 强制显示管理员相关元素
+            this.forceShowAdminElements();
+            
+        } catch (error) {
+            console.error('确保管理员数据加载失败:', error);
+        }
+    }
+
+    /**
+     * 强制更新头像显示
+     */
+    forceUpdateAvatarDisplay(userData) {
+        if (!userData) return;
+        
+        console.log('强制更新头像显示:', userData);
+        
+        // 构建头像URL
+        let avatarUrl = null;
+        
+        // 1. 优先从缓存获取
+        if (window.StorageManager && typeof window.StorageManager.getAvatar === 'function') {
+            const cachedAvatar = window.StorageManager.getAvatar();
+            if (cachedAvatar && cachedAvatar !== 'null' && cachedAvatar !== 'undefined') {
+                avatarUrl = cachedAvatar;
+                console.log('从StorageManager获取头像:', avatarUrl);
+            }
+        }
+        
+        // 2. 如果没有缓存，从用户数据构建URL
+        if (!avatarUrl && userData.avatar) {
+            if (window.APP_UTILS && window.APP_UTILS.buildAvatarUrl) {
+                avatarUrl = window.APP_UTILS.buildAvatarUrl(userData.avatar);
+                console.log('构建头像URL:', avatarUrl);
+            } else {
+                // 备用方案：直接构建URL
+                avatarUrl = `/api/avatars/${userData.avatar}`;
+                console.log('使用备用头像URL:', avatarUrl);
+            }
+        }
+        
+        // 更新所有头像元素
+        this.updateAllAvatarElements(avatarUrl);
+    }
+
+    /**
+     * 更新所有头像元素
+     */
+    updateAllAvatarElements(avatarUrl) {
+        // 更新顶栏头像
+        const userAvatar = document.getElementById('user-avatar');
+        if (userAvatar) {
+            if (avatarUrl) {
+                userAvatar.src = avatarUrl;
+                userAvatar.style.display = 'block';
+                userAvatar.style.visibility = 'visible';
+                userAvatar.style.opacity = '1';
+                console.log('更新顶栏头像:', avatarUrl);
+            } else {
+                userAvatar.style.display = 'none';
+                console.log('隐藏顶栏头像');
+            }
+        }
+        
+        // 更新欢迎模块头像
+        const welcomeAvatarImage = document.getElementById('avatar-image');
+        const welcomeAvatarIcon = document.getElementById('avatar-icon');
+        
+        if (welcomeAvatarImage && welcomeAvatarIcon) {
+            if (avatarUrl) {
+                welcomeAvatarImage.src = avatarUrl;
+                welcomeAvatarImage.classList.remove('hidden');
+                welcomeAvatarIcon.classList.add('hidden');
+                welcomeAvatarImage.style.display = 'block';
+                welcomeAvatarImage.style.visibility = 'visible';
+                welcomeAvatarImage.style.opacity = '1';
+                welcomeAvatarIcon.style.display = 'none';
+                console.log('更新欢迎模块头像:', avatarUrl);
+            } else {
+                welcomeAvatarImage.classList.add('hidden');
+                welcomeAvatarIcon.classList.remove('hidden');
+                welcomeAvatarImage.style.display = 'none';
+                welcomeAvatarIcon.style.display = 'block';
+                welcomeAvatarImage.src = '';
+                console.log('显示欢迎模块默认图标');
+            }
+        }
+        
+        // 更新其他可能的头像元素
+        const allAvatarElements = document.querySelectorAll('.user-avatar, .avatar-img, #profile-avatar img');
+        allAvatarElements.forEach((avatar, index) => {
+            if (avatar.tagName === 'IMG') {
+                if (avatarUrl) {
+                    avatar.src = avatarUrl;
+                    avatar.style.display = 'block';
+                    avatar.style.visibility = 'visible';
+                    avatar.style.opacity = '1';
+                    console.log(`更新头像元素 ${index}:`, avatarUrl);
+                } else {
+                    avatar.style.display = 'none';
+                    avatar.src = '';
+                    console.log(`隐藏头像元素 ${index}`);
+                }
+            }
+        });
+    }
+
+    /**
+     * 强制显示管理员相关元素
+     */
+    forceShowAdminElements() {
+        console.log('强制显示管理员相关元素');
+        
+        // 显示同步文档按钮
+        const syncDocsBtn = document.getElementById('sync-docs-btn');
+        if (syncDocsBtn) {
+            syncDocsBtn.style.display = 'flex !important';
+            syncDocsBtn.style.visibility = 'visible';
+            syncDocsBtn.classList.remove('hidden');
+            syncDocsBtn.removeAttribute('hidden');
+            console.log('显示同步文档按钮');
+        } else {
+            console.warn('同步文档按钮元素未找到');
+        }
+        
+        // 显示管理存储空间按钮
+        const storageSettingsBtn = document.getElementById('storage-settings-btn');
+        if (storageSettingsBtn) {
+            storageSettingsBtn.style.display = 'block !important';
+            storageSettingsBtn.style.visibility = 'visible';
+            storageSettingsBtn.classList.remove('hidden');
+            storageSettingsBtn.removeAttribute('hidden');
+            console.log('显示管理存储空间按钮');
+        } else {
+            console.warn('管理存储空间按钮元素未找到');
+        }
+        
+        // 显示设置按钮
+        const settingsBtn = document.getElementById('settings-btn');
+        if (settingsBtn) {
+            settingsBtn.style.display = 'block !important';
+            settingsBtn.style.visibility = 'visible';
+            settingsBtn.classList.remove('hidden');
+            settingsBtn.removeAttribute('hidden');
+            console.log('显示设置按钮');
+        } else {
+            console.warn('设置按钮元素未找到');
+        }
+        
+        // 显示管理员菜单
+        const adminMenu = document.getElementById('admin-menu');
+        if (adminMenu) {
+            adminMenu.style.display = 'block !important';
+            adminMenu.style.visibility = 'visible';
+            adminMenu.classList.remove('hidden');
+            adminMenu.removeAttribute('hidden');
+            console.log('显示管理员菜单');
+        } else {
+            console.warn('管理员菜单元素未找到');
+        }
+        
+        // 显示环境切换器（如果存在）
+        if (window.envSwitcher && typeof window.envSwitcher.show === 'function') {
+            try {
+                window.envSwitcher.show();
+                console.log('显示环境切换器');
+            } catch (error) {
+                console.warn('显示环境切换器失败:', error);
+            }
+        }
+        
+        // 延迟重试，确保元素已加载
+        setTimeout(() => {
+            this.retryShowAdminElements();
+        }, 500);
+    }
+
+    /**
+     * 重试显示管理员元素
+     */
+    retryShowAdminElements() {
+        console.log('重试显示管理员元素');
+        
+        // 再次尝试显示所有管理员元素
+        const elements = [
+            { id: 'sync-docs-btn', type: '同步文档按钮' },
+            { id: 'storage-settings-btn', type: '管理存储空间按钮' },
+            { id: 'settings-btn', type: '设置按钮' },
+            { id: 'admin-menu', type: '管理员菜单' }
+        ];
+        
+        elements.forEach(({ id, type }) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.style.display = element.id === 'sync-docs-btn' ? 'flex !important' : 'block !important';
+                element.style.visibility = 'visible';
+                element.classList.remove('hidden');
+                element.removeAttribute('hidden');
+                console.log(`重试显示${type}成功`);
+            } else {
+                console.warn(`重试显示${type}失败：元素未找到`);
+            }
+        });
     }
 
     /**
@@ -54,6 +334,8 @@ class UIAdminManager {
             // 如果是管理员，显示悬浮按钮
             if (this.isAdmin) {
                 this.showAdminFloatingButtons();
+                // 确保管理员数据已加载
+                await this.ensureAdminDataLoaded();
             } else {
                 this.hideAdminFloatingButtons();
             }
@@ -76,6 +358,37 @@ class UIAdminManager {
     }
 
     /**
+     * 强制刷新后恢复管理员权限
+     */
+    async restoreAdminPermissionsAfterForceRefresh() {
+        try {
+            const currentUser = this.getCurrentUser();
+            if (currentUser && currentUser.username === 'Mose') {
+                console.log('强制刷新后恢复管理员权限: Mose');
+                this.isAdmin = true;
+                
+                // 立即更新头像下拉菜单
+                this.updateAvatarAdminMenu();
+                
+                // 显示管理员悬浮按钮
+                this.showAdminFloatingButtons();
+                
+                // 强制显示所有管理员相关元素
+                this.forceShowAdminElements();
+                
+                // 确保管理员数据已加载
+                await this.ensureAdminDataLoaded();
+                
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('强制刷新后恢复管理员权限失败:', error);
+            return false;
+        }
+    }
+
+    /**
      * 延迟检查管理员权限（用于登录后确保用户信息已保存）
      */
     async delayedCheckAdminPermissions() {
@@ -83,7 +396,14 @@ class UIAdminManager {
         await new Promise(resolve => setTimeout(resolve, 500));
         
         // 重新检查管理员权限
-        return await this.checkAdminPermissions();
+        const result = await this.checkAdminPermissions();
+        
+        // 如果是管理员，确保数据已加载
+        if (result) {
+            await this.ensureAdminDataLoaded();
+        }
+        
+        return result;
     }
 
     /**
@@ -1054,4 +1374,81 @@ window.refreshLogs = function() {
     if (window.uiManager && window.uiManager.adminManager) {
         window.uiManager.adminManager.refreshLogs();
     }
+};
+
+// 调试函数
+window.debugAdminStatus = function() {
+    console.log('=== 管理员状态调试 ===');
+    
+    // 检查用户信息
+    const userInfo = localStorage.getItem('userInfo');
+    console.log('用户信息:', userInfo ? JSON.parse(userInfo) : 'null');
+    
+    // 检查头像缓存
+    const cachedAvatar = localStorage.getItem('cachedAvatar');
+    console.log('头像缓存:', cachedAvatar);
+    
+    // 检查管理员状态
+    if (window.uiManager && window.uiManager.adminManager) {
+        console.log('管理员状态:', window.uiManager.adminManager.isAdmin);
+    }
+    
+    // 检查DOM元素
+    const elements = [
+        'user-avatar',
+        'avatar-image', 
+        'avatar-icon',
+        'sync-docs-btn',
+        'settings-btn',
+        'admin-menu',
+        'welcome-message'
+    ];
+    
+    elements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            console.log(`${id}:`, {
+                display: element.style.display,
+                visibility: element.style.visibility,
+                hidden: element.classList.contains('hidden'),
+                src: element.src || 'N/A'
+            });
+        } else {
+            console.log(`${id}: 元素未找到`);
+        }
+    });
+    
+    console.log('=== 调试结束 ===');
+};
+
+// 测试头像显示函数
+window.testAvatarDisplay = function() {
+    console.log('=== 测试头像显示 ===');
+    
+    const userInfo = localStorage.getItem('userInfo');
+    if (userInfo) {
+        const user = JSON.parse(userInfo);
+        console.log('测试用户:', user);
+        
+        if (window.uiManager && window.uiManager.adminManager) {
+            window.uiManager.adminManager.forceUpdateAvatarDisplay(user);
+        }
+    } else {
+        console.log('没有找到用户信息');
+    }
+    
+    console.log('=== 测试结束 ===');
+};
+
+// 测试管理员功能显示函数
+window.testAdminDisplay = function() {
+    console.log('=== 测试管理员功能显示 ===');
+    
+    if (window.uiManager && window.uiManager.adminManager) {
+        window.uiManager.adminManager.forceShowAdminElements();
+    } else {
+        console.log('管理员管理器未找到');
+    }
+    
+    console.log('=== 测试结束 ===');
 }; 

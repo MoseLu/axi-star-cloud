@@ -98,7 +98,71 @@ class TokenManager {
         const expiresAt = new Date(tokenInfo.expiresAt);
         const now = new Date();
         // 提前5分钟刷新
-        return now.getTime() > (expiresAt.getTime() - 5 * 60 * 1000);
+        return now.getTime() >= (expiresAt.getTime() - 5 * 60 * 1000);
+    }
+
+    // 调试方法：检查cookie状态
+    debugCookies() {
+        console.log('=== Cookie调试信息 ===');
+        
+        // 检查所有cookie
+        const allCookies = document.cookie;
+        console.log('所有cookie:', allCookies);
+        
+        // 检查特定token cookie
+        const cookies = document.cookie.split(';');
+        const accessToken = cookies.find(cookie => cookie.trim().startsWith('access_token='));
+        const refreshToken = cookies.find(cookie => cookie.trim().startsWith('refresh_token='));
+        const adminAccessToken = cookies.find(cookie => cookie.trim().startsWith('admin_access_token='));
+        const adminRefreshToken = cookies.find(cookie => cookie.trim().startsWith('admin_refresh_token='));
+        
+        console.log('access_token存在:', !!accessToken);
+        console.log('refresh_token存在:', !!refreshToken);
+        console.log('admin_access_token存在:', !!adminAccessToken);
+        console.log('admin_refresh_token存在:', !!adminRefreshToken);
+        
+        if (accessToken) {
+            console.log('access_token值:', accessToken.split('=')[1]);
+        }
+        if (refreshToken) {
+            console.log('refresh_token值:', refreshToken.split('=')[1]);
+        }
+        if (adminAccessToken) {
+            console.log('admin_access_token值:', adminAccessToken.split('=')[1]);
+        }
+        if (adminRefreshToken) {
+            console.log('admin_refresh_token值:', adminRefreshToken.split('=')[1]);
+        }
+        
+        // 检查环境
+        const isLocalhost = window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1' ||
+                           window.location.hostname.includes('localhost');
+        console.log('是否为本地环境:', isLocalhost);
+        console.log('当前域名:', window.location.hostname);
+        console.log('当前协议:', window.location.protocol);
+        
+        // 检查localStorage
+        const userInfo = localStorage.getItem('userInfo');
+        console.log('localStorage中的用户信息:', userInfo);
+        
+        // 检查token获取方法
+        const tokens = this.getTokens();
+        const adminTokens = this.getAdminTokens();
+        console.log('getTokens()结果:', tokens);
+        console.log('getAdminTokens()结果:', adminTokens);
+        
+        console.log('=== Cookie调试结束 ===');
+        
+        return {
+            hasAccessToken: !!accessToken,
+            hasRefreshToken: !!refreshToken,
+            hasAdminAccessToken: !!adminAccessToken,
+            hasAdminRefreshToken: !!adminRefreshToken,
+            isLocalhost: isLocalhost,
+            tokens: tokens,
+            adminTokens: adminTokens
+        };
     }
 
     // 检查管理员token是否过期

@@ -270,7 +270,7 @@ class UIManager {
         // 更新欢迎区域的统计
         const countElement = document.getElementById('file-count');
         if (countElement) {
-            // 只显示当前文件数量，不显示总数，让界面更简洁
+            // 显示当前文件数量
             countElement.textContent = current;
         }
         
@@ -278,9 +278,9 @@ class UIManager {
         const countDisplayElement = document.getElementById('file-count-display');
         const countDescElement = document.getElementById('file-count-desc');
         if (countDisplayElement) {
-            // 在文件列表区域只显示当前文件数量
-                countDisplayElement.textContent = current;
-            }
+            // 在文件列表区域显示当前文件数量
+            countDisplayElement.textContent = current;
+        }
         
         // 根据当前分类更新计数描述文本
         if (countDescElement) {
@@ -307,6 +307,21 @@ class UIManager {
                     span.textContent = unitText.replace('个', '');
                 }
             });
+        }
+        
+        // 如果是管理员，确保文件统计正确显示
+        if (this.adminManager && this.adminManager.isAdmin) {
+            // 强制更新欢迎模块的文件统计
+            const welcomeFileCount = document.getElementById('file-count');
+            if (welcomeFileCount) {
+                welcomeFileCount.textContent = current;
+            }
+            
+            // 强制更新文件列表区域的统计
+            const fileListCount = document.getElementById('file-count-display');
+            if (fileListCount) {
+                fileListCount.textContent = current;
+            }
         }
     }
     
@@ -1363,6 +1378,27 @@ class UIManager {
         if (welcomeMessage && profile && profile.username) {
             welcomeMessage.textContent = `欢迎回来，${profile.username}`;
         }
+        
+        // 如果是管理员，确保所有用户信息元素都正确显示
+        if (profile && profile.username === 'Mose' && this.adminManager && this.adminManager.isAdmin) {
+            // 强制更新欢迎模块的用户名
+            if (welcomeMessage) {
+                welcomeMessage.textContent = `欢迎回来，${profile.username}`;
+            }
+            
+            // 强制更新头像显示
+            if (this.profileManager) {
+                this.profileManager.updateProfileDisplay(profile);
+            }
+            
+            // 确保当前日期显示
+            const currentDateElement = document.getElementById('current-date');
+            if (currentDateElement) {
+                const today = new Date();
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                currentDateElement.textContent = today.toLocaleDateString('zh-CN', options);
+            }
+        }
     }
 
     // 从缓存更新用户信息（用于页面刷新时）
@@ -1376,6 +1412,27 @@ class UIManager {
         const welcomeMessage = document.getElementById('welcome-message');
         if (welcomeMessage && userData && userData.username) {
             welcomeMessage.textContent = `欢迎回来，${userData.username}`;
+        }
+        
+        // 如果是管理员，确保所有用户信息元素都正确显示
+        if (userData && userData.username === 'Mose' && this.adminManager && this.adminManager.isAdmin) {
+            // 强制更新欢迎模块的用户名
+            if (welcomeMessage) {
+                welcomeMessage.textContent = `欢迎回来，${userData.username}`;
+            }
+            
+            // 强制更新头像显示
+            if (this.profileManager) {
+                this.profileManager.updateProfileDisplayFromCache(userData);
+            }
+            
+            // 确保当前日期显示
+            const currentDateElement = document.getElementById('current-date');
+            if (currentDateElement) {
+                const today = new Date();
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                currentDateElement.textContent = today.toLocaleDateString('zh-CN', options);
+            }
         }
     }
 
@@ -1408,47 +1465,64 @@ class UIManager {
     }
     
     // 管理员功能相关
-    async checkAndShowAdminMenu() { 
-        const result = await this.adminManager.checkAdminPermissions();
-        
-        // 同时控制设置按钮的显示
-        this.checkAndShowSettingsButton();
-        
-        return result;
+    /**
+     * 检查并显示管理员菜单
+     */
+    async checkAndShowAdminMenu() {
+        try {
+            if (this.adminManager) {
+                const isAdmin = await this.adminManager.checkAdminPermissions();
+                if (isAdmin) {
+                    // 确保管理员数据已加载
+                    await this.adminManager.ensureAdminDataLoaded();
+                }
+                return isAdmin;
+            }
+            return false;
+        } catch (error) {
+            console.error('检查管理员菜单失败:', error);
+            return false;
+        }
     }
 
     /**
-     * 延迟检查并显示管理员菜单（用于登录后确保用户信息已保存）
+     * 延迟检查并显示管理员菜单
      */
     async delayedCheckAndShowAdminMenu() {
-        const result = await this.adminManager.delayedCheckAdminPermissions();
-        
-        // 同时控制设置按钮的显示
-        this.checkAndShowSettingsButton();
-        
-        // 生产环境特殊处理：确保管理员菜单正确显示
-        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-            if (result && this.adminManager && this.adminManager.isAdmin) {
-                // 强制更新管理员菜单显示
-                this.adminManager.updateAvatarAdminMenu();
-                
-                // 确保所有管理员相关元素都显示
-                const adminMenu = document.getElementById('admin-menu');
-                const settingsBtn = document.getElementById('settings-btn');
-                const syncDocsBtn = document.getElementById('sync-docs-btn');
-                const storageSettingsBtn = document.getElementById('storage-settings-btn');
-                
-                if (adminMenu) adminMenu.classList.remove('hidden');
-                if (settingsBtn) {
-                    settingsBtn.style.display = 'block';
-                    settingsBtn.classList.remove('hidden');
+        try {
+            if (this.adminManager) {
+                const isAdmin = await this.adminManager.delayedCheckAdminPermissions();
+                if (isAdmin) {
+                    // 确保管理员数据已加载
+                    await this.adminManager.ensureAdminDataLoaded();
                 }
-                if (syncDocsBtn) syncDocsBtn.classList.remove('hidden');
-                if (storageSettingsBtn) storageSettingsBtn.style.display = 'block';
+                return isAdmin;
             }
+            return false;
+        } catch (error) {
+            console.error('延迟检查管理员菜单失败:', error);
+            return false;
         }
-        
-        return result;
+    }
+
+    /**
+     * 强制刷新后恢复管理员菜单
+     */
+    async restoreAdminMenuAfterForceRefresh() {
+        try {
+            if (this.adminManager) {
+                const restored = await this.adminManager.restoreAdminPermissionsAfterForceRefresh();
+                if (restored) {
+                    // 确保管理员数据已加载
+                    await this.adminManager.ensureAdminDataLoaded();
+                }
+                return restored;
+            }
+            return false;
+        } catch (error) {
+            console.error('强制刷新后恢复管理员菜单失败:', error);
+            return false;
+        }
     }
 
     /**

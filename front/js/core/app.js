@@ -27,6 +27,9 @@ class App {
                 });
             }
 
+            // 检测是否为强制刷新
+            this.detectForceRefresh();
+
             // 初始化应用核心
             this.core = new AppCore();
             
@@ -52,6 +55,57 @@ class App {
         } catch (error) {
             console.error('❌ 应用初始化失败:', error);
             this.handleInitError(error);
+        }
+    }
+
+    /**
+     * 检测强制刷新
+     */
+    detectForceRefresh() {
+        // 使用更可靠的方法检测强制刷新
+        let isForceRefresh = false;
+        
+        // 方法1: 检查 performance.navigation.type (旧版浏览器)
+        if (performance.navigation && performance.navigation.type === 1) {
+            isForceRefresh = true;
+        }
+        
+        // 方法2: 检查 performance.getEntriesByType (新版浏览器)
+        if (!isForceRefresh && window.performance && window.performance.getEntriesByType) {
+            const navigationEntries = window.performance.getEntriesByType('navigation');
+            if (navigationEntries.length > 0) {
+                const navigationEntry = navigationEntries[0];
+                if (navigationEntry.type === 'reload') {
+                    isForceRefresh = true;
+                }
+            }
+        }
+        
+        // 方法3: 检查是否来自缓存 (通过检查页面加载时间)
+        if (!isForceRefresh) {
+            const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+            // 如果加载时间很短，可能是从缓存加载的
+            if (loadTime < 100) {
+                isForceRefresh = false; // 从缓存加载，不是强制刷新
+            }
+        }
+        
+        // 方法4: 检查 sessionStorage 标记
+        const forceRefreshFlag = sessionStorage.getItem('forceRefresh');
+        if (forceRefreshFlag === 'true') {
+            isForceRefresh = true;
+            sessionStorage.removeItem('forceRefresh');
+        }
+        
+        if (isForceRefresh) {
+            console.log('检测到强制刷新，将优先恢复本地缓存数据');
+            // 设置强制刷新标记
+            window.isForceRefresh = true;
+            
+            // 延迟清除标记，避免影响后续操作
+            setTimeout(() => {
+                window.isForceRefresh = false;
+            }, 5000);
         }
     }
     
