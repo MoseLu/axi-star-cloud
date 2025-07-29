@@ -1,0 +1,518 @@
+/* 上传管理模块样式 */
+
+/* 上传区域样式 */
+.upload-area {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    margin: 20px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-area:hover {
+    border-color: #007bff;
+    background: #e3f2fd;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.upload-area.drag-over {
+    border-color: #007bff;
+    background: #e3f2fd;
+    transform: scale(1.02);
+    box-shadow: 0 8px 16px rgba(0,123,255,0.2);
+}
+
+.upload-area.drag-over::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(0,123,255,0.1) 50%, transparent 70%);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.upload-hint {
+    font-size: 16px;
+    color: #4B5563;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.upload-icon {
+    font-size: 48px;
+    color: #007bff;
+    margin-bottom: 15px;
+    transition: transform 0.3s ease;
+}
+
+.upload-area:hover .upload-icon {
+    transform: scale(1.1);
+}
+
+.upload-area.drag-over .upload-icon {
+    transform: scale(1.2);
+}
+
+/* 上传进度容器 */
+.upload-progress-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+.upload-progress {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    min-width: 400px;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.upload-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.upload-progress-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-btn:hover {
+    background-color: #f8f9fa;
+    color: #333;
+    transform: scale(1.1);
+}
+
+/* 上传队列 */
+.upload-queue {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.upload-queue::-webkit-scrollbar {
+    width: 6px;
+}
+
+.upload-queue::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.upload-queue::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.upload-queue::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* 上传项目 */
+.upload-item {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    margin: 12px 0;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.upload-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+}
+
+.upload-item.completed {
+    background: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.upload-item.completed::before {
+    content: '✓';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    color: #28a745;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.upload-item.failed {
+    background: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.upload-item.failed::before {
+    content: '✗';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.upload-item.uploading {
+    background: #e3f2fd;
+    border-color: #bbdefb;
+}
+
+.upload-item-info {
+    flex: 1;
+    margin-right: 16px;
+    min-width: 0;
+}
+
+.upload-item-name {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.upload-item-size {
+    font-size: 12px;
+    color: #666;
+}
+
+.upload-item-progress {
+    flex: 1;
+    margin-right: 16px;
+    min-width: 120px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 6px;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #007bff, #0056b3);
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 4px;
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+.progress-text {
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+    font-weight: 500;
+}
+
+.upload-item-status {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 60px;
+    text-align: center;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.05);
+}
+
+.upload-item.completed .upload-item-status {
+    color: #28a745;
+    background: rgba(40,167,69,0.1);
+}
+
+.upload-item.failed .upload-item-status {
+    color: #dc3545;
+    background: rgba(220,53,69,0.1);
+}
+
+.upload-item.uploading .upload-item-status {
+    color: #007bff;
+    background: rgba(0,123,255,0.1);
+}
+
+.upload-item.pending .upload-item-status {
+    color: #6c757d;
+    background: rgba(108,117,125,0.1);
+}
+
+/* 文件输入框 */
+.file-input {
+    display: none;
+}
+
+/* 上传操作按钮 */
+.upload-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.upload-action-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-action-btn.retry {
+    background: #007bff;
+    color: white;
+}
+
+.upload-action-btn.retry:hover {
+    background: #0056b3;
+}
+
+.upload-action-btn.cancel {
+    background: #6c757d;
+    color: white;
+}
+
+.upload-action-btn.cancel:hover {
+    background: #545b62;
+}
+
+/* 上传设置面板 */
+.upload-settings {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    border: 1px solid #e9ecef;
+}
+
+.upload-settings h4 {
+    margin-top: 0;
+    color: #333;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.setting-item {
+    margin: 12px 0;
+}
+
+.setting-item label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #555;
+}
+
+.setting-item input[type="number"],
+.setting-item input[type="text"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.setting-item input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+}
+
+.setting-item input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+/* 拖拽提示 */
+.drag-hint {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,123,255,0.9);
+    color: white;
+    padding: 20px 40px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 500;
+    z-index: 1001;
+    animation: fadeInOut 2s ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .upload-progress {
+        min-width: 90%;
+        margin: 0 10px;
+        padding: 16px;
+    }
+    
+    .upload-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 12px;
+    }
+    
+    .upload-item-info,
+    .upload-item-progress {
+        margin-right: 0;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+    
+    .upload-item-status {
+        align-self: flex-end;
+    }
+    
+    .upload-area {
+        padding: 20px;
+    }
+    
+    .upload-icon {
+        font-size: 36px;
+    }
+    
+    .upload-hint {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .upload-progress-header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .upload-progress-header h3 {
+        font-size: 16px;
+    }
+    
+    .close-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 20px;
+    }
+}
+
+/* 动画效果 */
+.upload-item {
+    animation: slideInItem 0.3s ease-out;
+}
+
+@keyframes slideInItem {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* 加载状态 */
+.upload-item.uploading .progress-fill {
+    background: linear-gradient(90deg, #007bff, #0056b3, #007bff);
+    background-size: 200% 100%;
+    animation: loading 2s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* 成功/失败动画 */
+.upload-item.completed,
+.upload-item.failed {
+    animation: resultPulse 0.6s ease-out;
+}
+
+@keyframes resultPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+} 

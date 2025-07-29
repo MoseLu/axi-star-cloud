@@ -1,0 +1,261 @@
+/**
+ * 暗色主题Header样式
+ * 覆盖Tailwind CSS类以适配暗色主题
+ */
+
+/* Header容器 */
+.glass-effect {
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(51, 65, 85, 0.3);
+}
+
+.border-b.border-purple-light\/20 {
+    border-bottom-color: rgba(168, 85, 247, 0.15);
+}
+
+/* 标题文字 */
+.text-transparent.bg-clip-text.bg-gradient-to-r.from-blue-light.to-purple-light {
+    background: linear-gradient(to right, #60A5FA, #A78BFA);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    box-sizing: content-box;
+    box-shadow: none !important;
+}
+
+/* 搜索框 */
+.bg-dark-light {
+    background-color: #1E293B;
+}
+
+.border-purple-light\/30 {
+    border-color: rgba(168, 85, 247, 0.2);
+}
+
+.text-gray-100 {
+    color: #F1F5F9;
+}
+
+.text-gray-400 {
+    color: #94A3B8;
+}
+
+.hover\:text-gray-300:hover {
+    color: #CBD5E1;
+}
+
+.focus\:ring-purple-light\/50:focus {
+    --tw-ring-color: rgba(168, 85, 247, 0.3);
+}
+
+.focus\:border-purple-light:focus {
+    border-color: #A78BFA;
+}
+
+/* 移动端搜索按钮 */
+.bg-dark-light {
+    background-color: #1E293B;
+}
+
+.border-purple-light\/30 {
+    border-color: rgba(168, 85, 247, 0.2);
+}
+
+/* 同步文档按钮 */
+.bg-gradient-to-r.from-emerald-500\/80.to-teal-500\/80 {
+    background: linear-gradient(to right, rgba(16, 185, 129, 0.8), rgba(20, 184, 166, 0.8));
+}
+
+.hover\:from-emerald-500.to-teal-500:hover {
+    background: linear-gradient(to right, #10B981, #14B8A6);
+}
+
+.shadow-emerald-500\/20 {
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+}
+
+/* 上传按钮 */
+.bg-gradient-to-r.from-primary\/80.to-secondary\/80 {
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.8), rgba(139, 92, 246, 0.8));
+}
+
+.hover\:from-primary.to-secondary:hover {
+    background: linear-gradient(to right, #3B82F6, #8B5CF6);
+}
+
+.shadow-primary\/20 {
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+/* 帮助按钮 */
+.border-green-500\/30 {
+    border-color: rgba(34, 197, 94, 0.2);
+}
+
+.text-green-400 {
+    color: #4ADE80;
+}
+
+.hover\:text-green-300:hover {
+    color: #86EFAC;
+}
+
+/* 用户头像 */
+.border-purple-light\/50 {
+    border-color: rgba(168, 85, 247, 0.3);
+}
+
+/* 用户名 */
+.text-transparent.bg-clip-text.bg-gradient-to-r.from-yellow-400.via-amber-500.to-orange-500 {
+    background: linear-gradient(to right, #FACC15, #F59E0B, #F97316);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* 下拉菜单 */
+.glass-effect {
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(51, 65, 85, 0.3);
+}
+
+/* 用户下拉菜单容器 */
+.relative.group .absolute {
+    max-height: 80vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* 下拉菜单滚动条样式 */
+.relative.group .absolute::-webkit-scrollbar {
+    width: 6px;
+}
+
+.relative.group .absolute::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.3);
+    border-radius: 3px;
+}
+
+.relative.group .absolute::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 247, 0.5);
+    border-radius: 3px;
+}
+
+.relative.group .absolute::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 247, 0.7);
+}
+
+.border-purple-light\/20 {
+    border-color: rgba(168, 85, 247, 0.15);
+}
+
+/* 菜单项 */
+.text-gray-300 {
+    color: #CBD5E1;
+}
+
+.hover\:bg-purple-light\/20:hover {
+    background-color: rgba(168, 85, 247, 0.1);
+}
+
+.hover\:text-white:hover {
+    color: #F8FAFC;
+}
+
+/* 管理员菜单 */
+.border-gray-700 {
+    border-color: #374151;
+}
+
+.text-blue-400 {
+    color: #60A5FA;
+}
+
+.hover\:bg-blue-900\/20:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.hover\:text-blue-300:hover {
+    color: #93C5FD;
+}
+
+.text-red-400 {
+    color: #F87171;
+}
+
+.hover\:bg-red-900\/20:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.hover\:text-red-300:hover {
+    color: #FCA5A5;
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+    .glass-effect {
+        background: rgba(15, 23, 42, 0.95);
+    }
+    
+    .border-purple-light\/20 {
+        border-color: rgba(168, 85, 247, 0.1);
+    }
+}
+
+/* 主题切换按钮暗色主题样式 */
+.theme-toggle-btn {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.theme-toggle-btn .icon {
+    color: inherit !important;
+}
+
+.theme-toggle-btn:hover {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.theme-toggle-btn:focus {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* 下拉菜单group-hover样式 */
+.group:hover .group-hover\:opacity-100 {
+    opacity: 1 !important;
+}
+
+.group:hover .group-hover\:visible {
+    visibility: visible !important;
+}
+
+/* 确保下拉菜单在hover时可见 */
+.relative.group:hover .absolute {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 更新日志按钮样式 */
+#update-logs-btn {
+    color: #4ADE80 !important;
+}
+
+#update-logs-btn:hover {
+    background-color: rgba(34, 197, 94, 0.1) !important;
+    color: #86EFAC !important;
+}
+
+/* 文件夹图标颜色 - 暗色主题头部 */
+.fa-folder {
+    color: #60A5FA !important;
+} 

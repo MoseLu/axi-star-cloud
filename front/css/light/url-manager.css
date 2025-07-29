@@ -1,0 +1,236 @@
+/* URL管理器样式 */
+.url-manager-container {
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.url-manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.url-manager-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+}
+
+.url-manager-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.url-manager-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.url-manager-btn-primary {
+    background: linear-gradient(135deg, #7B61FF, #4338CA);
+    color: white;
+}
+
+.url-manager-btn-primary:hover {
+    background: linear-gradient(135deg, #6B51EF, #3730A3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(123, 97, 255, 0.3);
+}
+
+.url-manager-btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.url-manager-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.url-manager-content {
+    display: grid;
+    gap: 15px;
+}
+
+.url-manager-form {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.url-manager-form-group {
+    margin-bottom: 15px;
+}
+
+.url-manager-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.url-manager-input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(15, 23, 42, 0.8);
+    color: #ffffff;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.url-manager-input:focus {
+    outline: none;
+    border-color: #7B61FF;
+    box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.1);
+}
+
+.url-manager-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.url-manager-list {
+    display: grid;
+    gap: 15px;
+}
+
+.url-manager-item {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.url-manager-item:hover {
+    background: rgba(15, 23, 42, 0.8);
+    border-color: rgba(123, 97, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.url-manager-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.url-manager-item-title {
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.url-manager-item-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.url-manager-item-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.url-manager-item-btn-edit {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60A5FA;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.url-manager-item-btn-edit:hover {
+    background: rgba(59, 130, 246, 0.3);
+}
+
+.url-manager-item-btn-delete {
+    background: rgba(239, 68, 68, 0.2);
+    color: #F87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.url-manager-item-btn-delete:hover {
+    background: rgba(239, 68, 68, 0.3);
+}
+
+.url-manager-item-content {
+    color: #CBD5E1;
+    line-height: 1.6;
+}
+
+.url-manager-item-url {
+    color: #60A5FA;
+    word-break: break-all;
+    margin-bottom: 10px;
+}
+
+.url-manager-item-description {
+    color: #94A3B8;
+    font-size: 0.9rem;
+}
+
+.url-manager-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #94A3B8;
+}
+
+.url-manager-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.url-manager-empty-text {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .url-manager-container {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    .url-manager-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .url-manager-actions {
+        justify-content: center;
+    }
+    
+    .url-manager-item-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .url-manager-item-actions {
+        justify-content: flex-end;
+    }
+} 

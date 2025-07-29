@@ -1,0 +1,176 @@
+/**
+ * 滚动条样式
+ * 包含全局滚动条、主题滚动条、文件列表滚动条等样式
+ */
+
+/* 主题滚动条样式 */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* 主题滚动条的轨道 */
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 4px;
+}
+
+/* 主题滚动条的滑块按钮 */
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(59, 130, 246, 0.6));
+  border-radius: 4px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  transition: all 0.3s ease;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(59, 130, 246, 0.8));
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
+}
+
+/* 主题滚动条的上下两端的按钮 */
+.scrollbar-thin::-webkit-scrollbar-button {
+  display: none;
+}
+
+.scrollbar-thin::-webkit-scrollbar-corner {
+  background: rgba(15, 23, 42, 0.3);
+}
+
+/* 预览内容滚动条样式 */
+.preview-content::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+/* 预览内容滚动条的轨道 */
+.preview-content::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.2);
+  border-radius: 5px;
+  margin: 2px;
+}
+
+/* 预览内容滚动条的滑块按钮 */
+.preview-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.7), rgba(59, 130, 246, 0.7), rgba(6, 182, 212, 0.7));
+  border-radius: 5px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.preview-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(59, 130, 246, 0.9), rgba(6, 182, 212, 0.9));
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
+  transform: scale(1.05);
+}
+
+/* 预览内容滚动条的上下两端的按钮 */
+.preview-content::-webkit-scrollbar-button {
+  display: none;
+}
+
+.preview-content::-webkit-scrollbar-corner {
+  background: rgba(15, 23, 42, 0.2);
+}
+
+/* 全局滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* 滚动条的轨道 */
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.2);
+  border-radius: 4px;
+}
+
+/* 滚动条的滑块按钮 */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(59, 130, 246, 0.6));
+  border-radius: 4px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(59, 130, 246, 0.8));
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
+}
+
+/* 滚动条的上下两端的按钮 */
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+::-webkit-scrollbar-corner {
+  background: rgba(15, 23, 42, 0.2);
+}
+
+/* Firefox 滚动条样式 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.6) rgba(15, 23, 42, 0.3);
+}
+
+/* 特殊滚动条样式 - 用于文件列表等 */
+.scrollbar-file-list::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+/* 文件列表滚动条的轨道 */
+.scrollbar-file-list::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.1);
+  border-radius: 3px;
+}
+
+/* 文件列表滚动条的滑块按钮 */
+.scrollbar-file-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(59, 130, 246, 0.4));
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.scrollbar-file-list::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(59, 130, 246, 0.6));
+}
+
+/* 文件列表滚动条的上下两端的按钮 */
+.scrollbar-file-list::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* 模态框内滚动条样式 */
+.modal-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* 模态框滚动条的轨道 */
+.modal-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+/* 模态框滚动条的滑块按钮 */
+.modal-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(59, 130, 246, 0.6));
+  border-radius: 4px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  transition: all 0.3s ease;
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(59, 130, 246, 0.8));
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
+}
+
+/* 模态框滚动条的上下两端的按钮 */
+.modal-scrollbar::-webkit-scrollbar-button {
+  display: none;
+} 

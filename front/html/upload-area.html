@@ -1,0 +1,36 @@
+<!-- 文件上传区域 -->
+<div id="upload-area" class="hidden glass-effect rounded-xl p-4 md:p-8 mb-8 border border-purple-light/20 shadow-lg">
+    <div class="flex justify-between items-center mb-4 md:mb-6">
+        <div class="text-center flex-1">
+            <h2 class="text-lg md:text-xl font-semibold mb-2">上传文件</h2>
+            <p class="text-gray-400 text-sm md:text-base">拖放文件到此处，或点击选择文件</p>
+        </div>
+        <button id="close-upload-btn" class="text-gray-400 hover:text-white transition-colors p-2">
+            <i class="fa fa-times text-lg md:text-xl"></i>
+        </button>
+    </div>
+    
+    <div id="drop-area" class="border-2 border-dashed border-purple-light/30 rounded-lg p-6 md:p-10 text-center cursor-pointer hover:border-purple-light/60 transition-colors">
+        <i class="fa fa-cloud-upload text-3xl md:text-5xl text-purple-light/60 mb-3 md:mb-4"></i>
+        <p class="text-gray-300 mb-2 text-sm md:text-base">拖放文件到此处上传</p>
+        <p class="text-purple-light text-xs md:text-sm" id="drop-area-file-types">支持的格式: JPG, PNG, GIF, MP4, AVI, MP3, WAV, PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, MD 等</p>
+        <p class="text-emerald-light text-xs mt-1">💡 提示: 可以同时选择或拖拽多个图片文件</p>
+        <input type="file" id="file-input" class="hidden" multiple>
+        <button id="browse-btn" class="mt-3 md:mt-4 bg-gradient-to-r from-primary/80 to-secondary/80 hover:from-primary to-secondary text-white px-3 md:px-4 py-2 rounded-lg shadow-md shadow-primary/20 transition-all duration-300 transform hover:scale-[1.03] text-sm md:text-base">
+            选择文件
+        </button>
+    </div>
+    
+    <div id="upload-progress-container" class="hidden mt-4 md:mt-6">
+        <h3 class="text-xs md:text-sm font-medium mb-2">上传进度</h3>
+        <div id="upload-progress" class="h-2 bg-dark-light rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-blue-light to-purple-light rounded-full" style="width: 0%"></div>
+        </div>
+        <div class="flex justify-between mt-1">
+            <span id="upload-file-name" class="text-xs text-gray-400">文件名</span>
+            <span id="upload-percentage" class="text-xs text-purple-light">0%</span>
+        </div>
+    </div>
+    <!-- 文件名队列美化区域 -->
+    <div class="upload-queue mt-6 space-y-2"></div>
+</div> 

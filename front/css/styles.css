@@ -1,0 +1,13 @@
+/**
+ * 主样式文件
+ * 引入所有拆分的样式模块
+ * 主题样式由主题管理器动态加载
+ */
+
+/* 引入公共样式 */
+@import url('./responsive.css');
+@import url('./font-optimization.css');
+
+/* 主题样式由主题管理器动态加载 */
+/* 暗色主题: /static/css/dark/ */
+/* 亮色主题: /static/css/light/ */

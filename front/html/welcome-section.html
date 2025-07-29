@@ -1,0 +1,215 @@
+<!-- 欢迎信息 -->
+<div class="mb-8">
+    <div class="glass-effect rounded-2xl p-4 md:p-8 shadow-xl relative overflow-hidden welcome-section-card" id="welcome-section-card">
+        <!-- 背景装饰已删除 -->
+        
+        <div class="relative z-10">
+            <!-- 移动端优化的头部布局 -->
+            <div class="welcome-header">
+                <!-- 头像和欢迎信息 -->
+                <div class="welcome-user-info">
+                    <div class="avatar-section">
+                        <div class="relative group">
+                            <div class="profile-avatar" id="profile-avatar" title="点击编辑个人资料">
+                                <i class="fa fa-user-circle avatar-icon" id="avatar-icon"></i>
+                                <img id="avatar-image" class="avatar-image hidden" alt="头像">
+                            </div>
+                            <!-- 编辑图标提示 -->
+                            <div class="edit-icon" title="编辑个人资料">
+                                <i class="fa fa-pencil"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="welcome-text">
+                        <h1 class="welcome-title">
+                            <span id="welcome-message">欢迎回来，用户</span>
+                        </h1>
+                        <p class="welcome-date">今天是 <span id="current-date" class="text-purple-light font-medium"></span></p>
+                    </div>
+                </div>
+                
+                <!-- 文件统计卡片 -->
+                <div class="file-stats-card">
+                    <div class="stats-content">
+                        <div class="stats-number" id="file-count">0</div>
+                        <div class="stats-label">个文件</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 状态信息卡片 -->
+            <div class="status-cards">
+                <div class="status-card status-login">
+                    <div class="status-icon">
+                        <i class="fa fa-clock-o"></i>
+                    </div>
+                    <div class="status-info">
+                        <div class="status-label">最后登录</div>
+                        <div class="status-value" id="last-login"></div>
+                    </div>
+                </div>
+                
+                <div class="status-card status-storage">
+                    <div class="status-icon">
+                        <i class="fa fa-cloud"></i>
+                    </div>
+                    <div class="status-info">
+                        <div class="status-label">存储状态</div>
+                        <div class="status-value" id="welcome-storage-status">--</div>
+                    </div>
+                </div>
+                
+                <script>
+                    console.log('💾 欢迎模块：脚本开始执行');
+                    
+                    let isInitialized = false;
+                    
+                    // 从本地缓存读取存储状态
+                    function updateStorageStatusFromCache() {
+                        console.log('💾 欢迎模块：开始从缓存读取存储状态');
+                        
+                        // 尝试从新的StorageManager结构读取
+                        let storageStatusData = null;
+                        
+                        // 方法1：从StorageManager读取
+                        if (window.StorageManager && typeof window.StorageManager.getStorageStatus === 'function') {
+                            storageStatusData = window.StorageManager.getStorageStatus();
+                            console.log('💾 欢迎模块：从StorageManager读取:', storageStatusData);
+                        }
+                        
+                        // 方法2：从systemInfo读取
+                        if (!storageStatusData) {
+                            const systemData = localStorage.getItem('systemInfo');
+                            if (systemData) {
+                                try {
+                                    const systemInfo = JSON.parse(systemData);
+                                    storageStatusData = systemInfo.storageStatus;
+                                    console.log('💾 欢迎模块：从systemInfo读取:', storageStatusData);
+                                } catch (error) {
+                                    console.warn('解析systemInfo失败:', error);
+                                }
+                            }
+                        }
+                        
+                        // 方法3：从旧的storageStatus键读取（兼容性）
+                        if (!storageStatusData) {
+                            const oldData = localStorage.getItem('storageStatus');
+                            if (oldData) {
+                                try {
+                                    storageStatusData = JSON.parse(oldData);
+                                    console.log('💾 欢迎模块：从旧storageStatus读取:', storageStatusData);
+                                } catch (error) {
+                                    console.warn('解析旧storageStatus失败:', error);
+                                }
+                            }
+                        }
+                        
+                        if (storageStatusData && storageStatusData.status) {
+                            try {
+                                console.log('💾 欢迎模块：最终缓存数据:', storageStatusData);
+                                const welcomeStorageStatus = document.getElementById('welcome-storage-status');
+                                if (welcomeStorageStatus) {
+                                    // 确保只使用status字段，避免使用percentage字段
+                                    let statusText = storageStatusData.status;
+                                    
+                                    // 如果status是数字或数字字符串，说明可能是错误的字段
+                                    if (typeof statusText === 'number' || (typeof statusText === 'string' && !isNaN(parseFloat(statusText)))) {
+                                        console.warn('💾 欢迎模块：检测到status字段为数字，可能是错误的字段映射');
+                                        // 尝试从其他字段获取正确的状态文本
+                                        if (storageStatusData.remainingPercentage !== undefined) {
+                                            const remainingPercentage = storageStatusData.remainingPercentage;
+                                            if (remainingPercentage > 30) {
+                                                statusText = '充足';
+                                            } else if (remainingPercentage >= 10) {
+                                                statusText = '不足';
+                                            } else {
+                                                statusText = '严重不足';
+                                            }
+                                        } else {
+                                            // 如果没有其他字段，使用默认值
+                                            statusText = '充足';
+                                        }
+                                    }
+                                    
+                                    welcomeStorageStatus.textContent = statusText;
+                                    console.log(`💾 欢迎模块：已从缓存读取并更新状态: ${statusText}`);
+                                    isInitialized = true;
+                                } else {
+                                    console.log('💾 欢迎模块：DOM元素未找到');
+                                }
+                            } catch (error) {
+                                console.error('解析存储状态缓存失败:', error);
+                            }
+                        } else {
+                            console.log('💾 欢迎模块：本地缓存中没有有效的存储状态数据');
+                            // 如果没有缓存数据，等待存储空间概览模块更新
+                            if (!isInitialized) {
+                                setTimeout(() => {
+                                    // 延迟重试，等待存储空间概览模块初始化
+                                    updateStorageStatusFromCache();
+                                }, 1000);
+                            }
+                        }
+                    }
+                    
+                    // 监听存储状态变化
+                    function setupStorageStatusListener() {
+                        // 监听localStorage变化
+                        window.addEventListener('storage', function(e) {
+                            if (e.key === 'storageStatus' || e.key === 'systemInfo') {
+                                console.log('💾 欢迎模块：检测到存储状态变化');
+                                updateStorageStatusFromCache();
+                            }
+                        });
+                        
+                        // 监听自定义事件
+                        window.addEventListener('storageStatusUpdated', function(e) {
+                            console.log('💾 欢迎模块：检测到存储状态更新事件');
+                            updateStorageStatusFromCache();
+                        });
+                    }
+                    
+                    // 页面加载完成后的初始化
+                    function initializeStorageStatus() {
+                        // 立即尝试更新
+                        updateStorageStatusFromCache();
+                        
+                        // 设置监听器
+                        setupStorageStatusListener();
+                        
+                        // 延迟重试，确保DOM元素已加载
+                        setTimeout(updateStorageStatusFromCache, 100);
+                        setTimeout(updateStorageStatusFromCache, 500);
+                        setTimeout(updateStorageStatusFromCache, 1000);
+                        
+                        // 如果还是没有数据，等待更长时间后再次尝试
+                        setTimeout(() => {
+                            if (!isInitialized) {
+                                console.log('💾 欢迎模块：延迟初始化，再次尝试获取存储状态');
+                                updateStorageStatusFromCache();
+                            }
+                        }, 3000);
+                    }
+                    
+                    // 页面加载完成后初始化
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', initializeStorageStatus);
+                    } else {
+                        initializeStorageStatus();
+                    }
+                </script>
+                
+                <div class="status-card status-security">
+                    <div class="status-icon">
+                        <i class="fa fa-shield"></i>
+                    </div>
+                    <div class="status-info">
+                        <div class="status-label">安全状态</div>
+                        <div class="status-value">已保护</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 
