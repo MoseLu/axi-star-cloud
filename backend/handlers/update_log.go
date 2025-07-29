@@ -4,7 +4,10 @@ import (
 	"backend/models"
 	"database/sql"
 	"net/http"
+<<<<<<< HEAD
 	"time"
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,6 +40,7 @@ func (h *UpdateLogHandler) GetUpdateLogs(c *gin.Context) {
 		"data":    logs,
 	})
 }
+<<<<<<< HEAD
 
 // SyncUpdateLogs 同步更新日志
 func (h *UpdateLogHandler) SyncUpdateLogs(c *gin.Context) {
@@ -246,3 +250,5 @@ func (h *UpdateLogHandler) ValidateUpdateLogs(c *gin.Context) {
 		},
 	})
 }
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89

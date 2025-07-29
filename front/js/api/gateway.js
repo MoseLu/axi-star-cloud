@@ -26,6 +26,7 @@ class ApiGateway {
             setTimeout(() => {
                 this.updateBaseUrl();
                 this.isInitialized = true;
+<<<<<<< HEAD
             }, 500); // 增加延迟到500ms，确保环境配置已加载
         } else {
             this.isInitialized = true;
@@ -42,6 +43,12 @@ class ApiGateway {
                 this.isInitialized = true;
             }, 1000);
         }
+=======
+            }, 200); // 减少延迟到200ms
+        } else {
+            this.isInitialized = true;
+        }
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 
     // 更新baseUrl（用于环境切换）
@@ -53,6 +60,7 @@ class ApiGateway {
         } else if (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) {
             this.baseUrl = window.APP_CONFIG.API_BASE_URL;
         } else {
+<<<<<<< HEAD
             // 备用方案：根据当前域名自动设置
             const hostname = window.location.hostname;
             const port = window.location.port;
@@ -64,6 +72,9 @@ class ApiGateway {
             } else {
                 this.baseUrl = `http://${hostname}:${port || '8080'}`;
             }
+=======
+            this.baseUrl = '';
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         }
         
         // 验证更新是否成功

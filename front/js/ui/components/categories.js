@@ -511,6 +511,7 @@ class UICategories {
         
         // 处理外站文档分类的特殊逻辑
         if (type === 'external-docs') {
+<<<<<<< HEAD
             // 检查是否为管理员，只有管理员才能访问外站文档分类
             const isAdmin = this.checkIfAdmin();
             if (!isAdmin) {
@@ -518,17 +519,23 @@ class UICategories {
                 // 阻止非管理员用户访问外站文档分类
                 return;
             }
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             this.handleExternalDocsCategory();
             return;
         }
         
+<<<<<<< HEAD
         // 处理其他分类时，确保同步文档按钮被隐藏
         this.hideSyncDocsButton();
         
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         // 处理其他分类
         this.handleRegularCategory(type);
     }
     
+<<<<<<< HEAD
     // 隐藏同步文档按钮
     hideSyncDocsButton() {
         const syncDocsBtn = document.getElementById('sync-docs-btn');
@@ -582,6 +589,29 @@ class UICategories {
         // this.cleanupRegularFilesDisplay(); // 这个方法不存在，移除这行
         
         // 隐藏上传按钮，显示同步文档按钮（仅管理员可见）
+=======
+    // 处理外站文档分类
+    handleExternalDocsCategory() {
+        // 设置当前分类
+        this.uiManager.currentCategory = 'external-docs';
+        
+        // 添加外站文档分类CSS类
+        document.body.classList.add('external-docs-category');
+        
+        // 隐藏文件夹区域
+        const folderSection = document.getElementById('folder-section');
+        if (folderSection) {
+            folderSection.classList.add('hidden');
+        }
+        
+        // 隐藏新建分组按钮
+        const createFolderBtn = document.getElementById('create-folder-main-btn');
+        if (createFolderBtn) {
+            createFolderBtn.style.display = 'none';
+        }
+        
+        // 隐藏上传按钮，显示同步文档按钮
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         const uploadBtn = document.getElementById('upload-btn');
         const syncDocsBtn = document.getElementById('sync-docs-btn');
         
@@ -589,6 +619,7 @@ class UICategories {
             uploadBtn.style.display = 'none';
         }
         
+<<<<<<< HEAD
         // 只有管理员才能显示同步文档按钮
         if (syncDocsBtn) {
             // 检查是否为管理员
@@ -601,6 +632,10 @@ class UICategories {
                 syncDocsBtn.classList.add('hidden');
                 syncDocsBtn.setAttribute('hidden', '');
             }
+=======
+        if (syncDocsBtn) {
+            syncDocsBtn.style.display = 'flex';
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         }
         
         // 隐藏默认空状态容器（如果存在）
@@ -634,9 +669,12 @@ class UICategories {
         // 清理外站文档显示
         this.cleanupExternalDocsDisplay();
         
+<<<<<<< HEAD
         // 确保同步文档按钮被隐藏
         this.hideSyncDocsButton();
         
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         // 根据分类决定是否显示文件夹区域和新建分组按钮
         const folderSection = document.getElementById('folder-section');
         const createFolderBtn = document.getElementById('create-folder-main-btn');

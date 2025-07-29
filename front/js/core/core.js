@@ -23,7 +23,11 @@ class AppCore {
             await this.waitForApiSystem();
             
             // 初始化管理器
+<<<<<<< HEAD
             await this.initManagers();
+=======
+            this.initManagers();
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             
             // 设置全局函数
             this.setupGlobalFunctions();
@@ -64,7 +68,11 @@ class AppCore {
     /**
      * 初始化管理器
      */
+<<<<<<< HEAD
     async initManagers() {
+=======
+    initManagers() {
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         // 使用新的API系统，确保向后兼容
         this.apiManager = window.apiSystem || window.apiManager;
         if (!this.apiManager) {
@@ -79,15 +87,19 @@ class AppCore {
             return;
         }
         
+<<<<<<< HEAD
         // 等待UIManager类加载完成
         await this.waitForUIManager();
         
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         // 初始化UI管理器
         this.uiManager = new UIManager();
         window.uiManager = this.uiManager;
     }
 
     /**
+<<<<<<< HEAD
      * 等待UIManager类加载完成
      */
     async waitForUIManager() {
@@ -106,6 +118,8 @@ class AppCore {
     }
 
     /**
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
      * 设置全局函数
      */
     setupGlobalFunctions() {

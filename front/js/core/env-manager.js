@@ -8,7 +8,10 @@ class AppEnvironmentManager {
         this.authManager = appCore.authManager;
         this.apiManager = appCore.apiManager;
         this.uiManager = appCore.uiManager;
+<<<<<<< HEAD
         this.isEnvironmentDetected = false; // 环境检测完成标记
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         this.init();
     }
 
@@ -17,6 +20,7 @@ class AppEnvironmentManager {
      */
     init() {
         this.setupEnvironmentChangeListener();
+<<<<<<< HEAD
         
         // 检查是否为强制刷新，如果是则延迟更新环境信息
         if (window.isForceRefresh) {
@@ -25,6 +29,8 @@ class AppEnvironmentManager {
             // 非强制刷新情况下，立即标记环境检测完成
             this.isEnvironmentDetected = true;
         }
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 
     /**
@@ -58,9 +64,15 @@ class AppEnvironmentManager {
                                 const response = await window.apiGateway.get(`/api/profile?user_id=${userId}`);
                                 if (response.ok) {
                                     const result = await response.json();
+<<<<<<< HEAD
                                     if (result.success && result.profile && result.profile.avatarUrl) {
                                         // 使用新的头像URL
                                         const newAvatarUrl = result.profile.avatarUrl;
+=======
+                                    if (result.success && result.profile && result.profile.avatar) {
+                                        // 构建新环境的头像URL
+                                        const newAvatarUrl = window.apiGateway?.buildUrl('/uploads/avatars/' + result.profile.avatar);
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                                         if (newAvatarUrl) {
                                             // 更新用户信息，包含新的头像URL
                                             const updatedUserInfo = {
@@ -121,6 +133,7 @@ class AppEnvironmentManager {
     }
 
     /**
+<<<<<<< HEAD
      * 处理强制刷新后的环境更新
      */
     async handleForceRefreshEnvironmentUpdate() {
@@ -278,6 +291,8 @@ class AppEnvironmentManager {
     }
 
     /**
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
      * 切换环境
      */
     async switchEnvironment(env, customApiUrl = null) {
@@ -368,7 +383,24 @@ class AppEnvironmentManager {
         
         // 降级处理
         const baseUrl = this.getEnvironmentConfig()?.apiBaseUrl || 'https://redamancy.com.cn';
+<<<<<<< HEAD
         return `${baseUrl}${path}`;
+=======
+        return `${baseUrl}/static${path}`;
+    }
+
+    /**
+     * 构建头像URL
+     */
+    buildAvatarUrl(avatarPath) {
+        if (window.ENV_MANAGER && typeof window.ENV_MANAGER.buildAvatarUrl === 'function') {
+            return window.ENV_MANAGER.buildAvatarUrl(avatarPath);
+        }
+        
+        // 降级处理
+        const baseUrl = this.getEnvironmentConfig()?.apiBaseUrl || 'https://redamancy.com.cn';
+        return `${baseUrl}/uploads/avatars/${avatarPath}`;
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 
     /**

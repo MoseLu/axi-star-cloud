@@ -257,6 +257,7 @@ class UIUserManager {
      * 渲染用户列表
      */
     renderUsersList(users, result = null) {
+<<<<<<< HEAD
         // 修正头像URL
         users = users.map(user => {
             if (user.avatar && !user.avatarUrl) {
@@ -268,6 +269,8 @@ class UIUserManager {
             return user;
         });
 
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         const usersList = document.getElementById('users-list');
         if (!usersList) return;
 
@@ -294,6 +297,7 @@ class UIUserManager {
             `;
         }
 
+<<<<<<< HEAD
         usersList.innerHTML = headerHtml + users.map(user => {
             // 确定头像URL
             let avatarUrl = '/static/public/docs.png';
@@ -354,6 +358,41 @@ class UIUserManager {
                 </div>
             `;
         }).join('');
+=======
+        usersList.innerHTML = headerHtml + users.map(user => `
+            <div class="bg-dark border border-gray-700 rounded-lg p-4 hover:border-blue-400/50 transition-colors ${user.username === 'Mose' ? 'border-red-400/50 bg-red-900/10' : ''}">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center ${user.username === 'Mose' ? 'from-red-500/20 to-orange-500/20' : ''}">
+                            <i class="fa fa-user text-blue-400 text-xl ${user.username === 'Mose' ? 'text-red-400' : ''}"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h4 class="font-semibold">${user.username}</h4>
+                                ${user.username === 'Mose' ? '<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded-full text-xs font-medium">管理员</span>' : ''}
+                            </div>
+                            <p class="text-gray-400 text-sm">${user.email || '未设置邮箱'}</p>
+                            <p class="text-gray-500 text-xs">创建于 ${this.formatDate(user.created_at)}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right">
+                            <p class="text-sm text-gray-400">存储空间</p>
+                            <p class="font-semibold">${this.formatStorageSize(user.storage_limit)}</p>
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <button class="storage-edit-btn bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-3 py-1 rounded-lg text-sm transition-colors" 
+                                    data-uuid="${user.uuid}" data-current="${user.storage_limit}">
+                                <i class="fa fa-edit mr-1"></i>编辑存储
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 
         // 绑定编辑存储按钮事件
         usersList.querySelectorAll('.storage-edit-btn').forEach(btn => {
@@ -375,13 +414,17 @@ class UIUserManager {
             existingModal.remove();
         }
 
+<<<<<<< HEAD
         const currentLimitGB = Math.round(currentLimit / (1024 * 1024 * 1024));
 
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/60';
         modal.setAttribute('data-modal', 'storage-edit');
         modal.innerHTML = `
             <div class="bg-dark-light rounded-xl p-6 w-full max-w-md shadow-2xl border border-blue-400/30">
+<<<<<<< HEAD
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-lg font-bold text-blue-300">编辑存储限制</h3>
                     <button class="text-gray-400 hover:text-white transition-colors" id="storage-edit-cancel">
@@ -414,6 +457,21 @@ class UIUserManager {
                             <span class="text-gray-400">新限制:</span>
                             <span class="text-blue-400 font-medium" id="storage-edit-display">${currentLimitGB} GB</span>
                         </div>
+=======
+                <h3 class="text-lg font-bold text-blue-300 mb-4">编辑存储限制</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">当前限制</label>
+                        <p class="font-semibold">${this.formatStorageSize(currentLimit)}</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">新限制 (GB)</label>
+                        <input type="number" id="new-storage-limit" min="1" max="1000" 
+                               class="w-full p-3 bg-dark border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                               value="${Math.round(currentLimit / (1024 * 1024 * 1024))}" />
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                     </div>
                 </div>
                 
@@ -428,9 +486,12 @@ class UIUserManager {
         
         document.body.appendChild(modal);
         
+<<<<<<< HEAD
         // 绑定滑动条和输入框事件
         this.bindStorageEditEvents(modal, currentLimitGB);
         
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         // 绑定事件监听器
         const cancelBtn = modal.querySelector('#storage-edit-cancel');
         const saveBtn = modal.querySelector('#storage-edit-save');
@@ -460,6 +521,7 @@ class UIUserManager {
     }
 
     /**
+<<<<<<< HEAD
      * 绑定存储编辑对话框的事件
      */
     bindStorageEditEvents(modal, initialValue) {
@@ -519,14 +581,25 @@ class UIUserManager {
      */
     async updateUserStorage(uuid, modal = null) {
         const newLimitInput = modal ? modal.querySelector('#storage-edit-input') : document.getElementById('storage-edit-input');
+=======
+     * 更新用户存储限制
+     */
+    async updateUserStorage(uuid, modal = null) {
+        const newLimitInput = document.getElementById('new-storage-limit');
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         if (!newLimitInput) {
             this.showMessage('找不到输入框', 'error');
             return;
         }
 
         const newLimitGB = parseInt(newLimitInput.value);
+<<<<<<< HEAD
         if (!newLimitGB || newLimitGB < 1 || newLimitGB > 20) {
             this.showMessage('请输入有效的存储限制 (1-20 GB)', 'error');
+=======
+        if (!newLimitGB || newLimitGB < 1 || newLimitGB > 1000) {
+            this.showMessage('请输入有效的存储限制 (1-1000 GB)', 'error');
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             return;
         }
 

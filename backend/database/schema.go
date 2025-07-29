@@ -125,8 +125,25 @@ func InsertInitialData(db *sql.DB) error {
 
 	// 删除自动插入测试文件的逻辑
 
+<<<<<<< HEAD
 	// 注意：更新日志现在由前端维护，不再在这里自动插入
 	// 前端会通过 /api/update-logs/sync 接口同步更新日志数据
+=======
+	// 插入初始更新日志数据
+	insertUpdateLogs := `
+	INSERT IGNORE INTO update_logs (version, title, description, release_date, features, known_issues) VALUES 
+	('1.0.0', '星际云盘正式发布', '首个正式版本发布，提供完整的文件管理功能', '2024-01-01 00:00:00', 
+	'["文件上传下载", "文件夹管理", "文件预览", "用户认证", "存储空间管理"]', '[]'),
+	('1.1.0', '性能优化与界面改进', '优化应用性能，改进用户界面体验', '2024-01-15 00:00:00', 
+	'["界面响应速度提升", "文件上传进度显示", "拖拽上传支持", "文件类型图标"]', '[]'),
+	('1.2.0', '新增文档管理功能', '添加文档同步和管理功能', '2024-02-01 00:00:00', 
+	'["文档同步", "文档预览", "文档搜索", "文档分类管理"]', '[]')`
+
+	_, err = db.Exec(insertUpdateLogs)
+	if err != nil {
+		return err
+	}
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 
 	return nil
 }

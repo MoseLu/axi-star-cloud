@@ -381,7 +381,10 @@ class SimpleAuthManager {
         // 清除token
         if (this.tokenManager) {
             this.tokenManager.clearTokens();
+<<<<<<< HEAD
             this.tokenManager.clearAdminTokens();
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         }
     }
 

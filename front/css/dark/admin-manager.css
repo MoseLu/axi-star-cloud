@@ -1,6 +1,10 @@
 /* 管理员模块样式 */
 
+<<<<<<< HEAD
 /* 管理员菜单 - 固定定位的全屏菜单 */
+=======
+/* 管理员菜单 */
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 .admin-menu {
     position: fixed;
     top: 0;
@@ -19,6 +23,7 @@
     transform: translateX(0);
 }
 
+<<<<<<< HEAD
 /* 下拉菜单中的管理员菜单 - 新增样式 */
 .relative.group .absolute .py-2 #admin-menu {
     position: static !important;
@@ -76,6 +81,8 @@
     hidden: none !important;
 }
 
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 .admin-menu-header {
     display: flex;
     justify-content: space-between;

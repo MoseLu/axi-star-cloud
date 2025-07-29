@@ -130,6 +130,7 @@ class StorageManager {
     }
     
     /**
+<<<<<<< HEAD
      * 构建完整的头像URL
      * @param {string} avatarPath - 头像路径
      * @returns {string} 完整的头像URL
@@ -195,10 +196,14 @@ class StorageManager {
 
     /**
      * 获取用户信息
+=======
+     * 获取用户信息（完全合并的用户数据）
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
      * @returns {Object|null} 用户信息对象
      */
     getUserInfo() {
         const data = localStorage.getItem(this.KEYS.USER_INFO);
+<<<<<<< HEAD
         const userInfo = data ? JSON.parse(data) : null;
         
         // 兜底：确保avatarUrl始终为完整URL
@@ -215,6 +220,9 @@ class StorageManager {
         }
         
         return userInfo;
+=======
+        return data ? JSON.parse(data) : null;
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
     
     /**
@@ -362,6 +370,7 @@ class StorageManager {
      */
     getStorageInfo() {
         const systemInfo = this.getSystemInfo();
+<<<<<<< HEAD
         const storageInfo = systemInfo.storageInfo || null;
         
         // 验证存储信息格式
@@ -384,12 +393,16 @@ class StorageManager {
         }
         
         return storageInfo;
+=======
+        return systemInfo.storageInfo || null;
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
     
     /**
      * 设置存储信息
      */
     setStorageInfo(storageInfo) {
+<<<<<<< HEAD
         if (!storageInfo) {
             return;
         }
@@ -404,6 +417,9 @@ class StorageManager {
         };
         
         this.updateSystemInfo({ storageInfo: processedStorageInfo });
+=======
+        this.updateSystemInfo({ storageInfo });
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
     
     /**
@@ -547,6 +563,7 @@ class StorageManager {
     getToken() {
         return localStorage.getItem('token');
     }
+<<<<<<< HEAD
 
     // ==================== 文件列表缓存管理 ====================
     
@@ -579,6 +596,8 @@ class StorageManager {
         const systemInfo = this.getSystemInfo();
         return systemInfo.cachedFolders || [];
     }
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 }
 
 // 创建全局实例

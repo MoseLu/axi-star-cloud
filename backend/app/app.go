@@ -48,10 +48,17 @@ func (app *App) Initialize() error {
 	app.Router = app.initializeRouter()
 
 	// 初始化处理器
+<<<<<<< HEAD
 	handlers, userRepo, fileRepo, urlFileRepo := app.initializeHandlers(db)
 
 	// 设置路由
 	app.setupRoutes(handlers, userRepo, fileRepo, urlFileRepo)
+=======
+	handlers := app.initializeHandlers(db)
+
+	// 设置路由
+	app.setupRoutes(handlers)
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 
 	return nil
 }
@@ -155,7 +162,11 @@ func (app *App) corsMiddleware() gin.HandlerFunc {
 }
 
 // initializeHandlers 初始化处理器
+<<<<<<< HEAD
 func (app *App) initializeHandlers(db *sql.DB) (*Handlers, *database.UserRepository, *database.FileRepository, *database.UrlFileRepository) {
+=======
+func (app *App) initializeHandlers(db *sql.DB) *Handlers {
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	// 初始化数据访问层
 	userRepo := database.NewUserRepository(db)
 	fileRepo := database.NewFileRepository(db)
@@ -167,8 +178,13 @@ func (app *App) initializeHandlers(db *sql.DB) (*Handlers, *database.UserReposit
 	uploadQueueManager := utils.NewUploadQueueManager()
 
 	// 初始化处理器层
+<<<<<<< HEAD
 	handlers := &Handlers{
 		Auth:           handlers.NewAuthHandler(userRepo, fileRepo, urlFileRepo),
+=======
+	return &Handlers{
+		Auth:           handlers.NewAuthHandler(userRepo),
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 		File:           handlers.NewFileHandler(fileRepo, userRepo, folderRepo),
 		Folder:         handlers.NewFolderHandler(folderRepo),
 		Storage:        handlers.NewStorageHandler(userRepo, fileRepo, urlFileRepo),
@@ -179,12 +195,19 @@ func (app *App) initializeHandlers(db *sql.DB) (*Handlers, *database.UserReposit
 		UpdateLog:      handlers.NewUpdateLogHandler(db),
 		Health:         handlers.NewHealthHandler(db),
 	}
+<<<<<<< HEAD
 
 	return handlers, userRepo, fileRepo, urlFileRepo
 }
 
 // setupRoutes 设置路由
 func (app *App) setupRoutes(handlers *Handlers, userRepo *database.UserRepository, fileRepo *database.FileRepository, urlFileRepo *database.UrlFileRepository) {
+=======
+}
+
+// setupRoutes 设置路由
+func (app *App) setupRoutes(handlers *Handlers) {
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	// 初始化路由器
 	routerManager := routes.NewRouter(app.Router)
 
@@ -202,7 +225,11 @@ func (app *App) setupRoutes(handlers *Handlers, userRepo *database.UserRepositor
 	)
 
 	// 设置认证路由（/api/auth/*）
+<<<<<<< HEAD
 	routes.SetupAuthRoutes(app.Router, userRepo, fileRepo, urlFileRepo)
+=======
+	routes.SetupAuthRoutes(app.Router, handlers.Auth.GetUserRepo())
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 
 	// 添加额外的健康检查路由（避免与routes.go中的重复）
 	app.Router.GET("/ready", handlers.Health.ReadinessCheck)

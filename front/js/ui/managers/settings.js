@@ -19,6 +19,7 @@ class UISettingsManager {
         this.loadSettings();
         this.setupSettingsUI();
         this.bindSettingsEvents();
+<<<<<<< HEAD
         
         // 延迟绑定存储设置按钮，确保DOM元素已加载
         setTimeout(() => {
@@ -29,6 +30,8 @@ class UISettingsManager {
         setTimeout(() => {
             this.bindStorageSettingsButton();
         }, 2000);
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 
     /**
@@ -179,17 +182,22 @@ class UISettingsManager {
     bindStorageSettingsButton() {
         const storageSettingsBtn = document.getElementById('storage-settings-btn');
         if (storageSettingsBtn) {
+<<<<<<< HEAD
             // 移除已存在的事件监听器，避免重复绑定
             storageSettingsBtn.removeEventListener('click', this.handleStorageSettingsClick);
             
             // 创建事件处理函数
             this.handleStorageSettingsClick = (event) => {
+=======
+            storageSettingsBtn.addEventListener('click', (event) => {
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                 event.preventDefault();
                 event.stopPropagation();
                 
                 // 直接显示设置模态框，鉴权由后端API统一处理
                 this.showSettingsModal();
                 this.switchTab('storage');
+<<<<<<< HEAD
             };
             
             // 绑定事件监听器
@@ -205,6 +213,11 @@ class UISettingsManager {
             setTimeout(() => {
                 this.bindStorageSettingsButton();
             }, 500);
+=======
+            });
+            return true;
+        } else {
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             return false;
         }
     }

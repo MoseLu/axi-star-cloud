@@ -129,6 +129,7 @@ window.ENV_MANAGER = (function() {
 
     // 初始化环境配置
     function initEnvironment() {
+<<<<<<< HEAD
         // 优先从URL参数获取环境配置
         const urlEnv = getEnvFromUrl();
         if (urlEnv && ENVIRONMENTS[urlEnv]) {
@@ -155,6 +156,25 @@ window.ENV_MANAGER = (function() {
             currentEnv = detectedEnv;
             saveEnvToStorage(currentEnv);
         }
+=======
+        // 优先级：URL参数 > localStorage > 自动检测
+        const urlEnv = getEnvFromUrl();
+        const storageEnv = getEnvFromStorage();
+        const detectedEnv = detectEnvironment();
+        
+        let env = urlEnv || storageEnv || detectedEnv;
+        
+        // 验证环境是否有效
+        if (!ENVIRONMENTS[env]) {
+            console.warn(`❌ 无效的环境配置: ${env}，使用默认环境: local`);
+            env = 'local';
+        }
+        
+        currentEnv = env;
+        saveEnvToStorage(env);
+        
+        return env;
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 
     // 切换环境
@@ -221,6 +241,7 @@ window.ENV_MANAGER = (function() {
         return config.apiBaseUrl + endpoint;
     }
 
+<<<<<<< HEAD
     /**
      * 构建资源URL
      */
@@ -228,13 +249,62 @@ window.ENV_MANAGER = (function() {
         if (!path) return '';
         
         // 如果是绝对URL，直接返回
+=======
+    // 构建资源URL
+    function buildResourceUrl(path) {
+        if (!path) return null;
+        
+        const config = getCurrentEnvironment();
+        
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         if (path.startsWith('http://') || path.startsWith('https://')) {
             return path;
         }
         
+<<<<<<< HEAD
         // 如果是相对路径，添加baseUrl
         const baseUrl = getCurrentEnvironment()?.apiBaseUrl || 'https://redamancy.com.cn';
         return `${baseUrl}${path}`;
+=======
+        if (path.startsWith('/')) {
+            if (!config.apiBaseUrl) {
+                return path;
+            }
+            return config.apiBaseUrl + path;
+        }
+        
+        if (!config.apiBaseUrl) {
+            return '/' + path;
+        }
+        
+        return config.apiBaseUrl + '/' + path;
+    }
+
+    // 构建头像URL
+    function buildAvatarUrl(avatarPath) {
+        if (!avatarPath || avatarPath === 'null' || avatarPath === 'undefined') {
+            return '/static/public/docs.png';
+        }
+        
+        if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
+            return avatarPath;
+        }
+        
+        if (avatarPath.startsWith('/uploads/avatars/')) {
+            const fileName = avatarPath.replace('/uploads/avatars/', '');
+            return window.apiGateway?.buildUrl('/uploads/avatars/' + fileName) || ('/uploads/avatars/' + fileName);
+        }
+        
+        if (avatarPath.startsWith('/')) {
+            return avatarPath;
+        }
+        
+        if (avatarPath.includes('avatars/')) {
+            return window.apiGateway?.buildUrl('/uploads/' + avatarPath) || ('/uploads/' + avatarPath);
+        } else {
+            return window.apiGateway?.buildUrl('/uploads/avatars/' + avatarPath) || ('/uploads/avatars/' + avatarPath);
+        }
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 
     // 构建文件URL
@@ -287,6 +357,10 @@ window.ENV_MANAGER = (function() {
         // URL构建
         buildApiUrl,
         buildResourceUrl,
+<<<<<<< HEAD
+=======
+        buildAvatarUrl,
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         buildFileUrl,
         
         // 功能检查
@@ -322,6 +396,10 @@ window.APP_CONFIG = {
 window.APP_UTILS = {
     buildResourceUrl: window.ENV_MANAGER.buildResourceUrl,
     buildApiUrl: window.ENV_MANAGER.buildApiUrl,
+<<<<<<< HEAD
+=======
+    buildAvatarUrl: window.ENV_MANAGER.buildAvatarUrl,
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     buildFileUrl: window.ENV_MANAGER.buildFileUrl
 };
 

@@ -27,6 +27,7 @@ func NewProfileHandler(userRepo *database.UserRepository) *ProfileHandler {
 	}
 }
 
+<<<<<<< HEAD
 // buildAvatarUrl 构建完整的头像URL
 func (h *ProfileHandler) buildAvatarUrl(avatarFileName string) string {
 	if avatarFileName == "" || avatarFileName == "null" || avatarFileName == "undefined" {
@@ -42,6 +43,8 @@ func (h *ProfileHandler) buildAvatarUrl(avatarFileName string) string {
 	return "/uploads/avatars/" + avatarFileName
 }
 
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 // GetProfile 获取用户个人资料
 func (h *ProfileHandler) GetProfile(c *gin.Context) {
 	userID := c.Query("user_id")
@@ -77,7 +80,11 @@ func (h *ProfileHandler) GetProfile(c *gin.Context) {
 		"username":   user.Username,
 		"email":      user.Email,
 		"bio":        user.Bio,
+<<<<<<< HEAD
 		"avatarUrl":  h.buildAvatarUrl(user.Avatar),
+=======
+		"avatar":     user.Avatar,
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 		"created_at": user.CreatedAt,
 		"updated_at": user.UpdatedAt,
 	}
@@ -102,10 +109,17 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 
 	// 解析请求体
 	var updateData struct {
+<<<<<<< HEAD
 		Username  string `json:"username"`
 		Email     string `json:"email"`
 		Bio       string `json:"bio"`
 		AvatarUrl string `json:"avatarUrl"`
+=======
+		Username string `json:"username"`
+		Email    string `json:"email"`
+		Bio      string `json:"bio"`
+		Avatar   string `json:"avatar"`
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	}
 
 	if err := c.ShouldBindJSON(&updateData); err != nil {
@@ -165,8 +179,13 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 	user.Username = updateData.Username
 	user.Email = updateData.Email
 	user.Bio = updateData.Bio
+<<<<<<< HEAD
 	if updateData.AvatarUrl != "" {
 		user.Avatar = updateData.AvatarUrl
+=======
+	if updateData.Avatar != "" {
+		user.Avatar = updateData.Avatar
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	}
 	user.UpdatedAt = time.Now()
 
@@ -187,7 +206,11 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 			"username":   user.Username,
 			"email":      user.Email,
 			"bio":        user.Bio,
+<<<<<<< HEAD
 			"avatarUrl":  h.buildAvatarUrl(user.Avatar),
+=======
+			"avatar":     user.Avatar,
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 			"created_at": user.CreatedAt,
 			"updated_at": user.UpdatedAt,
 		},
@@ -330,6 +353,10 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success":    true,
 		"message":    "头像上传成功",
+<<<<<<< HEAD
 		"avatar_url": h.buildAvatarUrl(avatarURL),
+=======
+		"avatar_url": avatarURL,
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	})
 }

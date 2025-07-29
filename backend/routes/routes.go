@@ -148,9 +148,12 @@ func (r *Router) SetupRoutes(
 
 	// 更新日志相关路由（公开）
 	apiGroup.AddRoute("GET", "/update-logs", updateLogHandler.GetUpdateLogs, "获取更新日志")
+<<<<<<< HEAD
 	apiGroup.AddRoute("POST", "/update-logs/sync", updateLogHandler.SyncUpdateLogs, "同步更新日志")
 	apiGroup.AddRoute("GET", "/update-logs/stats", updateLogHandler.GetUpdateLogStats, "获取更新日志统计")
 	apiGroup.AddRoute("POST", "/update-logs/validate", updateLogHandler.ValidateUpdateLogs, "验证更新日志数据完整性")
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 
 	// 管理员清理任务路由
 	adminGroup.AddRoute("POST", "/upload/cleanup", uploadProgressHandler.CleanupOldTasks, "清理旧上传任务")
@@ -476,10 +479,17 @@ func generateDocTitle(filename string) string {
 
 	// 预定义的标题映射（作为后备）
 	titleMap := map[string]string{
+<<<<<<< HEAD
 		"INDEX":                         "文档索引",
 		"README":                        "项目概述",
 		"UPLOAD_LIMITS":                 "上传限制",
 		"LICENSE":                       "许可证信息",
+=======
+		"INDEX":                         "文档目录",
+		"README":                        "项目概述",
+		"UPLOAD_LIMITS":                 "上传限制",
+		"LICENSE":                       "许可证",
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 		"ENV_USAGE_EXAMPLES":            "环境使用示例",
 		"CSS_README":                    "CSS样式文档",
 		"HTML_README":                   "HTML文档",
@@ -495,6 +505,7 @@ func generateDocTitle(filename string) string {
 		"FRONTEND_DEVELOPMENT_GUIDE":  "前端开发完整指南",
 		"API_AND_AUTH_GUIDE":          "API和认证系统完整指南",
 		"DEPLOYMENT_AND_CONFIG_GUIDE": "部署和配置完整指南",
+<<<<<<< HEAD
 		// 新增登录相关文档
 		"LOGIN_DEBUG_GUIDE":           "登录调试指南",
 		"LOGIN_DISPLAY_FIX":           "登录显示修复",
@@ -502,6 +513,8 @@ func generateDocTitle(filename string) string {
 		// 新增其他文档
 		"JAVASCRIPT_STRUCTURE_GUIDE":  "JavaScript目录结构指南",
 		"UPDATE_LOG_SYSTEM_GUIDE":     "更新日志系统指南",
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	}
 
 	if title, exists := titleMap[name]; exists {

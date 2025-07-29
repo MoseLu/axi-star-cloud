@@ -28,6 +28,7 @@ class Particles {
             this.setupParticles();
         }, 500);
         
+<<<<<<< HEAD
         // 监听环境变化事件，重新初始化粒子特效
         this.setupEnvironmentChangeListener();
         
@@ -61,11 +62,17 @@ class Particles {
         });
     }
 
+=======
+        this.isInitialized = true;
+    }
+
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     // 设置粒子背景
     setupParticles() {
         // 检查是否在登录页面
         const loginPage = document.getElementById('login-page');
         if (!loginPage || loginPage.classList.contains('hidden')) {
+<<<<<<< HEAD
             // 如果不在登录页面，延迟重试
             if (this.particlesRetryCount < this.maxRetries) {
                 this.particlesRetryCount++;
@@ -73,11 +80,14 @@ class Particles {
                     this.setupParticles();
                 }, 500);
             }
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             return;
         }
 
         const particlesContainer = document.getElementById('particles-js');
         if (!particlesContainer) {
+<<<<<<< HEAD
             // 如果容器不存在，延迟重试
             if (this.particlesRetryCount < this.maxRetries) {
                 this.particlesRetryCount++;
@@ -85,6 +95,8 @@ class Particles {
                     this.setupParticles();
                 }, 200);
             }
+=======
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             return;
         }
 
@@ -100,6 +112,7 @@ class Particles {
             return;
         }
 
+<<<<<<< HEAD
         // 检查容器是否有内容，如果有内容但需要重新初始化，先清空
         if (particlesContainer.children.length > 0) {
             // 如果已经有粒子效果，检查是否需要重新初始化
@@ -111,6 +124,11 @@ class Particles {
                 // 如果画布异常，清空容器重新初始化
                 particlesContainer.innerHTML = '';
             }
+=======
+        // 检查容器是否有内容
+        if (particlesContainer.children.length > 0) {
+            return;
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         }
 
         try {
@@ -226,6 +244,7 @@ class Particles {
                 retina_detect: true
             });
 
+<<<<<<< HEAD
             // 重置重试计数
             this.particlesRetryCount = 0;
 
@@ -238,6 +257,13 @@ class Particles {
                     this.setupParticles();
                 }, 300);
             }
+=======
+        } catch (error) {
+            // 如果初始化失败，延迟重试
+            setTimeout(() => {
+                this.setupParticles();
+            }, 300);
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         }
     }
 
@@ -253,6 +279,7 @@ class Particles {
     reinit() {
         this.destroy();
         this.particlesRetryCount = 0;
+<<<<<<< HEAD
         this.isInitialized = false;
         
         // 延迟重新初始化，确保清理完成
@@ -271,6 +298,11 @@ class Particles {
         setTimeout(() => {
             this.setupParticles();
         }, 200);
+=======
+        setTimeout(() => {
+            this.setupParticles();
+        }, 100);
+>>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 }
 
