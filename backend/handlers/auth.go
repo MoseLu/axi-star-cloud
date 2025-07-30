@@ -1,20 +1,12 @@
 /**
  * 认证处理器（重构版本）
-<<<<<<< HEAD
- *
-=======
  * 
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
  * 这是重构后的认证处理器，使用分层架构：
  * - 控制器层：处理HTTP请求和响应
  * - 服务层：处理业务逻辑
  * - 中间件层：处理权限验证
  * - 工具层：提供辅助功能
-<<<<<<< HEAD
- *
-=======
  * 
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
  * 该文件现在主要作为兼容性层，实际功能已迁移到新的架构中
  */
 
@@ -37,23 +29,12 @@ type AuthHandler struct {
 }
 
 // NewAuthHandler 创建认证处理器实例
-<<<<<<< HEAD
 func NewAuthHandler(userRepo *database.UserRepository, fileRepo *database.FileRepository, urlFileRepo *database.UrlFileRepository) *AuthHandler {
 	// 创建服务层
 	authService := services.NewAuthService(userRepo, fileRepo, urlFileRepo)
 
 	// 创建控制器
 	authController := controllers.NewAuthController(authService)
-
-=======
-func NewAuthHandler(userRepo *database.UserRepository) *AuthHandler {
-	// 创建服务层
-	authService := services.NewAuthService(userRepo)
-	
-	// 创建控制器
-	authController := controllers.NewAuthController(authService)
-	
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	// 创建中间件
 	authMiddleware := middleware.NewAuthMiddleware(userRepo)
 

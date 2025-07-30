@@ -1,21 +1,13 @@
 /**
  * 认证工具函数
-<<<<<<< HEAD
- *
-=======
  * 
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
  * 提供认证相关的辅助功能，包括：
  * - 密码验证
  * - 用户名验证
  * - 邮箱验证
  * - 权限检查
  * - 用户信息格式化
-<<<<<<< HEAD
- *
-=======
  * 
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
  * 该工具文件提供可复用的认证相关功能
  */
 
@@ -34,13 +26,8 @@ import (
 
 // PasswordValidator 密码验证器
 type PasswordValidator struct {
-<<<<<<< HEAD
 	minLength        int
 	maxLength        int
-=======
-	minLength int
-	maxLength int
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	requireUppercase bool
 	requireLowercase bool
 	requireNumber    bool
@@ -110,13 +97,8 @@ func (pv *PasswordValidator) ValidatePassword(password string) error {
 
 // UsernameValidator 用户名验证器
 type UsernameValidator struct {
-<<<<<<< HEAD
 	minLength    int
 	maxLength    int
-=======
-	minLength int
-	maxLength int
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	allowedChars *regexp.Regexp
 }
 
@@ -187,7 +169,6 @@ func IsAdminUser(username string) bool {
 	return username == "Mose"
 }
 
-<<<<<<< HEAD
 // buildAvatarUrl 构建完整的头像URL
 func buildAvatarUrl(avatarFileName string) string {
 	if avatarFileName == "" || avatarFileName == "null" || avatarFileName == "undefined" {
@@ -211,16 +192,6 @@ func FormatUserResponse(user *models.User) models.UserResponse {
 		Bio:       user.Bio,
 		AvatarUrl: buildAvatarUrl(user.Avatar),
 		CreatedAt: user.CreatedAt,
-=======
-// FormatUserResponse 格式化用户响应
-func FormatUserResponse(user *models.User) models.UserResponse {
-	return models.UserResponse{
-		UUID:     user.UUID,
-		Username: user.Username,
-		Email:    user.Email,
-		Bio:      user.Bio,
-		Avatar:   user.Avatar,
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	}
 }
 
@@ -228,23 +199,12 @@ func FormatUserResponse(user *models.User) models.UserResponse {
 func SanitizeUsername(username string) string {
 	// 移除首尾空格
 	username = strings.TrimSpace(username)
-<<<<<<< HEAD
 
 	// 转换为小写
 	username = strings.ToLower(username)
 
 	// 移除特殊字符
 	username = regexp.MustCompile(`[^a-zA-Z0-9_-]`).ReplaceAllString(username, "")
-
-=======
-	
-	// 转换为小写
-	username = strings.ToLower(username)
-	
-	// 移除特殊字符
-	username = regexp.MustCompile(`[^a-zA-Z0-9_-]`).ReplaceAllString(username, "")
-	
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	return username
 }
 
@@ -254,11 +214,6 @@ func GenerateDisplayName(username string) string {
 	if len(username) == 0 {
 		return username
 	}
-<<<<<<< HEAD
-
-=======
-	
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	return strings.ToUpper(string(username[0])) + strings.ToLower(username[1:])
 }
 
@@ -267,22 +222,11 @@ func ValidateStorageLimit(storageLimit int64) error {
 	if storageLimit <= 0 {
 		return fmt.Errorf("存储限制必须大于0")
 	}
-<<<<<<< HEAD
-
-=======
-	
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	// 最大存储限制为100GB
 	maxStorage := int64(100 * 1024 * 1024 * 1024)
 	if storageLimit > maxStorage {
 		return fmt.Errorf("存储限制不能超过100GB")
 	}
-<<<<<<< HEAD
 
 	return nil
 }
-=======
-	
-	return nil
-} 
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
