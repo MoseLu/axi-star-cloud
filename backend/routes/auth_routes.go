@@ -1,10 +1,6 @@
 /**
  * 认证路由
-<<<<<<< HEAD
  *
-=======
- * 
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
  * 负责定义认证相关的API路由，包括：
  * - 用户注册路由
  * - 用户登录路由
@@ -12,11 +8,7 @@
  * - Token验证路由
  * - Token刷新路由
  * - 管理员功能路由
-<<<<<<< HEAD
  *
-=======
- * 
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
  * 该路由文件将路由定义与业务逻辑分离，提供清晰的路由结构
  */
 
@@ -32,15 +24,9 @@ import (
 )
 
 // SetupAuthRoutes 设置认证路由
-<<<<<<< HEAD
 func SetupAuthRoutes(router *gin.Engine, userRepo interface{}, fileRepo interface{}, urlFileRepo interface{}) {
 	// 创建服务层和控制器
 	authService := services.NewAuthService(userRepo.(*database.UserRepository), fileRepo.(*database.FileRepository), urlFileRepo.(*database.UrlFileRepository))
-=======
-func SetupAuthRoutes(router *gin.Engine, userRepo interface{}) {
-	// 创建服务层和控制器
-	authService := services.NewAuthService(userRepo.(*database.UserRepository))
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	authController := controllers.NewAuthController(authService)
 	authMiddleware := middleware.NewAuthMiddleware(userRepo.(*database.UserRepository))
 
@@ -72,8 +58,4 @@ func SetupAuthRoutes(router *gin.Engine, userRepo interface{}) {
 			adminAuth.PUT("/users/storage", authController.UpdateUserStorage)
 		}
 	}
-<<<<<<< HEAD
 }
-=======
-} 
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89

@@ -42,7 +42,7 @@ func NewCookieManager() *CookieManager {
 		domain:   "", // 空域名表示当前域名
 		secure:   secure,
 		httpOnly: httpOnly,
-		sameSite: http.SameSiteLaxMode, // 改为Lax模式，更宽松
+		sameSite: http.SameSiteLaxMode, // 使用Lax模式，更宽松
 	}
 }
 

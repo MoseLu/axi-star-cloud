@@ -3,34 +3,25 @@
  * 整合所有UI功能模块，提供统一的UIManager接口
  */
 
-<<<<<<< HEAD
 // 核心模块将在HTML中单独引用
 // 分类管理模块将在HTML中单独引用
 // 文件渲染模块将在HTML中单独引用
 // 文件夹管理模块将在HTML中单独引用
 // 文件预览模块将在HTML中单独引用
-=======
-// 核心模块将在HTML中单独引入
-// 分类管理模块将在HTML中单独引入
-// 文件渲染模块将在HTML中单独引入
-// 文件夹管理模块将在HTML中单独引入
-// 文件预览模块将在HTML中单独引入
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
-
 class UIManager {
     constructor() {
         // 使用新的API系统，确保向后兼容
         this.api = window.apiSystem || window.apiManager;
         if (!this.api) {
-    
+            console.warn('API系统未找到');
         }
         this.currentFolderId = null;
         this.folders = [];
         this.currentCategory = 'all'; // 记录当前分类
-<<<<<<< HEAD
         this.allFiles = []; // 缓存所有文件数
         this.isLoading = false; // 防抖标志
-        this.isSubmittingDoc = false; // 防重复提交标
+        this.isSubmittingDoc = false; // 防重复提交标志
+        this.isInitialized = false; // 初始化状态标志
         
         // 延迟初始化，确保所有依赖的类都已加载
         this.initWithRetry();
@@ -72,7 +63,7 @@ class UIManager {
             'UICore', 'UICategories', 'UIFileRenderer', 'UIFolderManager',
             'UIFilePreview', 'UIFileOperations', 'UIUploadManager', 'UIModalManager',
             'UIProfileManager', 'UIAdminManager', 'UIDocsSync', 'UIUtils',
-            'UISettingsManager', 'UIUserManager'
+            'UISettingsManager', 'UIUserManager', 'UIUpdateLogsManager'
         ];
         
         return requiredClasses.every(className => typeof window[className] === 'function');
@@ -119,24 +110,38 @@ class UIManager {
         }
         
         // 初始化各个管理器
-        this.helpManager = new UIHelpManager();
-        this.profileManager = new UIProfileManager();
-        this.settingsManager = new UISettingsManager();
-        this.uploadManager = new UIUploadManager();
-        this.userManager = new UIUserManager();
-        this.adminManager = new UIAdminManager();
-        this.docsSync = new UIDocsSync();
-        this.updateLogsManager = new UpdateLogsManager();
-        
-        // 设置管理器引用
-        this.helpManager.uiManager = this;
-        this.profileManager.uiManager = this;
-        this.settingsManager.uiManager = this;
-        this.uploadManager.uiManager = this;
-        this.userManager.uiManager = this;
-        this.adminManager.uiManager = this;
-        this.docsSync.uiManager = this;
-        this.updateLogsManager.uiManager = this;
+        if (typeof UIHelpManager !== 'undefined') {
+            this.helpManager = new UIHelpManager();
+            this.helpManager.uiManager = this;
+        }
+        if (typeof UIProfileManager !== 'undefined') {
+            this.profileManager = new UIProfileManager();
+            this.profileManager.uiManager = this;
+        }
+        if (typeof UISettingsManager !== 'undefined') {
+            this.settingsManager = new UISettingsManager();
+            this.settingsManager.uiManager = this;
+        }
+        if (typeof UIUploadManager !== 'undefined') {
+            this.uploadManager = new UIUploadManager();
+            this.uploadManager.uiManager = this;
+        }
+        if (typeof UIUserManager !== 'undefined') {
+            this.userManager = new UIUserManager();
+            this.userManager.uiManager = this;
+        }
+        if (typeof UIAdminManager !== 'undefined') {
+            this.adminManager = new UIAdminManager();
+            this.adminManager.uiManager = this;
+        }
+        if (typeof UIDocsSync !== 'undefined') {
+            this.docsSync = new UIDocsSync();
+            this.docsSync.uiManager = this;
+        }
+        if (typeof UIUpdateLogsManager !== 'undefined') {
+            this.updateLogsManager = new UIUpdateLogsManager();
+            this.updateLogsManager.uiManager = this;
+        }
     }
 
     /**
@@ -202,59 +207,18 @@ class UIManager {
         if (typeof UIUserManager !== 'undefined') {
             this.userManager = new UIUserManager(this);
         }
-=======
-        this.allFiles = []; // 缓存所有文件数据
-        this.isLoading = false; // 防抖标志
-        this.isSubmittingDoc = false; // 防重复提交标志
         
-        // 初始化核心功能
-        this.core = new UICore();
-        this.core.uiManager = this; // 设置引用
+        if (typeof UIHelpManager !== 'undefined') {
+            this.helpManager = new UIHelpManager();
+        }
         
-        // 初始化分类管理功能
-        this.categories = new UICategories(this);
-        
-        // 初始化文件渲染功能
-        this.fileRenderer = new UIFileRenderer(this);
-        
-        // 初始化文件夹管理功能
-        this.folderManager = new UIFolderManager(this);
-        
-        // 初始化文件预览功能
-        this.filePreview = new UIFilePreview(this);
-        
-        // 初始化文件操作功能
-        this.fileOperations = new UIFileOperations();
-        
-        // 初始化上传管理功能
-        this.uploadManager = new UIUploadManager(this);
-        
-        // 初始化模态框管理功能
-        this.modalManager = new UIModalManager();
-        
-        // 初始化个人资料管理功能
-        this.profileManager = new UIProfileManager();
-        
-        // 初始化管理员功能
-        this.adminManager = new UIAdminManager();
-        
-        // 初始化文档同步功能
-        this.docsSync = new UIDocsSync();
-        
-        // 初始化工具函数
-        this.utils = new UIUtils();
-        
-        // 初始化设置管理
-        this.settingsManager = new UISettingsManager();
-        
-        // 初始化用户管理
-        this.userManager = new UIUserManager(this);
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
+        if (typeof UIUpdateLogsManager !== 'undefined') {
+            this.updateLogsManager = new UIUpdateLogsManager();
+        }
         
         this.init();
     }
 
-<<<<<<< HEAD
     async init() {
         try {
             // 立即隐藏管理员按钮，避免页面刷新时短暂显示
@@ -312,18 +276,13 @@ class UIManager {
                 this.ensureAvatarDisplayStability();
             }, 100);
             
-            // 强制绑定存储设置按钮
+            // 强制绑定存储设置按钮（只调用一次，避免重复绑定）
             setTimeout(() => {
                 this.forceBindStorageSettingsButton();
             }, 1000);
-            // 延迟再次绑定，确保按钮存在
-            setTimeout(() => {
-                this.forceBindStorageSettingsButton();
-            }, 2000);
             
             // 延迟检查管理员权限并显示相应按钮
             setTimeout(() => {
-                this.forceBindStorageSettingsButton();
                 // 只有在确认是管理员后才显示存储设置按钮
                 if (this.adminManager && this.adminManager.isAdmin) {
                     this.forceShowStorageSettingsButton();
@@ -341,6 +300,12 @@ class UIManager {
             
             // 设置登录表单
             this.setupLoginForm();
+            
+            // 绑定上传按钮事件
+            this.bindUploadBtn();
+            
+            // 标记初始化完成
+            this.isInitialized = true;
             
         } catch (error) {
             console.error('❌ UI管理器初始化失败:', error);
@@ -491,107 +456,6 @@ class UIManager {
                 grandparent.style.visibility = 'visible';
                 grandparent.style.opacity = '1';
             }
-=======
-    init() {
-        // 委托给核心模块处理初始化
-        this.core.init();
-        
-        // 初始化各个管理器
-        try {
-            if (this.categories && typeof this.categories.init === 'function') {
-                this.categories.init();
-            }
-            
-            if (this.fileRenderer && typeof this.fileRenderer.init === 'function') {
-                this.fileRenderer.init();
-            }
-            
-            if (this.folderManager && typeof this.folderManager.init === 'function') {
-                this.folderManager.init();
-            }
-            
-            if (this.filePreview && typeof this.filePreview.init === 'function') {
-                this.filePreview.init();
-            }
-            
-            if (this.fileOperations && typeof this.fileOperations.init === 'function') {
-                this.fileOperations.init();
-            }
-            
-            if (this.uploadManager && typeof this.uploadManager.init === 'function') {
-                this.uploadManager.init();
-            }
-            
-            if (this.modalManager && typeof this.modalManager.init === 'function') {
-                this.modalManager.init();
-            }
-            
-            if (this.profileManager && typeof this.profileManager.init === 'function') {
-                this.profileManager.init();
-            }
-            
-            if (this.adminManager && typeof this.adminManager.init === 'function') {
-                this.adminManager.init();
-            }
-            
-            if (this.docsSync && typeof this.docsSync.init === 'function') {
-                this.docsSync.init();
-                // 将docs-sync模块暴露到全局
-                window.docsSyncManager = this.docsSync;
-                
-                // 暴露外站文档操作函数到全局
-                window.previewExternalDocument = (docId) => {
-                    if (this.docsSync && typeof this.docsSync.previewExternalDocument === 'function') {
-                        this.docsSync.previewExternalDocument(docId);
-                    }
-                };
-                
-                window.downloadExternalDocument = (docId) => {
-                    if (this.docsSync && typeof this.docsSync.downloadExternalDocument === 'function') {
-                        this.docsSync.downloadExternalDocument(docId);
-                    }
-                };
-                
-                window.removeExternalDocument = (docId) => {
-                    if (this.docsSync && typeof this.docsSync.removeExternalDocument === 'function') {
-                        this.docsSync.removeExternalDocument(docId);
-                    }
-                };
-                
-                // 暴露同步文档模态框函数到全局
-                window.showSyncDocsModal = () => {
-                    if (this.docsSync && typeof this.docsSync.showSyncDocsModal === 'function') {
-                        this.docsSync.showSyncDocsModal();
-                    }
-                };
-            }
-            
-            if (this.utils && typeof this.utils.init === 'function') {
-                this.utils.init();
-            }
-            
-            if (this.settingsManager && typeof this.settingsManager.init === 'function') {
-                this.settingsManager.init();
-            }
-            
-            if (this.userManager && typeof this.userManager.init === 'function') {
-                this.userManager.init();
-            }
-            
-        } catch (error) {
-
-        }
-        
-        // 绑定设置模态框事件
-        this.bindSettingsEvents();
-        
-        // 绑定个人资料模态框事件
-        this.bindProfileEvents();
-
-        // 自动加载全部文件列表，保证页面加载后文件自动渲染
-        if (typeof this.loadFiles === 'function') {
-            this.loadFiles();
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         }
     }
 
@@ -603,11 +467,7 @@ class UIManager {
             document.removeEventListener('click', existingHandler);
         }
         
-<<<<<<< HEAD
         // 创建新的事件处理函数
-=======
-        // 创建新的事件处理器
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         this._settingsEventHandler = (e) => {
             // 取消按钮
             if (e.target.id === 'cancel-settings-btn') {
@@ -625,8 +485,21 @@ class UIManager {
                 return;
             }
             
-            // 关闭按钮
-            if (e.target.closest('button') && e.target.closest('button').innerHTML.includes('fa-times')) {
+            // 关闭按钮 - 改进关闭按钮检测逻辑
+            const closeButton = e.target.closest('button');
+            if (closeButton && (
+                closeButton.id === 'close-settings-modal' ||
+                closeButton.innerHTML.includes('fa-times') ||
+                closeButton.querySelector('.fa-times')
+            )) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.hideSettingsModal();
+                return;
+            }
+            
+            // 点击模态框外部区域关闭
+            if (e.target.classList.contains('fixed') && e.target.getAttribute('data-modal') === 'settings') {
                 e.preventDefault();
                 e.stopPropagation();
                 this.hideSettingsModal();
@@ -679,7 +552,6 @@ class UIManager {
         return this.core.showLoginInterface();
     }
 
-    
     // 文件渲染相关
     renderFileList(files) {
         // 传递当前布局模式给fileRenderer
@@ -706,60 +578,35 @@ class UIManager {
         const countDisplayElement = document.getElementById('file-count-display');
         const countDescElement = document.getElementById('file-count-desc');
         if (countDisplayElement) {
-<<<<<<< HEAD
             // 在文件列表区域显示当前文件数
-=======
-            // 在文件列表区域显示当前文件数量
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             countDisplayElement.textContent = current;
         }
         
         // 根据当前分类更新计数描述文本
         if (countDescElement) {
             const currentCategory = this.currentCategory || 'all';
-<<<<<<< HEAD
-            let unitText = '个文';
-            
-            // 只有外站文档分类显示"个文"，其他分类保留"个文"
-            if (currentCategory === 'external-docs') {
-                unitText = '个文';
-            }
-            
-            // 更新计数描述文本 - 修复选择"
-            const spans = countDescElement.querySelectorAll('span');
-            spans.forEach(span => {
-                if (span.classList.contains('hidden') && span.classList.contains('xs:inline')) {
-                    // 这是"个文"的span
-                    if (span.textContent.includes('个文')) {
-                        span.textContent = '个文';
-                    } else if (span.textContent.includes('个文') || span.textContent.includes('个文')) {
-                        span.textContent = ` ${unitText}`;
-                    }
-                } else if (span.classList.contains('xs:hidden')) {
-                    // 这是小屏幕显示的"
-                    span.textContent = unitText.replace(', ', '');
-=======
             let unitText = '个文件';
             
-            // 只有外站文档分类显示"个文档"，其他分类保持"个文件"
+            // 外站文档分类显示"个文档"，其他分类显示"个文件"
             if (currentCategory === 'external-docs') {
                 unitText = '个文档';
             }
             
-            // 更新计数描述文本 - 修复选择器
+            // 更新计数描述文本
             const spans = countDescElement.querySelectorAll('span');
             spans.forEach(span => {
                 if (span.classList.contains('hidden') && span.classList.contains('xs:inline')) {
-                    // 这是"共 "和" 个文件"的span
-                    if (span.textContent.includes('共')) {
-                        span.textContent = '共 ';
-                    } else if (span.textContent.includes('个文件') || span.textContent.includes('个文档')) {
+                    // 这是显示"个文件"或"个文档"的span
+                    if (span.textContent.includes('个文件')) {
+                        span.textContent = ` ${unitText}`;
+                    } else if (span.textContent.includes('个文')) {
+                        span.textContent = ` ${unitText}`;
+                    } else if (span.textContent.includes('个文档')) {
                         span.textContent = ` ${unitText}`;
                     }
                 } else if (span.classList.contains('xs:hidden')) {
-                    // 这是小屏幕显示的"个"
-                    span.textContent = unitText.replace('个', '');
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
+                    // 这是小屏幕显示的
+                    span.textContent = unitText.replace(', ', '');
                 }
             });
         }
@@ -857,7 +704,6 @@ class UIManager {
     }
     
     // 文件夹管理相关
-<<<<<<< HEAD
     renderFolderList(folders) {
         if (this.folderManager && typeof this.folderManager.renderFolderList === 'function') {
             return this.folderManager.renderFolderList(folders);
@@ -865,16 +711,11 @@ class UIManager {
             console.warn('folderManager未初始化或renderFolderList方法不存在');
             return Promise.resolve();
         }
-=======
-    renderFolderList(folders) { 
-        return this.folderManager.renderFolderList(folders);
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
     
     // 刷新文件夹列表
     async refreshFolders() {
         try {
-<<<<<<< HEAD
             if (!this.folders) {
                 const response = await fetch('/api/folders');
                 const result = await response.json();
@@ -892,20 +733,6 @@ class UIManager {
             }
         } catch (error) {
             console.error('刷新文件夹失败:', error);
-=======
-            if (!this.api || !this.api.folders || !this.api.folders.getFolders) {
-                return;
-            }
-            
-            const folders = await this.api.folders.getFolders();
-            
-            if (Array.isArray(folders)) {
-                this.folders = folders;
-                await this.folderManager.renderFolderList(this.folders);
-            }
-        } catch (error) {
-            console.error('refreshFolders错误:', error);
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         }
     }
     
@@ -1144,7 +971,6 @@ class UIManager {
     }
     
     handleFileSelect(event) { 
-<<<<<<< HEAD
         if (this.uploadManager && typeof this.uploadManager.handleFileSelect === 'function') {
             return this.uploadManager.handleFileSelect(event);
         }
@@ -1214,58 +1040,15 @@ class UIManager {
             return this.uploadManager.retryUpload(fileId);
         }
         return false;
-=======
-        return this.uploadManager.handleFileSelect(event);
-    }
-    
-    updateFileInputMultiple() { 
-        return this.uploadManager.updateFileInputMultiple();
-    }
-    
-    updateUploadAreaHint() { 
-        return this.uploadManager.updateUploadAreaHint();
-    }
-
-    initUploadManager(uploadAreaSelector, fileInputSelector) {
-        return this.uploadManager.init(uploadAreaSelector, fileInputSelector);
-    }
-
-    setMaxFileSize(size) {
-        return this.uploadManager.setMaxFileSize(size);
-    }
-
-    setAllowedTypes(types) {
-        return this.uploadManager.setAllowedTypes(types);
-    }
-
-    getUploadQueue() {
-        return this.uploadManager.getUploadQueue();
-    }
-
-    isCurrentlyUploading() {
-        return this.uploadManager.isCurrentlyUploading();
-    }
-
-    cancelUpload(fileId) {
-        return this.uploadManager.cancelUpload(fileId);
-    }
-
-    retryUpload(fileId) {
-        return this.uploadManager.retryUpload(fileId);
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
     
     // 模态框管理相关
     showMessage(message, type = 'info') { 
-<<<<<<< HEAD
         if (this.modalManager && typeof this.modalManager.showMessage === 'function') {
             return this.modalManager.showMessage(message, type);
         }
         // 如果modalManager不存在，使用备用方法
         return false;
-=======
-        return this.modalManager.showMessage(message, type);
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
     
     showCreateFolderModal() { 
@@ -1281,11 +1064,7 @@ class UIManager {
             const categoryLabel = this.getCategoryLabel(this.currentCategory);
             const categoryInfo = document.getElementById('current-category-info');
             if (categoryInfo) {
-<<<<<<< HEAD
                 categoryInfo.textContent = `当前分类${categoryLabel}`;
-=======
-                categoryInfo.textContent = `当前分类：${categoryLabel}`;
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                 categoryInfo.style.display = 'block';
             }
             
@@ -1366,11 +1145,7 @@ class UIManager {
             return;
         }
         
-<<<<<<< HEAD
         // 如果当前分类为全部文件，提示用户选择具体分类
-=======
-        // 如果当前在"全部文件"分类下，提示用户选择具体分类
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         if (!category || category === 'all') {
             this.showMessage('请先选择具体分类（如文档、图片等），然后在该分类下创建文件夹', 'error');
             return;
@@ -1387,11 +1162,7 @@ class UIManager {
         );
         
         if (duplicateFolder) {
-<<<<<<< HEAD
             this.showMessage(`该分类下已存在名称${folderName}"的文件夹，请使用其他名称`, 'error');
-=======
-            this.showMessage(`该分类下已存在名为"${folderName}"的文件夹，请使用其他名称`, 'error');
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             return;
         }
         
@@ -1419,8 +1190,8 @@ class UIManager {
         if (this.profileManager) {
             await this.profileManager.showProfileModal();
         } else {
-
-    }
+            console.error('❌ UIManager - profileManager未找到');
+        }
     }
     // 个人资料相关方法委托给profileManager
     loadProfileData() {
@@ -1455,11 +1226,15 @@ class UIManager {
             if (input && input._inputHandler) {
                 input.removeEventListener('input', input._inputHandler);
                 input.removeEventListener('change', input._inputHandler);
-        }
+            }
             modal.remove();
         });
-        
 
+        // 清理旧的事件监听器
+        if (this._settingsEventHandler) {
+            document.removeEventListener('click', this._settingsEventHandler);
+            this._settingsEventHandler = null;
+        }
 
         // 先获取真实存储数据
         let storageInfo;
@@ -1483,7 +1258,7 @@ class UIManager {
         // 计算真实数据
         const limitGB = Math.round((storageInfo.limit_bytes || storageInfo.total_space || 1073741824) / (1024 * 1024 * 1024)); // 默认1GB
         const usedGB = (storageInfo.used_bytes || storageInfo.used_space || 0) / (1024 * 1024 * 1024);
-        const usagePercentage = limitGB > 0 ? Math.round((usedGB / limitGB) * 100) : 0;
+        const usagePercentage = limitGB > 0 ? ((usedGB / limitGB) * 100).toFixed(2) : '0.00';
         
         // 创建模态框，使用真实数据
         const modal = document.createElement('div');
@@ -1494,7 +1269,7 @@ class UIManager {
             <div class="bg-dark-light rounded-xl p-6 w-full max-w-md max-h-[80vh] shadow-2xl border border-purple-400/30 overflow-hidden">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-xl font-bold text-purple-300">存储空间设置</h3>
-                    <button class="text-gray-400 hover:text-white transition-colors" onclick="this.closest('.fixed').remove()">
+                    <button id="close-settings-modal" class="text-gray-400 hover:text-white transition-colors">
                         <i class="fa fa-times text-xl"></i>
                     </button>
                 </div>
@@ -1511,27 +1286,21 @@ class UIManager {
                                 <span class="text-gray-400 text-sm">GB</span>
                             </div>
                         </div>
-<<<<<<< HEAD
-                        <p class="text-xs text-gray-500 mt-1">设置范围�?GB - 20GB</p>
-=======
                         <p class="text-xs text-gray-500 mt-1">设置范围：1GB - 20GB</p>
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                     </div>
                     
                     <div class="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl p-3 border border-blue-400/20">
                         <h4 class="text-sm font-medium text-gray-300 mb-2">当前存储状态</h4>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                             <div>
-<<<<<<< HEAD
-                                <div class="text-gray-400">总空?</div>
-=======
                                 <div class="text-gray-400">总空间</div>
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                                 <div id="settings-total-storage" class="text-blue-300 font-medium">${limitGB} GB</div>
                             </div>
                             <div>
                                 <div class="text-gray-400">已使用</div>
-                                <div id="settings-used-storage" class="text-purple-300 font-medium">${usedGB < 0.1 ? (usedGB * 1024).toFixed(1) + ' MB' : usedGB.toFixed(1) + ' GB'}</div>
+                                <div id="settings-used-storage" class="text-purple-300 font-medium">
+                                    ${usedGB < 0.1 ? `${(usedGB * 1024).toFixed(1)} MB` : `${usedGB.toFixed(1)} GB`}
+                                </div>
                             </div>
                             <div>
                                 <div class="text-gray-400">使用率</div>
@@ -1541,11 +1310,11 @@ class UIManager {
                     </div>
                 </div>
                 
-                <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-purple-light/20">
-                    <button id="cancel-settings-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors text-sm">
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button id="cancel-settings-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors">
                         取消
                     </button>
-                    <button id="save-settings-btn" class="px-4 py-2 bg-gradient-to-r from-purple-500/80 to-blue-500/80 hover:from-purple-500 hover:to-blue-500 text-white rounded-lg shadow-md transition-all duration-300 transform hover:scale-[1.03] text-sm">
+                    <button id="save-settings-btn" class="px-4 py-2 bg-gradient-to-r from-primary/80 to-secondary/80 hover:from-primary to-secondary text-white rounded-lg shadow-md shadow-primary/20 transition-all duration-300 transform hover:scale-[1.03]">
                         <i class="fa fa-save mr-1"></i> 保存设置
                     </button>
                 </div>
@@ -1553,18 +1322,15 @@ class UIManager {
         `;
         
         document.body.appendChild(modal);
-
         
-        // 绑定事件
-        this.bindSettingsEvents();
-        
-        // 绑定滑块事件，传入真实的使用空间数据
-        this.bindStorageSliderEvents(usedGB);
-        
-        // 通知settings-manager不要重复渲染
-        if (window.settingsManager) {
-            window.settingsManager.skipRender = true;
-        }
+        // 使用setTimeout确保DOM元素已经完全渲染后再绑定事件
+        setTimeout(() => {
+            // 绑定存储滑块事件
+            this.bindStorageSliderEvents(usedGB);
+            
+            // 绑定设置模态框事件
+            this.bindSettingsEvents();
+        }, 0);
     }
 
     // 绑定存储滑块事件
@@ -1572,25 +1338,20 @@ class UIManager {
         // 检查是否有多个设置模态框
         const allSettingsModals = document.querySelectorAll('.fixed[data-modal="settings"]');
 
-        
         // 使用最后一个模态框（最新的）
         const modal = allSettingsModals[allSettingsModals.length - 1];
         if (!modal) {
-
+            console.warn('未找到设置模态框');
             return;
         }
-        
 
-        
         const slider = modal.querySelector('#storage-slider');
         const input = modal.querySelector('#storage-input');
         if (!slider || !input) {
-
+            console.warn('未找到存储控件');
             return;
         }
-        
 
-        
         let cachedUsedSpace = usedGB;
         
         // 更新右侧显示
@@ -1611,11 +1372,7 @@ class UIManager {
             if (usagePercentageEl) usagePercentageEl.textContent = `${usagePercentage}%`;
         };
         
-<<<<<<< HEAD
         // 确保滑块和输入框的值相同
-=======
-        // 确保滑块和输入框的值同步
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         const syncValues = (value) => {
             const numValue = Math.max(1, Math.min(20, parseInt(value) || 1));
     
@@ -1634,20 +1391,13 @@ class UIManager {
             input.removeEventListener('change', input._inputHandler);
         }
 
-        
-<<<<<<< HEAD
         // 创建滑块事件处理函数
-=======
-        // 创建滑块事件处理器
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         slider._sliderHandler = (e) => {
-    
             syncValues(e.target.value);
         };
         
         // 创建输入框事件处理器
         input._inputHandler = (e) => {
-    
             const value = parseInt(e.target.value);
             if (!isNaN(value) && value >= 1 && value <= 20) {
                 syncValues(value);
@@ -1659,16 +1409,9 @@ class UIManager {
         slider.addEventListener('change', slider._sliderHandler);
         input.addEventListener('input', input._inputHandler);
         input.addEventListener('change', input._inputHandler);
-        
 
-        
-<<<<<<< HEAD
         // 初始值
-=======
-        // 初始化
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         const initialValue = parseInt(slider.value) || 1;
-
         syncValues(initialValue);
     }
 
@@ -1692,19 +1435,16 @@ class UIManager {
             }
 
             const limitGB = parseInt(input.value);
-    
-            
+
             if (limitGB < 1 || limitGB > 20) {
                 this.showMessage('存储空间限制必须在1-20GB之间', 'error');
                 return;
             }
 
             const limitBytes = limitGB * 1024 * 1024 * 1024;
-    
-            
+
             const result = await this.api.storage.updateStorageLimit(limitBytes);
-    
-            
+
             this.clearAllMessages();
             this.showMessage('存储空间设置已保存', 'success');
             this.hideSettingsModal();
@@ -1724,9 +1464,43 @@ class UIManager {
         try {
             // 获取最新的存储信息
             const storageInfo = await this.api.storage.getStorageInfo();
+            if (!storageInfo) {
+                console.warn('无法获取存储信息');
+                return;
+            }
             
-            // 调用全局存储同步方法
+            // 同步所有存储空间显示
             await this.syncStorageDisplay(storageInfo);
+            
+            // 更新设置模态框中的显示（如果存在）
+            const settingsModals = document.querySelectorAll('.fixed[data-modal="settings"]');
+            settingsModals.forEach(modal => {
+                const totalStorage = modal.querySelector('#settings-total-storage');
+                const usedStorage = modal.querySelector('#settings-used-storage');
+                const usagePercentage = modal.querySelector('#settings-usage-percentage');
+                
+                if (totalStorage) {
+                    const limitGB = Math.round((storageInfo.limit_bytes || storageInfo.total_space) / (1024 * 1024 * 1024));
+                    totalStorage.textContent = `${limitGB} GB`;
+                }
+                
+                if (usedStorage) {
+                    const usedGB = (storageInfo.used_bytes || storageInfo.used_space) / (1024 * 1024 * 1024);
+                    if (usedGB < 0.1) {
+                        usedStorage.textContent = `${(usedGB * 1024).toFixed(1)} MB`;
+                    } else {
+                        usedStorage.textContent = `${usedGB.toFixed(1)} GB`;
+                    }
+                }
+                
+                if (usagePercentage) {
+                    const limitGB = Math.round((storageInfo.limit_bytes || storageInfo.total_space) / (1024 * 1024 * 1024));
+                    const usedGB = (storageInfo.used_bytes || storageInfo.used_space) / (1024 * 1024 * 1024);
+                    const percentage = limitGB > 0 ? ((usedGB / limitGB) * 100).toFixed(2) : '0.00';
+                    usagePercentage.textContent = `${percentage}%`;
+                }
+            });
+            
         } catch (error) {
             console.error('刷新存储空间显示失败:', error);
         }
@@ -1735,11 +1509,7 @@ class UIManager {
     // 全局存储同步方法
     async syncStorageDisplay(storageInfo) {
         if (!storageInfo || storageInfo.used_space === undefined || storageInfo.total_space === undefined) {
-<<<<<<< HEAD
             console.warn('⚠️ 存储信息格式不正确', storageInfo);
-=======
-            console.warn('⚠️ 存储信息格式不正确:', storageInfo);
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             return;
         }
 
@@ -1757,14 +1527,7 @@ class UIManager {
                 window.userManager.updateStorageDisplay(storageInfo);
             }
             
-            // 更新管理员页面的存储显示（如果存在）
-            if (window.adminManager && typeof window.adminManager.updateStorageDisplay === 'function') {
-                window.adminManager.updateStorageDisplay({
-                    total: storageInfo.total_space,
-                    used: storageInfo.used_space,
-                    available: storageInfo.total_space - storageInfo.used_space
-                });
-            }
+
             
             // 更新设置页面的存储显示（如果存在）
             if (window.settingsManager && typeof window.settingsManager.renderStorageData === 'function') {
@@ -1777,11 +1540,7 @@ class UIManager {
             }
             
         } catch (error) {
-<<<<<<< HEAD
             console.error('同步存储空间显示失败:', error);
-=======
-            console.error('❌ 同步存储空间显示失败:', error);
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         }
     }
 
@@ -1791,13 +1550,18 @@ class UIManager {
         const modals = document.querySelectorAll('.fixed[data-modal="settings"]');
         modals.forEach(modal => {
             // 清理模态框的事件监听器
-            if (modal._inputHandler) {
-                modal.removeEventListener('input', modal._inputHandler);
-                modal._inputHandler = null;
+            const slider = modal.querySelector('#storage-slider');
+            const input = modal.querySelector('#storage-input');
+            
+            if (slider && slider._sliderHandler) {
+                slider.removeEventListener('input', slider._sliderHandler);
+                slider.removeEventListener('change', slider._sliderHandler);
+                slider._sliderHandler = null;
             }
-            if (modal._sliderInputHandler) {
-                modal.removeEventListener('input', modal._sliderInputHandler);
-                modal._sliderInputHandler = null;
+            if (input && input._inputHandler) {
+                input.removeEventListener('input', input._inputHandler);
+                input.removeEventListener('change', input._inputHandler);
+                input._inputHandler = null;
             }
             modal.remove();
         });
@@ -1807,6 +1571,15 @@ class UIManager {
             document.removeEventListener('click', this._settingsEventHandler);
             this._settingsEventHandler = null;
         }
+        
+        // 确保所有相关的事件监听器都被清理
+        const allSettingsButtons = document.querySelectorAll('#close-settings-modal, #cancel-settings-btn, #save-settings-btn');
+        allSettingsButtons.forEach(button => {
+            // 移除可能存在的内联事件监听器
+            button.onclick = null;
+            button.onmousedown = null;
+            button.onmouseup = null;
+        });
     }
 
     hideProfileModal() {
@@ -1842,7 +1615,7 @@ class UIManager {
 
             if (usagePercentage) {
                 const percentage = (storageInfo.used_space / storageInfo.total_space) * 100;
-                usagePercentage.textContent = `${percentage.toFixed(1)}%`;
+                usagePercentage.textContent = `${percentage.toFixed(2)}%`;
             }
         } catch (error) {
             // 静默处理错误
@@ -1973,37 +1746,22 @@ class UIManager {
     
     // 头像渲染
     updateProfileDisplay(profile) {
-<<<<<<< HEAD
         // 调用 profileManager的updateProfileDisplay方法来更新头像和用户信息
-=======
-        // 调用 profileManager 的 updateProfileDisplay 方法来更新头像和用户信息
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         if (this.profileManager) {
             this.profileManager.updateProfileDisplay(profile);
         }
         
-<<<<<<< HEAD
         // 更新欢迎模块中的用户信息
         const welcomeMessage = document.getElementById('welcome-message');
         if (welcomeMessage && profile && profile.username) {
             welcomeMessage.textContent = `欢迎回来${profile.username}`;
-=======
-        // 更新欢迎模块中的用户名
-        const welcomeMessage = document.getElementById('welcome-message');
-        if (welcomeMessage && profile && profile.username) {
-            welcomeMessage.textContent = `欢迎回来，${profile.username}`;
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         }
         
         // 如果是管理员，确保所有用户信息元素都正确显示
         if (profile && profile.username === 'Mose' && this.adminManager && this.adminManager.isAdmin) {
             // 强制更新欢迎模块的用户名
             if (welcomeMessage) {
-<<<<<<< HEAD
                 welcomeMessage.textContent = `欢迎回来${profile.username}`;
-=======
-                welcomeMessage.textContent = `欢迎回来，${profile.username}`;
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             }
             
             // 强制更新头像显示
@@ -2023,37 +1781,22 @@ class UIManager {
 
     // 从缓存更新用户信息（用于页面刷新时）
     updateProfileDisplayFromCache(userData) {
-<<<<<<< HEAD
         // 调用 profileManager的updateProfileDisplayFromCache方法
-=======
-        // 调用 profileManager 的 updateProfileDisplayFromCache 方法
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         if (this.profileManager) {
             this.profileManager.updateProfileDisplayFromCache(userData);
         }
         
-<<<<<<< HEAD
         // 更新欢迎模块中的用户信息
         const welcomeMessage = document.getElementById('welcome-message');
         if (welcomeMessage && userData && userData.username) {
             welcomeMessage.textContent = `欢迎回来${userData.username}`;
-=======
-        // 更新欢迎模块中的用户名
-        const welcomeMessage = document.getElementById('welcome-message');
-        if (welcomeMessage && userData && userData.username) {
-            welcomeMessage.textContent = `欢迎回来，${userData.username}`;
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         }
         
         // 如果是管理员，确保所有用户信息元素都正确显示
         if (userData && userData.username === 'Mose' && this.adminManager && this.adminManager.isAdmin) {
             // 强制更新欢迎模块的用户名
             if (welcomeMessage) {
-<<<<<<< HEAD
                 welcomeMessage.textContent = `欢迎回来${userData.username}`;
-=======
-                welcomeMessage.textContent = `欢迎回来，${userData.username}`;
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             }
             
             // 强制更新头像显示
@@ -2182,16 +1925,12 @@ class UIManager {
     }
 
     showAdminMenu() {
-<<<<<<< HEAD
         if (this.adminManager && typeof this.adminManager.showAdminMenu === 'function') {
             return this.adminManager.showAdminMenu();
         } else {
             console.warn('adminManager未初始化或showAdminMenu方法不存在');
             return Promise.resolve();
         }
-=======
-        return this.adminManager.showAdminMenu();
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 
     hideAdminMenu() {
@@ -2214,9 +1953,7 @@ class UIManager {
         return this.adminManager.loadUserList();
     }
 
-    loadStorageData() {
-        return this.adminManager.loadStorageData();
-    }
+
 
     loadSystemSettings() {
         return this.adminManager.loadSystemSettings();
@@ -2334,6 +2071,7 @@ class UIManager {
     
     // 弹窗上传文件（根据分类动态配置）
     showUploadModal(category = 'all') {
+        
         // 分类与格式映射
         const FILE_TYPE_MAP = {
             image: {
@@ -2392,11 +2130,7 @@ class UIManager {
                 label: '全部文件',
                 accept: Object.values(FILE_TYPE_MAP).map(t => t.accept).join(','),
                 multiple: true,
-<<<<<<< HEAD
                 max: 9,
-=======
-                max: 100,
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                 formats: [].concat(...Object.values(FILE_TYPE_MAP).map(t => t.formats))
             };
         } else {
@@ -2418,15 +2152,9 @@ class UIManager {
                         <div id="upload-placeholder">
                             <i class="fa fa-cloud-upload text-3xl text-purple-light/60 mb-3"></i>
                             <p class="text-gray-300 mb-2 text-sm">拖放文件到此处上传，或点击选择文件</p>
-<<<<<<< HEAD
                             <p class="text-purple-light text-xs" id="modal-upload-file-types">支持的格式 ${config.formats.join(', ')}</p>
                             ${category === 'image' || category === 'all' ? '<p class="text-emerald-light text-xs mt-1">💡 最多可上传9个文件</p>' : ''}
                             
-=======
-                            <p class="text-purple-light text-xs" id="modal-upload-file-types">支持的格式: ${config.formats.join(', ')}</p>
-                            ${category === 'image' ? '<p class="text-emerald-light text-xs mt-1">💡 最多可选9张图片</p>' : ''}
-                            ${category === 'video' ? '<p class="text-yellow-light text-xs mt-1">⚠️ 视频文件大小限制为50MB</p>' : ''}
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                             <button id="modal-browse-btn" class="mt-3 bg-gradient-to-r from-primary/80 to-secondary/80 text-white px-3 py-2 rounded-lg shadow-md transition-all duration-300 text-sm">选择文件</button>
                         </div>
                         <div id="modal-upload-file-info" class="hidden"></div>
@@ -2441,36 +2169,23 @@ class UIManager {
             </div>
         `;
         document.body.appendChild(modal);
-<<<<<<< HEAD
-        
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         // 事件绑定
         const fileInput = modal.querySelector('#modal-file-input');
         const browseBtn = modal.querySelector('#modal-browse-btn');
         const uploadList = modal.querySelector('#modal-upload-list');
         const uploadArea = modal.querySelector('#modal-upload-area');
         let selectedFiles = [];
-<<<<<<< HEAD
-        
         // 选择文件按钮点击事件
         browseBtn.addEventListener('click', () => {
             fileInput.click();
         });
         
         // 文件选择事件
-=======
-        browseBtn.addEventListener('click', () => fileInput.click());
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         fileInput.addEventListener('change', (e) => {
             selectedFiles = Array.from(e.target.files);
             if (config.multiple && selectedFiles.length > config.max) {
                 this.showMessage(`最多只能选择${config.max}个文件`, 'warning');
-<<<<<<< HEAD
                 // 安全地清空文件输入框
-=======
-                // 安全地清空文件输入
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                 try {
                     const dataTransfer = new DataTransfer();
                     fileInput.files = dataTransfer.files;
@@ -2486,17 +2201,11 @@ class UIManager {
             
             // 调用uploadManager的autoAdjustUploadUI方法来自动调整UI
             if (this.uploadManager && selectedFiles.length > 0) {
-<<<<<<< HEAD
                 this.uploadManager.autoAdjustUploadUI(selectedFiles, config.max);
-=======
-                this.uploadManager.autoAdjustUploadUI(selectedFiles);
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                 // 关闭模态框，让autoAdjustUploadUI处理文件预览
                 modal.remove();
             }
         });
-<<<<<<< HEAD
-        
         // 拖拽上传
         uploadArea.addEventListener('dragover', e => { 
             e.preventDefault(); 
@@ -2506,11 +2215,6 @@ class UIManager {
             e.preventDefault(); 
             uploadArea.classList.remove('drag-over'); 
         });
-=======
-        // 拖拽上传
-        uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
-        uploadArea.addEventListener('dragleave', e => { e.preventDefault(); uploadArea.classList.remove('drag-over'); });
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         uploadArea.addEventListener('drop', e => {
             e.preventDefault();
             uploadArea.classList.remove('drag-over');
@@ -2529,17 +2233,11 @@ class UIManager {
             
             // 调用uploadManager的autoAdjustUploadUI方法来自动调整UI
             if (this.uploadManager && files.length > 0) {
-<<<<<<< HEAD
                 this.uploadManager.autoAdjustUploadUI(files, config.max);
-=======
-                this.uploadManager.autoAdjustUploadUI(files);
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                 // 关闭模态框，让autoAdjustUploadUI处理文件预览
                 modal.remove();
             }
         });
-<<<<<<< HEAD
-        
         // 关闭按钮
         modal.querySelector('#modal-upload-close-btn').onclick = () => modal.remove();
         
@@ -2547,10 +2245,6 @@ class UIManager {
         modal.querySelector('#modal-upload-cancel').onclick = () => modal.remove();
         
         // 确认上传按钮
-=======
-        modal.querySelector('#modal-upload-close-btn').onclick = () => modal.remove();
-        modal.querySelector('#modal-upload-cancel').onclick = () => modal.remove();
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         modal.querySelector('#modal-upload-confirm').onclick = () => {
             if (selectedFiles.length === 0) {
                 this.showMessage('请先选择文件', 'warning');
@@ -2625,11 +2319,7 @@ class UIManager {
     /**
      * 格式化文件大小
      * @param {number} bytes - 字节数
-<<<<<<< HEAD
      * @returns {string} 格式化后的文件大小
-=======
-     * @returns {string} 格式化后的大小
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
      */
     formatFileSize(bytes) {
         if (bytes === 0) return '0 B';
@@ -2694,21 +2384,17 @@ class UIManager {
     // 顶栏上传按钮事件绑定到showUploadModal
     bindUploadBtn() {
         const uploadBtn = document.getElementById('upload-btn');
+        
         if (uploadBtn) {
             // 移除之前的事件监听器，避免重复绑定
             uploadBtn.removeEventListener('click', this.handleUploadBtnClick);
             
             // 创建事件处理函数
-<<<<<<< HEAD
             this.handleUploadBtnClick = (event) => {
                 // 阻止默认行为，确保不会触发任何文件选择
                 event.preventDefault();
                 event.stopPropagation();
                 
-=======
-            this.handleUploadBtnClick = () => {
-    
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                 // URL分类调用添加链接弹窗，其他分类调用文件上传弹窗
                 if (this.currentCategory === 'url') {
                     this.showAddLinkModal();
@@ -2840,12 +2526,7 @@ class UIManager {
             
             // 禁用按钮，显示加载状态
             confirmBtn.disabled = true;
-<<<<<<< HEAD
             confirmBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-1"></i> 添加链接...';
-=======
-            confirmBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-1"></i> 添加中...';
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
-            
             try {
                 // 调用添加链接的API
                 await this.addUrlLink({ title, url, notes });
@@ -2944,8 +2625,6 @@ class UIManager {
         if (!storageInfo) {
             return;
         }
-<<<<<<< HEAD
-        
         // 统一数据格式处理
         let used, total;
         
@@ -2966,14 +2645,6 @@ class UIManager {
         
         const percentage = total > 0 ? (used / total) * 100 : 0;
         
-=======
-        // 处理嵌套的存储数据结构
-        const storageData = storageInfo.storage || storageInfo;
-        // 只用limit_bytes作为总存储空间，避免被新文件大小覆盖
-        const used = storageData.used_space || storageData.used_bytes || 0;
-        const total = storageData.limit_bytes || 1073741824; // 默认1GB
-        const percentage = total > 0 ? (used / total) * 100 : 0;
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         // 格式化存储大小
         const formatSize = (bytes) => {
             if (bytes === 0) return '0 B';
@@ -2982,53 +2653,33 @@ class UIManager {
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         };
-<<<<<<< HEAD
-        
         const usedFormatted = formatSize(used);
         const totalFormatted = formatSize(total);
         
-=======
-        const usedFormatted = formatSize(used);
-        const totalFormatted = formatSize(total);
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         // 更新存储空间显示
         const totalStorageElement = document.getElementById('total-storage');
         if (totalStorageElement) {
             totalStorageElement.textContent = totalFormatted;
         }
-<<<<<<< HEAD
-        
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         const usedStorageElement = document.getElementById('used-storage');
         if (usedStorageElement) {
             usedStorageElement.textContent = usedFormatted;
         }
-<<<<<<< HEAD
         
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
-        const usagePercentageElement = document.getElementById('usage-percentage');
-        if (usagePercentageElement) {
-            usagePercentageElement.textContent = `${percentage.toFixed(2)}%`;
-        }
-<<<<<<< HEAD
-        
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         const progressBarElement = document.getElementById('storage-progress-bar');
         if (progressBarElement) {
             progressBarElement.style.width = `${percentage}%`;
         }
-<<<<<<< HEAD
-        
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         const progressTextElement = document.getElementById('storage-progress-text');
         if (progressTextElement) {
             progressTextElement.textContent = `${percentage.toFixed(2)}% 已使用`;
         }
-<<<<<<< HEAD
+        
+        // 更新空间利用率百分比显示
+        const usagePercentageElement = document.getElementById('usage-percentage');
+        if (usagePercentageElement) {
+            usagePercentageElement.textContent = `${percentage.toFixed(2)}%`;
+        }
         
         this.updateStorageStatus(percentage);
         
@@ -3042,9 +2693,6 @@ class UIManager {
                 usage_percent: percentage
             });
         }
-=======
-        this.updateStorageStatus(percentage);
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 
     /**
@@ -3189,8 +2837,6 @@ class UIManager {
         if (!this.files || !Array.isArray(this.files)) return [];
         return this.files.filter(f => f.type === 'image');
     }
-<<<<<<< HEAD
-
     async syncStorageDisplay(storageInfo) {
         if (!storageInfo) {
             console.warn('⚠️ 存储信息为空');
@@ -3232,14 +2878,7 @@ class UIManager {
                 window.userManager.updateStorageDisplay(processedStorageInfo);
             }
             
-            // 更新管理员页面的存储显示（如果存在）
-            if (window.adminManager && typeof window.adminManager.updateStorageDisplay === 'function') {
-                window.adminManager.updateStorageDisplay({
-                    total: processedStorageInfo.total_space,
-                    used: processedStorageInfo.used_space,
-                    available: processedStorageInfo.total_space - processedStorageInfo.used_space
-                });
-            }
+
             
             // 更新设置页面的存储显示（如果存在）
             if (window.settingsManager && typeof window.settingsManager.renderStorageData === 'function') {
@@ -3266,28 +2905,22 @@ class UIManager {
                 this.settingsManager.bindStorageSettingsButton();
             }
             
-            // 直接绑定按钮事件
+            // 不再直接绑定按钮事件，避免与 settings.js 中的绑定冲突
+            // 让 settings.js 统一管理按钮事件
+            
             const storageSettingsBtn = document.getElementById('storage-settings-btn');
             if (storageSettingsBtn) {
-                // 移除已存在的事件监听器
-                storageSettingsBtn.removeEventListener('click', this.handleStorageSettingsClick);
-                
-                // 创建事件处理函数
-                this.handleStorageSettingsClick = (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    
-                    // 显示设置模态框
-                    this.showSettingsModal();
-                };
-                
-                // 绑定事件监听器
-                storageSettingsBtn.addEventListener('click', this.handleStorageSettingsClick);
-                
                 // 确保按钮可见
                 storageSettingsBtn.style.display = 'inline-block';
                 storageSettingsBtn.style.visibility = 'visible';
+                storageSettingsBtn.classList.remove('hidden');
+                storageSettingsBtn.removeAttribute('hidden');
                 
+                // 检查是否已经绑定过事件
+                if (storageSettingsBtn._hasBoundEvent) {
+                    console.debug('存储设置按钮事件已绑定，跳过重复绑定');
+                    return;
+                }
             } else {
                 console.warn('⚠️ 存储设置按钮不存在');
             }
@@ -3317,9 +2950,3 @@ class UIManager {
 
 // 导出UI管理器
 window.UIManager = UIManager; 
-=======
-}
-
-// 导出UI管理器
-window.UIManager = UIManager; 
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89

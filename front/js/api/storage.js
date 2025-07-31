@@ -11,10 +11,6 @@ class Storage {
     async getStorageInfo() {
         const userId = this.core.getCurrentUserId();
         if (!userId) {
-<<<<<<< HEAD
-=======
-            console.warn('用户未登录，无法获取存储信息');
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             return null;
         }
 

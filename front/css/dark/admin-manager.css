@@ -1,10 +1,6 @@
 /* 管理员模块样式 */
 
-<<<<<<< HEAD
 /* 管理员菜单 - 固定定位的全屏菜单 */
-=======
-/* 管理员菜单 */
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 .admin-menu {
     position: fixed;
     top: 0;
@@ -23,7 +19,6 @@
     transform: translateX(0);
 }
 
-<<<<<<< HEAD
 /* 下拉菜单中的管理员菜单 - 新增样式 */
 .relative.group .absolute .py-2 #admin-menu {
     position: static !important;
@@ -80,9 +75,6 @@
     visibility: visible !important;
     hidden: none !important;
 }
-
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 .admin-menu-header {
     display: flex;
     justify-content: space-between;
@@ -372,56 +364,7 @@
     border-radius: 4px;
 }
 
-/* 存储管理 */
-.storage-management {
-    margin: 20px 0;
-}
 
-.storage-overview {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    border: 1px solid #e9ecef;
-}
-
-.storage-chart {
-    width: 100%;
-    height: 200px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #666;
-    font-size: 14px;
-}
-
-.storage-details {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-}
-
-.storage-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px;
-    background: #f8f9fa;
-    border-radius: 6px;
-}
-
-.storage-label {
-    font-size: 14px;
-    color: #666;
-}
-
-.storage-value {
-    font-weight: 500;
-    color: #333;
-}
 
 /* 系统设置 */
 .settings-form {
@@ -925,36 +868,7 @@ body.theme-light .user-actions .btn {
     color: #374151 !important;
 }
 
-body.theme-light .storage-management {
-    background: rgba(255, 255, 255, 0.95) !important;
-}
 
-body.theme-light .storage-overview {
-    background: rgba(249, 250, 251, 0.5) !important;
-    border: 1px solid #e5e7eb !important;
-}
-
-body.theme-light .storage-chart {
-    background: rgba(249, 250, 251, 0.3) !important;
-    border: 1px solid #e5e7eb !important;
-}
-
-body.theme-light .storage-details {
-    color: #1f2937 !important;
-}
-
-body.theme-light .storage-item {
-    background: rgba(249, 250, 251, 0.5) !important;
-    border: 1px solid #e5e7eb !important;
-}
-
-body.theme-light .storage-label {
-    color: #374151 !important;
-}
-
-body.theme-light .storage-value {
-    color: #1f2937 !important;
-}
 
 body.theme-light .settings-form {
     background: rgba(249, 250, 251, 0.3) !important;
@@ -1119,3 +1033,1300 @@ body.theme-light .btn-sm {
     padding: 4px 8px !important;
     font-size: 12px !important;
 } 
+
+/* 新增：优化后的用户管理模态框样式 */
+
+/* 用户管理模态框动画 */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes statCardPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+/* 用户卡片悬停效果 */
+.user-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: cardFadeIn 0.6s ease-out;
+}
+
+.user-card:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* 统计卡片动画 */
+.stat-card-animated {
+    animation: statCardPulse 2s ease-in-out infinite;
+}
+
+/* 搜索框焦点效果 */
+.search-input:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    transform: scale(1.02);
+}
+
+/* 按钮悬停效果增强 */
+.btn-enhanced {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-enhanced:hover::before {
+    left: 100%;
+}
+
+/* 进度条动画 */
+.storage-progress {
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 用户头像状态指示器 */
+.user-avatar-status {
+    position: relative;
+}
+
+.user-avatar-status::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    background: #10b981;
+    border: 2px solid #1f2937;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+/* 模态框背景模糊效果 */
+.modal-backdrop-blur {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* 渐变文字效果 */
+.gradient-text {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* 卡片阴影效果 */
+.card-shadow-glow {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(59, 130, 246, 0.1);
+}
+
+.card-shadow-glow:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.2);
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+    .user-management-modal {
+        margin: 1rem;
+        max-width: calc(100vw - 2rem);
+    }
+    
+    .user-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .user-actions {
+        margin-top: 1rem;
+        justify-content: center;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+}
+
+/* 深色主题特定样式 */
+.dark .user-management-modal {
+    background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(31, 41, 55, 0.95));
+}
+
+.dark .user-card {
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.8), rgba(17, 24, 39, 0.8));
+    border: 1px solid rgba(75, 85, 99, 0.3);
+}
+
+.dark .user-card:hover {
+    border-color: rgba(59, 130, 246, 0.5);
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.9), rgba(17, 24, 39, 0.9));
+}
+
+/* 加载动画优化 */
+.loading-spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(59, 130, 246, 0.3);
+    border-radius: 50%;
+    border-top-color: #3b82f6;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 工具提示样式 */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: #1f2937;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* 滚动条美化 */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(75, 85, 99, 0.3);
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #2563eb, #7c3aed);
+}
+
+/* 用户管理卡片专用样式 - 优化版本 */
+.user-management-card {
+    transition: all 0.2s ease; /* 减少动画时间，从0.3s改为0.2s */
+    animation: cardFadeIn 0.4s ease-out; /* 减少动画时间，从0.6s改为0.4s */
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.95), rgba(17, 24, 39, 0.95));
+    border: 1px solid rgba(75, 85, 99, 0.5);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    /* 防止水平滚动 */
+    max-width: 100%;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    /* 确保卡片内容不会溢出 */
+    min-height: 0;
+    /* 防止内容溢出导致水平滚动 */
+    overflow-x: hidden;
+    /* 优化：减少动画对布局的影响 */
+    will-change: auto;
+}
+
+.user-management-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+    transition: left 0.6s ease;
+    pointer-events: none;
+}
+
+.user-management-card:hover::before {
+    left: 100%;
+}
+
+.user-management-card:hover {
+    transform: translateY(-2px) scale(0.98);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.5);
+    background: linear-gradient(135deg, rgba(31, 41, 55, 1), rgba(17, 24, 39, 1));
+}
+
+/* 用户卡片主容器布局 */
+.user-management-card .flex.items-start.justify-between {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    width: 100%;
+}
+
+/* 新的布局样式 */
+.user-management-card .flex.items-center.justify-between.mb-6 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+.user-management-card .grid.grid-cols-1.md\\:grid-cols-2.gap-6 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .user-management-card .grid.grid-cols-1.md\\:grid-cols-2.gap-6 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* 信息卡片样式 */
+.user-management-card .bg-gray-800\\/30.rounded-xl.p-4.border.border-gray-700\\/50 {
+    background: rgba(31, 41, 55, 0.3);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    border: 1px solid rgba(55, 65, 81, 0.5);
+    transition: all 0.3s ease;
+}
+
+.user-management-card .bg-gray-800\\/30.rounded-xl.p-4.border.border-gray-700\\/50:hover {
+    background: rgba(31, 41, 55, 0.4);
+    border-color: rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+}
+
+/* 存储进度条样式 */
+.user-management-card .w-full.h-3.bg-gray-700.rounded-full.overflow-hidden.mb-3 {
+    width: 100%;
+    height: 0.75rem;
+    background: rgba(55, 65, 81, 0.8);
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+.user-management-card .w-full.h-3.bg-gray-700.rounded-full.overflow-hidden.mb-3 .bg-gradient-to-r {
+    height: 100%;
+    border-radius: 9999px;
+    transition: all 0.3s ease;
+}
+
+/* 信息网格样式 */
+.user-management-card .grid.grid-cols-2.gap-4.text-sm {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    font-size: 0.875rem;
+}
+
+.user-management-card .space-y-3.text-sm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.user-management-card .flex.items-center.justify-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+
+
+/* 用户基本信息区域 */
+.user-management-card .flex.items-center.space-x-4 {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+/* 用户头像容器 */
+.user-management-card .relative.flex-shrink-0 {
+    position: relative;
+    flex-shrink: 0;
+    width: 4rem;
+    height: 4rem;
+}
+
+/* 用户头像样式 */
+.user-management-card img,
+.user-management-card .w-12.h-12 {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(75, 85, 99, 0.5);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.user-management-card:hover img,
+.user-management-card:hover .w-12.h-12 {
+    border-color: rgba(59, 130, 246, 0.5);
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+}
+
+/* 用户信息文本区域 */
+.user-management-card .flex-1.min-w-0 {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* 居中对齐的用户信息 */
+.user-management-card .text-center {
+    text-align: center;
+}
+
+.user-management-card .justify-center {
+    justify-content: center;
+}
+
+/* 紧凑布局优化 */
+.user-management-card .space-x-2 {
+    gap: 0.5rem;
+}
+
+.user-management-card .space-x-3 {
+    gap: 0.75rem;
+}
+
+.user-management-card .gap-2 {
+    gap: 0.5rem;
+}
+
+.user-management-card .gap-4 {
+    gap: 1rem;
+}
+
+
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(31, 41, 55, 0.3);
+    border: 1px solid rgba(75, 85, 99, 0.5);
+}
+
+/* 用户名和角色标签 */
+.user-management-card .flex.items-center.space-x-3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.user-management-card h4 {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1.125rem;
+    margin: 0;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+/* 角色标签 */
+.user-management-card .px-2.py-1 {
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.user-management-card .bg-blue-500\/20.text-blue-400 {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+}
+
+.user-management-card .bg-yellow-500\/20.text-yellow-400 {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+}
+
+/* 用户详细信息 */
+.user-management-card .text-gray-400.text-sm,
+.user-management-card .text-gray-500.text-xs {
+    color: #9ca3af;
+    font-size: 0.875rem;
+    margin: 0;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.user-management-card .text-gray-500.text-xs {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+/* 存储信息区域 */
+.user-management-card .text-right.flex-shrink-0 {
+    text-align: right;
+    flex-shrink: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-end;
+}
+
+/* 存储进度条容器 */
+.user-management-card .mb-3 {
+    margin-bottom: 0.75rem;
+    width: 100%;
+}
+
+/* 存储进度条标签 */
+.user-management-card .flex.items-center.justify-between.text-sm {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.user-management-card .text-gray-400 {
+    color: #9ca3af;
+}
+
+.user-management-card .text-green-400,
+.user-management-card .text-orange-400,
+.user-management-card .text-red-400 {
+    font-weight: 500;
+}
+
+/* 存储进度条 */
+.user-management-card .w-32.h-2 {
+    width: 8rem;
+    height: 0.5rem;
+    background: rgba(75, 85, 99, 0.5);
+    border-radius: 9999px;
+    overflow: hidden;
+    position: relative;
+}
+
+.user-management-card .w-32.h-2 .bg-gradient-to-r {
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.user-management-card .w-32.h-2 .bg-gradient-to-r::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shimmer 2s infinite;
+}
+
+/* 存储大小信息 */
+.user-management-card .text-sm.text-gray-400.space-y-1 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    color: #9ca3af;
+    text-align: right;
+}
+
+.user-management-card .text-sm.text-gray-400.space-y-1 div {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: nowrap;
+}
+
+/* 操作按钮区域 */
+.user-management-card .flex.flex-col.space-y-2 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    min-width: 0;
+}
+
+/* 按钮样式 */
+.user-management-card .storage-edit-btn,
+.user-management-card .user-details-btn {
+    position: relative;
+    overflow: hidden;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 0;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+.user-management-card .storage-edit-btn {
+    background: none;
+    color: #60a5fa;
+    border: none;
+}
+
+.user-management-card .storage-edit-btn:hover {
+    background: none;
+    border: none;
+    transform: scale(1.05);
+}
+
+.user-management-card .user-details-btn {
+    background: linear-gradient(135deg, rgba(75, 85, 99, 0.2), rgba(107, 114, 128, 0.2));
+    color: #9ca3af;
+    border-color: rgba(75, 85, 99, 0.3);
+}
+
+.user-management-card .user-details-btn:hover {
+    background: linear-gradient(135deg, rgba(75, 85, 99, 0.3), rgba(107, 114, 128, 0.3));
+    border-color: rgba(75, 85, 99, 0.5);
+    transform: scale(1.05);
+}
+
+/* 按钮悬停效果 */
+.user-management-card .storage-edit-btn::before,
+.user-management-card .user-details-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.user-management-card .storage-edit-btn:hover::before,
+.user-management-card .user-details-btn:hover::before {
+    left: 100%;
+}
+
+/* 用户状态指示器区域 */
+.user-management-card .mt-4.pt-4.border-t {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(75, 85, 99, 0.3);
+    width: 100%;
+}
+
+.user-management-card .flex.items-center.justify-between.text-xs {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #9ca3af;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.user-management-card .flex.items-center.space-x-4.flex-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.user-management-card .flex.items-center.flex-shrink-0 {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 0.25rem;
+}
+
+.user-management-card .flex.items-center.break-words {
+    display: flex;
+    align-items: center;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    gap: 0.25rem;
+}
+
+/* 在线状态图标 */
+.user-management-card .fa-circle,
+.user-management-card .fa-circle-o {
+    font-size: 0.5rem;
+    margin-right: 0.25rem;
+}
+
+.user-management-card .text-green-400 {
+    color: #34d399;
+}
+
+.user-management-card .text-gray-400 {
+    color: #9ca3af;
+}
+
+/* 响应式设计优化 */
+@media (max-width: 1024px) {
+    .user-management-card .flex.items-start.justify-between {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .user-management-card .text-right.flex-shrink-0 {
+        align-items: stretch;
+        text-align: left;
+    }
+    
+    .user-management-card .flex.flex-col.space-y-2 {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .user-management-card .storage-edit-btn,
+    .user-management-card .user-details-btn {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .user-management-card {
+        padding: 1rem;
+    }
+    
+    .user-management-card .flex.items-center.space-x-4 {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .user-management-card .text-right.flex-shrink-0 {
+        align-items: center;
+        text-align: center;
+    }
+    
+    .user-management-card .flex.flex-col.space-y-2 {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .user-management-card .storage-edit-btn,
+    .user-management-card .user-details-btn {
+        width: 100%;
+    }
+    
+    .user-management-card .flex.items-center.justify-between.text-xs {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .user-management-card {
+        padding: 0.75rem;
+    }
+    
+    .user-management-card h4 {
+        font-size: 1rem;
+    }
+    
+    .user-management-card .text-sm,
+    .user-management-card .text-xs {
+        font-size: 0.75rem;
+    }
+    
+    .user-management-card .w-32.h-2 {
+        width: 6rem;
+    }
+}
+
+/* 管理员用户卡片特殊样式优化 */
+.admin-user-card {
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.95), rgba(17, 24, 39, 0.95)) !important;
+    border: none !important;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.2) !important;
+    position: relative;
+    overflow: hidden;
+    /* 新增：管理员卡片特殊效果 */
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    /* 修复：使用padding为放大预留空间 */
+    padding: 4px;
+    margin: 0;
+}
+
+/* 使用伪元素创建边框，避免被裁剪 */
+.admin-user-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 2px solid rgba(245, 158, 11, 0.6);
+    border-radius: 16px;
+    pointer-events: none;
+    z-index: 2;
+    transition: border-color 0.4s ease;
+}
+
+/* 管理员卡片顶部装饰条 */
+.admin-user-card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.8), transparent);
+    animation: adminShine 3s ease-in-out infinite;
+    z-index: 1;
+}
+
+/* 管理员卡片右下角装饰 */
+.admin-user-card .crown-decoration {
+    content: '👑';
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    font-size: 16px;
+    opacity: 0.7;
+    animation: crownPulse 2s ease-in-out infinite;
+    z-index: 3;
+}
+
+@keyframes adminShine {
+    0%, 100% {
+        transform: translateX(-100%);
+    }
+    50% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes crownPulse {
+    0%, 100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+.admin-user-card:hover {
+    background: linear-gradient(135deg, rgba(31, 41, 55, 1), rgba(17, 24, 39, 1)) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(245, 158, 11, 0.3) !important;
+    transform: translateY(-2px) scale(0.98) !important;
+    /* 修复：确保边框在缩小时不被裁剪 */
+    z-index: 10;
+    position: relative;
+}
+
+.admin-user-card:hover::after {
+    border-color: rgba(245, 158, 11, 0.8);
+}
+
+/* 管理员卡片内部元素样式 */
+.admin-user-card .text-white {
+    color: rgba(245, 158, 11, 0.9) !important;
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+.admin-user-card .bg-yellow-500\/20 {
+    background: rgba(245, 158, 11, 0.3) !important;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    border-radius: 20px;
+    padding: 4px 12px;
+}
+
+.admin-user-card .text-yellow-400 {
+    color: rgba(245, 158, 11, 0.9) !important;
+    font-weight: 600;
+}
+
+/* 管理员头像特殊样式 */
+.admin-user-card img {
+    border: 3px solid rgba(245, 158, 11, 0.6) !important;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4) !important;
+}
+
+.admin-user-card:hover img {
+    border-color: rgba(245, 158, 11, 0.8) !important;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.6) !important;
+    transform: scale(1.05);
+}
+
+/* 管理员存储信息框特殊样式 */
+.admin-user-card .bg-gray-800\/30 {
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.8), rgba(17, 24, 39, 0.8)) !important;
+    border: 1px solid rgba(245, 158, 11, 0.4) !important;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.2) !important;
+}
+
+.admin-user-card:hover .bg-gray-800\/30 {
+    border-color: rgba(245, 158, 11, 0.6) !important;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3) !important;
+}
+
+/* 管理员进度条特殊样式 */
+.admin-user-card .bg-gray-700 {
+    background: rgba(75, 85, 99, 0.6) !important;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.admin-user-card .bg-gradient-to-r {
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+/* 动画效果优化 */
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* 确保所有文本都能正确换行 */
+.user-management-card * {
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+/* 防止长文本导致布局问题 */
+.user-management-card .text-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 确保按钮文本不会换行 */
+.user-management-card .whitespace-nowrap {
+    white-space: nowrap;
+}
+
+/* 用户管理模态框容器样式 */
+.fixed.inset-0.z-50[data-modal="user-management"] {
+    overflow: hidden;
+}
+
+/* 限制模态框最大宽度，避免在大屏幕上过宽 */
+.fixed.inset-0.z-50[data-modal="user-management"] .bg-gradient-to-br {
+    max-width: 896px; /* max-w-4xl - 调整为更宽的宽度以容纳左右布局 */
+    margin: 0 auto;
+    max-height: 90vh;
+    overflow: hidden;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    /* 防止内容溢出 */
+    width: 100%;
+    min-width: 0;
+}
+
+/* 用户列表容器 - 修复滚动条问题 */
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto {
+    overflow-x: hidden !important;
+    overflow-y: auto;
+    max-width: 100%;
+    box-sizing: border-box;
+    flex: 1;
+    min-height: 0;
+    /* 防止滚动条闪烁 - 优化版本 */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+    /* 移除scrollbar-gutter，避免在内容较少时预留滚动条空间 */
+    /* 确保容器不会产生水平滚动 */
+    width: 100%;
+    min-width: 0;
+    /* 优化：减少动画对滚动的影响 */
+    will-change: auto;
+    /* 优化：确保滚动条稳定 */
+    -webkit-overflow-scrolling: touch;
+    /* 新增：防止内容变化导致滚动条闪烁 */
+    contain: layout style;
+    /* 新增：确保滚动条始终显示 */
+    overflow-y: scroll !important;
+}
+
+/* Webkit浏览器滚动条样式 - 优化版本 */
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar {
+    width: 8px;
+    background: transparent;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.6);
+    border-radius: 4px;
+    border: 1px solid transparent;
+    background-clip: content-box;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.8);
+    background-clip: content-box;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] #users-list {
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden !important;
+    padding-right: 12px; /* 为滚动条预留更多空间 */
+    /* 防止内容溢出 */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    /* 确保容器不会产生水平滚动 */
+    width: 100%;
+    min-width: 0;
+    /* 新增：防止内容变化导致滚动条闪烁 */
+    contain: layout style;
+    /* 新增：确保内容稳定 */
+    transform: translateZ(0);
+}
+
+/* 确保模态框内容不会超出屏幕 */
+@media (max-width: 1024px) {
+    .fixed.inset-0.z-50[data-modal="user-management"] .bg-gradient-to-br {
+        margin: 1rem;
+        max-width: calc(100vw - 2rem);
+        max-height: calc(100vh - 2rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .fixed.inset-0.z-50[data-modal="user-management"] .bg-gradient-to-br {
+        margin: 0.5rem;
+        max-width: calc(100vw - 1rem);
+        max-height: calc(100vh - 1rem);
+        padding: 1rem;
+    }
+} 
+
+/* 全局防止水平滚动 */
+* {
+    box-sizing: border-box;
+}
+
+/* 用户管理界面全局样式 */
+[data-modal="user-management"] {
+    overflow: hidden !important;
+}
+
+[data-modal="user-management"] * {
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* 防止滚动条闪烁的全局规则 */
+.fixed.inset-0.z-50[data-modal="user-management"] {
+    overflow: hidden !important;
+}
+
+/* 确保模态框内容不会超出屏幕边界 */
+.fixed.inset-0.z-50[data-modal="user-management"] .bg-gradient-to-br {
+    max-width: 100vw;
+    max-height: 100vh;
+    overflow: hidden;
+    width: 100%;
+    min-width: 0;
+}
+
+/* 防止内容溢出导致水平滚动 */
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+    width: 100%;
+    min-width: 0;
+    /* 优化：确保滚动条稳定显示 */
+    scrollbar-gutter: stable both-edges;
+    /* 新增：强制显示滚动条，防止闪烁 */
+    overflow-y: scroll !important;
+    /* 新增：确保滚动条在页面加载时就存在 */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+/* 确保用户列表容器不会产生水平滚动 */
+.fixed.inset-0.z-50[data-modal="user-management"] #users-list {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    width: 100%;
+    min-width: 0;
+    /* 优化：防止内容变化导致滚动条闪烁 */
+    contain: layout style;
+    /* 新增：确保内容稳定 */
+    transform: translateZ(0);
+    /* 新增：为滚动条预留空间 */
+    padding-right: 12px;
+}
+
+/* 新增：确保滚动条在页面加载时就稳定显示 */
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar {
+    width: 8px !important;
+    background: transparent !important;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent !important;
+    border-radius: 4px !important;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.6) !important;
+    border-radius: 4px !important;
+    border: 1px solid transparent !important;
+    background-clip: content-box !important;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.8) !important;
+    background-clip: content-box !important;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar-corner {
+    background: transparent !important;
+}
+
+/* 防止内容溢出导致水平滚动 */
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+    width: 100%;
+    min-width: 0;
+    /* 移除scrollbar-gutter，避免在内容较少时预留滚动条空间 */
+    /* 新增：强制显示滚动条，防止闪烁 */
+    overflow-y: scroll !important;
+    /* 新增：确保滚动条在页面加载时就存在 */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+/* 确保用户列表容器不会产生水平滚动 */
+.fixed.inset-0.z-50[data-modal="user-management"] #users-list {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    width: 100%;
+    min-width: 0;
+    /* 优化：防止内容变化导致滚动条闪烁 */
+    contain: layout style;
+    /* 新增：确保内容稳定 */
+    transform: translateZ(0);
+    /* 新增：为滚动条预留空间 */
+    padding-right: 12px;
+}
+
+/* 新增：确保滚动条在页面加载时就稳定显示 */
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar {
+    width: 8px !important;
+    background: transparent !important;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent !important;
+    border-radius: 4px !important;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.6) !important;
+    border-radius: 4px !important;
+    border: 1px solid transparent !important;
+    background-clip: content-box !important;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.8) !important;
+    background-clip: content-box !important;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar-corner {
+    background: transparent !important;
+}
+
+/* 新增：全局滚动条样式，确保在所有浏览器中稳定显示 */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+/* Webkit浏览器的全局滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+    background: transparent;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.6);
+    border-radius: 4px;
+    border: 1px solid transparent;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.8);
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* 用户管理对话框专用滚动条样式 - 优先级更高 */
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto {
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent !important;
+    /* 移除scrollbar-gutter，避免在内容较少时预留滚动条空间 */
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar {
+    width: 8px !important;
+    background: transparent !important;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent !important;
+    border-radius: 4px !important;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.6) !important;
+    border-radius: 4px !important;
+    border: 1px solid transparent !important;
+    background-clip: content-box !important;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.8) !important;
+    background-clip: content-box !important;
+}
+
+.fixed.inset-0.z-50[data-modal="user-management"] .flex-1.min-h-0.overflow-y-auto::-webkit-scrollbar-corner {
+    background: transparent !important;
+}

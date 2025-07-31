@@ -39,6 +39,9 @@ class UIDocsSync {
         this.bindSyncEvents();
         this.bindSyncDocsEvents();
         
+        // 设置全局函数，确保外站文档操作能正常工作
+        this.setupGlobalFunctions();
+        
         // 不在这里加载外站文档，而是在切换到外站文档分类时加载
         // this.loadExternalDocs();
         
@@ -46,6 +49,16 @@ class UIDocsSync {
         // if (this.syncConfig.syncOnStartup) {
         //     this.startAutoSync();
         // }
+    }
+
+    /**
+     * 设置全局函数
+     */
+    setupGlobalFunctions() {
+        // 设置外站文档操作的全局函数
+        window.previewExternalDocument = (docId) => this.previewExternalDocument(docId);
+        window.downloadExternalDocument = (docId) => this.downloadExternalDocument(docId);
+        window.removeExternalDocument = (docId) => this.removeExternalDocument(docId);
     }
 
     /**
@@ -860,11 +873,11 @@ class UIDocsSync {
      */
     getStatusClass(status) {
         switch (status) {
-            case 'synced': return 'bg-green-500/20 text-green-400 border-green-400/30';
-            case 'syncing': return 'bg-yellow-500/20 text-yellow-400 border-yellow-400/30';
-            case 'error': return 'bg-red-500/20 text-red-400 border-red-400/30';
+            case 'synced': return 'bg-green-500/80 text-green-300 border-green-400';
+            case 'syncing': return 'bg-yellow-500/80 text-yellow-300 border-yellow-400';
+            case 'error': return 'bg-red-500/80 text-red-300 border-red-400';
             case 'pending': 
-            default: return 'bg-gray-500/20 text-gray-400 border-gray-400/30';
+            default: return 'bg-gray-500/80 text-gray-300 border-gray-400';
         }
     }
 

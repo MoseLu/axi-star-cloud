@@ -51,9 +51,26 @@ class Auth {
     }
 
     // 退出登录
-    logout() {
-        this.core.clearUserData();
-        return { success: true, message: '已退出登录' };
+    async logout() {
+        try {
+            // 调用后端API设置离线状态
+            const response = await window.apiGateway.post('/api/auth/logout');
+            
+            // 无论后端响应如何，都清除本地数据
+            this.core.clearUserData();
+            
+            if (response.ok) {
+                return { success: true, message: '已退出登录' };
+            } else {
+                console.warn('后端登出失败，但已清除本地数据');
+                return { success: true, message: '已退出登录' };
+            }
+        } catch (error) {
+            console.error('登出失败:', error);
+            // 即使API调用失败，也清除本地数据
+            this.core.clearUserData();
+            return { success: true, message: '已退出登录' };
+        }
     }
 }
 

@@ -177,9 +177,7 @@ class UICategories {
             });
         });
     }
-    
 
-    
     // 处理可展开按钮的双击事件
     handleExpandableDoubleClick(e) {
         
@@ -221,9 +219,7 @@ class UICategories {
         
         const isExpanded = btn.getAttribute('data-expanded') === 'true';
         const subContainer = document.getElementById('sub-categories-container');
-        
 
-        
         if (isExpanded) {
             // 收起子分类
             this.collapseSubCategories(btn, subContainer);
@@ -511,7 +507,6 @@ class UICategories {
         
         // 处理外站文档分类的特殊逻辑
         if (type === 'external-docs') {
-<<<<<<< HEAD
             // 检查是否为管理员，只有管理员才能访问外站文档分类
             const isAdmin = this.checkIfAdmin();
             if (!isAdmin) {
@@ -519,23 +514,19 @@ class UICategories {
                 // 阻止非管理员用户访问外站文档分类
                 return;
             }
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
+            
+            // 设置外站文档分类的CSS类
+            document.body.classList.add('external-docs-category');
+            
+            // 处理外站文档分类
             this.handleExternalDocsCategory();
             return;
         }
         
-<<<<<<< HEAD
-        // 处理其他分类时，确保同步文档按钮被隐藏
-        this.hideSyncDocsButton();
-        
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         // 处理其他分类
         this.handleRegularCategory(type);
     }
     
-<<<<<<< HEAD
     // 隐藏同步文档按钮
     hideSyncDocsButton() {
         const syncDocsBtn = document.getElementById('sync-docs-btn');
@@ -585,33 +576,7 @@ class UICategories {
 
     // 处理外站文档分类
     handleExternalDocsCategory() {
-        // 清理常规文件显示 - 这里不需要清理，因为外站文档分类是独立的
-        // this.cleanupRegularFilesDisplay(); // 这个方法不存在，移除这行
-        
         // 隐藏上传按钮，显示同步文档按钮（仅管理员可见）
-=======
-    // 处理外站文档分类
-    handleExternalDocsCategory() {
-        // 设置当前分类
-        this.uiManager.currentCategory = 'external-docs';
-        
-        // 添加外站文档分类CSS类
-        document.body.classList.add('external-docs-category');
-        
-        // 隐藏文件夹区域
-        const folderSection = document.getElementById('folder-section');
-        if (folderSection) {
-            folderSection.classList.add('hidden');
-        }
-        
-        // 隐藏新建分组按钮
-        const createFolderBtn = document.getElementById('create-folder-main-btn');
-        if (createFolderBtn) {
-            createFolderBtn.style.display = 'none';
-        }
-        
-        // 隐藏上传按钮，显示同步文档按钮
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         const uploadBtn = document.getElementById('upload-btn');
         const syncDocsBtn = document.getElementById('sync-docs-btn');
         
@@ -619,7 +584,6 @@ class UICategories {
             uploadBtn.style.display = 'none';
         }
         
-<<<<<<< HEAD
         // 只有管理员才能显示同步文档按钮
         if (syncDocsBtn) {
             // 检查是否为管理员
@@ -632,10 +596,6 @@ class UICategories {
                 syncDocsBtn.classList.add('hidden');
                 syncDocsBtn.setAttribute('hidden', '');
             }
-=======
-        if (syncDocsBtn) {
-            syncDocsBtn.style.display = 'flex';
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         }
         
         // 隐藏默认空状态容器（如果存在）
@@ -669,12 +629,9 @@ class UICategories {
         // 清理外站文档显示
         this.cleanupExternalDocsDisplay();
         
-<<<<<<< HEAD
         // 确保同步文档按钮被隐藏
         this.hideSyncDocsButton();
         
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         // 根据分类决定是否显示文件夹区域和新建分组按钮
         const folderSection = document.getElementById('folder-section');
         const createFolderBtn = document.getElementById('create-folder-main-btn');
@@ -718,8 +675,8 @@ class UICategories {
             externalDocsEmptyState.remove();
         }
         
-        // 移除外站文档卡片
-        const externalDocsCards = document.querySelectorAll('#files-grid .external-doc-card');
+        // 移除外站文档卡片 - 使用正确的选择器
+        const externalDocsCards = document.querySelectorAll('#files-grid .file-card[data-type="external-docs"]');
         externalDocsCards.forEach(card => card.remove());
         
         // 恢复上传按钮显示状态
@@ -742,14 +699,15 @@ class UICategories {
     async loadExternalDocs() {
         try {
             // 调用docs-sync模块加载外站文档
-            if (window.docsSyncManager && typeof window.docsSyncManager.loadExternalDocs === 'function') {
+            if (this.uiManager && this.uiManager.docsSync && typeof this.uiManager.docsSync.loadExternalDocs === 'function') {
+                await this.uiManager.docsSync.loadExternalDocs();
+            } else if (window.docsSyncManager && typeof window.docsSyncManager.loadExternalDocs === 'function') {
                 await window.docsSyncManager.loadExternalDocs();
             } else if (this.uiManager && typeof this.uiManager.loadExternalDocs === 'function') {
                 await this.uiManager.loadExternalDocs();
-            } else if (this.uiManager && this.uiManager.docsSync && typeof this.uiManager.docsSync.loadExternalDocs === 'function') {
-                await this.uiManager.docsSync.loadExternalDocs();
             }
         } catch (error) {
+            console.error('加载外站文档失败:', error);
         }
     }
 
@@ -783,9 +741,7 @@ class UICategories {
     // 过滤文件
     filterFiles(type) {
         this.uiManager.currentCategory = type;
-        
 
-        
         // 处理外站文档分类
         if (type === 'external-docs') {
             // 更新文件计数为0，因为外站文档由docs-sync模块处理
@@ -838,9 +794,7 @@ class UICategories {
                 }
             });
         }
-        
 
-        
         // 更新文件计数
         if (this.uiManager.updateFileCount) {
             this.uiManager.updateFileCount(filteredFiles.length, this.uiManager.totalFileCount || 0);

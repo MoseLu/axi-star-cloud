@@ -19,56 +19,86 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 
 // CreateUser 创建新用户
 func (r *UserRepository) CreateUser(user *models.User) error {
-	query := `INSERT INTO user (uuid, username, password, email, storage_limit, created_at, updated_at)
-			  VALUES (?, ?, ?, ?, ?, ?, ?)`
-	_, err := r.db.Exec(query, user.UUID, user.Username, user.Password, user.Email, user.StorageLimit, user.CreatedAt, user.UpdatedAt)
+	query := `INSERT INTO user (uuid, username, password, email, bio, avatar, storage_limit, created_at, updated_at)
+			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	_, err := r.db.Exec(query, user.UUID, user.Username, user.Password, user.Email, user.Bio, user.Avatar, user.StorageLimit, user.CreatedAt, user.UpdatedAt)
 	return err
 }
 
 // GetUserByUsername 根据用户名获取用户
 func (r *UserRepository) GetUserByUsername(username string) (*models.User, error) {
-	var user models.User
-	var email, bio, avatar sql.NullString
-	query := `SELECT uuid, username, password, email, bio, avatar, storage_limit, created_at, updated_at 
+	query := `SELECT uuid, username, password, email, bio, avatar, storage_limit, last_login_time, is_online, created_at, updated_at
 			  FROM user WHERE username = ?`
 
+	var user models.User
+	var lastLoginTime sql.NullTime
+	var email, bio, avatar sql.NullString
+
 	err := r.db.QueryRow(query, username).Scan(
-		&user.UUID, &user.Username, &user.Password,
-		&email, &bio, &avatar,
-		&user.StorageLimit, &user.CreatedAt, &user.UpdatedAt)
+		&user.UUID, &user.Username, &user.Password, &email, &bio, &avatar,
+		&user.StorageLimit, &lastLoginTime, &user.IsOnline,
+		&user.CreatedAt, &user.UpdatedAt,
+	)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 
-	// 处理NULL值
-	user.Email = email.String
-	user.Bio = bio.String
-	user.Avatar = avatar.String
+	// 处理可能为NULL的字段
+	if email.Valid {
+		user.Email = email.String
+	}
+	if bio.Valid {
+		user.Bio = bio.String
+	}
+	if avatar.Valid {
+		user.Avatar = avatar.String
+	}
+	if lastLoginTime.Valid {
+		user.LastLoginTime = &lastLoginTime.Time
+	}
 
 	return &user, nil
 }
 
 // GetUserByUUID 根据UUID获取用户
 func (r *UserRepository) GetUserByUUID(uuid string) (*models.User, error) {
-	var user models.User
-	var email, bio, avatar sql.NullString
-	query := `SELECT uuid, username, password, email, bio, avatar, storage_limit, created_at, updated_at 
+	query := `SELECT uuid, username, password, email, bio, avatar, storage_limit, last_login_time, is_online, created_at, updated_at
 			  FROM user WHERE uuid = ?`
 
+	var user models.User
+	var lastLoginTime sql.NullTime
+	var email, bio, avatar sql.NullString
+
 	err := r.db.QueryRow(query, uuid).Scan(
-		&user.UUID, &user.Username, &user.Password,
-		&email, &bio, &avatar,
-		&user.StorageLimit, &user.CreatedAt, &user.UpdatedAt)
+		&user.UUID, &user.Username, &user.Password, &email, &bio, &avatar,
+		&user.StorageLimit, &lastLoginTime, &user.IsOnline,
+		&user.CreatedAt, &user.UpdatedAt,
+	)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 
-	// 处理NULL值
-	user.Email = email.String
-	user.Bio = bio.String
-	user.Avatar = avatar.String
+	// 处理可能为NULL的字段
+	if email.Valid {
+		user.Email = email.String
+	}
+	if bio.Valid {
+		user.Bio = bio.String
+	}
+	if avatar.Valid {
+		user.Avatar = avatar.String
+	}
+	if lastLoginTime.Valid {
+		user.LastLoginTime = &lastLoginTime.Time
+	}
 
 	return &user, nil
 }
@@ -79,10 +109,12 @@ func (r *UserRepository) GetUserByID(id string) (*models.User, error) {
 }
 
 // GetAllUsers 获取所有用户（管理员功能）
-func (r *UserRepository) GetAllUsers() ([]models.User, error) {
-	query := `SELECT uuid, username, email, bio, avatar, storage_limit, created_at, updated_at 
+func (r *UserRepository) GetAllUsers() ([]*models.User, error) {
+	query := `SELECT uuid, username, email, bio, avatar, storage_limit, last_login_time, is_online, created_at, updated_at
 			  FROM user 
-			  ORDER BY CASE WHEN username = 'Mose' THEN 0 ELSE 1 END, created_at DESC`
+			  ORDER BY 
+			    CASE WHEN username = 'Mose' THEN 0 ELSE 1 END,
+			    created_at DESC`
 
 	rows, err := r.db.Query(query)
 	if err != nil {
@@ -90,40 +122,48 @@ func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	}
 	defer rows.Close()
 
-	var users []models.User
+	var users []*models.User
 	for rows.Next() {
 		var user models.User
+		var lastLoginTime sql.NullTime
 		var email, bio, avatar sql.NullString
 
 		err := rows.Scan(
-			&user.UUID, &user.Username,
-			&email, &bio, &avatar,
-			&user.StorageLimit, &user.CreatedAt, &user.UpdatedAt)
+			&user.UUID, &user.Username, &email, &bio, &avatar,
+			&user.StorageLimit, &lastLoginTime, &user.IsOnline,
+			&user.CreatedAt, &user.UpdatedAt,
+		)
 
 		if err != nil {
 			return nil, err
 		}
 
-		// 处理NULL值
-		user.Email = email.String
-		user.Bio = bio.String
-		user.Avatar = avatar.String
+		// 处理可能为NULL的字段
+		if email.Valid {
+			user.Email = email.String
+		}
+		if bio.Valid {
+			user.Bio = bio.String
+		}
+		if avatar.Valid {
+			user.Avatar = avatar.String
+		}
+		if lastLoginTime.Valid {
+			user.LastLoginTime = &lastLoginTime.Time
+		}
 
-		// 不返回密码
-		user.Password = ""
-
-		users = append(users, user)
+		users = append(users, &user)
 	}
 
 	return users, nil
 }
 
 // GetUsersWithPagination 获取用户列表（带分页）
-func (r *UserRepository) GetUsersWithPagination(page, pageSize int) ([]models.User, int, error) {
+func (r *UserRepository) GetUsersWithPagination(page, pageSize int) ([]*models.User, int, error) {
 	// 获取总数
-	var total int
+	var totalCount int
 	countQuery := `SELECT COUNT(*) FROM user`
-	err := r.db.QueryRow(countQuery).Scan(&total)
+	err := r.db.QueryRow(countQuery).Scan(&totalCount)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -131,10 +171,12 @@ func (r *UserRepository) GetUsersWithPagination(page, pageSize int) ([]models.Us
 	// 计算偏移量
 	offset := (page - 1) * pageSize
 
-	// 获取用户列表 - 管理员（Mose）永远在最上面，其他用户按创建时间倒序
-	query := `SELECT uuid, username, email, bio, avatar, storage_limit, created_at, updated_at 
+	// 获取用户列表，Mose管理员永远排在最上面
+	query := `SELECT uuid, username, email, bio, avatar, storage_limit, last_login_time, is_online, created_at, updated_at
 			  FROM user 
-			  ORDER BY CASE WHEN username = 'Mose' THEN 0 ELSE 1 END, created_at DESC
+			  ORDER BY 
+			    CASE WHEN username = 'Mose' THEN 0 ELSE 1 END,
+			    created_at DESC
 			  LIMIT ? OFFSET ?`
 
 	rows, err := r.db.Query(query, pageSize, offset)
@@ -143,32 +185,29 @@ func (r *UserRepository) GetUsersWithPagination(page, pageSize int) ([]models.Us
 	}
 	defer rows.Close()
 
-	var users []models.User
+	var users []*models.User
 	for rows.Next() {
 		var user models.User
-		var email, bio, avatar sql.NullString
+		var lastLoginTime sql.NullTime
 
 		err := rows.Scan(
-			&user.UUID, &user.Username,
-			&email, &bio, &avatar,
-			&user.StorageLimit, &user.CreatedAt, &user.UpdatedAt)
+			&user.UUID, &user.Username, &user.Email, &user.Bio, &user.Avatar,
+			&user.StorageLimit, &lastLoginTime, &user.IsOnline,
+			&user.CreatedAt, &user.UpdatedAt,
+		)
 
 		if err != nil {
 			return nil, 0, err
 		}
 
-		// 处理NULL值
-		user.Email = email.String
-		user.Bio = bio.String
-		user.Avatar = avatar.String
+		if lastLoginTime.Valid {
+			user.LastLoginTime = &lastLoginTime.Time
+		}
 
-		// 不返回密码
-		user.Password = ""
-
-		users = append(users, user)
+		users = append(users, &user)
 	}
 
-	return users, total, nil
+	return users, totalCount, nil
 }
 
 // UpdateUser 更新用户信息
@@ -183,6 +222,27 @@ func (r *UserRepository) UpdateUser(user *models.User) error {
 func (r *UserRepository) UpdateUserStorage(uuid string, storageLimit int64) error {
 	query := `UPDATE user SET storage_limit = ?, updated_at = ? WHERE uuid = ?`
 	_, err := r.db.Exec(query, storageLimit, time.Now(), uuid)
+	return err
+}
+
+// UpdateUserOnlineStatus 更新用户在线状态
+func (r *UserRepository) UpdateUserOnlineStatus(uuid string, isOnline bool) error {
+	query := `UPDATE user SET is_online = ?, updated_at = ? WHERE uuid = ?`
+	_, err := r.db.Exec(query, isOnline, time.Now(), uuid)
+	return err
+}
+
+// UpdateLastLoginTime 更新用户最后登录时间
+func (r *UserRepository) UpdateLastLoginTime(uuid string) error {
+	query := `UPDATE user SET last_login_time = ?, is_online = TRUE, updated_at = ? WHERE uuid = ?`
+	_, err := r.db.Exec(query, time.Now(), time.Now(), uuid)
+	return err
+}
+
+// SetUserOffline 设置用户离线
+func (r *UserRepository) SetUserOffline(uuid string) error {
+	query := `UPDATE user SET is_online = FALSE, updated_at = ? WHERE uuid = ?`
+	_, err := r.db.Exec(query, time.Now(), uuid)
 	return err
 }
 

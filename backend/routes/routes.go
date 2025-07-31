@@ -148,12 +148,9 @@ func (r *Router) SetupRoutes(
 
 	// 更新日志相关路由（公开）
 	apiGroup.AddRoute("GET", "/update-logs", updateLogHandler.GetUpdateLogs, "获取更新日志")
-<<<<<<< HEAD
 	apiGroup.AddRoute("POST", "/update-logs/sync", updateLogHandler.SyncUpdateLogs, "同步更新日志")
 	apiGroup.AddRoute("GET", "/update-logs/stats", updateLogHandler.GetUpdateLogStats, "获取更新日志统计")
 	apiGroup.AddRoute("POST", "/update-logs/validate", updateLogHandler.ValidateUpdateLogs, "验证更新日志数据完整性")
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 
 	// 管理员清理任务路由
 	adminGroup.AddRoute("POST", "/upload/cleanup", uploadProgressHandler.CleanupOldTasks, "清理旧上传任务")
@@ -364,6 +361,62 @@ func (r *Router) registerStaticFilesRoutes() {
 
 // registerDocRoutes 注册文档路由
 func (r *Router) registerDocRoutes() {
+	// 处理根目录的文档文件（README.md 和 LICENSE）
+	r.engine.GET("/:filename", func(c *gin.Context) {
+		filename := c.Param("filename")
+
+		// 只允许访问特定文件
+		allowedFiles := []string{"README.md", "LICENSE"}
+		isAllowed := false
+		for _, allowed := range allowedFiles {
+			if filename == allowed {
+				isAllowed = true
+				break
+			}
+		}
+
+		if !isAllowed {
+			c.Next() // 继续到下一个路由
+			return
+		}
+
+		// 尝试多个可能的根目录路径
+		possiblePaths := []string{
+			".",
+			"..",
+			"./",
+			"../",
+			"/www/wwwroot/axi-star-cloud",
+			"/www/wwwroot/redamancy.com.cn",
+		}
+
+		var filePath string
+		for _, dir := range possiblePaths {
+			path := filepath.Join(dir, filename)
+			if _, err := os.Stat(path); err == nil {
+				filePath = path
+				break
+			}
+		}
+
+		if filePath == "" {
+			c.JSON(http.StatusNotFound, gin.H{"error": "文档文件不存在"})
+			return
+		}
+
+		// 读取文件内容
+		content, err := os.ReadFile(filePath)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "读取文件失败"})
+			return
+		}
+
+		// 设置响应头
+		c.Header("Content-Type", "text/markdown; charset=utf-8")
+		c.Data(http.StatusOK, "text/markdown; charset=utf-8", content)
+	})
+
+	// 处理docs目录的文档文件
 	r.engine.GET("/docs/:filename", func(c *gin.Context) {
 		filename := c.Param("filename")
 
@@ -408,10 +461,46 @@ func (r *Router) registerDocRoutes() {
 		c.Data(http.StatusOK, "text/markdown; charset=utf-8", content)
 	})
 
-	// 新增：动态扫描docs目录的API端点
+	// 新增：动态扫描所有文档的API端点
 	r.engine.GET("/api/docs/list", func(c *gin.Context) {
-		// 尝试多个可能的docs目录路径
-		possiblePaths := []string{
+		var docs []map[string]interface{}
+
+		// 1. 首先添加根目录的文档（README.md 和 LICENSE）
+		rootFiles := []string{"README.md", "LICENSE"}
+		rootPaths := []string{
+			".",
+			"..",
+			"./",
+			"../",
+			"/www/wwwroot/axi-star-cloud",
+			"/www/wwwroot/redamancy.com.cn",
+		}
+
+		for _, filename := range rootFiles {
+			var filePath string
+			for _, dir := range rootPaths {
+				path := filepath.Join(dir, filename)
+				if _, err := os.Stat(path); err == nil {
+					filePath = path
+					break
+				}
+			}
+
+			if filePath != "" {
+				// 为根目录文件生成标题和图标
+				title := generateRootDocTitle(filename)
+				icon := generateRootDocIcon(filename)
+
+				docs = append(docs, map[string]interface{}{
+					"id":    filename,
+					"title": title,
+					"icon":  icon,
+				})
+			}
+		}
+
+		// 2. 然后添加docs目录的文档
+		docsPaths := []string{
 			"docs",
 			"./docs",
 			"../docs",
@@ -420,43 +509,61 @@ func (r *Router) registerDocRoutes() {
 		}
 
 		var docsDir string
-		for _, dir := range possiblePaths {
+		for _, dir := range docsPaths {
 			if _, err := os.Stat(dir); err == nil {
 				docsDir = dir
 				break
 			}
 		}
 
-		if docsDir == "" {
-			c.JSON(http.StatusNotFound, gin.H{"error": "docs目录不存在"})
-			return
-		}
+		if docsDir != "" {
+			// 扫描docs目录中的所有.md文件
+			files, err := os.ReadDir(docsDir)
+			if err == nil {
+				for _, file := range files {
+					if !file.IsDir() && filepath.Ext(file.Name()) == ".md" {
+						// 跳过INDEX.md，因为它应该作为隐藏的索引文件
+						if file.Name() == "INDEX.md" {
+							continue
+						}
 
-		// 扫描目录中的所有.md文件
-		files, err := os.ReadDir(docsDir)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "读取docs目录失败"})
-			return
-		}
+						// 从文件名生成标题和图标
+						title := generateDocTitle(file.Name())
+						icon := generateDocIcon(file.Name())
 
-		var docs []map[string]interface{}
-		for _, file := range files {
-			if !file.IsDir() && filepath.Ext(file.Name()) == ".md" {
-				// 从文件名生成标题和图标
-				title := generateDocTitle(file.Name())
-				icon := generateDocIcon(file.Name())
-
-				docs = append(docs, map[string]interface{}{
-					"id":    file.Name(),
-					"title": title,
-					"icon":  icon,
-				})
+						docs = append(docs, map[string]interface{}{
+							"id":    file.Name(),
+							"title": title,
+							"icon":  icon,
+						})
+					}
+				}
 			}
 		}
 
-		// 按文件名排序
+		// 3. 按优先级排序：README.md第一，LICENSE第二，其他按字母顺序
 		sort.Slice(docs, func(i, j int) bool {
-			return docs[i]["id"].(string) < docs[j]["id"].(string)
+			id1 := docs[i]["id"].(string)
+			id2 := docs[j]["id"].(string)
+
+			// README.md 排第一
+			if id1 == "README.md" {
+				return true
+			}
+			if id2 == "README.md" {
+				return false
+			}
+
+			// LICENSE 排第二
+			if id1 == "LICENSE" {
+				return true
+			}
+			if id2 == "LICENSE" {
+				return false
+			}
+
+			// 其他按字母顺序
+			return id1 < id2
 		})
 
 		c.JSON(http.StatusOK, gin.H{
@@ -464,6 +571,30 @@ func (r *Router) registerDocRoutes() {
 			"docs":    docs,
 		})
 	})
+}
+
+// generateRootDocTitle 为根目录文档生成标题
+func generateRootDocTitle(filename string) string {
+	switch filename {
+	case "README.md":
+		return "项目概述"
+	case "LICENSE":
+		return "通行证"
+	default:
+		return filename
+	}
+}
+
+// generateRootDocIcon 为根目录文档生成图标
+func generateRootDocIcon(filename string) string {
+	switch filename {
+	case "README.md":
+		return "📖"
+	case "LICENSE":
+		return "⚖️"
+	default:
+		return "📄"
+	}
 }
 
 // generateDocTitle 根据文件名生成文档标题
@@ -479,17 +610,10 @@ func generateDocTitle(filename string) string {
 
 	// 预定义的标题映射（作为后备）
 	titleMap := map[string]string{
-<<<<<<< HEAD
 		"INDEX":                         "文档索引",
 		"README":                        "项目概述",
 		"UPLOAD_LIMITS":                 "上传限制",
 		"LICENSE":                       "许可证信息",
-=======
-		"INDEX":                         "文档目录",
-		"README":                        "项目概述",
-		"UPLOAD_LIMITS":                 "上传限制",
-		"LICENSE":                       "许可证",
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 		"ENV_USAGE_EXAMPLES":            "环境使用示例",
 		"CSS_README":                    "CSS样式文档",
 		"HTML_README":                   "HTML文档",
@@ -505,16 +629,13 @@ func generateDocTitle(filename string) string {
 		"FRONTEND_DEVELOPMENT_GUIDE":  "前端开发完整指南",
 		"API_AND_AUTH_GUIDE":          "API和认证系统完整指南",
 		"DEPLOYMENT_AND_CONFIG_GUIDE": "部署和配置完整指南",
-<<<<<<< HEAD
 		// 新增登录相关文档
-		"LOGIN_DEBUG_GUIDE":           "登录调试指南",
-		"LOGIN_DISPLAY_FIX":           "登录显示修复",
-		"LOGIN_PERSISTENCE_FIX":       "登录持久化修复",
+		"LOGIN_DEBUG_GUIDE":     "登录调试指南",
+		"LOGIN_DISPLAY_FIX":     "登录显示修复",
+		"LOGIN_PERSISTENCE_FIX": "登录持久化修复",
 		// 新增其他文档
-		"JAVASCRIPT_STRUCTURE_GUIDE":  "JavaScript目录结构指南",
-		"UPDATE_LOG_SYSTEM_GUIDE":     "更新日志系统指南",
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
+		"JAVASCRIPT_STRUCTURE_GUIDE": "JavaScript目录结构指南",
+		"UPDATE_LOG_SYSTEM_GUIDE":    "更新日志系统指南",
 	}
 
 	if title, exists := titleMap[name]; exists {

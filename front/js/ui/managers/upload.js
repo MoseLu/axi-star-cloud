@@ -446,7 +446,6 @@ if (typeof UIUploadManager === 'undefined') {
         async processUploadQueue() {
             if (this.isUploading || this.uploadQueue.length === 0) return;
 
-
             this.isUploading = true;
             
             // 区分单个文件和批量上传
@@ -1057,15 +1056,9 @@ if (typeof UIUploadManager === 'undefined') {
         /**
          * 根据选择的文件类型自动调整上传UI
          * @param {File[]} files - 选择的文件列表
-<<<<<<< HEAD
          * @param {number} maxFiles - 最大文件数量限制（可选）
          */
-        async autoAdjustUploadUI(files, maxFiles = null) {
-=======
-         */
-        async autoAdjustUploadUI(files) {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
-            if (!files || files.length === 0) return;
+        async autoAdjustUploadUI(files, maxFiles = null) {            if (!files || files.length === 0) return;
             
             // 不进行文件验证，只进行UI调整
             const validFiles = files;
@@ -1076,12 +1069,7 @@ if (typeof UIUploadManager === 'undefined') {
             
             // 修复逻辑：只有图片类且选择了很多文件时才渲染文件列表UI，其他情况都渲染文件信息UI
             if (imageFiles.length > 0 && nonImageFiles.length === 0 && validFiles.length > 1) {
-<<<<<<< HEAD
-                this.renderMultiFileUploadUI(validFiles, maxFiles);
-=======
-                this.renderMultiFileUploadUI(validFiles);
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
-            } else {
+                this.renderMultiFileUploadUI(validFiles, maxFiles);            } else {
                 this.renderSingleFileInfoUI(validFiles);
             }
         }
@@ -1106,15 +1094,9 @@ if (typeof UIUploadManager === 'undefined') {
         /**
          * 渲染多文件上传列表UI
          * @param {File[]} files - 图片文件列表
-<<<<<<< HEAD
          * @param {number} maxFiles - 最大文件数量限制（可选）
          */
-        renderMultiFileUploadUI(files, maxFiles = null) {
-=======
-         */
-        renderMultiFileUploadUI(files) {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
-            // 更新文件输入框为多文件模式
+        renderMultiFileUploadUI(files, maxFiles = null) {            // 更新文件输入框为多文件模式
             if (this.fileInput) {
                 this.fileInput.multiple = true;
                 this.fileInput.accept = 'image/*';
@@ -1126,7 +1108,6 @@ if (typeof UIUploadManager === 'undefined') {
             // 渲染文件列表预览
             this.renderFileListPreview(files);
             
-<<<<<<< HEAD
             // 动态显示提示信息
             const currentCount = files.length;
             const maxCount = maxFiles || 9; // 默认最大9个
@@ -1136,12 +1117,7 @@ if (typeof UIUploadManager === 'undefined') {
                 this.showMessage(`已选择 ${currentCount} 个图片文件，还可以继续添加 ${remaining} 个图片`, 'info');
             } else {
                 this.showMessage(`已选择 ${currentCount} 个图片文件，已达到最大数量限制`, 'info');
-            }
-=======
-            // 显示多文件上传提示
-            this.showMessage(`已选择 ${files.length} 个图片文件，可以继续添加更多图片`, 'info');
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
-        }
+            }        }
         
         /**
          * 渲染单文件信息UI
@@ -1519,7 +1495,6 @@ if (typeof UIUploadManager === 'undefined') {
 
             summaryElement.textContent = summaryText;
             progressElement.textContent = `${totalProgress}%`;
-            
 
         }
 
@@ -1974,16 +1949,7 @@ if (typeof UIUploadManager === 'undefined') {
             await this.startUpload();
         }
     }
-<<<<<<< HEAD
-
     // 全局暴露
     window.UIUploadManager = UIUploadManager;
     window.uploadManager = null; // 将在实例化时设置
-} 
-=======
-}
-
-// 全局暴露
-window.UIUploadManager = UIUploadManager;
-window.uploadManager = null; // 将在实例化时设置 
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
+} 

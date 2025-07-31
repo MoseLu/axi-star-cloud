@@ -17,6 +17,16 @@ func MigrateDatabase(db *sql.DB) error {
 		return fmt.Errorf("添加thumbnail_data字段失败: %v", err)
 	}
 
+	// 检查并添加last_login_time字段
+	if err := addLastLoginTimeColumn(db); err != nil {
+		return fmt.Errorf("添加last_login_time字段失败: %v", err)
+	}
+
+	// 检查并添加is_online字段
+	if err := addIsOnlineColumn(db); err != nil {
+		return fmt.Errorf("添加is_online字段失败: %v", err)
+	}
+
 	return nil
 }
 
@@ -106,4 +116,34 @@ func columnExists(db *sql.DB, tableName, columnName string) bool {
 	}
 
 	return count > 0
+}
+
+// addLastLoginTimeColumn 添加last_login_time字段
+func addLastLoginTimeColumn(db *sql.DB) error {
+	if !columnExists(db, "user", "last_login_time") {
+		_, err := db.Exec("ALTER TABLE user ADD COLUMN last_login_time TIMESTAMP NULL")
+		if err != nil {
+			return fmt.Errorf("添加last_login_time字段失败: %v", err)
+		}
+		fmt.Println("已添加last_login_time字段")
+	} else {
+		fmt.Println("last_login_time字段已存在")
+	}
+
+	return nil
+}
+
+// addIsOnlineColumn 添加is_online字段
+func addIsOnlineColumn(db *sql.DB) error {
+	if !columnExists(db, "user", "is_online") {
+		_, err := db.Exec("ALTER TABLE user ADD COLUMN is_online BOOLEAN DEFAULT FALSE")
+		if err != nil {
+			return fmt.Errorf("添加is_online字段失败: %v", err)
+		}
+		fmt.Println("已添加is_online字段")
+	} else {
+		fmt.Println("is_online字段已存在")
+	}
+
+	return nil
 }

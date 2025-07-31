@@ -19,19 +19,15 @@ class UISettingsManager {
         this.loadSettings();
         this.setupSettingsUI();
         this.bindSettingsEvents();
-<<<<<<< HEAD
-        
         // 延迟绑定存储设置按钮，确保DOM元素已加载
         setTimeout(() => {
             this.bindStorageSettingsButton();
         }, 1000);
         
-        // 再次尝试绑定，确保按钮存在
-        setTimeout(() => {
-            this.bindStorageSettingsButton();
-        }, 2000);
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
+        // 移除重复的绑定调用，避免多次绑定
+        // setTimeout(() => {
+        //     this.bindStorageSettingsButton();
+        // }, 2000);
     }
 
     /**
@@ -39,141 +35,37 @@ class UISettingsManager {
      */
     loadSettings() {
         try {
+            // 从localStorage加载设置
             const savedSettings = localStorage.getItem('appSettings');
             if (savedSettings) {
                 this.settings = JSON.parse(savedSettings);
+            } else {
+                // 使用默认设置
+                this.settings = this.getDefaultSettings();
             }
         } catch (error) {
             console.error('加载设置失败:', error);
+            this.settings = this.getDefaultSettings();
         }
-        
-        // 合并默认设置
-        this.settings = this.mergeSettings(this.getDefaultSettings(), this.settings);
-    }
-
-    /**
-     * 保存设置
-     */
-    saveSettings() {
-        try {
-            localStorage.setItem('appSettings', JSON.stringify(this.settings));
-            this.emit('settingsChanged', this.settings);
-        } catch (error) {
-            console.error('保存设置失败:', error);
-        }
-    }
-
-    /**
-     * 合并设置
-     * @param {Object} defaultSettings - 默认设置
-     * @param {Object} savedSettings - 保存的设置
-     * @returns {Object} 合并后的设置
-     */
-    mergeSettings(defaultSettings, savedSettings) {
-        const merged = { ...defaultSettings };
-        
-        if (savedSettings) {
-            for (const key in savedSettings) {
-                if (savedSettings.hasOwnProperty(key)) {
-                    if (typeof savedSettings[key] === 'object' && savedSettings[key] !== null) {
-                        merged[key] = this.mergeSettings(merged[key] || {}, savedSettings[key]);
-                    } else {
-                        merged[key] = savedSettings[key];
-                    }
-                }
-            }
-        }
-        
-        return merged;
     }
 
     /**
      * 设置设置UI
      */
     setupSettingsUI() {
-        this.createSettingsPanel();
-    }
-
-    /**
-     * 创建设置面板
-     */
-    createSettingsPanel() {
-        // 创建设置面板HTML
-        this.settingsPanel = document.createElement('div');
-        this.settingsPanel.id = 'settings-panel';
-        this.settingsPanel.className = 'settings-panel';
-        this.settingsPanel.style.display = 'none';
-        
-        this.settingsPanel.innerHTML = `
-            <div class="settings-overlay">
-                <div class="settings-modal">
-                    <div class="settings-header">
-                        <h3>设置</h3>
-                        <button class="close-btn">&times;</button>
-                    </div>
-                    <div class="settings-content">
-                        <div class="settings-tabs">
-                            <button class="tab-btn active" data-tab="general">常规</button>
-                            <button class="tab-btn" data-tab="storage">存储</button>
-                            <button class="tab-btn" data-tab="advanced">高级</button>
-                        </div>
-                        <form id="settingsForm">
-                            <div id="general-section" class="settings-section">
-                                <h4>常规设置</h4>
-                                <div class="setting-group">
-                                    <label>自动保存</label>
-                                    <input type="checkbox" name="general.autoSave" />
-                                </div>
-                                <div class="setting-group">
-                                    <label>主题</label>
-                                    <select name="general.theme">
-                                        <option value="dark">深色</option>
-                                        <option value="light">浅色</option>
-                                        <option value="auto">自动</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div id="storage-section" class="settings-section" style="display: none;">
-                                <h4>存储设置</h4>
-                                <div class="setting-group">
-                                    <label>最大文件大小 (MB)</label>
-                                    <input type="range" name="storage.maxFileSize" min="1" max="100" />
-                                    <span class="range-value">10</span>
-                                </div>
-                                <div class="setting-group">
-                                    <label>存储路径</label>
-                                    <input type="text" name="storage.path" />
-                                </div>
-                            </div>
-                            <div id="advanced-section" class="settings-section" style="display: none;">
-                                <h4>高级设置</h4>
-                                <div class="setting-group">
-                                    <label>调试模式</label>
-                                    <input type="checkbox" name="advanced.debug" />
-                                </div>
-                                <div class="setting-group">
-                                    <label>日志级别</label>
-                                    <select name="advanced.logLevel">
-                                        <option value="error">错误</option>
-                                        <option value="warn">警告</option>
-                                        <option value="info">信息</option>
-                                        <option value="debug">调试</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="settings-footer">
-                        <button id="reset-settings-btn">重置</button>
-                        <button id="export-settings-btn">导出</button>
-                        <button id="import-settings-btn">导入</button>
-                        <button id="save-settings-btn">保存</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(this.settingsPanel);
+        // 延迟初始化，确保DOM已加载
+        setTimeout(() => {
+            this.settingsPanel = document.getElementById('settings-panel');
+            if (this.settingsPanel) {
+                this.renderSettingsForm();
+                this.updateFormValues();
+            } else {
+                // 如果面板不存在，延迟重试
+                setTimeout(() => {
+                    this.setupSettingsUI();
+                }, 500);
+            }
+        }, 100);
     }
 
     /**
@@ -182,42 +74,60 @@ class UISettingsManager {
     bindStorageSettingsButton() {
         const storageSettingsBtn = document.getElementById('storage-settings-btn');
         if (storageSettingsBtn) {
-<<<<<<< HEAD
-            // 移除已存在的事件监听器，避免重复绑定
+            // 检查是否已经绑定过事件，避免重复绑定
+            if (storageSettingsBtn._hasBoundEvent) {
+                console.debug('存储设置按钮事件已绑定，跳过重复绑定');
+                return true;
+            }
+            
+            // 移除已存在的事件监听器
             storageSettingsBtn.removeEventListener('click', this.handleStorageSettingsClick);
             
-            // 创建事件处理函数
+            // 创建新的事件处理函数
             this.handleStorageSettingsClick = (event) => {
-=======
-            storageSettingsBtn.addEventListener('click', (event) => {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                 event.preventDefault();
                 event.stopPropagation();
                 
-                // 直接显示设置模态框，鉴权由后端API统一处理
+                // 检查是否已经有模态框存在，避免重复创建
+                const existingModals = document.querySelectorAll('.fixed[data-modal="settings"]');
+                if (existingModals.length > 0) {
+                    console.warn('设置模态框已存在，跳过重复创建');
+                    return;
+                }
+                
+                // 显示设置模态框
                 this.showSettingsModal();
-                this.switchTab('storage');
-<<<<<<< HEAD
+                // 移除 switchTab 调用，因为模态框已经包含了存储设置
+                // this.switchTab('storage');
             };
             
             // 绑定事件监听器
             storageSettingsBtn.addEventListener('click', this.handleStorageSettingsClick);
             
+            // 标记已绑定事件
+            storageSettingsBtn._hasBoundEvent = true;
+            
             // 确保按钮可见
             storageSettingsBtn.style.display = 'inline-block';
             storageSettingsBtn.style.visibility = 'visible';
+            storageSettingsBtn.classList.remove('hidden');
+            storageSettingsBtn.removeAttribute('hidden');
             
             return true;
         } else {
-            // 如果按钮不存在，延迟重试
-            setTimeout(() => {
-                this.bindStorageSettingsButton();
-            }, 500);
-=======
-            });
-            return true;
-        } else {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
+            // 如果按钮不存在，延迟重试，但限制重试次数
+            if (!this._bindRetryCount) {
+                this._bindRetryCount = 0;
+            }
+            
+            if (this._bindRetryCount < 5) { // 最多重试5次
+                this._bindRetryCount++;
+                setTimeout(() => {
+                    this.bindStorageSettingsButton();
+                }, 500);
+            } else {
+                console.warn('存储设置按钮绑定失败，已达到最大重试次数');
+            }
             return false;
         }
     }
@@ -226,8 +136,8 @@ class UISettingsManager {
      * 绑定设置事件
      */
     bindSettingsEvents() {
-        // 绑定存储设置按钮
-        this.bindStorageSettingsButton();
+        // 移除重复的绑定调用，避免多次绑定
+        // this.bindStorageSettingsButton();
 
         // 绑定设置面板事件
         if (this.settingsPanel) {
@@ -265,38 +175,6 @@ class UISettingsManager {
                 });
             });
 
-            // 重置按钮事件
-            const resetBtn = this.settingsPanel.querySelector('#reset-settings-btn');
-            if (resetBtn) {
-                resetBtn.addEventListener('click', () => {
-                    this.resetSettings();
-                });
-            }
-
-            // 导出按钮事件
-            const exportBtn = this.settingsPanel.querySelector('#export-settings-btn');
-            if (exportBtn) {
-                exportBtn.addEventListener('click', () => {
-                    this.exportSettings();
-                });
-            }
-
-            // 导入按钮事件
-            const importBtn = this.settingsPanel.querySelector('#import-settings-btn');
-            if (importBtn) {
-                importBtn.addEventListener('click', () => {
-                    this.importSettings();
-                });
-            }
-
-            // 关闭按钮事件
-            const closeBtn = this.settingsPanel.querySelector('.close-btn');
-            if (closeBtn) {
-                closeBtn.addEventListener('click', () => {
-                    this.hideSettingsPanel();
-                });
-            }
-
             // 保存按钮事件
             const saveBtn = this.settingsPanel.querySelector('#save-settings-btn');
             if (saveBtn) {
@@ -308,10 +186,57 @@ class UISettingsManager {
 
             // 模态框按钮事件在 showSettingsModal() 中绑定
         } else {
-            console.error('❌ 设置面板不存在');
+            // 静默处理，不显示错误信息，因为设置面板可能还没有创建
+            console.debug('设置面板尚未创建，跳过事件绑定');
         }
+    }
+
+    /**
+     * 绑定设置模态框事件
+     */
+    bindModalSettingsEvents() {
+        // 创建事件处理函数
+        this._settingsEventHandler = (e) => {
+            // 取消按钮
+            if (e.target.id === 'cancel-settings-btn') {
+                e.preventDefault();
+                e.stopPropagation();
+                this.hideSettingsModal();
+                return;
+            }
+            
+            // 保存按钮
+            if (e.target.id === 'save-settings-btn') {
+                e.preventDefault();
+                e.stopPropagation();
+                this.saveStorageSettings();
+                return;
+            }
+            
+            // 关闭按钮 - 改进关闭按钮检测逻辑
+            const closeButton = e.target.closest('button');
+            if (closeButton && (
+                closeButton.id === 'close-settings-modal' ||
+                closeButton.innerHTML.includes('fa-times') ||
+                closeButton.querySelector('.fa-times')
+            )) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.hideSettingsModal();
+                return;
+            }
+            
+            // 点击模态框外部区域关闭
+            if (e.target.classList.contains('fixed') && e.target.getAttribute('data-modal') === 'settings') {
+                e.preventDefault();
+                e.stopPropagation();
+                this.hideSettingsModal();
+                return;
+            }
+        };
         
-        
+        // 绑定新的事件监听器
+        document.addEventListener('click', this._settingsEventHandler);
     }
 
     /**
@@ -326,34 +251,142 @@ class UISettingsManager {
     }
 
     /**
+     * 显示存储设置模态框
+     * 这是showSettingsModal的别名，用于兼容admin-manager.js的调用
+     */
+    async showStorageSettingsModal() {
+        return this.showSettingsModal();
+    }
+
+    /**
      * 显示设置模态框
      */
     async showSettingsModal() {
         try {
-            // 先创建模态框
-            if (window.uiManager && window.uiManager.showSettingsModal) {
-                window.uiManager.showSettingsModal();
+            // 清理所有已存在的设置模态框
+            const existingModals = document.querySelectorAll('.fixed[data-modal="settings"]');
+            existingModals.forEach(modal => {
+                // 清理事件监听器
+                const slider = modal.querySelector('#storage-slider');
+                const input = modal.querySelector('#storage-input');
+                if (slider && slider._sliderHandler) {
+                    slider.removeEventListener('input', slider._sliderHandler);
+                    slider.removeEventListener('change', slider._sliderHandler);
+                }
+                if (input && input._inputHandler) {
+                    input.removeEventListener('input', input._inputHandler);
+                    input.removeEventListener('change', input._inputHandler);
+                }
+                modal.remove();
+            });
+
+            // 清理旧的事件监听器
+            if (this._settingsEventHandler) {
+                document.removeEventListener('click', this._settingsEventHandler);
+                this._settingsEventHandler = null;
+            }
+            
+            // 获取真实存储数据
+            let storageInfo;
+            try {
+                const api = window.apiSystem || window.apiManager;
+                if (api && api.storage && api.storage.getStorageInfo) {
+                    storageInfo = await api.storage.getStorageInfo();
+                } else if (api && api.getStorageInfo) {
+                    storageInfo = await api.getStorageInfo();
+                } else {
+                    return;
+                }
                 
-                // 设置跳过渲染标志，避免重复处理
-                this.skipRender = true;
-            } else {
+                if (!storageInfo) {
+                    return;
+                }
+            } catch (error) {
                 return;
             }
+
+            // 计算真实数据
+            const limitGB = Math.round((storageInfo.limit_bytes || storageInfo.total_space || 1073741824) / (1024 * 1024 * 1024)); // 默认1GB
+            const usedGB = (storageInfo.used_bytes || storageInfo.used_space || 0) / (1024 * 1024 * 1024);
+            const usagePercentage = limitGB > 0 ? ((usedGB / limitGB) * 100).toFixed(2) : '0.00';
             
-            // 等待模态框创建完成
-            await new Promise(resolve => setTimeout(resolve, 100));
+            // 缓存已使用空间数据
+            this.cachedUsedSpace = storageInfo.used_bytes || storageInfo.used_space || 0;
             
-            // 检查是否需要跳过渲染（避免重复渲染）
-            if (this.skipRender) {
-                this.skipRender = false;
-                return;
-            }
+            // 创建模态框，使用真实数据
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/60';
+            modal.setAttribute('data-modal', 'settings');
             
-            // 加载真实存储数据并渲染
-            await this.loadAndRenderStorageData();
+            modal.innerHTML = `
+                <div class="bg-dark-light rounded-xl p-6 w-full max-w-md max-h-[80vh] shadow-2xl border border-purple-400/30 overflow-hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-purple-300">存储空间设置</h3>
+                        <button id="close-settings-modal" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fa fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">存储空间限制</label>
+                            <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                                <input type="range" id="storage-slider" min="1" max="20" value="${limitGB}" 
+                                       class="flex-1 h-2 bg-dark-light rounded-lg appearance-none cursor-pointer slider">
+                                <div class="flex items-center space-x-2">
+                                    <input type="number" id="storage-input" min="1" max="20" value="${limitGB}" 
+                                           class="w-20 bg-dark-light border border-purple-light/30 text-gray-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-light/50 focus:border-purple-light transition-all duration-300">
+                                    <span class="text-gray-400 text-sm">GB</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">设置范围：1GB - 20GB</p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl p-3 border border-blue-400/20">
+                            <h4 class="text-sm font-medium text-gray-300 mb-2">当前存储状态</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                                <div>
+                                    <div class="text-gray-400">总空间</div>
+                                    <div id="settings-total-storage" class="text-blue-300 font-medium">${limitGB} GB</div>
+                                </div>
+                                <div>
+                                    <div class="text-gray-400">已使用</div>
+                                    <div id="settings-used-storage" class="text-purple-300 font-medium">
+                                        ${usedGB < 0.1 ? `${(usedGB * 1024).toFixed(1)} MB` : `${usedGB.toFixed(1)} GB`}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="text-gray-400">使用率</div>
+                                    <div id="settings-usage-percentage" class="text-emerald-300 font-medium">${usagePercentage}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button id="cancel-settings-btn" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors">
+                            取消
+                        </button>
+                        <button id="save-settings-btn" class="px-4 py-2 bg-gradient-to-r from-primary/80 to-secondary/80 hover:from-primary to-secondary text-white rounded-lg shadow-md shadow-primary/20 transition-all duration-300 transform hover:scale-[1.03]">
+                            <i class="fa fa-save mr-1"></i> 保存设置
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // 使用setTimeout确保DOM元素已经完全渲染后再绑定事件
+            setTimeout(() => {
+                // 绑定存储滑块事件
+                this.bindStorageSliderEvents();
+                
+                // 绑定设置模态框事件
+                this.bindModalSettingsEvents();
+            }, 0);
             
         } catch (error) {
-            // 静默处理错误
+            console.error('显示设置模态框失败:', error);
         }
     }
 
@@ -379,11 +412,8 @@ class UISettingsManager {
     bindModalEvents() {
         // 由于模态框现在是动态创建的，事件绑定已经在index.js中通过事件委托处理
         // 这里不再需要手动绑定事件，因为事件委托已经处理了所有按钮点击
-        
 
     }
-
-
 
     /**
      * 加载并渲染真实存储数据
@@ -431,7 +461,7 @@ class UISettingsManager {
         const usagePercentage = document.getElementById('settings-usage-percentage');
 
         // 缓存已使用空间，避免频繁API调用
-        this.cachedUsedSpace = storageInfo.used_space;
+        this.cachedUsedSpace = storageInfo.used_space || 0;
 
         // 计算当前设置的总空间（GB）
         const currentLimitGB = Math.round(storageInfo.total_space / (1024 * 1024 * 1024));
@@ -460,10 +490,10 @@ class UISettingsManager {
             usedStorage.textContent = this.formatStorageSize(storageInfo.used_space);
         }
 
-        if (usagePercentage) {
-            const percentage = (storageInfo.used_space / storageInfo.total_space) * 100;
-            usagePercentage.textContent = `${percentage.toFixed(1)}%`;
-        }
+                                if (usagePercentage) {
+                            const percentage = (storageInfo.used_space / storageInfo.total_space) * 100;
+                            usagePercentage.textContent = `${percentage.toFixed(2)}%`;
+                        }
     }
 
     /**
@@ -474,113 +504,111 @@ class UISettingsManager {
         const input = document.getElementById('storage-input');
         
         if (!slider || !input) {
+            console.warn('存储滑块或输入框未找到');
             return;
         }
         
-        // 参考ui.js的简单实现，添加动态更新功能
-        const sliderHandler = (e) => {
-            const newValue = e.target.value;
-            
-            // 同步输入框
-            input.value = newValue;
-            
-            // 动态更新右侧显示
-            this.updateStorageDisplayOnChange(newValue);
-        };
+        // 清除之前的事件监听器
+        const newSlider = slider.cloneNode(true);
+        const newInput = input.cloneNode(true);
+        slider.parentNode.replaceChild(newSlider, slider);
+        input.parentNode.replaceChild(newInput, input);
         
-        const inputHandler = (e) => {
-            const newValue = e.target.value;
-            
-            const value = parseInt(newValue);
-            if (!isNaN(value) && value >= 1 && value <= 20) {
-                // 同步滑块
-                slider.value = value;
+        // 重新获取元素
+        const newSliderElement = document.getElementById('storage-slider');
+        const newInputElement = document.getElementById('storage-input');
+        
+        if (!newSliderElement || !newInputElement) {
+            console.warn('重新获取存储控件失败');
+            return;
+        }
+        
+        // 滑块事件处理
+        const sliderHandler = (e) => {
+            const newValue = parseInt(e.target.value);
+            if (!isNaN(newValue)) {
+                // 同步输入框
+                newInputElement.value = newValue;
                 
-                // 动态更新右侧显示
-                this.updateStorageDisplayOnChange(value);
+                // 动态更新显示
+                this.updateStorageDisplayOnChange(newValue);
             }
         };
         
+        // 输入框事件处理
+        const inputHandler = (e) => {
+            const newValue = parseInt(e.target.value);
+            if (!isNaN(newValue) && newValue >= 1 && newValue <= 20) {
+                // 同步滑块
+                newSliderElement.value = newValue;
+                
+                // 动态更新显示
+                this.updateStorageDisplayOnChange(newValue);
+            }
+        };
+        
+        // 输入框失焦处理
         const blurHandler = () => {
-            const value = parseInt(input.value);
+            const value = parseInt(newInputElement.value);
             if (isNaN(value) || value < 1) {
-                input.value = 1;
-                slider.value = 1;
-    
+                newInputElement.value = 1;
+                newSliderElement.value = 1;
                 this.updateStorageDisplayOnChange(1);
             } else if (value > 20) {
-                input.value = 20;
-                slider.value = 20;
-
+                newInputElement.value = 20;
+                newSliderElement.value = 20;
                 this.updateStorageDisplayOnChange(20);
             }
         };
-
-        // 移除之前的事件监听器
-        if (slider._sliderHandler) {
-            slider.removeEventListener('input', slider._sliderHandler);
-        }
-        if (input._inputHandler) {
-            input.removeEventListener('input', input._inputHandler);
-        }
-        if (input._blurHandler) {
-            input.removeEventListener('blur', input._blurHandler);
-        }
-
-        // 绑定新的事件监听器
-        slider.addEventListener('input', sliderHandler);
-        input.addEventListener('input', inputHandler);
-        input.addEventListener('blur', blurHandler);
         
-        // 保存引用以便后续移除
-        slider._sliderHandler = sliderHandler;
-        input._inputHandler = inputHandler;
-        input._blurHandler = blurHandler;
+        // 绑定事件监听器
+        newSliderElement.addEventListener('input', sliderHandler);
+        newSliderElement.addEventListener('change', sliderHandler);
+        newInputElement.addEventListener('input', inputHandler);
+        newInputElement.addEventListener('change', inputHandler);
+        newInputElement.addEventListener('blur', blurHandler);
         
-
+        // 初始化同步
+        const initialValue = parseInt(newSliderElement.value) || 1;
+        this.updateStorageDisplayOnChange(initialValue);
     }
 
     /**
      * 根据滑块/输入框变化动态更新存储显示
      */
     updateStorageDisplayOnChange(limitGB) {
-
-        
         const totalStorage = document.getElementById('settings-total-storage');
         const usedStorage = document.getElementById('settings-used-storage');
         const usagePercentage = document.getElementById('settings-usage-percentage');
         
-        // 立即更新总空间显示（基于用户设置）
-        if (totalStorage) {
-            const totalBytes = limitGB * 1024 * 1024 * 1024;
-            totalStorage.textContent = this.formatStorageSize(totalBytes);
+        if (!totalStorage || !usedStorage || !usagePercentage) {
+            console.warn('存储显示元素未找到');
+            return;
         }
         
-        // 简化实现：直接使用缓存的已使用空间，避免频繁API调用
+        // 立即更新总空间显示（基于用户设置）
+        const totalBytes = limitGB * 1024 * 1024 * 1024;
+        totalStorage.textContent = this.formatStorageSize(totalBytes);
+        
+        // 使用缓存的已使用空间数据
         if (this.cachedUsedSpace !== undefined) {
-            if (usedStorage) {
-                usedStorage.textContent = this.formatStorageSize(this.cachedUsedSpace);
-            }
+            usedStorage.textContent = this.formatStorageSize(this.cachedUsedSpace);
             
-            if (usagePercentage) {
-                const totalBytes = limitGB * 1024 * 1024 * 1024;
-                const percentage = (this.cachedUsedSpace / totalBytes) * 100;
-                usagePercentage.textContent = `${percentage.toFixed(1)}%`;
-            }
+            // 计算使用率
+            const percentage = (this.cachedUsedSpace / totalBytes) * 100;
+            usagePercentage.textContent = `${Math.min(percentage, 100).toFixed(2)}%`;
         } else {
             // 如果没有缓存，则获取一次
             this.getCurrentUsedSpace().then(usedSpace => {
                 this.cachedUsedSpace = usedSpace;
-                this.updateStorageDisplayOnChange(limitGB); // 递归调用更新显示
+                usedStorage.textContent = this.formatStorageSize(usedSpace);
+                
+                const percentage = (usedSpace / totalBytes) * 100;
+                usagePercentage.textContent = `${Math.min(percentage, 100).toFixed(2)}%`;
             }).catch(error => {
-                // 静默处理错误
-                // 使用默认值
-                if (usedStorage) {
-                    usedStorage.textContent = '0 B';
-                }
-                if (usagePercentage) {
-                    usagePercentage.textContent = '0%';
-                }
+                console.error('获取已使用空间失败:', error);
+                usedStorage.textContent = '0 B';
+                usagePercentage.textContent = '0.00%';
             });
         }
     }
@@ -589,21 +617,31 @@ class UISettingsManager {
      * 获取当前已使用空间
      */
     async getCurrentUsedSpace() {
-        const api = window.apiSystem || window.apiManager;
-        if (!api) {
-            throw new Error('API不可用');
+        try {
+            const api = window.apiSystem || window.apiManager;
+            if (!api) {
+                throw new Error('API不可用');
+            }
+            
+            let storageInfo;
+            if (api.storage && api.storage.getStorageInfo) {
+                storageInfo = await api.storage.getStorageInfo();
+            } else if (api.getStorageInfo) {
+                storageInfo = await api.getStorageInfo();
+            } else {
+                throw new Error('未找到存储API方法');
+            }
+            
+            if (!storageInfo) {
+                throw new Error('获取存储信息失败');
+            }
+            
+            // 返回已使用空间（字节）
+            return storageInfo.used_bytes || storageInfo.used_space || 0;
+        } catch (error) {
+            console.error('获取已使用空间失败:', error);
+            return 0;
         }
-        
-        let storageInfo;
-        if (api.storage && api.storage.getStorageInfo) {
-            storageInfo = await api.storage.getStorageInfo();
-        } else if (api.getStorageInfo) {
-            storageInfo = await api.getStorageInfo();
-        } else {
-            throw new Error('未找到存储API方法');
-        }
-        
-        return storageInfo.used_space;
     }
 
     /**
@@ -627,7 +665,7 @@ class UISettingsManager {
 
             if (usagePercentage) {
                 const percentage = (this.cachedUsedSpace / (limitGB * 1024 * 1024 * 1024)) * 100;
-                usagePercentage.textContent = `${percentage.toFixed(1)}%`;
+                usagePercentage.textContent = `${percentage.toFixed(2)}%`;
             }
         });
     }
@@ -792,10 +830,40 @@ class UISettingsManager {
      * 隐藏设置模态框
      */
     hideSettingsModal() {
-        const modal = document.querySelector('.fixed[data-modal="settings"]');
-        if (modal) {
+        // 移除所有设置相关的模态框
+        const modals = document.querySelectorAll('.fixed[data-modal="settings"]');
+        modals.forEach(modal => {
+            // 清理模态框的事件监听器
+            const slider = modal.querySelector('#storage-slider');
+            const input = modal.querySelector('#storage-input');
+            
+            if (slider && slider._sliderHandler) {
+                slider.removeEventListener('input', slider._sliderHandler);
+                slider.removeEventListener('change', slider._sliderHandler);
+                slider._sliderHandler = null;
+            }
+            if (input && input._inputHandler) {
+                input.removeEventListener('input', input._inputHandler);
+                input.removeEventListener('change', input._inputHandler);
+                input._inputHandler = null;
+            }
             modal.remove();
+        });
+        
+        // 清理事件监听器
+        if (this._settingsEventHandler) {
+            document.removeEventListener('click', this._settingsEventHandler);
+            this._settingsEventHandler = null;
         }
+        
+        // 确保所有相关的事件监听器都被清理
+        const allSettingsButtons = document.querySelectorAll('#close-settings-modal, #cancel-settings-btn, #save-settings-btn');
+        allSettingsButtons.forEach(button => {
+            // 移除可能存在的内联事件监听器
+            button.onclick = null;
+            button.onmousedown = null;
+            button.onmouseup = null;
+        });
     }
 
     /**
@@ -911,6 +979,12 @@ class UISettingsManager {
      * @param {string} tabName - 标签名称
      */
     switchTab(tabName) {
+        // 检查 settingsPanel 是否存在
+        if (!this.settingsPanel) {
+            console.warn('设置面板未找到，跳过标签切换');
+            return;
+        }
+        
         // 更新标签按钮状态
         const tabBtns = this.settingsPanel.querySelectorAll('.tab-btn');
         tabBtns.forEach(btn => {
@@ -1082,6 +1156,46 @@ class UISettingsManager {
                 logLevel: 'info'
             }
         };
+    }
+
+    /**
+     * 保存设置
+     */
+    saveSettings() {
+        try {
+            localStorage.setItem('appSettings', JSON.stringify(this.settings));
+            this.emit('settingsSaved', this.settings);
+        } catch (error) {
+            console.error('保存设置失败:', error);
+        }
+    }
+
+    /**
+     * 合并设置
+     * @param {Object} defaultSettings - 默认设置
+     * @param {Object} importedSettings - 导入的设置
+     * @returns {Object} 合并后的设置
+     */
+    mergeSettings(defaultSettings, importedSettings) {
+        const merged = this.deepClone(defaultSettings);
+        
+        const mergeRecursive = (target, source) => {
+            for (const key in source) {
+                if (source.hasOwnProperty(key)) {
+                    if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])) {
+                        if (!target[key] || typeof target[key] !== 'object') {
+                            target[key] = {};
+                        }
+                        mergeRecursive(target[key], source[key]);
+                    } else {
+                        target[key] = source[key];
+                    }
+                }
+            }
+        };
+        
+        mergeRecursive(merged, importedSettings);
+        return merged;
     }
 
     /**

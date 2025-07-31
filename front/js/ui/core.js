@@ -6,10 +6,7 @@ if (typeof UICore === 'undefined') {
     class UICore {
         constructor() {
             this.uiManager = null; // 将在UIManager中设置
-<<<<<<< HEAD
             this.api = window.apiSystem || window.apiManager; // 获取API引用
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         }
 
         /**
@@ -17,35 +14,20 @@ if (typeof UICore === 'undefined') {
          */
         init() {
             try {
-<<<<<<< HEAD
-=======
-                console.log('🚀 初始化UI核心模块...');
-                
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                 // 设置全局工具
                 this.setupGlobalUtils();
                 
                 // 绑定事件
-<<<<<<< HEAD
                 this.setupEventListeners();
                 
                 // 上传按钮事件现在由UIManager统一处理，移除此处调用
                 // this.bindUploadBtn();
                 
-=======
-                this.bindEvents();
-                
-                // 绑定上传按钮
-                this.bindUploadBtn();
-                
-                console.log('✅ UI核心模块初始化完成');
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             } catch (error) {
                 console.error('❌ UI核心模块初始化失败:', error);
             }
         }
 
-<<<<<<< HEAD
         /**
          * 设置全局工具函数
          */
@@ -66,9 +48,6 @@ if (typeof UICore === 'undefined') {
             // 设置全局API引用
             window.api = this.api;
         }
-
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         // 确保滚动条可见
         ensureScrollbarVisibility() {
             // 确保body和html的overflow设置正确
@@ -127,44 +106,16 @@ if (typeof UICore === 'undefined') {
 
         // 设置事件监听器
         setupEventListeners() {
-            // 移除重复的登录成功事件监听，由App统一处理
-            // window.addEventListener('loginSuccess', (event) => {
-            //     this.onLoginSuccess(event.detail);
-            // });
-
-            // 上传按钮事件（已由index.js统一绑定弹窗上传，移除此处绑定）
-            // document.getElementById('upload-btn')?.addEventListener('click', () => {
-            //     const fileInput = document.getElementById('file-input');
-            //     if (fileInput) {
-            //         fileInput.click();
-            //     }
-            // });
-            
             // 空状态上传按钮事件
             document.getElementById('empty-upload-btn')?.addEventListener('click', () => {
-<<<<<<< HEAD
                 if (this.uiManager && typeof this.uiManager.showUploadArea === 'function') {
-=======
-                if (this.uiManager) {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                     this.uiManager.showUploadArea();
                 }
             });
 
-            // 同步文档按钮事件 - 由docs-sync模块处理，避免重复绑定
-            // document.getElementById('sync-docs-btn')?.addEventListener('click', () => {
-            //     if (this.uiManager) {
-            //         this.uiManager.showSyncDocsModal();
-            //     }
-            // });
-
             // 关闭上传区域按钮
             document.getElementById('close-upload-btn')?.addEventListener('click', () => {
-<<<<<<< HEAD
                 if (this.uiManager && typeof this.uiManager.hideUploadArea === 'function') {
-=======
-                if (this.uiManager) {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                     this.uiManager.hideUploadArea();
                 }
             });
@@ -179,31 +130,19 @@ if (typeof UICore === 'undefined') {
 
             // 文件输入变化事件
             document.getElementById('file-input')?.addEventListener('change', (e) => {
-<<<<<<< HEAD
                 if (this.uiManager && this.uiManager.uploadManager && typeof this.uiManager.uploadManager.handleFileSelect === 'function') {
-=======
-                if (this.uiManager && this.uiManager.uploadManager) {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                     this.uiManager.uploadManager.handleFileSelect(e);
                 }
             });
             
             // 动态设置文件输入框的multiple属性
-<<<<<<< HEAD
             if (this.uiManager && typeof this.uiManager.updateFileInputMultiple === 'function') {
-=======
-            if (this.uiManager) {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                 this.uiManager.updateFileInputMultiple();
             }
             
             // 添加文件输入框点击事件，动态设置multiple属性
             document.getElementById('file-input')?.addEventListener('click', () => {
-<<<<<<< HEAD
                 if (this.uiManager && typeof this.uiManager.updateFileInputMultiple === 'function') {
-=======
-                if (this.uiManager) {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                     this.uiManager.updateFileInputMultiple();
                 }
             });
@@ -225,11 +164,7 @@ if (typeof UICore === 'undefined') {
                     e.preventDefault();
                     dropArea.classList.remove('border-purple-light/60');
                     const files = e.dataTransfer.files;
-<<<<<<< HEAD
                     if (this.uiManager && this.uiManager.uploadManager && typeof this.uiManager.uploadManager.addFilesToQueue === 'function') {
-=======
-                    if (this.uiManager) {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                         // 只添加到队列，不自动上传
                         this.uiManager.uploadManager.addFilesToQueue(Array.from(files));
                     }
@@ -243,11 +178,7 @@ if (typeof UICore === 'undefined') {
                 searchInput.addEventListener('input', (e) => {
                     clearTimeout(searchTimeout);
                     searchTimeout = setTimeout(() => {
-<<<<<<< HEAD
                         if (this.uiManager && typeof this.uiManager.handleSearch === 'function') {
-=======
-                        if (this.uiManager) {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                             this.uiManager.handleSearch(e.target.value);
                         }
                     }, 500);
@@ -259,11 +190,7 @@ if (typeof UICore === 'undefined') {
                     clearButton.addEventListener('click', () => {
                         searchInput.value = '';
                         clearButton.classList.add('hidden');
-<<<<<<< HEAD
                         if (this.uiManager && typeof this.uiManager.handleSearch === 'function') {
-=======
-                        if (this.uiManager) {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                             this.uiManager.handleSearch('');
                         }
                     });
@@ -290,7 +217,6 @@ if (typeof UICore === 'undefined') {
             // });
 
             // 个人资料按钮
-<<<<<<< HEAD
             const profileBtn = document.getElementById('profile-btn');
             profileBtn?.addEventListener('click', (e) => {
                 e.preventDefault(); // 阻止默认行为
@@ -298,17 +224,10 @@ if (typeof UICore === 'undefined') {
                     this.uiManager.showProfileModal();
                 } else {
                     console.error('❌ UICore - showProfileModal方法未找到');
-=======
-            document.getElementById('profile-btn')?.addEventListener('click', (e) => {
-                e.preventDefault(); // 阻止默认行为
-                if (this.uiManager) {
-                    this.uiManager.showProfileModal();
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                 }
             });
 
             // 设置按钮
-<<<<<<< HEAD
             const settingsBtn = document.getElementById('settings-btn');
             settingsBtn?.addEventListener('click', () => {
                 // 设置按钮只有管理员才能看到，所以不需要再次检查权限
@@ -327,12 +246,6 @@ if (typeof UICore === 'undefined') {
                     this.uiManager.adminManager.switchAdminView('update-logs');
                 } else {
                     console.error('❌ UICore - adminManager.switchAdminView方法未找到');
-=======
-            document.getElementById('settings-btn')?.addEventListener('click', () => {
-                // 设置按钮只有管理员才能看到，所以不需要再次检查权限
-                if (this.uiManager) {
-                    this.uiManager.showSettingsModal();
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                 }
             });
 
@@ -345,11 +258,7 @@ if (typeof UICore === 'undefined') {
 
             // 返回按钮
             document.getElementById('back-btn')?.addEventListener('click', () => {
-<<<<<<< HEAD
                 if (this.uiManager && typeof this.uiManager.goBackToAllFiles === 'function') {
-=======
-                if (this.uiManager) {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                     this.uiManager.goBackToAllFiles();
                 }
             });
@@ -369,18 +278,11 @@ if (typeof UICore === 'undefined') {
                 }
                 
                 // 从后端获取所有数据（不传递folderId，获取所有文件）
-<<<<<<< HEAD
                 const [files, urlFiles, folders, storageInfo] = await Promise.all([
                     this.api.files.getFiles(),
                     this.api.urlFiles.getUrlFiles(),
                     this.api.folders.getFolders(),
                     this.api.storage.getStorageInfo()
-=======
-                const [files, urlFiles, folders] = await Promise.all([
-                    this.api.files.getFiles(),
-                    this.api.urlFiles.getUrlFiles(),
-                    this.api.folders.getFolders()
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                 ]);
 
                 // 保存文件夹数据
@@ -397,17 +299,12 @@ if (typeof UICore === 'undefined') {
                 this.renderFileList(allDisplayFiles);
                 // 文件夹列表由app.js统一处理，避免重复渲染
 
-<<<<<<< HEAD
                 // 保存存储信息到本地缓存
                 if (storageInfo && window.StorageManager && typeof window.StorageManager.setStorageInfo === 'function') {
                     window.StorageManager.setStorageInfo(storageInfo);
                 }
 
                 // 更新存储空间显示
-=======
-                // 获取并更新存储信息
-                const storageInfo = await this.api.storage.getStorageInfo();
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                 this.updateStorageDisplay(storageInfo);
 
                 // 初始化拖拽功能
@@ -442,7 +339,6 @@ if (typeof UICore === 'undefined') {
         bindUploadBtn() {
             const uploadBtn = document.getElementById('upload-btn');
             if (uploadBtn) {
-<<<<<<< HEAD
                 uploadBtn.addEventListener('click', (event) => {
                     // 阻止默认行为，确保不会触发任何文件选择
                     event.preventDefault();
@@ -451,13 +347,6 @@ if (typeof UICore === 'undefined') {
                     // 调用UIManager的showUploadModal方法
                     if (this.uiManager && typeof this.uiManager.showUploadModal === 'function') {
                         this.uiManager.showUploadModal();
-=======
-                uploadBtn.addEventListener('click', () => {
-                    // 触发文件输入框
-                    const fileInput = document.getElementById('file-input');
-                    if (fileInput) {
-                        fileInput.click();
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                     }
                 });
             }
@@ -472,8 +361,6 @@ if (typeof UICore === 'undefined') {
                 window.uiManager.adminManager.checkAdminPermissions();
             }
         }
-<<<<<<< HEAD
-
         /**
          * 更新文件数量显示
          */
@@ -525,10 +412,3 @@ if (typeof UICore === 'undefined') {
     // 暴露到全局作用域
     window.UICore = UICore;
 } 
-=======
-    }
-}
-
-// 暴露到全局作用域
-window.UICore = UICore; 
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89

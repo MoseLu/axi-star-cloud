@@ -97,12 +97,11 @@ class TokenManager {
         if (!tokenInfo || !tokenInfo.expiresAt) return true;
         const expiresAt = new Date(tokenInfo.expiresAt);
         const now = new Date();
-        // 提前5分钟刷新
-        return now.getTime() >= (expiresAt.getTime() - 5 * 60 * 1000);
+        // 提前1分钟刷新（从5分钟改为1分钟）
+        return now.getTime() >= (expiresAt.getTime() - 1 * 60 * 1000);
     }
 
     // 调试方法：检查cookie状态
-<<<<<<< HEAD
     debugTokens() {
         // 检查所有cookie
         const allCookies = document.cookie;
@@ -138,68 +137,6 @@ class TokenManager {
             userInfo: userInfo ? JSON.parse(userInfo) : null,
             tokens,
             adminTokens
-=======
-    debugCookies() {
-        console.log('=== Cookie调试信息 ===');
-        
-        // 检查所有cookie
-        const allCookies = document.cookie;
-        console.log('所有cookie:', allCookies);
-        
-        // 检查特定token cookie
-        const cookies = document.cookie.split(';');
-        const accessToken = cookies.find(cookie => cookie.trim().startsWith('access_token='));
-        const refreshToken = cookies.find(cookie => cookie.trim().startsWith('refresh_token='));
-        const adminAccessToken = cookies.find(cookie => cookie.trim().startsWith('admin_access_token='));
-        const adminRefreshToken = cookies.find(cookie => cookie.trim().startsWith('admin_refresh_token='));
-        
-        console.log('access_token存在:', !!accessToken);
-        console.log('refresh_token存在:', !!refreshToken);
-        console.log('admin_access_token存在:', !!adminAccessToken);
-        console.log('admin_refresh_token存在:', !!adminRefreshToken);
-        
-        if (accessToken) {
-            console.log('access_token值:', accessToken.split('=')[1]);
-        }
-        if (refreshToken) {
-            console.log('refresh_token值:', refreshToken.split('=')[1]);
-        }
-        if (adminAccessToken) {
-            console.log('admin_access_token值:', adminAccessToken.split('=')[1]);
-        }
-        if (adminRefreshToken) {
-            console.log('admin_refresh_token值:', adminRefreshToken.split('=')[1]);
-        }
-        
-        // 检查环境
-        const isLocalhost = window.location.hostname === 'localhost' || 
-                           window.location.hostname === '127.0.0.1' ||
-                           window.location.hostname.includes('localhost');
-        console.log('是否为本地环境:', isLocalhost);
-        console.log('当前域名:', window.location.hostname);
-        console.log('当前协议:', window.location.protocol);
-        
-        // 检查localStorage
-        const userInfo = localStorage.getItem('userInfo');
-        console.log('localStorage中的用户信息:', userInfo);
-        
-        // 检查token获取方法
-        const tokens = this.getTokens();
-        const adminTokens = this.getAdminTokens();
-        console.log('getTokens()结果:', tokens);
-        console.log('getAdminTokens()结果:', adminTokens);
-        
-        console.log('=== Cookie调试结束 ===');
-        
-        return {
-            hasAccessToken: !!accessToken,
-            hasRefreshToken: !!refreshToken,
-            hasAdminAccessToken: !!adminAccessToken,
-            hasAdminRefreshToken: !!adminRefreshToken,
-            isLocalhost: isLocalhost,
-            tokens: tokens,
-            adminTokens: adminTokens
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         };
     }
 
@@ -208,8 +145,8 @@ class TokenManager {
         if (!adminTokenInfo || !adminTokenInfo.adminExpiresAt) return true;
         const expiresAt = new Date(adminTokenInfo.adminExpiresAt);
         const now = new Date();
-        // 提前5分钟刷新
-        return now.getTime() > (expiresAt.getTime() - 5 * 60 * 1000);
+        // 提前1分钟刷新（从5分钟改为1分钟）
+        return now.getTime() > (expiresAt.getTime() - 1 * 60 * 1000);
     }
 
     // 刷新普通用户token
@@ -403,46 +340,12 @@ class TokenManager {
 
     // 清除token
     clearTokens() {
-<<<<<<< HEAD
         // 清除localStorage中的token
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
-        if (window.StorageManager && typeof window.StorageManager.setSystemInfo === 'function') {
-            const systemInfo = window.StorageManager.getSystemInfo() || {};
-            delete systemInfo.tokens;
-            window.StorageManager.setSystemInfo(systemInfo);
-        } else {
-            localStorage.removeItem('tokens');
-        }
-<<<<<<< HEAD
-        
-        // 清除cookie中的token
-        document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 
     // 清除管理员token
     clearAdminTokens() {
-<<<<<<< HEAD
         // 清除localStorage中的管理员token
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
-        if (window.StorageManager && typeof window.StorageManager.setSystemInfo === 'function') {
-            const systemInfo = window.StorageManager.getSystemInfo() || {};
-            delete systemInfo.adminTokens;
-            window.StorageManager.setSystemInfo(systemInfo);
-        } else {
-            localStorage.removeItem('adminTokens');
-        }
-<<<<<<< HEAD
-        
-        // 清除cookie中的管理员token
-        document.cookie = 'admin_access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'admin_refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 
     // 设置自动刷新

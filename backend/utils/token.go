@@ -26,9 +26,9 @@ func NewTokenManager() *TokenManager {
 	return &TokenManager{
 		secretKey:       []byte("your-secret-key-change-in-production"),
 		adminSecretKey:  []byte("your-admin-secret-key-change-in-production"),
-		accessTokenTTL:  15 * time.Minute,   // 普通用户访问token 15分钟
+		accessTokenTTL:  2 * time.Hour,      // 普通用户访问token 2小时（从15分钟改为2小时）
 		refreshTokenTTL: 7 * 24 * time.Hour, // 普通用户刷新token 7天
-		adminTokenTTL:   30 * time.Minute,   // 管理员访问token 30分钟
+		adminTokenTTL:   4 * time.Hour,      // 管理员访问token 4小时（从30分钟改为4小时）
 		adminRefreshTTL: 24 * time.Hour,     // 管理员刷新token 24小时
 	}
 }

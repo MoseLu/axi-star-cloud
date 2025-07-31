@@ -255,7 +255,6 @@ if (typeof UIFolderManager === 'undefined') {
                         <span class="text-xs" style="color: #86efac;">${this.formatDate(folder.created_at)}</span>
                     </div>
                 </div>
-                
 
             `;
 
@@ -911,14 +910,6 @@ if (typeof UIFolderManager === 'undefined') {
             return `${year}-${month}-${day}`;
         }
     }
-<<<<<<< HEAD
-
     // 暴露到全局作用域
     window.UIFolderManager = UIFolderManager;
 } 
-=======
-}
-
-// 暴露到全局作用域
-window.UIFolderManager = UIFolderManager; 
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89

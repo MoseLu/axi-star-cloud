@@ -1,21 +1,13 @@
 /**
  * 认证服务层
-<<<<<<< HEAD
  *
-=======
- * 
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
  * 负责处理用户认证相关的核心业务逻辑，包括：
  * - 用户注册
  * - 用户登录
  * - 用户登出
  * - 用户验证
  * - 存储限制管理
-<<<<<<< HEAD
  *
-=======
- * 
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
  * 该服务层将业务逻辑与HTTP处理分离，提高代码的可维护性和可测试性
  */
 
@@ -23,10 +15,7 @@ package services
 
 import (
 	"fmt"
-<<<<<<< HEAD
 	"strings"
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	"time"
 
 	"backend/database"
@@ -38,37 +27,24 @@ import (
 
 // AuthService 认证服务
 type AuthService struct {
-<<<<<<< HEAD
 	userRepo      *database.UserRepository
 	fileRepo      *database.FileRepository
 	urlFileRepo   *database.UrlFileRepository
 	tokenManager  *utils.TokenManager
-=======
-	userRepo     *database.UserRepository
-	tokenManager *utils.TokenManager
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	cookieManager *utils.CookieManager
 }
 
 // NewAuthService 创建认证服务实例
-<<<<<<< HEAD
 func NewAuthService(userRepo *database.UserRepository, fileRepo *database.FileRepository, urlFileRepo *database.UrlFileRepository) *AuthService {
 	return &AuthService{
 		userRepo:      userRepo,
 		fileRepo:      fileRepo,
 		urlFileRepo:   urlFileRepo,
 		tokenManager:  utils.NewTokenManager(),
-=======
-func NewAuthService(userRepo *database.UserRepository) *AuthService {
-	return &AuthService{
-		userRepo:     userRepo,
-		tokenManager: utils.NewTokenManager(),
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 		cookieManager: utils.NewCookieManager(),
 	}
 }
 
-<<<<<<< HEAD
 // buildAvatarUrl 构建完整的头像URL
 func (s *AuthService) buildAvatarUrl(avatarFileName string) string {
 	if avatarFileName == "" || avatarFileName == "null" || avatarFileName == "undefined" {
@@ -84,8 +60,6 @@ func (s *AuthService) buildAvatarUrl(avatarFileName string) string {
 	return "/uploads/avatars/" + avatarFileName
 }
 
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 // Register 处理用户注册
 func (s *AuthService) Register(registerData models.RegisterRequest) (*models.RegisterResponse, error) {
 	// 检查用户名是否已存在
@@ -100,7 +74,6 @@ func (s *AuthService) Register(registerData models.RegisterRequest) (*models.Reg
 
 	// 创建新用户
 	user := &models.User{
-<<<<<<< HEAD
 		UUID:         uuid.New().String(),
 		Username:     registerData.Username,
 		Password:     registerData.Password, // 实际应用中应该哈希密码
@@ -108,15 +81,6 @@ func (s *AuthService) Register(registerData models.RegisterRequest) (*models.Reg
 		StorageLimit: s.calculateStorageLimit(registerData.Username),
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
-=======
-		UUID:     uuid.New().String(),
-		Username: registerData.Username,
-		Password: registerData.Password, // 实际应用中应该哈希密码
-		Email:    registerData.Email,
-		StorageLimit: s.calculateStorageLimit(registerData.Username),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 	}
 
 	// 保存用户到数据库
@@ -130,19 +94,11 @@ func (s *AuthService) Register(registerData models.RegisterRequest) (*models.Reg
 		Success: true,
 		Message: "注册成功",
 		User: models.UserResponse{
-<<<<<<< HEAD
 			UUID:      user.UUID,
 			Username:  user.Username,
 			Email:     user.Email,
 			Bio:       user.Bio,
 			AvatarUrl: s.buildAvatarUrl(user.Avatar),
-=======
-			UUID:     user.UUID,
-			Username: user.Username,
-			Email:    user.Email,
-			Bio:      user.Bio,
-			Avatar:   user.Avatar,
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 		},
 	}
 
@@ -166,6 +122,13 @@ func (s *AuthService) Login(loginData models.LoginRequest) (*models.LoginRespons
 		return nil, fmt.Errorf("用户名或密码错误")
 	}
 
+	// 更新最后登录时间和在线状态
+	err = s.userRepo.UpdateLastLoginTime(user.UUID)
+	if err != nil {
+		// 记录错误但不影响登录流程
+		fmt.Printf("更新用户登录时间失败: %v\n", err)
+	}
+
 	// 生成普通用户token
 	tokens, err := s.tokenManager.GenerateTokenPair(user.UUID, user.Username)
 	if err != nil {
@@ -177,19 +140,12 @@ func (s *AuthService) Login(loginData models.LoginRequest) (*models.LoginRespons
 		Success: true,
 		Message: "登录成功",
 		User: models.UserResponse{
-<<<<<<< HEAD
 			UUID:      user.UUID,
 			Username:  user.Username,
 			Email:     user.Email,
 			Bio:       user.Bio,
 			AvatarUrl: s.buildAvatarUrl(user.Avatar),
-=======
-			UUID:     user.UUID,
-			Username: user.Username,
-			Email:    user.Email,
-			Bio:      user.Bio,
-			Avatar:   user.Avatar,
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
+			IsOnline:  true,
 		},
 		Tokens: *tokens,
 	}
@@ -208,6 +164,13 @@ func (s *AuthService) Login(loginData models.LoginRequest) (*models.LoginRespons
 
 // Logout 处理用户登出
 func (s *AuthService) Logout(userID string) (*models.LogoutResponse, error) {
+	// 设置用户离线状态
+	err := s.userRepo.SetUserOffline(userID)
+	if err != nil {
+		// 记录错误但不影响登出流程
+		fmt.Printf("设置用户离线状态失败: %v\n", err)
+	}
+
 	// 这里可以添加登出日志记录、token黑名单等逻辑
 	response := &models.LogoutResponse{
 		Success: true,
@@ -243,19 +206,11 @@ func (s *AuthService) ValidateUserToken(accessToken string) (*models.TokenValida
 		Success: true,
 		Valid:   true,
 		User: models.UserResponse{
-<<<<<<< HEAD
 			UUID:      user.UUID,
 			Username:  user.Username,
 			Email:     user.Email,
 			Bio:       user.Bio,
 			AvatarUrl: s.buildAvatarUrl(user.Avatar),
-=======
-			UUID:     user.UUID,
-			Username: user.Username,
-			Email:    user.Email,
-			Bio:      user.Bio,
-			Avatar:   user.Avatar,
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 		},
 		Message: "token有效",
 	}
@@ -298,19 +253,11 @@ func (s *AuthService) ValidateAdminToken(adminAccessToken string) (*models.Admin
 		Success: true,
 		Valid:   true,
 		User: models.UserResponse{
-<<<<<<< HEAD
 			UUID:      user.UUID,
 			Username:  user.Username,
 			Email:     user.Email,
 			Bio:       user.Bio,
 			AvatarUrl: s.buildAvatarUrl(user.Avatar),
-=======
-			UUID:     user.UUID,
-			Username: user.Username,
-			Email:    user.Email,
-			Bio:      user.Bio,
-			Avatar:   user.Avatar,
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 		},
 		Message: "管理员token有效",
 	}
@@ -372,7 +319,6 @@ func (s *AuthService) GetAllUsers(page, pageSize int) (*models.UserListResponse,
 		return nil, fmt.Errorf("获取用户列表失败: %w", err)
 	}
 
-<<<<<<< HEAD
 	// 将User转换为UserResponse，并处理头像URL和存储信息
 	userResponses := make([]models.UserResponse, 0, len(users))
 	for _, user := range users {
@@ -408,6 +354,8 @@ func (s *AuthService) GetAllUsers(page, pageSize int) (*models.UserListResponse,
 			AvatarUrl:    s.buildAvatarUrl(user.Avatar),
 			StorageLimit: user.StorageLimit,
 			UsedSpace:    totalUsedSpace,
+			LastLoginTime: user.LastLoginTime,
+			IsOnline:     user.IsOnline,
 			CreatedAt:    user.CreatedAt,
 		})
 	}
@@ -415,11 +363,6 @@ func (s *AuthService) GetAllUsers(page, pageSize int) (*models.UserListResponse,
 	response := &models.UserListResponse{
 		Success:  true,
 		Users:    userResponses,
-=======
-	response := &models.UserListResponse{
-		Success:  true,
-		Users:    users,
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 		Total:    totalCount,
 		Page:     page,
 		PageSize: pageSize,
@@ -447,8 +390,4 @@ func (s *AuthService) calculateStorageLimit(username string) int64 {
 		return 5 * 1024 * 1024 * 1024 // 5GB
 	}
 	return 1024 * 1024 * 1024 // 1GB
-<<<<<<< HEAD
 }
-=======
-} 
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89

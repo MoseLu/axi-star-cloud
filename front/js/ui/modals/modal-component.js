@@ -497,7 +497,7 @@ class ModalManager {
 
                         if (usagePercentage) {
                             const percentage = (storageInfo.used_space / storageInfo.total_space) * 100;
-                            usagePercentage.textContent = `${percentage.toFixed(1)}%`;
+                            usagePercentage.textContent = `${percentage.toFixed(2)}%`;
                         }
                     }
                 } catch (error) {

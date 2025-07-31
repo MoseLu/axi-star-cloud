@@ -245,27 +245,31 @@
     font-size: 10px;
     padding: 2px 8px;
     border-radius: 12px;
-    background: #28a745;
+    background: #16a34a;
     color: white;
     text-transform: uppercase;
     font-weight: 500;
     display: inline-block;
     width: fit-content;
+    border: 1px solid rgba(22, 163, 74, 0.3);
 }
 
 .doc-status.pending {
-    background: #ffc107;
-    color: black;
+    background: #ea580c;
+    color: white;
+    border: 1px solid rgba(234, 88, 12, 0.3);
 }
 
 .doc-status.syncing {
-    background: #17a2b8;
+    background: #2563eb;
     color: white;
+    border: 1px solid rgba(37, 99, 235, 0.3);
 }
 
 .doc-status.failed {
-    background: #dc3545;
+    background: #dc2626;
     color: white;
+    border: 1px solid rgba(220, 38, 38, 0.3);
 }
 
 .doc-actions {
@@ -373,20 +377,23 @@
     font-size: 10px;
     padding: 2px 6px;
     border-radius: 8px;
-    background: #28a745;
+    background: #16a34a;
     color: white;
     text-transform: uppercase;
     font-weight: 500;
+    border: 1px solid rgba(22, 163, 74, 0.3);
 }
 
 .queue-status.syncing {
-    background: #ffc107;
-    color: black;
+    background: #2563eb;
+    color: white;
+    border: 1px solid rgba(37, 99, 235, 0.3);
 }
 
 .queue-status.failed {
-    background: #dc3545;
+    background: #dc2626;
     color: white;
+    border: 1px solid rgba(220, 38, 38, 0.3);
 }
 
 .queue-actions {

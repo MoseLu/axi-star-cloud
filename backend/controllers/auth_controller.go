@@ -89,12 +89,22 @@ func (ac *AuthController) Login(c *gin.Context) {
 
 // Logout 处理退出登录请求
 func (ac *AuthController) Logout(c *gin.Context) {
-	userID := c.Query("user_id")
-
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "缺少用户ID"})
+	// 从cookie中获取访问token
+	accessToken, err := c.Cookie("access_token")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "未提供用户token"})
 		return
 	}
+
+	// 验证访问token并获取用户ID
+	tokenManager := utils.NewTokenManager()
+	claims, err := tokenManager.ValidateAccessToken(accessToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "无效的用户token"})
+		return
+	}
+
+	userID := claims.UserUUID
 
 	// 调用服务层处理登出
 	response, err := ac.authService.Logout(userID)

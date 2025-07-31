@@ -17,18 +17,12 @@ class AppCore {
      */
     async init() {
         try {
-    
-            
+
             // 等待API系统准备就绪
             await this.waitForApiSystem();
             
             // 初始化管理器
-<<<<<<< HEAD
             await this.initManagers();
-=======
-            this.initManagers();
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
-            
             // 设置全局函数
             this.setupGlobalFunctions();
             
@@ -37,7 +31,6 @@ class AppCore {
             
             this.isInitialized = true;
 
-            
             // 触发核心就绪事件
             this.dispatchEvent('app:core:ready');
             
@@ -68,11 +61,7 @@ class AppCore {
     /**
      * 初始化管理器
      */
-<<<<<<< HEAD
     async initManagers() {
-=======
-    initManagers() {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         // 使用新的API系统，确保向后兼容
         this.apiManager = window.apiSystem || window.apiManager;
         if (!this.apiManager) {
@@ -87,39 +76,33 @@ class AppCore {
             return;
         }
         
-<<<<<<< HEAD
         // 等待UIManager类加载完成
         await this.waitForUIManager();
-        
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
-        // 初始化UI管理器
-        this.uiManager = new UIManager();
-        window.uiManager = this.uiManager;
     }
 
     /**
-<<<<<<< HEAD
-     * 等待UIManager类加载完成
+     * 等待UIManager加载完成
      */
     async waitForUIManager() {
         let attempts = 0;
         const maxAttempts = 50; // 最多等待5秒
         
         while (attempts < maxAttempts) {
-            if (typeof UIManager !== 'undefined') {
+            if (window.UIManager) {
+                // 创建UI管理器实例
+                this.uiManager = new window.UIManager();
+                // 设置全局引用
+                window.uiManager = this.uiManager;
                 return;
             }
             await new Promise(resolve => setTimeout(resolve, 100));
             attempts++;
         }
         
-        throw new Error('UIManager类加载超时');
+        console.warn('UIManager加载超时，跳过UI管理器初始化');
     }
 
     /**
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
      * 设置全局函数
      */
     setupGlobalFunctions() {
@@ -230,4 +213,7 @@ class AppCore {
 // 导出AppCore类
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = AppCore;
-} 
+}
+
+// 暴露到全局
+window.AppCore = AppCore; 

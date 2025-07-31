@@ -206,11 +206,56 @@ func (h *FileHandler) DownloadFile(c *gin.Context) {
 		return
 	}
 
-	// 不设置Content-Disposition，让浏览器使用默认下载行为
-	// disposition := "attachment; filename*=UTF-8''" + url.QueryEscape(file.Name)
+	// 根据文件类型设置正确的Content-Type
 	contentType := "application/octet-stream"
 
-	// c.Header("Content-Disposition", disposition) // 注释掉这行
+	// 检查文件扩展名，设置正确的MIME类型
+	ext := strings.ToLower(filepath.Ext(file.Name))
+	switch ext {
+	case ".jpg", ".jpeg":
+		contentType = "image/jpeg"
+	case ".png":
+		contentType = "image/png"
+	case ".gif":
+		contentType = "image/gif"
+	case ".bmp":
+		contentType = "image/bmp"
+	case ".webp":
+		contentType = "image/webp"
+	case ".svg":
+		contentType = "image/svg+xml"
+	case ".pdf":
+		contentType = "application/pdf"
+	case ".txt":
+		contentType = "text/plain"
+	case ".html", ".htm":
+		contentType = "text/html"
+	case ".css":
+		contentType = "text/css"
+	case ".js":
+		contentType = "application/javascript"
+	case ".json":
+		contentType = "application/json"
+	case ".xml":
+		contentType = "application/xml"
+	case ".zip":
+		contentType = "application/zip"
+	case ".rar":
+		contentType = "application/x-rar-compressed"
+	case ".7z":
+		contentType = "application/x-7z-compressed"
+	case ".doc", ".docx":
+		contentType = "application/msword"
+	case ".xls", ".xlsx":
+		contentType = "application/vnd.ms-excel"
+	case ".ppt", ".pptx":
+		contentType = "application/vnd.ms-powerpoint"
+	}
+
+	// 设置Content-Disposition头，强制下载
+	// 使用简单的filename参数，避免编码问题
+	disposition := "attachment; filename=\"" + file.Name + "\""
+	c.Header("Content-Disposition", disposition)
 	c.Header("Content-Type", contentType)
 	c.Header("Content-Length", strconv.FormatInt(fileInfo.Size(), 10))
 

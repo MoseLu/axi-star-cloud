@@ -4,15 +4,17 @@ import "time"
 
 // User 结构体表示用户数据
 type User struct {
-	UUID         string    `json:"uuid"`
-	Username     string    `json:"username"`
-	Password     string    `json:"password"`
-	Email        string    `json:"email"`
-	Bio          string    `json:"bio"`
-	Avatar       string    `json:"avatar"`
-	StorageLimit int64     `json:"storage_limit"` // 存储空间限制（字节）
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	UUID         string     `json:"uuid"`
+	Username     string     `json:"username"`
+	Password     string     `json:"password"`
+	Email        string     `json:"email"`
+	Bio          string     `json:"bio"`
+	Avatar       string     `json:"avatar"`
+	StorageLimit int64      `json:"storage_limit"` // 存储空间限制（字节）
+	LastLoginTime *time.Time `json:"last_login_time,omitempty"` // 最后登录时间
+	IsOnline     bool       `json:"is_online"`    // 在线状态
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
 }
 
 // LoginRequest 登录请求结构体
@@ -40,22 +42,16 @@ type LoginResponse struct {
 
 // UserResponse 用户响应结构体
 type UserResponse struct {
-<<<<<<< HEAD
-	UUID         string    `json:"uuid"`
-	Username     string    `json:"username"`
-	Email        string    `json:"email"`
-	Bio          string    `json:"bio"`
-	AvatarUrl    string    `json:"avatarUrl"`
-	StorageLimit int64     `json:"storage_limit"` // 存储空间限制（字节）
-	UsedSpace    int64     `json:"used_space"`    // 已使用存储空间（字节）
-	CreatedAt    time.Time `json:"created_at"`    // 创建时间
-=======
-	UUID     string `json:"uuid"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Bio      string `json:"bio"`
-	Avatar   string `json:"avatar"`
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
+	UUID         string     `json:"uuid"`
+	Username     string     `json:"username"`
+	Email        string     `json:"email"`
+	Bio          string     `json:"bio"`
+	AvatarUrl    string     `json:"avatarUrl"`
+	StorageLimit int64      `json:"storage_limit"` // 存储空间限制（字节）
+	UsedSpace    int64      `json:"used_space"`    // 已使用存储空间（字节）
+	LastLoginTime *time.Time `json:"last_login_time,omitempty"` // 最后登录时间
+	IsOnline     bool       `json:"is_online"`    // 在线状态
+	CreatedAt    time.Time  `json:"created_at"`   // 创建时间
 }
 
 // RegisterResponse 注册响应结构体
@@ -73,21 +69,12 @@ type LogoutResponse struct {
 
 // UserListResponse 用户列表响应结构体
 type UserListResponse struct {
-<<<<<<< HEAD
 	Success  bool           `json:"success"`
 	Users    []UserResponse `json:"users"`
 	Total    int            `json:"total,omitempty"`
 	Page     int            `json:"page,omitempty"`
 	PageSize int            `json:"page_size,omitempty"`
 	HasMore  bool           `json:"has_more,omitempty"`
-=======
-	Success  bool   `json:"success"`
-	Users    []User `json:"users"`
-	Total    int    `json:"total,omitempty"`
-	Page     int    `json:"page,omitempty"`
-	PageSize int    `json:"page_size,omitempty"`
-	HasMore  bool   `json:"has_more,omitempty"`
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 }
 
 // UpdateUserStorageRequest 更新用户存储限制请求结构体

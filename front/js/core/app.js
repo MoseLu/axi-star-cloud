@@ -9,6 +9,9 @@ class App {
         this.authManager = null;
         this.environmentManager = null;
         this.isInitialized = false;
+        
+
+        
         this.init();
     }
 
@@ -31,7 +34,7 @@ class App {
             this.detectForceRefresh();
 
             // 初始化应用核心
-            this.core = new AppCore();
+            this.core = new window.AppCore();
             
             // 等待核心初始化完成
             await this.waitForCoreReady();
@@ -39,7 +42,6 @@ class App {
             // 初始化认证管理
             this.authManager = new AppAuthManager(this.core);
             
-<<<<<<< HEAD
             // 初始化环境管理 - 在强制刷新时优先处理环境检测
             this.environmentManager = new AppEnvironmentManager(this.core);
             
@@ -49,15 +51,8 @@ class App {
                 await this.waitForEnvironmentDetection();
             }
             
-=======
-            // 初始化环境管理
-            this.environmentManager = new AppEnvironmentManager(this.core);
-            
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
-            // 绑定上传按钮弹窗事件
-            if (this.core.uiManager) {
-                this.core.uiManager.bindUploadBtn();
-            }
+            // 等待UIManager完全初始化后再绑定上传按钮事件
+            await this.waitForUIManagerReady();
             
             this.isInitialized = true;
 
@@ -110,10 +105,6 @@ class App {
         }
         
         if (isForceRefresh) {
-<<<<<<< HEAD
-=======
-            console.log('检测到强制刷新，将优先恢复本地缓存数据');
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             // 设置强制刷新标记
             window.isForceRefresh = true;
             
@@ -148,6 +139,7 @@ class App {
                 if (this.core && this.core.isInitialized) {
                     resolve();
                 } else {
+                    
                     setTimeout(checkCoreReady, 100);
                 }
             };
@@ -158,13 +150,7 @@ class App {
     /**
      * 处理初始化错误
      */
-<<<<<<< HEAD
     handleInitError(_error) {
-=======
-    handleInitError(error) {
-        console.error('应用初始化错误:', error);
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
-        
         // 显示错误消息
         if (window.MessageBox) {
             window.MessageBox.show({
@@ -248,8 +234,6 @@ class App {
     getAPIManager() {
         return this.core?.apiManager;
     }
-<<<<<<< HEAD
-
     /**
      * 等待环境检测完成
      */
@@ -266,8 +250,28 @@ class App {
             checkEnvironmentDetection();
         });
     }
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
+
+    /**
+     * 等待UIManager完全初始化
+     */
+    async waitForUIManagerReady() {
+        return new Promise((resolve) => {
+            const checkUIManagerReady = () => {
+                if (this.core && this.core.uiManager && this.core.uiManager.isInitialized !== false) {
+                    // 绑定上传按钮弹窗事件
+                    if (this.core.uiManager && typeof this.core.uiManager.bindUploadBtn === 'function') {
+                        this.core.uiManager.bindUploadBtn();
+                    }
+                    resolve();
+                } else {
+                    setTimeout(checkUIManagerReady, 100);
+                }
+            };
+            checkUIManagerReady();
+        });
+    }
+
+
 }
 
 // 全局缓存渲染函数

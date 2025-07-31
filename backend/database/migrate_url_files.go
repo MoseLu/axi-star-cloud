@@ -41,5 +41,4 @@ func MigrateUrlFiles(db *sql.DB) error {
 	}
 
 	return nil
-	return nil
 }

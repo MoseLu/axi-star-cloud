@@ -161,18 +161,19 @@ class ErrorManager {
                     await window.tokenManager.refreshTokens();
                     return { retry: true };
                 } catch (refreshError) {
-                    this.clearAuthData();
+                    console.warn('刷新token失败，但不清除用户数据，让用户继续使用:', refreshError);
+                    // 不清除用户数据，给用户更多机会
                     throw new ApiError(
                         HTTP_STATUS.UNAUTHORIZED,
-                        '登录已过期，请重新登录',
+                        '登录状态可能已过期，但您可以继续使用',
                         ERROR_TYPES.TOKEN_EXPIRED
                     );
                 }
             } else {
-                this.clearAuthData();
+                console.warn('tokenManager未找到，不清除用户数据');
                 throw new ApiError(
                     HTTP_STATUS.UNAUTHORIZED,
-                    '认证失败，请重新登录',
+                    '认证失败，但您可以继续使用',
                     ERROR_TYPES.AUTHENTICATION_ERROR
                 );
             }

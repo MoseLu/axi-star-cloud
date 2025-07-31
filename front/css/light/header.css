@@ -140,7 +140,6 @@
     border: 1px solid rgba(229, 231, 235, 0.3);
 }
 
-<<<<<<< HEAD
 /* 用户下拉菜单容器 */
 .relative.group .absolute {
     max-height: 80vh !important;
@@ -166,9 +165,6 @@
 .relative.group .absolute::-webkit-scrollbar-thumb:hover {
     background: rgba(139, 92, 247, 0.7);
 }
-
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 .border-purple-light\/20 {
     border-color: rgba(168, 85, 247, 0.15);
 }
@@ -218,11 +214,7 @@
 /* 响应式调整 */
 @media (max-width: 640px) {
     .glass-effect {
-<<<<<<< HEAD
         background: rgba(255, 255, 255, 0.95);
-=======
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1), rgba(16, 185, 129, 0.1));
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
     
     .border-purple-light\/20 {
@@ -230,7 +222,6 @@
     }
 }
 
-<<<<<<< HEAD
 /* 下拉菜单group-hover样式 */
 .group:hover .group-hover\:opacity-100 {
     opacity: 1 !important;
@@ -255,9 +246,6 @@
     background-color: rgba(34, 197, 94, 0.1) !important;
     color: #86EFAC !important;
 }
-
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 /* 主题切换按钮亮色主题样式 */
 .theme-toggle-btn {
     background: transparent !important;

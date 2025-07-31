@@ -167,7 +167,7 @@ class AuthSystem {
 class SimpleAuthManager {
     constructor() {
         this.currentUser = null;
-        this.isLoggedIn = false;
+        this._isLoggedIn = false; // 重命名为_isLoggedIn避免与方法冲突
         this.authAPI = null;
         this.tokenManager = null;
         this.init();
@@ -254,25 +254,25 @@ class SimpleAuthManager {
             const loginResult = await this.authAPI.login(username, password);
             
             if (loginResult && loginResult.success) {
-                // 保存用户信息
-                this.currentUser = loginResult.user || { 
+                // 保存用户信息到localStorage，与getCurrentUser方法保持一致
+                const userInfo = loginResult.user || { 
                     username: loginResult.user?.username || username,
                     uuid: loginResult.user?.uuid || loginResult.user?.id
                 };
-                this.isLoggedIn = true;
                 
                 // 保存到localStorage
-                localStorage.setItem('userInfo', JSON.stringify(this.currentUser));
+                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                
+                // 设置当前用户状态
+                this.currentUser = userInfo;
+                this._isLoggedIn = true;
                 
                 // 等待cookie设置完成，减少延迟
                 await new Promise(resolve => setTimeout(resolve, 800));
                 
-                // 移除重复的消息显示，由AppAuthManager统一处理
-                // this.showMessage(loginResult.message || '登录成功', 'success');
-                
                 // 触发登录成功事件
                 document.dispatchEvent(new CustomEvent('loginSuccess', {
-                    detail: this.currentUser
+                    detail: userInfo
                 }));
                 
                 return true;
@@ -346,7 +346,7 @@ class SimpleAuthManager {
         if (userData) {
             try {
                 this.currentUser = JSON.parse(userData);
-                this.isLoggedIn = true;
+                this._isLoggedIn = true;
                 
                 // 验证token是否有效
                 if (this.tokenManager) {
@@ -364,7 +364,7 @@ class SimpleAuthManager {
 
     // 是否已登录
     isLoggedIn() {
-        return this.isLoggedIn;
+        return this._isLoggedIn;
     }
 
     // 获取当前用户
@@ -375,16 +375,13 @@ class SimpleAuthManager {
     // 清除登录数据
     clearLoginData() {
         this.currentUser = null;
-        this.isLoggedIn = false;
+        this._isLoggedIn = false;
         localStorage.removeItem('userInfo');
         
         // 清除token
         if (this.tokenManager) {
             this.tokenManager.clearTokens();
-<<<<<<< HEAD
             this.tokenManager.clearAdminTokens();
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         }
     }
 

@@ -23,8 +23,6 @@ class UIHelpManager {
                 this.showHelpModal();
             }
         });
-<<<<<<< HEAD
-
         // 添加下拉菜单的JavaScript控制
         this.bindDropdownMenu();
     }
@@ -33,8 +31,13 @@ class UIHelpManager {
      * 绑定下拉菜单事件
      */
     bindDropdownMenu() {
-        const userButton = document.querySelector('.relative.group button');
-        const dropdownMenu = document.querySelector('.relative.group .absolute');
+        // 查找用户按钮和下拉菜单，使用更通用的选择器
+        const userButton = document.querySelector('[data-dropdown="user-menu"]') || 
+                          document.querySelector('.user-dropdown button') ||
+                          document.querySelector('.relative.group button');
+        const dropdownMenu = document.querySelector('[data-dropdown-menu="user-menu"]') ||
+                           document.querySelector('.user-dropdown .dropdown-menu') ||
+                           document.querySelector('.relative.group .absolute');
         
         if (userButton && dropdownMenu) {
             // 鼠标进入显示菜单
@@ -60,24 +63,9 @@ class UIHelpManager {
                 dropdownMenu.style.opacity = '0';
                 dropdownMenu.style.visibility = 'hidden';
             });
-        }
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
-    }
-
-    /**
-     * 显示帮助模态框
-     */
-    showHelpModal() {
-        const modal = document.getElementById('help-modal');
-        if (modal) {
-            modal.classList.remove('hidden');
-<<<<<<< HEAD
-=======
-    
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         } else {
-            console.error('❌ Help modal not found');
+            // 静默处理，不显示错误信息，因为下拉菜单可能不存在
+            console.debug('用户下拉菜单元素未找到，跳过绑定事件');
         }
     }
 
@@ -88,6 +76,16 @@ class UIHelpManager {
         const modal = document.getElementById('help-modal');
         if (modal) {
             modal.classList.add('hidden');
+        }
+    }
+
+    /**
+     * 显示帮助模态框
+     */
+    showHelpModal() {
+        const modal = document.getElementById('help-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
         }
     }
 
@@ -125,11 +123,7 @@ class UIHelpManager {
         // 添加到body
         document.body.insertAdjacentHTML('beforeend', modalHTML);
         
-<<<<<<< HEAD
         // 绑定关闭按钮事件
-=======
-        // 移除全屏按钮事件绑定
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         this.bindCloseButton(); // 绑定关闭按钮事件
         this.bindKeyboardEvents(); // 绑定键盘事件
         
@@ -138,38 +132,13 @@ class UIHelpManager {
     }
 
     /**
-     * 绑定关闭按钮事件
-     */
-    bindCloseButton() {
-        const closeBtn = document.getElementById('help-close-btn');
-        if (closeBtn) {
-<<<<<<< HEAD
-            closeBtn.removeEventListener('click', this.hideHelpModal);
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
-            closeBtn.addEventListener('click', () => {
-                this.hideHelpModal();
-            });
-        }
-    }
-
-    /**
      * 绑定键盘事件
      */
     bindKeyboardEvents() {
         document.addEventListener('keydown', (e) => {
-            const modal = document.getElementById('help-modal');
-            if (!modal || modal.classList.contains('hidden')) return;
-            
+            // ESC键关闭帮助模态框
             if (e.key === 'Escape') {
-                const modalContent = document.getElementById('help-modal-content');
-                if (modalContent && modalContent.classList.contains('fullscreen')) {
-                    // 如果处于全屏状态，先退出全屏
-                    // this.exitFullscreen(); // 移除此方法
-                } else {
-                    // 否则关闭模态框
-                    this.hideHelpModal();
-                }
+                this.hideHelpModal();
             }
         });
     }
@@ -179,29 +148,31 @@ class UIHelpManager {
      */
     renderHelpContent() {
         const content = document.getElementById('help-content');
-        if (content && window.marked) {
-            // 使用marked.js渲染Markdown
-            content.innerHTML = marked.parse(this.helpContent);
+        if (content) {
+            // 使用marked.js渲染Markdown内容
+            if (window.marked) {
+                content.innerHTML = marked.parse(this.helpContent);
+            } else {
+                content.innerHTML = this.helpContent;
+            }
             
-            // 添加自定义样式
+            // 添加样式
             this.addHelpStyles();
             
             // 添加目录跳转功能
             this.addTableOfContents();
-<<<<<<< HEAD
-        } else if (content) {
-            // 降级处理：直接显示原始内容
-            content.innerHTML = this.helpContent;
-=======
-            
-            // 动态加载更新日志
-            this.loadUpdateLogs();
-    
-        } else if (content) {
-            // 降级处理：直接显示原始内容
-            content.innerHTML = this.helpContent;
-    
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
+        }
+    }
+
+    /**
+     * 绑定关闭按钮事件
+     */
+    bindCloseButton() {
+        const closeBtn = document.getElementById('help-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.hideHelpModal();
+            });
         }
     }
 
@@ -211,16 +182,6 @@ class UIHelpManager {
     addTableOfContents() {
         const content = document.getElementById('help-content');
         if (!content) return;
-
-        // 为所有标题添加ID
-        const headings = content.querySelectorAll('h1, h2, h3, h4, h5, h6');
-        headings.forEach((heading, index) => {
-            const text = heading.textContent.trim();
-            // 移除emoji和特殊字符，生成干净的ID
-            const cleanText = text.replace(/[📖🚀📁📂📊⚙️❓🔧🏷️]/g, '').trim();
-            const id = `heading-${index}-${cleanText.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-            heading.id = id;
-        });
 
         // 动态生成目录链接
         this.updateTableOfContentsLinks();
@@ -237,11 +198,6 @@ class UIHelpManager {
                 
                 const targetElement = document.getElementById(targetId);
                 
-<<<<<<< HEAD
-=======
-
-                
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                 if (targetElement) {
                     // 获取模态框的滚动容器
                     const modal = document.getElementById('help-modal');
@@ -254,29 +210,12 @@ class UIHelpManager {
                         const scrollTop = scrollContainer.scrollTop;
                         const targetTop = targetRect.top - containerRect.top + scrollTop - 20; // 20px 偏移
                         
-<<<<<<< HEAD
-=======
-
-                        
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                         // 平滑滚动到目标位置
                         scrollContainer.scrollTo({
                             top: targetTop,
                             behavior: 'smooth'
                         });
-                    } else {
-                        // 降级方案：使用默认滚动
-                        targetElement.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
                     }
-                    
-                    // 添加高亮效果
-                    targetElement.classList.add('bg-purple-500/20', 'border-l-4', 'border-purple-400', 'pl-4', 'py-2');
-                    setTimeout(() => {
-                        targetElement.classList.remove('bg-purple-500/20', 'border-l-4', 'border-purple-400', 'pl-4', 'py-2');
-                    }, 3000);
                 }
             });
         });
@@ -289,29 +228,23 @@ class UIHelpManager {
         const content = document.getElementById('help-content');
         if (!content) return;
 
-        // 找到目录区域
-        const tocSection = content.querySelector('h2');
-        if (!tocSection || !tocSection.textContent.includes('目录')) return;
-
-        // 只获取h2标题（一级标题）
-        const headings = content.querySelectorAll('h2');
         const mainHeadings = [];
+        // 只选择二级标题（h2），排除目录标题
+        const headings = content.querySelectorAll('h2');
         
         headings.forEach((heading, index) => {
-            const text = heading.textContent.trim();
-            // 跳过目录标题
-            if (text.includes('目录')) return;
+            const text = heading.textContent;
+            // 移除所有emoji、特殊字符和不可见字符，生成干净的标题文本
+            const cleanText = text.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{FE00}-\u{FE0F}]|[\u{1F900}-\u{1F9FF}]/gu, '').replace(/[\u200B\u200C\u200D\uFEFF]/g, '').trim();
             
-            // 使用实际的ID，而不是重新生成
-            const actualId = heading.id;
-            // 移除所有表情符号和特殊字符，只保留中文、英文、数字
-            let cleanText = text.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA70}-\u{1FAFF}]|[\u{1FAB0}-\u{1FABF}]|[\u{1FAC0}-\u{1FAFF}]|[\u{1FAD0}-\u{1FAFF}]|[\u{1FAE0}-\u{1FAFF}]|[\u{1FAF0}-\u{1FAFF}]|[\u{FE00}-\u{FE0F}]/gu, '').replace(/[\u00A0\u2000-\u200A\u202F\u205F\u3000]/g, ' ').replace(/\s+/g, ' ').trim();
+            // 排除目录标题
+            if (cleanText === '目录') {
+                return;
+            }
             
-<<<<<<< HEAD
-=======
+            const actualId = `heading-${index}-${cleanText.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+            heading.id = actualId;
 
-            
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             mainHeadings.push({
                 text: cleanText,
                 id: actualId,
@@ -556,129 +489,9 @@ class UIHelpManager {
         document.head.appendChild(style);
     }
 
-    /**
-<<<<<<< HEAD
-=======
-     * 动态加载更新日志
-     */
-    async loadUpdateLogs() {
-        try {
-            const response = await window.apiGateway.get('/api/update-logs');
-            const result = await response.json();
-            
-            if (result.success && result.data) {
-                this.renderUpdateLogs(result.data);
-                // 更新最后更新时间和版本信息
-                this.updateLastUpdateInfo(result.data);
-            } else {
-                const errorMessage = result.message || result.error || '未知错误';
-                console.error('❌ 获取更新日志失败:', errorMessage);
-                this.renderUpdateLogs([]);
-            }
-        } catch (error) {
-            const errorMessage = error.message || error.toString() || '网络请求失败';
-            console.error('❌ 获取更新日志出错:', errorMessage);
-            this.renderUpdateLogs([]);
-        }
-    }
-
-    /**
-     * 更新最后更新时间和版本信息
-     */
-    updateLastUpdateInfo(logs) {
-        if (logs && logs.length > 0) {
-            // 获取最新版本信息
-            const latestLog = logs[0]; // 按时间倒序，第一个是最新的
-            const latestVersion = latestLog.version;
-            const latestDate = window.dayjs ? dayjs(latestLog.release_date).format('YYYY年MM月DD日') : new Date(latestLog.release_date).toLocaleDateString('zh-CN');
-            
-            // 更新页面中的版本信息
-            const versionElements = document.querySelectorAll('.help-version-info');
-            versionElements.forEach(element => {
-                if (element.textContent.includes('版本:')) {
-                    element.textContent = `版本: ${latestVersion}`;
-                }
-                if (element.textContent.includes('最后更新:')) {
-                    element.textContent = `最后更新: ${latestDate}`;
-                }
-            });
-            
-            // 添加一些动画效果
-            const container = document.querySelector('.version-info-container');
-            if (container) {
-                container.classList.add('animate-pulse');
-                setTimeout(() => {
-                    container.classList.remove('animate-pulse');
-                }, 1000);
-            }
-        }
-    }
-
-    /**
-     * 渲染更新日志
-     */
-    renderUpdateLogs(logs) {
-        const container = document.getElementById('update-logs-content');
-        if (!container) return;
-
-        if (logs.length === 0) {
-            container.innerHTML = '<p class="text-gray-400 text-center py-4">暂无更新日志</p>';
-            return;
-        }
-
-        // 构建更新日志内容
-        let html = '';
-        
-        logs.forEach((log, index) => {
-            const releaseDate = window.dayjs ? dayjs(log.release_date).format('YYYY年MM月DD日') : new Date(log.release_date).toLocaleDateString('zh-CN');
-            
-            html += `### ${log.version} (${releaseDate}) - ${log.title}\n`;
-            
-            // 渲染功能列表
-            if (log.features && log.features.length > 0) {
-                html += `#### 新增功能\n`;
-                log.features.forEach(feature => {
-                    html += `- ✅ **${feature}**\n`;
-                });
-                html += `\n`;
-            }
-
-            // 渲染功能详情
-            if (log.description) {
-                html += `#### 功能详情\n`;
-                html += `- **${log.description}**\n\n`;
-            }
-
-            // 渲染已知问题
-            if (log.known_issues && log.known_issues.length > 0) {
-                html += `#### 已知问题\n`;
-                log.known_issues.forEach(issue => {
-                    html += `- ${issue}\n`;
-                });
-                html += `\n`;
-            }
-
-            // 添加分隔线（除了最后一个）
-            if (index < logs.length - 1) {
-                html += `---\n\n`;
-            }
-        });
-
-        // 使用marked.js渲染Markdown
-        if (window.marked) {
-            container.innerHTML = marked.parse(html);
-        } else {
-            container.innerHTML = html;
-        }
-        
-        // 重新应用样式
-        this.addHelpStyles();
-    }
-
 
 
     /**
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
      * 获取帮助文档内容
      */
     getHelpContent() {
@@ -688,7 +501,6 @@ class UIHelpManager {
         return `
 # 星际云盘 - 用户帮助文档
 
-## 📖 目录
 <ul class="toc-list space-y-2">
 <!-- 目录将通过JavaScript动态生成 -->
 </ul>
@@ -961,17 +773,7 @@ class UIHelpManager {
 
 ---
 
-<<<<<<< HEAD
-=======
-## 📝 更新日志
 
-<div id="update-logs-content">
-<!-- 更新日志将通过API动态加载 -->
-</div>
-
----
-
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
 <div class="version-info-container bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-400/20 rounded-lg p-4 mt-8">
     <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
@@ -995,11 +797,7 @@ class UIHelpManager {
 }
 
 // 创建全局实例
-<<<<<<< HEAD
 window.helpManager = new UIHelpManager();
 
 // 全局暴露
 window.UIHelpManager = UIHelpManager; 
-=======
-window.helpManager = new UIHelpManager(); 
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89

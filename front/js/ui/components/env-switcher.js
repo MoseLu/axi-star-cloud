@@ -6,18 +6,11 @@
 
 class EnvSwitcher {
     constructor() {
-<<<<<<< HEAD
         this.container = null;
         this.isExpanded = false; // 确保初始状态是收起的
         this.showEnvOptions = false; // 确保初始不显示环境选项
         this.isUpdating = false; // 添加更新状态标志，防止循环调用
         this.lastUpdateTime = 0; // 添加最后更新时间，用于防抖
-=======
-        this.isVisible = false;
-        this.isExpanded = false;
-        this.showEnvOptions = false;
-        this.init();
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 
     init() {
@@ -26,11 +19,7 @@ class EnvSwitcher {
             return;
         }
         
-<<<<<<< HEAD
         // 创建切换器
-=======
-        // 创建环境切换器
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         this.createSwitcher();
         
         // 添加样式
@@ -39,7 +28,6 @@ class EnvSwitcher {
         // 绑定事件
         this.bindEvents();
         
-<<<<<<< HEAD
         // 确保初始状态是收起的
         this.isExpanded = false;
         this.showEnvOptions = false;
@@ -55,21 +43,6 @@ class EnvSwitcher {
     }
 
     isAdmin() {
-=======
-        // 初始化显示
-        this.updateDisplay();
-        
-        // 添加404错误处理
-        this.handle404Error();
-    }
-
-    isAdmin() {
-        // 开发模式下总是显示
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            return true;
-        }
-        
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         // 优先检查当前用户是否为管理员用户（Mose）
         let currentUser = null;
         if (window.StorageManager && typeof window.StorageManager.getUser === 'function') {
@@ -86,10 +59,7 @@ class EnvSwitcher {
             }
         }
         
-<<<<<<< HEAD
         // 检查用户是否为管理员（Mose）
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         if (currentUser && currentUser.username === 'Mose') {
             return true;
         }
@@ -100,7 +70,6 @@ class EnvSwitcher {
             return false;
         }
         
-<<<<<<< HEAD
         // 检查cookie中的管理员token
         try {
             const cookies = document.cookie.split(';');
@@ -117,10 +86,6 @@ class EnvSwitcher {
         
         // 开发模式下，只有在没有用户信息时才显示（用于调试）
         if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && !currentUser) {
-=======
-        // 如果authManager不存在，在开发环境下也显示
-        if (!window.authManager && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             return true;
         }
         
@@ -572,7 +537,6 @@ class EnvSwitcher {
     bindEvents() {
         // 延迟绑定事件，确保DOM元素已创建
         setTimeout(() => {
-<<<<<<< HEAD
             // 确保container存在
             if (!this.container) {
                 setTimeout(() => this.bindEvents(), 500);
@@ -594,43 +558,26 @@ class EnvSwitcher {
                 
                 // 绑定事件监听器
                 toggleBtn.addEventListener('click', this.handleToggleClick);
-=======
-            // 主按钮点击事件
-            const toggleBtn = this.container.querySelector('.env-switcher-toggle');
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.toggle();
-                });
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
             }
 
             // 菜单项点击事件
             this.container.querySelectorAll('.env-menu-item').forEach(item => {
-<<<<<<< HEAD
                 // 移除已存在的事件监听器
                 item.removeEventListener('click', this.handleMenuItemClick);
                 
                 // 创建事件处理函数
                 this.handleMenuItemClick = (e) => {
                     e.preventDefault();
-=======
-                item.addEventListener('click', (e) => {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
                     e.stopPropagation();
                     const action = item.dataset.action;
-        
                     if (action === 'switch-env') {
-                        // 如果当前显示的是菜单，则切换到路由卡片
                         if (this.isExpanded && !this.showEnvOptions) {
                             this.showEnvOptions = true;
                             this.updateDisplay();
                         } else if (this.showEnvOptions) {
-                            // 如果当前显示的是路由卡片，则关闭
                             this.showEnvOptions = false;
                             this.updateDisplay();
                         } else {
-                            // 如果当前是收起状态，则展开菜单
                             this.showEnvOptions = false;
                             this.toggle();
                         }
@@ -638,10 +585,7 @@ class EnvSwitcher {
                         this.viewDocs();
                         this.hide();
                     }
-<<<<<<< HEAD
                 };
-                
-                // 绑定事件监听器
                 item.addEventListener('click', this.handleMenuItemClick);
             });
             
@@ -680,29 +624,6 @@ class EnvSwitcher {
             document.addEventListener('click', this.externalClickHandler);
             
         }, 100);
-=======
-                });
-            });
-
-            // 环境选项点击事件
-            this.container.querySelectorAll('.env-option').forEach(option => {
-                option.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const env = option.dataset.env;
-        
-                    this.switchEnvironment(env);
-                    this.showEnvOptions = false;
-                    this.hide();
-                });
-            });
-        }, 100);
-
-        // 点击外部关闭
-        document.addEventListener('click', (e) => {
-            if (!this.container.contains(e.target)) {
-                this.hide();
-            }
-        });
 
         // ESC键关闭
         document.addEventListener('keydown', (e) => {
@@ -710,7 +631,6 @@ class EnvSwitcher {
                 this.hide();
             }
         });
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 
     toggle() {
@@ -732,14 +652,11 @@ class EnvSwitcher {
             this.container.classList.add('expanded');
         }
         
-<<<<<<< HEAD
         // 只在状态真正改变时才调用updateDisplay
         if (!this.isUpdating) {
             this.updateDisplay();
         }
-=======
         this.updateDisplay();
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 
     hide() {
@@ -751,14 +668,11 @@ class EnvSwitcher {
             this.container.classList.remove('expanded');
         }
         
-<<<<<<< HEAD
         // 只在状态真正改变时才调用updateDisplay
         if (!this.isUpdating) {
             this.updateDisplay();
         }
-=======
         this.updateDisplay();
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 
     switchEnvironment(env) {
@@ -1009,7 +923,6 @@ class EnvSwitcher {
     }
 
     updateDisplay() {
-<<<<<<< HEAD
         // 防抖机制：如果距离上次更新不到100ms，则跳过
         const now = Date.now();
         if (now - this.lastUpdateTime < 100) {
@@ -1050,28 +963,26 @@ class EnvSwitcher {
                 }
             }
         }
-=======
         // 安全检查：确保container存在
         if (!this.container) {
             return;
         }
         
-        const switcher = this.container;
-        const currentEnv = window.ENV_MANAGER?.currentEnv || 'local';
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
+        const switcherElement = this.container;
+        const currentEnvName = window.ENV_MANAGER?.currentEnv || 'local';
         
         // 更新展开状态
         if (this.isExpanded) {
-            switcher.classList.add('expanded');
+            switcherElement.classList.add('expanded');
         } else {
-            switcher.classList.remove('expanded');
+            switcherElement.classList.remove('expanded');
         }
         
         // 更新环境选项显示状态
         if (this.showEnvOptions) {
-            switcher.classList.add('show-env-options');
+            switcherElement.classList.add('show-env-options');
         } else {
-            switcher.classList.remove('show-env-options');
+            switcherElement.classList.remove('show-env-options');
         }
         
         // 更新选项状态
@@ -1079,7 +990,7 @@ class EnvSwitcher {
         if (envOptions.length > 0) {
             envOptions.forEach(option => {
                 const env = option.dataset.env;
-                if (env === currentEnv) {
+                if (env === currentEnvName) {
                     option.classList.add('active');
                 } else {
                     option.classList.remove('active');
@@ -1089,16 +1000,12 @@ class EnvSwitcher {
         
         // 更新API图标
         this.updateApiIcon();
-<<<<<<< HEAD
         
         this.isUpdating = false;
-=======
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 
     updateApiIcon() {
         const apiIcon = document.getElementById('env-api-icon');
-<<<<<<< HEAD
         if (!apiIcon) {
             return;
         }
@@ -1134,17 +1041,6 @@ class EnvSwitcher {
         if (apiIcon.textContent !== newIcon) {
             apiIcon.textContent = newIcon;
         }
-=======
-        if (!apiIcon) return;
-        
-        const currentEnv = window.ENV_MANAGER?.currentEnv || 'local';
-        const envIcons = {
-            'local': '🛠️',
-            'prod': '🚀'
-        };
-        
-        apiIcon.textContent = envIcons[currentEnv] || '🛠️';
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     }
 }
 
@@ -1158,7 +1054,6 @@ const initEnvSwitcher = (retryCount = 0) => {
     // 检查基本依赖
     if (window.ENV_MANAGER) {
         if (!window.envSwitcher) {
-<<<<<<< HEAD
             // 确保DOM完全准备好
             if (document.readyState === 'loading') {
                 setTimeout(() => initEnvSwitcher(retryCount), 100);
@@ -1176,9 +1071,6 @@ const initEnvSwitcher = (retryCount = 0) => {
                     window.envSwitcher.updateDisplay();
                 }
             }, 2000); // 延迟2秒，确保环境检测完成
-=======
-            window.envSwitcher = new EnvSwitcher();
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
         }
     } else {
         setTimeout(() => initEnvSwitcher(retryCount + 1), 100);
@@ -1188,16 +1080,10 @@ const initEnvSwitcher = (retryCount = 0) => {
 // 页面加载完成后初始化
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-<<<<<<< HEAD
         // 延迟初始化，确保所有依赖都已加载
         setTimeout(initEnvSwitcher, 1000);
     });
 } else {
     // 延迟初始化，确保所有依赖都已加载
-=======
-        setTimeout(initEnvSwitcher, 1000);
-    });
-} else {
->>>>>>> feb71399497cd53628e1508aad8d419667cd5f89
     setTimeout(initEnvSwitcher, 1000);
 }

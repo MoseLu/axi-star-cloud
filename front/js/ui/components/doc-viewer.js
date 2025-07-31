@@ -5,7 +5,7 @@
 
 class DocViewer {
     constructor() {
-        this.currentDoc = 'INDEX.md';
+        this.currentDoc = 'README.md';
         this.docs = []; // 动态加载文档列表
         this.modal = null;
     }
@@ -36,20 +36,19 @@ class DocViewer {
             } else {
                 // 如果API失败，使用默认文档列表作为后备
                 this.docs = [
-                    { id: 'INDEX.md', title: '文档目录', icon: '📚' },
                     { id: 'README.md', title: '项目概述', icon: '📖' },
-                    { id: 'UPLOAD_LIMITS.md', title: '上传限制', icon: '📋' },
-                    { id: 'LICENSE.md', title: '许可证', icon: '⚖️' },
-                    { id: 'ENV_USAGE_EXAMPLES.md', title: '环境使用示例', icon: '⚙️' },
-                    { id: 'CSS_README.md', title: 'CSS样式文档', icon: '🎨' },
-                    { id: 'HTML_README.md', title: 'HTML文档', icon: '🌐' },
-                    { id: 'API_README.md', title: 'API接口文档', icon: '🔌' },
-                    { id: 'AUTH_SYSTEM.md', title: '认证系统文档', icon: '🔐' },
-                    { id: 'BACKEND_OPTIMIZATION.md', title: '后端优化文档', icon: '⚡' },
-                    { id: 'BACKEND_FURTHER_OPTIMIZATION.md', title: '后端进一步优化', icon: '🚀' },
-                    { id: 'FRONTEND_FURTHER_OPTIMIZATION.md', title: '前端进一步优化', icon: '🎯' },
-                    { id: 'MAIN_SIMPLIFICATION.md', title: '主要简化文档', icon: '📝' },
-                    { id: 'IS_ADMIN_REMOVAL_SUMMARY.md', title: 'is_admin移除总结', icon: '🗑️' }
+                    { id: 'LICENSE', title: '通行证', icon: '⚖️' },
+                    { id: 'API_AND_AUTH_GUIDE.md', title: 'API和认证系统完整指南', icon: '🔌' },
+                    { id: 'BACKEND_OPTIMIZATION_GUIDE.md', title: '后端优化完整指南', icon: '⚡' },
+                    { id: 'FRONTEND_DEVELOPMENT_GUIDE.md', title: '前端开发完整指南', icon: '🎨' },
+                    { id: 'DEPLOYMENT_AND_CONFIG_GUIDE.md', title: '部署和配置完整指南', icon: '🚀' },
+                    { id: 'JAVASCRIPT_STRUCTURE_GUIDE.md', title: 'JavaScript目录结构指南', icon: '📁' },
+                    { id: 'LOGIN_DEBUG_GUIDE.md', title: '登录调试指南', icon: '🔍' },
+                    { id: 'LOGIN_DISPLAY_FIX.md', title: '登录显示修复', icon: '👁️' },
+                    { id: 'LOGIN_PERSISTENCE_FIX.md', title: '登录持久化修复', icon: '🔒' },
+                    { id: 'IS_ADMIN_REMOVAL_SUMMARY.md', title: 'is_admin移除总结', icon: '🗑️' },
+                    { id: 'UPDATE_LOG_SYSTEM_GUIDE.md', title: '更新日志系统指南', icon: '📝' },
+                    { id: 'USER_MANAGEMENT_SCROLLBAR_FIX.md', title: '用户管理滚动条修复', icon: '🔧' }
                 ];
                 
                 // 如果模态框已存在，重新渲染文档列表
@@ -61,20 +60,19 @@ class DocViewer {
             console.error('加载文档列表失败:', error);
             // 使用默认文档列表作为后备
             this.docs = [
-                { id: 'INDEX.md', title: '文档目录', icon: '📚' },
                 { id: 'README.md', title: '项目概述', icon: '📖' },
-                { id: 'UPLOAD_LIMITS.md', title: '上传限制', icon: '📋' },
-                { id: 'LICENSE.md', title: '许可证', icon: '⚖️' },
-                { id: 'ENV_USAGE_EXAMPLES.md', title: '环境使用示例', icon: '⚙️' },
-                { id: 'CSS_README.md', title: 'CSS样式文档', icon: '🎨' },
-                { id: 'HTML_README.md', title: 'HTML文档', icon: '🌐' },
-                { id: 'API_README.md', title: 'API接口文档', icon: '🔌' },
-                { id: 'AUTH_SYSTEM.md', title: '认证系统文档', icon: '🔐' },
-                { id: 'BACKEND_OPTIMIZATION.md', title: '后端优化文档', icon: '⚡' },
-                { id: 'BACKEND_FURTHER_OPTIMIZATION.md', title: '后端进一步优化', icon: '🚀' },
-                { id: 'FRONTEND_FURTHER_OPTIMIZATION.md', title: '前端进一步优化', icon: '🎯' },
-                { id: 'MAIN_SIMPLIFICATION.md', title: '主要简化文档', icon: '📝' },
-                { id: 'IS_ADMIN_REMOVAL_SUMMARY.md', title: 'is_admin移除总结', icon: '🗑️' }
+                { id: 'LICENSE', title: '通行证', icon: '⚖️' },
+                { id: 'API_AND_AUTH_GUIDE.md', title: 'API和认证系统完整指南', icon: '🔌' },
+                { id: 'BACKEND_OPTIMIZATION_GUIDE.md', title: '后端优化完整指南', icon: '⚡' },
+                { id: 'FRONTEND_DEVELOPMENT_GUIDE.md', title: '前端开发完整指南', icon: '🎨' },
+                { id: 'DEPLOYMENT_AND_CONFIG_GUIDE.md', title: '部署和配置完整指南', icon: '🚀' },
+                { id: 'JAVASCRIPT_STRUCTURE_GUIDE.md', title: 'JavaScript目录结构指南', icon: '📁' },
+                { id: 'LOGIN_DEBUG_GUIDE.md', title: '登录调试指南', icon: '🔍' },
+                { id: 'LOGIN_DISPLAY_FIX.md', title: '登录显示修复', icon: '👁️' },
+                { id: 'LOGIN_PERSISTENCE_FIX.md', title: '登录持久化修复', icon: '🔒' },
+                { id: 'IS_ADMIN_REMOVAL_SUMMARY.md', title: 'is_admin移除总结', icon: '🗑️' },
+                { id: 'UPDATE_LOG_SYSTEM_GUIDE.md', title: '更新日志系统指南', icon: '📝' },
+                { id: 'USER_MANAGEMENT_SCROLLBAR_FIX.md', title: '用户管理滚动条修复', icon: '🔧' }
             ];
             
             // 如果模态框已存在，重新渲染文档列表
@@ -275,7 +273,17 @@ class DocViewer {
         `;
 
         try {
-            const response = await fetch(`/docs/${docId}`);
+            // 根据文档ID确定正确的路径
+            let docPath;
+            if (docId === 'README.md' || docId === 'LICENSE') {
+                // README.md 和 LICENSE 在根目录
+                docPath = `/${docId}`;
+            } else {
+                // 其他文档在 docs 目录
+                docPath = `/docs/${docId}`;
+            }
+            
+            const response = await fetch(docPath);
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
