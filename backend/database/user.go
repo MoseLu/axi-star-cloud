@@ -189,12 +189,31 @@ func (r *UserRepository) GetUsersWithPagination(page, pageSize int) ([]*models.U
 	for rows.Next() {
 		var user models.User
 		var lastLoginTime sql.NullTime
+		var email, bio, avatar sql.NullString
 
 		err := rows.Scan(
-			&user.UUID, &user.Username, &user.Email, &user.Bio, &user.Avatar,
+			&user.UUID, &user.Username, &email, &bio, &avatar,
 			&user.StorageLimit, &lastLoginTime, &user.IsOnline,
 			&user.CreatedAt, &user.UpdatedAt,
 		)
+
+		if err != nil {
+			return nil, 0, err
+		}
+
+		// 处理可能为NULL的字段
+		if email.Valid {
+			user.Email = email.String
+		}
+		if bio.Valid {
+			user.Bio = bio.String
+		}
+		if avatar.Valid {
+			user.Avatar = avatar.String
+		}
+		if lastLoginTime.Valid {
+			user.LastLoginTime = &lastLoginTime.Time
+		}
 
 		if err != nil {
 			return nil, 0, err
