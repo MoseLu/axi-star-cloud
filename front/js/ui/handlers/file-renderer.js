@@ -133,26 +133,6 @@ class UIFileRenderer {
             }
             
             fileGrid.appendChild(this.renderFileListTable(filteredFiles));
-            
-            // 如果过滤后没有文件，显示空状态
-            if (filteredFiles.length === 0) {
-                const emptyState = document.getElementById('empty-state');
-                if (emptyState) {
-                    emptyState.classList.remove('hidden');
-                }
-                if (fileGrid) {
-                    fileGrid.classList.add('hidden');
-                }
-            } else {
-                // 有文件时显示文件网格，隐藏空状态
-                if (fileGrid) {
-                    fileGrid.classList.remove('hidden');
-                }
-                const emptyState = document.getElementById('empty-state');
-                if (emptyState) {
-                    emptyState.classList.add('hidden');
-                }
-            }
         } else {
             // 卡片模式
             // 恢复卡片布局样式
@@ -185,26 +165,6 @@ class UIFileRenderer {
             // 处理空状态 - 外站文档分类由docs-sync模块处理
             if (this.uiManager && this.uiManager.toggleEmptyState && this.uiManager.currentCategory !== 'external-docs') {
                 this.uiManager.toggleEmptyState(filteredFiles.length);
-            }
-            
-            // 如果过滤后没有文件，显示空状态
-            if (filteredFiles.length === 0) {
-                const emptyState = document.getElementById('empty-state');
-                if (emptyState) {
-                    emptyState.classList.remove('hidden');
-                }
-                if (fileGrid) {
-                    fileGrid.classList.add('hidden');
-                }
-            } else {
-                // 有文件时显示文件网格，隐藏空状态
-                if (fileGrid) {
-                    fileGrid.classList.remove('hidden');
-                }
-                const emptyState = document.getElementById('empty-state');
-                if (emptyState) {
-                    emptyState.classList.add('hidden');
-                }
             }
         }
         
@@ -882,11 +842,8 @@ class UIFileRenderer {
 
         if (visibleCount === 0) {
             // 没有可见文件，显示空状态，隐藏文件网格和上传区域
+            fileGrid.classList.add('hidden');
             fileGrid.style.opacity = '0';
-            setTimeout(() => {
-                fileGrid.classList.add('hidden');
-                fileGrid.style.opacity = '';
-            }, 200);
             
             // 外站文档分类特殊处理：外站文档的空状态由docs-sync模块处理，这里只隐藏默认空状态
             if (this.uiManager.currentCategory === 'external-docs') {

@@ -702,6 +702,10 @@ class AppAuthManager {
                 this.uiManager.allFiles = cachedFiles;
                 this.uiManager.renderFileList(cachedFiles);
                 this.uiManager.updateFileCount(cachedFiles.length, cachedFiles.length);
+            } else {
+                // 如果没有缓存文件，确保空状态检查在文件加载完成后进行
+                this.uiManager.allFiles = [];
+                // 不在这里调用renderFileList，等待loadUserData完成后再处理
             }
             
             // 从缓存获取文件夹列表
