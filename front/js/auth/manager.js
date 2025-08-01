@@ -187,7 +187,7 @@ class AppAuthManager {
         // 退出登录事件
         document.getElementById('logout-btn')?.addEventListener('click', (e) => {
             e.preventDefault();
-            this.logout();
+            this.handleLogout();
         });
 
         // 设置按钮事件
@@ -248,6 +248,34 @@ class AppAuthManager {
                 }
             }, 500);
         });
+    }
+
+    /**
+     * 处理退出登录
+     */
+    async handleLogout() {
+        try {
+            // 调用API退出登录
+            if (this.apiManager && typeof this.apiManager.logout === 'function') {
+                await this.apiManager.logout();
+            }
+            
+            // 清除本地用户数据
+            this.clearUserData();
+            
+            // 显示登录界面
+            this.showLoginInterface();
+            
+            // 触发退出登录事件
+            document.dispatchEvent(new CustomEvent('logout'));
+            
+            console.log('退出登录成功');
+        } catch (error) {
+            console.error('退出登录失败:', error);
+            // 即使API调用失败，也要清除本地数据并显示登录界面
+            this.clearUserData();
+            this.showLoginInterface();
+        }
     }
 
     /**
