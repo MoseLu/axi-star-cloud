@@ -868,6 +868,19 @@ class UIManager {
     // 文件操作相关
     async loadFiles() {
         try {
+            // 显示加载状态
+            const fileGrid = document.getElementById('files-grid');
+            if (fileGrid) {
+                fileGrid.innerHTML = `
+                    <div class="col-span-full flex flex-col items-center justify-center py-12 md:py-16 text-center">
+                        <div class="w-16 h-16 md:w-24 md:h-24 mb-4 md:mb-6 rounded-full bg-purple-light/10 flex items-center justify-center animate-pulse">
+                            <i class="fa fa-spinner fa-spin text-2xl md:text-4xl text-purple-light/70"></i>
+                        </div>
+                        <h2 class="text-lg md:text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300 mb-2">正在加载文件...</h2>
+                    </div>
+                `;
+            }
+            
             // 从后端获取数据
             const [files, urlFiles] = await Promise.all([
                 this.api.files.getFiles(),
@@ -880,8 +893,22 @@ class UIManager {
             // 更新界面
             this.renderFileList(allFiles);
         } catch (error) {
-
+            console.error('加载文件失败:', error);
             this.showMessage('重新加载文件失败', 'error');
+            
+            // 显示错误状态
+            const fileGrid = document.getElementById('files-grid');
+            if (fileGrid) {
+                fileGrid.innerHTML = `
+                    <div class="col-span-full flex flex-col items-center justify-center py-12 md:py-16 text-center">
+                        <div class="w-16 h-16 md:w-24 md:h-24 mb-4 md:mb-6 rounded-full bg-red-500/10 flex items-center justify-center">
+                            <i class="fa fa-exclamation-triangle text-2xl md:text-4xl text-red-400"></i>
+                        </div>
+                        <h2 class="text-lg md:text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-red-300 to-pink-300 mb-2">加载失败</h2>
+                        <p class="text-gray-400 max-w-md mb-4 md:mb-6 text-sm md:text-base px-4">文件加载失败，请刷新页面重试。</p>
+                    </div>
+                `;
+            }
         }
     }
 
@@ -908,16 +935,16 @@ class UIManager {
     }
     
     deleteFile(file) { 
-        return this.fileOperations.deleteFile(file, () => {
+        return this.fileOperations.deleteFile(file, async () => {
             // 删除成功后刷新文件列表
-            this.loadFiles();
+            await this.loadFiles();
         });
     }
 
     batchDeleteFiles(files) {
-        return this.fileOperations.batchDeleteFiles(files, () => {
+        return this.fileOperations.batchDeleteFiles(files, async () => {
             // 批量删除成功后刷新文件列表
-            this.loadFiles();
+            await this.loadFiles();
         });
     }
 
@@ -2395,9 +2422,14 @@ class UIManager {
                 event.preventDefault();
                 event.stopPropagation();
                 
-                // URL分类调用添加链接弹窗，其他分类调用文件上传弹窗
+                // URL分类调用添加链接弹窗，外站文档分类调用同步文档弹窗，其他分类调用文件上传弹窗
                 if (this.currentCategory === 'url') {
                     this.showAddLinkModal();
+                } else if (this.currentCategory === 'external-docs') {
+                    // 外站文档分类调用同步文档模态框
+                    if (this.docsSync && this.docsSync.showSyncDocsModal) {
+                        this.docsSync.showSyncDocsModal();
+                    }
                 } else {
                     this.showUploadModal(this.currentCategory || 'all');
                 }

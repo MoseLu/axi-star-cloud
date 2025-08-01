@@ -66,7 +66,36 @@ class UIFileRenderer {
 
     init() {
         // 初始化文件渲染器
-        // 可以在这里添加初始化逻辑
+        // 确保初始状态正确
+        const fileGrid = document.getElementById('files-grid');
+        const emptyState = document.getElementById('empty-state');
+        
+        if (fileGrid) {
+            fileGrid.classList.remove('hidden');
+            fileGrid.style.opacity = '1';
+        }
+        
+        if (emptyState) {
+            emptyState.classList.add('hidden');
+        }
+        
+        // 初始化状态记录
+        this._lastEmptyStateCount = null;
+        
+        // 确保文件网格在加载时可见，避免空状态闪烁
+        setTimeout(() => {
+            if (fileGrid && fileGrid.innerHTML.trim() === '') {
+                // 如果文件网格为空，显示加载状态
+                fileGrid.innerHTML = `
+                    <div class="col-span-full flex flex-col items-center justify-center py-12 md:py-16 text-center">
+                        <div class="w-16 h-16 md:w-24 md:h-24 mb-4 md:mb-6 rounded-full bg-purple-light/10 flex items-center justify-center animate-pulse">
+                            <i class="fa fa-spinner fa-spin text-2xl md:text-4xl text-purple-light/70"></i>
+                        </div>
+                        <h2 class="text-lg md:text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300 mb-2">正在加载文件...</h2>
+                    </div>
+                `;
+            }
+        }, 100);
     }
 
     // 渲染文件列表
@@ -95,6 +124,15 @@ class UIFileRenderer {
         
         // 清空容器内容
         fileGrid.innerHTML = '';
+        
+        // 确保文件网格可见，隐藏空状态
+        fileGrid.classList.remove('hidden');
+        fileGrid.style.opacity = '1';
+        
+        // 隐藏空状态，避免闪烁
+        if (emptyState) {
+            emptyState.classList.add('hidden');
+        }
         
         if (layoutMode === 'list') {
             // 列表模式 - 对所有文件类型都可用
@@ -128,9 +166,12 @@ class UIFileRenderer {
             }
             
             // 处理空状态 - 外站文档分类由docs-sync模块处理
-            if (this.uiManager && this.uiManager.toggleEmptyState && this.uiManager.currentCategory !== 'external-docs') {
-                this.uiManager.toggleEmptyState(filteredFiles.length);
-            }
+            // 延迟调用toggleEmptyState，确保DOM更新完成
+            setTimeout(() => {
+                if (this.uiManager && this.uiManager.toggleEmptyState && this.uiManager.currentCategory !== 'external-docs') {
+                    this.uiManager.toggleEmptyState(filteredFiles.length);
+                }
+            }, 50);
             
             fileGrid.appendChild(this.renderFileListTable(filteredFiles));
         } else {
@@ -150,12 +191,14 @@ class UIFileRenderer {
                 }
             }
             
-            // 渲染卡片
+            // 使用文档片段优化渲染性能
+            const fragment = document.createDocumentFragment();
             for (let i = 0; i < filteredFiles.length; i++) {
                 const file = filteredFiles[i];
                 const fileCard = this.createFileCard(file);
-                if (fileCard) fileGrid.appendChild(fileCard);
+                if (fileCard) fragment.appendChild(fileCard);
             }
+            fileGrid.appendChild(fragment);
             
             // 更新文件计数
             if (this.uiManager && this.uiManager.updateFileCount) {
@@ -163,9 +206,12 @@ class UIFileRenderer {
             }
             
             // 处理空状态 - 外站文档分类由docs-sync模块处理
-            if (this.uiManager && this.uiManager.toggleEmptyState && this.uiManager.currentCategory !== 'external-docs') {
-                this.uiManager.toggleEmptyState(filteredFiles.length);
-            }
+            // 延迟调用toggleEmptyState，确保DOM更新完成
+            setTimeout(() => {
+                if (this.uiManager && this.uiManager.toggleEmptyState && this.uiManager.currentCategory !== 'external-docs') {
+                    this.uiManager.toggleEmptyState(filteredFiles.length);
+                }
+            }, 50);
         }
         
         // 更新文件数量显示 - 使用过滤后的文件数量
@@ -834,6 +880,17 @@ class UIFileRenderer {
             return;
         }
 
+        // 防止重复调用
+        if (this._lastEmptyStateCount === visibleCount) {
+            return;
+        }
+        this._lastEmptyStateCount = visibleCount;
+        
+        // 如果文件网格正在显示加载状态，不处理空状态
+        if (fileGrid.innerHTML.includes('正在加载文件') || fileGrid.innerHTML.includes('fa-spinner')) {
+            return;
+        }
+
         // 如果没有传入visibleCount，则计算当前可见文件数量
         if (visibleCount === null) {
             const visibleFiles = fileGrid.querySelectorAll('.file-card:not(.hidden)');
@@ -854,8 +911,6 @@ class UIFileRenderer {
             
             // URL类型特殊处理：只更新提示文本
             if (this.uiManager.currentCategory === 'url') {
-    
-                
                 // 更新图标
                 const emptyStateIcon = emptyState.querySelector('.fa');
                 if (emptyStateIcon) {
@@ -874,8 +929,6 @@ class UIFileRenderer {
                     emptyStateText.textContent = '还没有添加任何链接，点击上方按钮添加第一个链接';
                 }
             } else {
-    
-                
                 // 恢复默认图标
                 const emptyStateIcon = emptyState.querySelector('.fa');
                 if (emptyStateIcon) {

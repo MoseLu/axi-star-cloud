@@ -304,6 +304,19 @@ if (typeof UICore === 'undefined') {
                     this.uiManager.initUserProfile(userData);
                 }
                 
+                // 显示加载状态
+                const fileGrid = document.getElementById('files-grid');
+                if (fileGrid) {
+                    fileGrid.innerHTML = `
+                        <div class="col-span-full flex flex-col items-center justify-center py-12 md:py-16 text-center">
+                            <div class="w-16 h-16 md:w-24 md:h-24 mb-4 md:mb-6 rounded-full bg-purple-light/10 flex items-center justify-center animate-pulse">
+                                <i class="fa fa-spinner fa-spin text-2xl md:text-4xl text-purple-light/70"></i>
+                            </div>
+                            <h2 class="text-lg md:text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300 mb-2">正在加载文件...</h2>
+                        </div>
+                    `;
+                }
+                
                 // 从后端获取所有数据（不传递folderId，获取所有文件）
                 const [files, urlFiles, folders, storageInfo] = await Promise.all([
                     this.api.files.getFiles(),
@@ -321,9 +334,16 @@ if (typeof UICore === 'undefined') {
                 // 直接使用API返回的所有文件
                 const allDisplayFiles = [...files, ...urlFiles];
 
-                // 更新界面
-                this.updateFileCount(allDisplayFiles.length);
-                this.renderFileList(allDisplayFiles);
+                // 更新界面 - 使用UIManager的renderFileList方法
+                if (this.uiManager) {
+                    this.uiManager.updateFileCount(allDisplayFiles.length, allDisplayFiles.length);
+                    this.uiManager.renderFileList(allDisplayFiles);
+                } else {
+                    // 降级处理
+                    this.updateFileCount(allDisplayFiles.length);
+                    this.renderFileList(allDisplayFiles);
+                }
+                
                 // 文件夹列表由app.js统一处理，避免重复渲染
 
                 // 保存存储信息到本地缓存
@@ -338,7 +358,22 @@ if (typeof UICore === 'undefined') {
                 this.setupDragAndDrop();
 
             } catch (error) {
+                console.error('数据加载失败:', error);
                 this.showMessage('数据加载失败', 'error');
+                
+                // 显示错误状态
+                const fileGrid = document.getElementById('files-grid');
+                if (fileGrid) {
+                    fileGrid.innerHTML = `
+                        <div class="col-span-full flex flex-col items-center justify-center py-12 md:py-16 text-center">
+                            <div class="w-16 h-16 md:w-24 md:h-24 mb-4 md:mb-6 rounded-full bg-red-500/10 flex items-center justify-center">
+                                <i class="fa fa-exclamation-triangle text-2xl md:text-4xl text-red-400"></i>
+                            </div>
+                            <h2 class="text-lg md:text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-red-300 to-pink-300 mb-2">加载失败</h2>
+                            <p class="text-gray-400 max-w-md mb-4 md:mb-6 text-sm md:text-base px-4">文件加载失败，请刷新页面重试。</p>
+                        </div>
+                    `;
+                }
             }
         }
 

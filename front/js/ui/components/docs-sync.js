@@ -733,7 +733,8 @@ class UIDocsSync {
             const response = await fetch(window.APP_UTILS.buildApiUrl(`/api/documents?user_id=${userId}`), {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache' // 禁用缓存
                 },
                 credentials: 'include' // 包含cookie中的管理员token
             });
@@ -1074,7 +1075,8 @@ class UIDocsSync {
                             method: 'DELETE',
                             headers: {
                                 'Content-Type': 'application/json'
-                            }
+                            },
+                            credentials: 'include' // 包含认证信息
                         });
 
                         if (response.ok) {
@@ -1082,6 +1084,11 @@ class UIDocsSync {
                             this.externalDocs = this.externalDocs.filter(d => d.id !== docId);
                             this.renderExternalDocs();
                             this.updateSyncStats();
+                            
+                            // 强制刷新数据，确保与后端同步
+                            setTimeout(() => {
+                                this.loadExternalDocs();
+                            }, 100);
                             
                             if (window.MessageBox && window.MessageBox.show) {
                                 window.MessageBox.show({
@@ -1119,7 +1126,8 @@ class UIDocsSync {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json'
-                        }
+                        },
+                        credentials: 'include' // 包含认证信息
                     });
 
                     if (response.ok) {
@@ -1127,6 +1135,11 @@ class UIDocsSync {
                         this.externalDocs = this.externalDocs.filter(d => d.id !== docId);
                         this.renderExternalDocs();
                         this.updateSyncStats();
+                        
+                        // 强制刷新数据，确保与后端同步
+                        setTimeout(() => {
+                            this.loadExternalDocs();
+                        }, 100);
                         
                         if (window.MessageBox && window.MessageBox.show) {
                             window.MessageBox.show({
@@ -1300,40 +1313,109 @@ class UIDocsSync {
                 confirmText: '删除',
                 cancelText: '取消',
                 confirmClass: 'btn-danger',
-                onConfirm: () => {
-                    this.externalDocs = this.externalDocs.filter(d => d.id !== docId);
-                    this.saveExternalDocsToStorage(); // 保存到localStorage
-                    this.renderExternalDocs();
-                    this.updateSyncStats();
-                    
-                    if (window.MessageBox && window.MessageBox.show) {
-                        window.MessageBox.show({
-                            message: '文档删除成功',
-                            type: 'success',
-                            duration: 3000
+                onConfirm: async () => {
+                    try {
+                        // 调用后端API删除文档
+                        const response = await fetch(window.APP_UTILS.buildApiUrl(`/api/documents/${docId}`), {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            credentials: 'include' // 包含认证信息
                         });
-                    } else if (window.showMessage) {
-                        window.showMessage('文档删除成功', 'success');
+
+                        if (response.ok) {
+                            // 从本地列表中移除
+                            this.externalDocs = this.externalDocs.filter(d => d.id !== docId);
+                            this.saveExternalDocsToStorage(); // 保存到localStorage
+                            this.renderExternalDocs();
+                            this.updateSyncStats();
+                            
+                            // 强制刷新数据，确保与后端同步
+                            setTimeout(() => {
+                                this.loadExternalDocs();
+                            }, 100);
+                            
+                            if (window.MessageBox && window.MessageBox.show) {
+                                window.MessageBox.show({
+                                    message: '文档删除成功',
+                                    type: 'success',
+                                    duration: 3000
+                                });
+                            } else if (window.showMessage) {
+                                window.showMessage('文档删除成功', 'success');
+                            }
+                        } else {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || `删除文档失败: ${response.status}`);
+                        }
+                    } catch (error) {
+                        console.error('删除文档失败:', error);
+                        if (window.MessageBox && window.MessageBox.show) {
+                            window.MessageBox.show({
+                                message: '删除文档失败: ' + error.message,
+                                type: 'error',
+                                duration: 4000
+                            });
+                        } else if (window.showMessage) {
+                            window.showMessage('删除文档失败: ' + error.message, 'error');
+                        }
                     }
                 }
             });
         } else {
             // 降级到原生confirm
             if (confirm(`确定要删除文档 "${doc.title}" 吗？`)) {
-                this.externalDocs = this.externalDocs.filter(d => d.id !== docId);
-                this.saveExternalDocsToStorage(); // 保存到localStorage
-                this.renderExternalDocs();
-                this.updateSyncStats();
-                
-                if (window.MessageBox && window.MessageBox.show) {
-                    window.MessageBox.show({
-                        message: '文档删除成功',
-                        type: 'success',
-                        duration: 3000
-                    });
-                } else if (window.showMessage) {
-                    window.showMessage('文档删除成功', 'success');
-                }
+                // 使用立即执行的异步函数
+                (async () => {
+                    try {
+                        // 调用后端API删除文档
+                        const response = await fetch(window.APP_UTILS.buildApiUrl(`/api/documents/${docId}`), {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            credentials: 'include' // 包含认证信息
+                        });
+
+                        if (response.ok) {
+                            // 从本地列表中移除
+                            this.externalDocs = this.externalDocs.filter(d => d.id !== docId);
+                            this.saveExternalDocsToStorage(); // 保存到localStorage
+                            this.renderExternalDocs();
+                            this.updateSyncStats();
+                            
+                            // 强制刷新数据，确保与后端同步
+                            setTimeout(() => {
+                                this.loadExternalDocs();
+                            }, 100);
+                            
+                            if (window.MessageBox && window.MessageBox.show) {
+                                window.MessageBox.show({
+                                    message: '文档删除成功',
+                                    type: 'success',
+                                    duration: 3000
+                                });
+                            } else if (window.showMessage) {
+                                window.showMessage('文档删除成功', 'success');
+                            }
+                        } else {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || `删除文档失败: ${response.status}`);
+                        }
+                    } catch (error) {
+                        console.error('删除文档失败:', error);
+                        if (window.MessageBox && window.MessageBox.show) {
+                            window.MessageBox.show({
+                                message: '删除文档失败: ' + error.message,
+                                type: 'error',
+                                duration: 4000
+                            });
+                        } else if (window.showMessage) {
+                            window.showMessage('删除文档失败: ' + error.message, 'error');
+                        }
+                    }
+                })();
             }
         }
     }
@@ -1558,8 +1640,19 @@ class UIDocsSync {
                     // 重新渲染
                     this.renderExternalDocs();
                     
-                    // 隐藏模态框
+                    // 隐藏模态框并确保不会触发其他模态框
                     this.hideSyncDocsModal();
+                    
+                    // 确保没有其他模态框被意外触发
+                    setTimeout(() => {
+                        // 检查是否有其他模态框被意外打开
+                        const otherModals = document.querySelectorAll('.fixed.inset-0.z-50');
+                        otherModals.forEach(modal => {
+                            if (modal.id !== 'sync-docs-modal' && !modal.classList.contains('invisible')) {
+                                modal.classList.add('invisible');
+                            }
+                        });
+                    }, 100);
                     
                     if (window.showMessage) {
                         window.showMessage('文档同步成功！', 'success');
