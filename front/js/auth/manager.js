@@ -263,8 +263,22 @@ class AppAuthManager {
             // 清除本地用户数据
             this.clearUserData();
             
+            // 清除UI管理器的数据
+            if (this.uiManager) {
+                this.uiManager.allFiles = [];
+                this.uiManager.folders = [];
+                this.uiManager.renderFileList([]);
+                this.uiManager.renderFolderList([]);
+                this.uiManager.updateFileCount(0);
+            }
+            
             // 显示登录界面
             this.showLoginInterface();
+            
+            // 显示退出通知
+            if (window.Notify) {
+                window.Notify.show({ message: '已退出登录', type: 'info' });
+            }
             
             // 触发退出登录事件
             document.dispatchEvent(new CustomEvent('logout'));
@@ -275,6 +289,11 @@ class AppAuthManager {
             // 即使API调用失败，也要清除本地数据并显示登录界面
             this.clearUserData();
             this.showLoginInterface();
+            
+            // 显示退出通知
+            if (window.Notify) {
+                window.Notify.show({ message: '已退出登录', type: 'info' });
+            }
         }
     }
 
@@ -758,6 +777,11 @@ class AppAuthManager {
                 this.apiManager.setCurrentUser(processedUser);
             }
             
+            // 显示登录成功通知
+            if (window.Notify) {
+                window.Notify.show({ message: '登录成功', type: 'success' });
+            }
+            
             // 立即显示主界面，不等待数据加载
             this.showMainInterface()
             
@@ -956,32 +980,6 @@ class AppAuthManager {
                 grandparent.style.visibility = 'visible';
                 grandparent.style.opacity = '1';
             }
-        }
-    }
-
-    /**
-        // 清除API管理器的用户信息
-        if (this.apiManager && typeof this.apiManager.setCurrentUser === 'function') {
-            this.apiManager.setCurrentUser(null);
-        } else {
-            // 静默处理错误
-        }
-        
-        // 清除UI管理器的数据
-        if (this.uiManager) {
-            this.uiManager.allFiles = [];
-            this.uiManager.folders = [];
-            this.uiManager.renderFileList([]);
-            this.uiManager.renderFolderList([]);
-            this.uiManager.updateFileCount(0);
-        }
-        
-        // 显示登录界面
-        this.showLoginInterface();
-        
-        // 显示退出通知
-        if (window.Notify) {
-            window.Notify.show({ message: '已退出登录', type: 'info' });
         }
     }
 
