@@ -113,48 +113,28 @@ class UIModalManager {
                 confirmClass,
                 showClose
             });
-            
+
             // 添加到DOM
             document.body.insertAdjacentHTML('beforeend', modalHTML);
-
-            // 获取模态框元素
-            const modalElement = document.getElementById(modalId);
-            const overlayElement = modalElement; // overlay就是modalElement本身
-            const contentElement = document.getElementById(`${modalId}-content`);
-
-            // 检查元素是否存在
-            if (!modalElement) {
-                console.error('Modal element not found:', modalId);
-                resolve({ confirmed: false, error: 'Modal element not found' });
-                return;
-            }
-
-            // 显示模态框
-            setTimeout(() => {
-                modalElement.classList.remove('opacity-0', 'invisible');
-                modalElement.classList.add('show');
-            }, 10);
 
             // 绑定事件
             this.bindModalEvents({
                 modalId,
-                modalElement,
-                overlayElement,
-                contentElement,
-                buttons,
-                inputs,
                 onConfirm,
                 onCancel,
                 closeOnOverlay,
                 closeOnEscape,
                 resolve
             });
+
+            // 添加到活动模态框列表
+            this.activeModals.push(modalId);
         });
     }
 
     /**
      * 创建模态框HTML
-     * @param {Object} config - 配置
+     * @param {Object} config - 配置对象
      * @returns {string} HTML字符串
      */
     createModalHTML(config) {
@@ -174,43 +154,22 @@ class UIModalManager {
             showClose
         } = config;
 
-        // 生成按钮HTML
         const buttonsHTML = this.generateButtonsHTML(buttons, confirmText, cancelText, confirmClass);
-        
-        // 生成输入框HTML
         const inputsHTML = this.generateInputsHTML(inputs);
 
         return `
-            <div id="${modalId}" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300 p-4 modal-overlay">
-                <div id="${modalId}-content" class="bg-dark-light rounded-xl p-5 w-full border border-purple-light/20 shadow-2xl backdrop-blur-sm" style="max-width: ${width}px !important; width: ${width}px !important; height: ${height};">
-                    ${showClose ? `
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-base font-semibold text-white">${title}</h3>
-                            <button id="${modalId}-close" class="text-gray-400 hover:text-white transition-colors">
-                                <i class="fa fa-times text-sm"></i>
-                            </button>
-                        </div>
-                    ` : `
-                        <div class="mb-4">
-                            <h3 class="text-base font-semibold text-white">${title}</h3>
-                        </div>
-                    `}
-                    
-                    ${message ? `
-                        <div class="mb-4">
-                            <p class="text-gray-300 text-sm leading-relaxed">${message}</p>
-                        </div>
-                    ` : ''}
-                    
-                    ${content ? `
-                        <div class="mb-4">
-                            ${content}
-                        </div>
-                    ` : ''}
-                    
-                    ${inputsHTML}
-                    
-                    ${buttonsHTML}
+            <div id="${modalId}" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="modal-content bg-white rounded-lg shadow-xl max-w-md w-full mx-4" style="width: ${width}px; height: ${height};">
+                    <div class="modal-header flex items-center justify-between p-4 border-b">
+                        <h3 class="text-lg font-semibold text-gray-900">${title}</h3>
+                        ${showClose ? `<button class="modal-close text-gray-400 hover:text-gray-600 text-xl">&times;</button>` : ''}
+                    </div>
+                    <div class="modal-body p-4">
+                        ${message ? `<p class="text-gray-700 mb-4">${message}</p>` : ''}
+                        ${content ? `<div class="modal-content">${content}</div>` : ''}
+                        ${inputsHTML}
+                    </div>
+                    ${buttonsHTML ? `<div class="modal-footer flex justify-end space-x-2 p-4 border-t">${buttonsHTML}</div>` : ''}
                 </div>
             </div>
         `;
@@ -218,40 +177,34 @@ class UIModalManager {
 
     /**
      * 生成按钮HTML
-     * @param {Array} buttons - 按钮配置
+     * @param {Array} buttons - 按钮数组
      * @param {string} confirmText - 确认按钮文本
      * @param {string} cancelText - 取消按钮文本
-     * @param {string} confirmClass - 确认按钮样式
+     * @param {string} confirmClass - 确认按钮样式类
      * @returns {string} 按钮HTML
      */
     generateButtonsHTML(buttons, confirmText, cancelText, confirmClass) {
         if (buttons.length > 0) {
-            return `
-                <div class="flex justify-end space-x-2">
-                    ${buttons.map(btn => `
-                        <button class="px-3 py-1.5 ${btn.class || 'border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors text-sm'}" data-action="${btn.action}">
-                            ${btn.text}
-                        </button>
-                    `).join('')}
-                </div>
-            `;
+            return buttons.map(button => `
+                <button class="modal-btn ${button.class || 'bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded'}">
+                    ${button.text}
+                </button>
+            `).join('');
         }
 
         return `
-            <div class="flex justify-end space-x-2">
-                <button id="cancel-btn" class="px-3 py-1.5 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors text-sm">
-                    ${cancelText}
-                </button>
-                <button id="confirm-btn" class="px-3 py-1.5 ${confirmClass} text-white rounded-lg transition-colors text-sm">
-                    ${confirmText}
-                </button>
-            </div>
+            <button class="modal-btn modal-confirm ${confirmClass} text-white px-4 py-2 rounded mr-2">
+                ${confirmText}
+            </button>
+            <button class="modal-btn modal-cancel bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">
+                ${cancelText}
+            </button>
         `;
     }
 
     /**
      * 生成输入框HTML
-     * @param {Array} inputs - 输入框配置
+     * @param {Array} inputs - 输入框配置数组
      * @returns {string} 输入框HTML
      */
     generateInputsHTML(inputs) {
@@ -259,29 +212,23 @@ class UIModalManager {
 
         return inputs.map(input => `
             <div class="mb-4">
-                <label for="${input.id}" class="block text-sm font-medium text-gray-300 mb-2">${input.label}</label>
-                <input type="${input.type || 'text'}" id="${input.id}" 
-                       class="w-full px-3 py-2 bg-dark-light/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-purple-light/50 focus:outline-none transition-colors text-sm" 
+                <label class="block text-sm font-medium text-gray-700 mb-2">${input.label}</label>
+                <input type="${input.type || 'text'}" 
+                       class="modal-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                        placeholder="${input.placeholder || ''}"
-                       ${input.required ? 'required' : ''}
-                       ${input.maxlength ? `maxlength="${input.maxlength}"` : ''}
-                       ${input.value ? `value="${input.value}"` : ''}>
+                       value="${input.value || ''}"
+                       ${input.required ? 'required' : ''}>
             </div>
         `).join('');
     }
 
     /**
      * 绑定模态框事件
-     * @param {Object} config - 事件配置
+     * @param {Object} config - 配置对象
      */
     bindModalEvents(config) {
         const {
             modalId,
-            modalElement,
-            overlayElement,
-            contentElement,
-            buttons,
-            inputs,
             onConfirm,
             onCancel,
             closeOnOverlay,
@@ -289,76 +236,63 @@ class UIModalManager {
             resolve
         } = config;
 
-        // 检查modalElement是否存在
-        if (!modalElement) {
-            console.error('Modal element is null in bindModalEvents');
-            resolve({ confirmed: false, error: 'Modal element is null' });
-            return;
-        }
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
 
         const closeModal = (result) => {
-            modalElement.classList.add('opacity-0', 'invisible');
-            setTimeout(() => {
-                modalElement.remove();
-                resolve(result);
-            }, 300);
+            // 从活动模态框列表中移除
+            const index = this.activeModals.indexOf(modalId);
+            if (index > -1) {
+                this.activeModals.splice(index, 1);
+            }
+
+            // 移除模态框
+            modal.remove();
+            resolve(result);
         };
 
         // 确认按钮
-        const confirmBtn = modalElement.querySelector('#confirm-btn');
+        const confirmBtn = modal.querySelector('.modal-confirm');
         if (confirmBtn) {
             confirmBtn.addEventListener('click', () => {
-                const inputValues = this.getInputValues(modalId, inputs);
+                const inputValues = this.getInputValues(modalId, config.inputs || []);
                 if (onConfirm) {
                     onConfirm(inputValues);
                 }
-                closeModal({ confirmed: true, inputs: inputValues });
+                closeModal(inputValues);
             });
         }
 
         // 取消按钮
-        const cancelBtn = modalElement.querySelector('#cancel-btn');
+        const cancelBtn = modal.querySelector('.modal-cancel');
         if (cancelBtn) {
             cancelBtn.addEventListener('click', () => {
                 if (onCancel) {
                     onCancel();
                 }
-                closeModal({ confirmed: false });
+                closeModal(null);
             });
         }
 
         // 关闭按钮
-        const closeBtn = modalElement.querySelector(`#${modalId}-close`);
+        const closeBtn = modal.querySelector('.modal-close');
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
                 if (onCancel) {
                     onCancel();
                 }
-                closeModal({ confirmed: false });
+                closeModal(null);
             });
         }
 
-        // 自定义按钮
-        buttons.forEach(btn => {
-            const btnElement = modalElement.querySelector(`[data-action="${btn.action}"]`);
-            if (btnElement) {
-                btnElement.addEventListener('click', () => {
-                    if (btn.onClick) {
-                        btn.onClick();
-                    }
-                    closeModal({ action: btn.action });
-                });
-            }
-        });
-
-        // 背景点击关闭
-        if (closeOnOverlay && overlayElement) {
-            overlayElement.addEventListener('click', (e) => {
-                if (e.target === overlayElement) {
+        // 遮罩点击关闭
+        if (closeOnOverlay) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
                     if (onCancel) {
                         onCancel();
                     }
-                    closeModal({ confirmed: false });
+                    closeModal(null);
                 }
             });
         }
@@ -370,44 +304,35 @@ class UIModalManager {
                     if (onCancel) {
                         onCancel();
                     }
-                    closeModal({ confirmed: false });
+                    closeModal(null);
                     document.removeEventListener('keydown', handleEscape);
                 }
             };
             document.addEventListener('keydown', handleEscape);
         }
 
-        // 回车键确认
-        if (inputs && Array.isArray(inputs)) {
-            inputs.forEach(input => {
-                const inputElement = modalElement.querySelector(`#${input.id}`);
-                if (inputElement) {
-                    inputElement.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') {
-                            const inputValues = this.getInputValues(modalId, inputs);
-                            if (onConfirm) {
-                                onConfirm(inputValues);
-                            }
-                            closeModal({ confirmed: true, inputs: inputValues });
-                        }
-                    });
-                }
+        // 自定义按钮
+        const customButtons = modal.querySelectorAll('.modal-btn:not(.modal-confirm):not(.modal-cancel)');
+        customButtons.forEach((button, index) => {
+            button.addEventListener('click', () => {
+                const inputValues = this.getInputValues(modalId, config.inputs || []);
+                closeModal({ button: index, inputs: inputValues });
             });
-        }
+        });
     }
 
     /**
      * 获取输入框值
      * @param {string} modalId - 模态框ID
      * @param {Array} inputs - 输入框配置
-     * @returns {Object} 输入值
+     * @returns {Object} 输入值对象
      */
     getInputValues(modalId, inputs) {
         const values = {};
-        inputs.forEach(input => {
-            const inputElement = document.querySelector(`#${modalId} #${input.id}`);
+        inputs.forEach((input, index) => {
+            const inputElement = document.querySelector(`#${modalId} .modal-input:nth-child(${index + 1})`);
             if (inputElement) {
-                values[input.id] = inputElement.value;
+                values[input.name || `input${index}`] = inputElement.value;
             }
         });
         return values;
@@ -416,7 +341,7 @@ class UIModalManager {
     /**
      * 显示确认对话框
      * @param {string} title - 标题
-     * @param {string} message - 消息内容
+     * @param {string} message - 消息
      * @param {Object} options - 选项
      * @returns {Promise<boolean>} 用户选择结果
      */
@@ -425,12 +350,8 @@ class UIModalManager {
             type: 'confirm',
             title,
             message,
-            width: 280,
-            confirmText: options.confirmText || '确认',
-            cancelText: options.cancelText || '取消',
-            confirmClass: options.confirmClass || 'bg-blue-600 hover:bg-blue-700',
             ...options
-        }).then(result => result.confirmed);
+        });
     }
 
     /**
@@ -438,41 +359,39 @@ class UIModalManager {
      * @param {string} title - 标题
      * @param {Array} inputs - 输入框配置
      * @param {Object} options - 选项
-     * @returns {Promise<Object>} 用户输入结果
+     * @returns {Promise<Object>} 输入值
      */
     showInputDialog(title, inputs, options = {}) {
-        const config = {
+        return this.showModal({
             type: 'input',
             title,
             inputs,
-            width: 320,
-            confirmText: options.confirmText || '确认',
-            cancelText: options.cancelText || '取消',
             ...options
-        };
-        
-        const promise = this.showModal(config);
-        
-        return promise.then(result => {
-            return result.inputs;
-        }).catch(error => {
-            console.error('showModal错误:', error);
-            throw error;
         });
     }
 
     /**
      * 显示自定义对话框
-     * @param {Object} config - 完整配置
-     * @returns {Promise<any>} 对话框结果
+     * @param {Object} config - 配置对象
+     * @returns {Promise<any>} 结果
      */
     showCustomDialog(config) {
         return this.showModal(config);
     }
 
-    // 保持向后兼容的方法
+    /**
+     * 显示紧凑确认对话框
+     * @param {string} title - 标题
+     * @param {string} message - 消息
+     * @param {Object} options - 选项
+     * @returns {Promise<boolean>} 用户选择结果
+     */
     showCompactConfirmDialog(title, message, options = {}) {
-        return this.showConfirmDialog(title, message, { width: 280, ...options });
+        return this.showConfirmDialog(title, message, {
+            width: 300,
+            height: 'auto',
+            ...options
+        });
     }
 
     /**
@@ -483,43 +402,40 @@ class UIModalManager {
      * @returns {HTMLElement} 消息元素
      */
     createMessageElement(message, type, config) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message message-${type} message-${config.position} message-${config.animation}`;
-        messageDiv.innerHTML = `
-            <div class="message-content">
-                <div class="message-icon">${this.getMessageIcon(type)}</div>
-                <div class="message-text">${message}</div>
-                <button class="message-close">&times;</button>
+        const messageElement = document.createElement('div');
+        messageElement.className = `message-item message-${type} bg-white border-l-4 border-${this.getMessageColor(type)} p-4 mb-2 shadow-lg rounded-r-lg`;
+        
+        const icon = this.getMessageIcon(type);
+        messageElement.innerHTML = `
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fa ${icon} text-${this.getMessageColor(type)}"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-gray-700">${message}</p>
+                </div>
+                <div class="ml-auto pl-3">
+                    <button class="message-close text-gray-400 hover:text-gray-600">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
             </div>
         `;
 
-        // 关闭按钮事件
-        const closeBtn = messageDiv.querySelector('.message-close');
-        closeBtn.addEventListener('click', () => {
-            this.removeMessage(messageDiv);
-        });
-
-        // 自动关闭
-        if (config.duration > 0) {
-            setTimeout(() => {
-                this.removeMessage(messageDiv);
-            }, config.duration);
-        }
-
-        return messageDiv;
+        return messageElement;
     }
 
     /**
      * 获取消息图标
      * @param {string} type - 消息类型
-     * @returns {string} 图标HTML
+     * @returns {string} 图标类名
      */
     getMessageIcon(type) {
         const icons = {
-            success: '<i class="fa fa-check-circle"></i>',
-            error: '<i class="fa fa-exclamation-circle"></i>',
-            warning: '<i class="fa fa-exclamation-triangle"></i>',
-            info: '<i class="fa fa-info-circle"></i>'
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            warning: 'fa-exclamation-triangle',
+            info: 'fa-info-circle'
         };
         return icons[type] || icons.info;
     }
@@ -530,17 +446,14 @@ class UIModalManager {
      */
     addMessageToQueue(messageElement) {
         this.messageQueue.push(messageElement);
-        if (!this.isShowingMessage) {
-            this.processMessageQueue();
-        }
+        this.processMessageQueue();
     }
 
     /**
      * 处理消息队列
      */
     processMessageQueue() {
-        if (this.messageQueue.length === 0) {
-            this.isShowingMessage = false;
+        if (this.isShowingMessage || this.messageQueue.length === 0) {
             return;
         }
 
@@ -555,19 +468,24 @@ class UIModalManager {
      */
     showMessageElement(messageElement) {
         const container = document.querySelector('.message-container');
-        if (container) {
+        if (!container) return;
+
         container.appendChild(messageElement);
 
-            // 添加显示动画
+        // 添加显示动画
+        messageElement.style.opacity = '0';
+        messageElement.style.transform = 'translateY(-20px)';
+        
         setTimeout(() => {
-            messageElement.classList.add('show');
+            messageElement.style.transition = 'all 0.3s ease';
+            messageElement.style.opacity = '1';
+            messageElement.style.transform = 'translateY(0)';
         }, 10);
 
-            // 自动移除
-            setTimeout(() => {
-                this.removeMessage(messageElement);
-            }, 5000);
-        }
+        // 自动移除
+        setTimeout(() => {
+            this.removeMessage(messageElement);
+        }, 3000);
     }
 
     /**
@@ -575,7 +493,9 @@ class UIModalManager {
      * @param {HTMLElement} messageElement - 消息元素
      */
     removeMessage(messageElement) {
-        messageElement.classList.remove('show');
+        messageElement.style.opacity = '0';
+        messageElement.style.transform = 'translateY(-20px)';
+        
         setTimeout(() => {
             this.removeMessageElement(messageElement);
         }, 300);
@@ -589,37 +509,47 @@ class UIModalManager {
         if (messageElement.parentNode) {
             messageElement.parentNode.removeChild(messageElement);
         }
+        
+        this.isShowingMessage = false;
         this.processMessageQueue();
     }
 
     /**
      * 显示加载对话框
      * @param {string} message - 加载消息
-     * @returns {HTMLElement} 加载模态框
+     * @returns {string} 模态框ID
      */
     showLoadingDialog(message = '加载中...') {
-        const loadingModal = document.createElement('div');
-        loadingModal.className = 'fixed inset-0 bg-black/70 z-50 flex items-center justify-center';
-        loadingModal.innerHTML = `
-            <div class="bg-dark-light rounded-xl p-6 max-w-sm w-full mx-4 border border-purple-light/20 shadow-2xl">
-                <div class="flex items-center justify-center">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mr-3"></div>
-                    <span class="text-white">${message}</span>
+        const modalId = `loading-${Date.now()}`;
+        const modalHTML = `
+            <div id="${modalId}" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="modal-content bg-white rounded-lg shadow-xl p-6 max-w-sm w-full mx-4">
+                    <div class="flex items-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-4"></div>
+                        <p class="text-gray-700">${message}</p>
+                    </div>
                 </div>
             </div>
         `;
         
-        document.body.appendChild(loadingModal);
-        return loadingModal;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        this.activeModals.push(modalId);
+        
+        return modalId;
     }
 
     /**
      * 隐藏加载对话框
-     * @param {HTMLElement} loadingModal - 加载模态框
+     * @param {string} modalId - 模态框ID
      */
-    hideLoadingDialog(loadingModal) {
-        if (loadingModal && loadingModal.parentNode) {
-            loadingModal.parentNode.removeChild(loadingModal);
+    hideLoadingDialog(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.remove();
+            const index = this.activeModals.indexOf(modalId);
+            if (index > -1) {
+                this.activeModals.splice(index, 1);
+            }
         }
     }
 
@@ -629,7 +559,7 @@ class UIModalManager {
      * @param {Object} options - 选项
      */
     showSuccess(message, options = {}) {
-        return this.showMessage(message, 'success', options);
+        this.showMessage(message, 'success', options);
     }
 
     /**
@@ -638,7 +568,7 @@ class UIModalManager {
      * @param {Object} options - 选项
      */
     showError(message, options = {}) {
-        return this.showMessage(message, 'error', options);
+        this.showMessage(message, 'error', options);
     }
 
     /**
@@ -647,7 +577,7 @@ class UIModalManager {
      * @param {Object} options - 选项
      */
     showWarning(message, options = {}) {
-        return this.showMessage(message, 'warning', options);
+        this.showMessage(message, 'warning', options);
     }
 
     /**
@@ -656,7 +586,7 @@ class UIModalManager {
      * @param {Object} options - 选项
      */
     showInfo(message, options = {}) {
-        return this.showMessage(message, 'info', options);
+        this.showMessage(message, 'info', options);
     }
 
     /**
@@ -675,9 +605,11 @@ class UIModalManager {
      * 关闭所有模态框
      */
     closeAllModals() {
-        const modals = document.querySelectorAll('.modal-overlay');
-        modals.forEach(modal => {
-            modal.remove();
+        this.activeModals.forEach(modalId => {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.remove();
+            }
         });
         this.activeModals = [];
     }
@@ -703,9 +635,12 @@ class UIModalManager {
      */
     closeTopModal() {
         if (this.activeModals.length > 0) {
-            const topModal = this.activeModals[this.activeModals.length - 1];
-            topModal.remove();
-            this.activeModals.pop();
+            const topModalId = this.activeModals[this.activeModals.length - 1];
+            const modal = document.getElementById(topModalId);
+            if (modal) {
+                modal.remove();
+                this.activeModals.pop();
+            }
         }
     }
 
@@ -714,13 +649,30 @@ class UIModalManager {
      * @param {HTMLElement} element - 元素
      */
     closeModalByElement(element) {
-        if (element.classList.contains('modal-overlay')) {
-            element.remove();
-            const index = this.activeModals.indexOf(element);
+        const modal = element.closest('.modal-overlay');
+        if (modal) {
+            const modalId = modal.id;
+            modal.remove();
+            const index = this.activeModals.indexOf(modalId);
             if (index > -1) {
                 this.activeModals.splice(index, 1);
             }
         }
+    }
+
+    /**
+     * 获取消息颜色
+     * @param {string} type - 消息类型
+     * @returns {string} 颜色类名
+     */
+    getMessageColor(type) {
+        const colors = {
+            success: 'green-500',
+            error: 'red-500',
+            warning: 'yellow-500',
+            info: 'blue-500'
+        };
+        return colors[type] || colors.info;
     }
 }
 
@@ -787,6 +739,111 @@ window.modalManager.showConfirm = function({ title, message, onConfirm, onCancel
           <div class="modal-actions">
             <button id="confirm-ok-btn" class="btn btn-confirm">确定</button>
             <button id="confirm-cancel-btn" class="btn btn-cancel">取消</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    // 事件绑定，确保元素已存在
+    setTimeout(() => {
+        const okBtn = document.getElementById('confirm-ok-btn');
+        const cancelBtn = document.getElementById('confirm-cancel-btn');
+        const mask = modal.querySelector('.custom-modal-mask');
+        const box = modal.querySelector('.custom-modal-box');
+        if (okBtn) okBtn.onclick = () => {
+            modal.remove();
+            if (onConfirm) onConfirm();
+        };
+        if (cancelBtn) cancelBtn.onclick = () => {
+            modal.remove();
+            if (onCancel) onCancel();
+        };
+        // 点击遮罩关闭
+        if (mask) mask.onclick = (e) => {
+            if (e.target === mask) {
+                modal.remove();
+                if (onCancel) onCancel();
+            }
+        };
+        // ESC关闭
+        document.addEventListener('keydown', function escHandler(ev) {
+            if (ev.key === 'Escape') {
+                modal.remove();
+                if (onCancel) onCancel();
+                document.removeEventListener('keydown', escHandler);
+            }
+        });
+    }, 0);
+};
+
+// 为了兼容性，同时暴露showConfirmModal
+window.showConfirmModal = function({ title, message, onConfirm, onCancel, confirmText, cancelText, confirmClass }) {
+    // 移除旧模态，防止重复
+    let modal = document.getElementById('custom-confirm-modal');
+    if (modal) modal.remove();
+
+    // 注入一次全局样式
+    if (!document.getElementById('custom-modal-style')) {
+        const style = document.createElement('style');
+        style.id = 'custom-modal-style';
+        style.innerHTML = `
+        .custom-modal-mask {
+            position: fixed; z-index: 9999; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(20,22,30,0.55); display: flex; align-items: center; justify-content: center;
+            animation: modal-fade-in 0.18s;
+        }
+        @keyframes modal-fade-in { from { opacity: 0; } to { opacity: 1; } }
+        .custom-modal-box {
+            background: #23272f; color: #e5e7eb; border-radius: 12px; min-width: 280px; max-width: 92vw;
+            box-shadow: 0 4px 32px #000a; padding: 28px 36px 22px 36px; text-align: center; position: relative;
+        }
+        .custom-modal-box .modal-title {
+            font-size: 19px; font-weight: 600; margin-bottom: 14px; color: #fff;
+        }
+        .custom-modal-box .modal-message {
+            font-size: 15px; margin-bottom: 26px; color: #b5bac8;
+        }
+        .custom-modal-box .modal-actions {
+            display: flex; gap: 18px; justify-content: center;
+        }
+        .custom-modal-box .btn {
+            padding: 7px 28px; font-size: 15px; border: none; border-radius: 6px; cursor: pointer;
+            transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+        }
+        .custom-modal-box .btn-confirm {
+            background: #22c55e; color: #fff; font-weight: 500;
+        }
+        .custom-modal-box .btn-confirm:hover {
+            background: #16a34a;
+        }
+        .custom-modal-box .btn-cancel {
+            background: #353945; color: #b5bac8;
+        }
+        .custom-modal-box .btn-cancel:hover {
+            background: #23272f; color: #fff;
+        }
+        .custom-modal-box .btn-danger {
+            background: #ef4444; color: #fff; font-weight: 500;
+        }
+        .custom-modal-box .btn-danger:hover {
+            background: #dc2626;
+        }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // 创建新模态
+    modal = document.createElement('div');
+    modal.id = 'custom-confirm-modal';
+    modal.innerHTML = `
+      <div class="modal-mask custom-modal-mask">
+        <div class="modal-box custom-modal-box">
+          <div class="modal-title">${title || '确认操作'}</div>
+          <div class="modal-message">${message || ''}</div>
+          <div class="modal-actions">
+            <button id="confirm-ok-btn" class="btn ${confirmClass || 'btn-confirm'}">${confirmText || '确定'}</button>
+            <button id="confirm-cancel-btn" class="btn btn-cancel">${cancelText || '取消'}</button>
           </div>
         </div>
       </div>

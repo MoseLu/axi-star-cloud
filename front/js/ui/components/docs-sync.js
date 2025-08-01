@@ -771,6 +771,7 @@ class UIDocsSync {
         this.syncStats.syncedDocs = this.externalDocs.filter(doc => doc.status === 'synced').length;
         this.syncStats.failedDocs = this.externalDocs.filter(doc => doc.status === 'failed').length;
         this.updateSyncStats();
+        
         this.renderExternalDocs();
     }
 
@@ -792,7 +793,7 @@ class UIDocsSync {
         if (this.externalDocs.length === 0) {
             // 显示外站文档空状态
             filesGrid.innerHTML = `
-                <div class="col-span-full flex flex-col items-center justify-center py-12 md:py-16 text-center">
+                <div class="external-docs-empty-state col-span-full flex flex-col items-center justify-center py-12 md:py-16 text-center">
                     <div class="w-16 h-16 md:w-24 md:h-24 mb-4 md:mb-6 rounded-full bg-purple-light/10 flex items-center justify-center animate-pulse">
                         <i class="fa fa-book text-2xl md:text-4xl text-purple-light/70"></i>
                     </div>
@@ -805,9 +806,7 @@ class UIDocsSync {
             if (window.uiManager && window.uiManager.updateFileCount) {
                 window.uiManager.updateFileCount(0, 0);
             }
-            if (window.uiManager && window.uiManager.toggleEmptyState) {
-                window.uiManager.toggleEmptyState(0);
-            }
+            // 不调用toggleEmptyState，因为外站文档有自己的空状态处理
             return;
         }
         
@@ -820,9 +819,14 @@ class UIDocsSync {
             window.uiManager.updateFileCount(this.externalDocs.length, this.externalDocs.length);
         }
         
-        // 隐藏空状态
-        if (window.uiManager && window.uiManager.toggleEmptyState) {
-            window.uiManager.toggleEmptyState(this.externalDocs.length);
+        // 确保文件网格可见
+        filesGrid.classList.remove('hidden');
+        filesGrid.style.opacity = '1';
+        
+        // 隐藏默认空状态
+        const emptyState = document.getElementById('empty-state');
+        if (emptyState) {
+            emptyState.classList.add('hidden');
         }
     }
     
@@ -1055,44 +1059,100 @@ class UIDocsSync {
         const doc = this.externalDocs.find(d => d.id === docId);
         if (!doc) return;
 
-        try {
-            // 调用后端API删除文档 - 暂时不发送认证头，因为GET请求成功
-            const response = await fetch(window.APP_UTILS.buildApiUrl(`/api/documents/${docId}`), {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
+        // 使用封装的二次确认模态框
+        if (window.showConfirmModal) {
+            window.showConfirmModal({
+                title: '删除文档',
+                message: `确定要删除文档 "${doc.title}" 吗？此操作不可撤销。`,
+                confirmText: '删除',
+                cancelText: '取消',
+                confirmClass: 'btn-danger',
+                onConfirm: async () => {
+                    try {
+                        // 调用后端API删除文档
+                        const response = await fetch(window.APP_UTILS.buildApiUrl(`/api/documents/${docId}`), {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (response.ok) {
+                            // 从本地列表中移除
+                            this.externalDocs = this.externalDocs.filter(d => d.id !== docId);
+                            this.renderExternalDocs();
+                            this.updateSyncStats();
+                            
+                            if (window.MessageBox && window.MessageBox.show) {
+                                window.MessageBox.show({
+                                    message: '文档删除成功',
+                                    type: 'success',
+                                    duration: 3000
+                                });
+                            } else if (window.showMessage) {
+                                window.showMessage('文档删除成功', 'success');
+                            }
+                        } else {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || `删除文档失败: ${response.status}`);
+                        }
+                    } catch (error) {
+                        console.error('删除文档失败:', error);
+                        if (window.MessageBox && window.MessageBox.show) {
+                            window.MessageBox.show({
+                                message: '删除文档失败: ' + error.message,
+                                type: 'error',
+                                duration: 4000
+                            });
+                        } else if (window.showMessage) {
+                            window.showMessage('删除文档失败: ' + error.message, 'error');
+                        }
+                    }
                 }
             });
-
-            if (response.ok) {
-                // 从本地列表中移除
-                this.externalDocs = this.externalDocs.filter(d => d.id !== docId);
-                this.renderExternalDocs();
-                this.updateSyncStats();
-                
-                if (window.MessageBox && window.MessageBox.show) {
-                    window.MessageBox.show({
-                        message: '文档删除成功',
-                        type: 'success',
-                        duration: 3000
+        } else {
+            // 降级到原生confirm
+            if (confirm(`确定要删除文档 "${doc.title}" 吗？此操作不可撤销。`)) {
+                try {
+                    // 调用后端API删除文档
+                    const response = await fetch(window.APP_UTILS.buildApiUrl(`/api/documents/${docId}`), {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
                     });
-                } else if (window.showMessage) {
-                    window.showMessage('文档删除成功', 'success');
+
+                    if (response.ok) {
+                        // 从本地列表中移除
+                        this.externalDocs = this.externalDocs.filter(d => d.id !== docId);
+                        this.renderExternalDocs();
+                        this.updateSyncStats();
+                        
+                        if (window.MessageBox && window.MessageBox.show) {
+                            window.MessageBox.show({
+                                message: '文档删除成功',
+                                type: 'success',
+                                duration: 3000
+                            });
+                        } else if (window.showMessage) {
+                            window.showMessage('文档删除成功', 'success');
+                        }
+                    } else {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || `删除文档失败: ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error('删除文档失败:', error);
+                    if (window.MessageBox && window.MessageBox.show) {
+                        window.MessageBox.show({
+                            message: '删除文档失败: ' + error.message,
+                            type: 'error',
+                            duration: 4000
+                        });
+                    } else if (window.showMessage) {
+                        window.showMessage('删除文档失败: ' + error.message, 'error');
+                    }
                 }
-            } else {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `删除文档失败: ${response.status}`);
-            }
-        } catch (error) {
-            console.error('删除文档失败:', error);
-            if (window.MessageBox && window.MessageBox.show) {
-                window.MessageBox.show({
-                    message: '删除文档失败: ' + error.message,
-                    type: 'error',
-                    duration: 4000
-                });
-            } else if (window.showMessage) {
-                window.showMessage('删除文档失败: ' + error.message, 'error');
             }
         }
     }
@@ -1239,7 +1299,7 @@ class UIDocsSync {
                 message: `确定要删除文档 "${doc.title}" 吗？`,
                 confirmText: '删除',
                 cancelText: '取消',
-                confirmClass: 'bg-red-500 hover:bg-red-600',
+                confirmClass: 'btn-danger',
                 onConfirm: () => {
                     this.externalDocs = this.externalDocs.filter(d => d.id !== docId);
                     this.saveExternalDocsToStorage(); // 保存到localStorage

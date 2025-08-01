@@ -102,6 +102,33 @@ if (typeof UICore === 'undefined') {
             if (defaultEmptyState) {
                 defaultEmptyState.classList.remove('hidden');
             }
+            
+            // 恢复文件分组区域显示状态（根据当前分类决定）
+            const folderSection = document.getElementById('folder-section');
+            const createFolderBtn = document.getElementById('create-folder-main-btn');
+            
+            if (folderSection && createFolderBtn) {
+                // 获取当前分类（从uiManager或默认值）
+                let currentCategory = 'all';
+                if (this.uiManager && this.uiManager.currentCategory) {
+                    currentCategory = this.uiManager.currentCategory;
+                }
+                
+                if (currentCategory === 'all') {
+                    // 全部文件分类时隐藏文件夹区域
+                    folderSection.classList.add('hidden');
+                    createFolderBtn.style.display = 'none';
+                } else {
+                    // 其他分类时显示文件夹区域
+                    folderSection.classList.remove('hidden');
+                    createFolderBtn.style.display = 'flex';
+                    
+                    // 重新渲染文件夹列表（如果存在文件夹管理器）
+                    if (this.uiManager && this.uiManager.folderManager && this.uiManager.folders) {
+                        this.uiManager.folderManager.renderFolderList(this.uiManager.folders);
+                    }
+                }
+            }
         }
 
         // 设置事件监听器

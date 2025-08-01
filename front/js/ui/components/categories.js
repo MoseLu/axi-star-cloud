@@ -98,6 +98,11 @@ class UICategories {
             allButton.classList.add('active', 'bg-gradient-to-r', 'from-primary', 'to-secondary', 'text-white', 'shadow-md', 'shadow-primary/20');
             allButton.classList.remove('bg-dark-light', 'hover:bg-dark-light/70');
             
+            // 确保UI管理器的当前分类状态与按钮状态同步
+            if (this.uiManager) {
+                this.uiManager.currentCategory = 'all';
+            }
+            
             // 确保上传按钮显示，同步文档按钮隐藏（默认是全部文件分类）
             const uploadBtn = document.getElementById('upload-btn');
             const syncDocsBtn = document.getElementById('sync-docs-btn');
@@ -515,9 +520,6 @@ class UICategories {
                     return;
                 }
                 
-                // 设置外站文档分类的CSS类
-                document.body.classList.add('external-docs-category');
-                
                 // 处理外站文档分类
                 this.handleExternalDocsCategory();
             }).catch(error => {
@@ -636,22 +638,29 @@ class UICategories {
             });
         }
         
+        // 隐藏文件分组区域（外站文档不需要分组功能）
+        const folderSection = document.getElementById('folder-section');
+        const createFolderBtn = document.getElementById('create-folder-main-btn');
+        
+        if (folderSection) {
+            folderSection.classList.add('hidden');
+        }
+        
+        if (createFolderBtn) {
+            createFolderBtn.style.display = 'none';
+        }
+        
         // 隐藏默认空状态容器（如果存在）
         const defaultEmptyState = document.getElementById('empty-state');
         if (defaultEmptyState) {
             defaultEmptyState.classList.add('hidden');
         }
         
+        // 确保外站文档分类CSS类已设置
+        document.body.classList.add('external-docs-category');
+        
         // 加载外站文档
         this.loadExternalDocs();
-        
-        // 重置文件计数为0，因为外站文档由docs-sync模块处理
-        if (this.uiManager.updateFileCount) {
-            this.uiManager.updateFileCount(0, 0);
-        }
-        if (this.uiManager.toggleEmptyState) {
-            this.uiManager.toggleEmptyState(0);
-        }
         
         // 更新上传区域提示信息和文件输入框设置
         if (this.uiManager.updateUploadAreaHint) {
@@ -729,6 +738,29 @@ class UICategories {
             syncDocsBtn.style.display = 'none';
         }
         
+        // 恢复文件分组区域显示状态（根据当前分类决定）
+        const folderSection = document.getElementById('folder-section');
+        const createFolderBtn = document.getElementById('create-folder-main-btn');
+        
+        if (folderSection && createFolderBtn) {
+            const currentCategory = this.uiManager.currentCategory || 'all';
+            
+            if (currentCategory === 'all') {
+                // 全部文件分类时隐藏文件夹区域
+                folderSection.classList.add('hidden');
+                createFolderBtn.style.display = 'none';
+            } else {
+                // 其他分类时显示文件夹区域
+                folderSection.classList.remove('hidden');
+                createFolderBtn.style.display = 'flex';
+                
+                // 重新渲染文件夹列表（如果存在文件夹管理器）
+                if (this.uiManager && this.uiManager.folderManager && this.uiManager.folders) {
+                    this.uiManager.folderManager.renderFolderList(this.uiManager.folders);
+                }
+            }
+        }
+        
         // 移除外站文档分类CSS类
         document.body.classList.remove('external-docs-category');
     }
@@ -782,13 +814,9 @@ class UICategories {
 
         // 处理外站文档分类
         if (type === 'external-docs') {
-            // 更新文件计数为0，因为外站文档由docs-sync模块处理
-            if (this.uiManager.updateFileCount) {
-                this.uiManager.updateFileCount(0, this.uiManager.totalFileCount || 0);
-            }
-            if (this.uiManager.toggleEmptyState) {
-                this.uiManager.toggleEmptyState(0);
-            }
+            // 加载外站文档
+            this.loadExternalDocs();
+            // 外站文档有自己的空状态处理，不需要调用toggleEmptyState
             return;
         }
         

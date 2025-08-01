@@ -127,8 +127,8 @@ class UIFileRenderer {
                 this.uiManager.updateFileCount(filteredFiles.length, files.length);
             }
             
-            // 处理空状态
-            if (this.uiManager && this.uiManager.toggleEmptyState) {
+            // 处理空状态 - 外站文档分类由docs-sync模块处理
+            if (this.uiManager && this.uiManager.toggleEmptyState && this.uiManager.currentCategory !== 'external-docs') {
                 this.uiManager.toggleEmptyState(filteredFiles.length);
             }
             
@@ -182,8 +182,8 @@ class UIFileRenderer {
                 this.uiManager.updateFileCount(filteredFiles.length, files.length);
             }
             
-            // 处理空状态
-            if (this.uiManager && this.uiManager.toggleEmptyState) {
+            // 处理空状态 - 外站文档分类由docs-sync模块处理
+            if (this.uiManager && this.uiManager.toggleEmptyState && this.uiManager.currentCategory !== 'external-docs') {
                 this.uiManager.toggleEmptyState(filteredFiles.length);
             }
             
@@ -880,8 +880,6 @@ class UIFileRenderer {
             visibleCount = visibleFiles.length;
         }
 
-
-
         if (visibleCount === 0) {
             // 没有可见文件，显示空状态，隐藏文件网格和上传区域
             fileGrid.style.opacity = '0';
@@ -890,10 +888,10 @@ class UIFileRenderer {
                 fileGrid.style.opacity = '';
             }, 200);
             
-            // 外站文档分类特殊处理：不显示默认空状态
+            // 外站文档分类特殊处理：外站文档的空状态由docs-sync模块处理，这里只隐藏默认空状态
             if (this.uiManager.currentCategory === 'external-docs') {
-    
-                // 外站文档分类下，空状态由renderExternalDocs方法处理
+                // 隐藏默认空状态，外站文档的空状态由docs-sync模块处理
+                emptyState.classList.add('hidden');
                 return;
             }
             
@@ -1073,8 +1071,8 @@ class UIFileRenderer {
             }
         }
         
-        // 重新渲染文件列表
-        if (this.uiManager && this.uiManager.allFiles) {
+        // 重新渲染文件列表 - 外站文档分类由docs-sync模块处理
+        if (this.uiManager && this.uiManager.allFiles && this.uiManager.currentCategory !== 'external-docs') {
             // 强制清空容器并重新渲染
             const fileGrid = document.getElementById('files-grid');
             if (fileGrid) {
@@ -1164,8 +1162,8 @@ class UIFileRenderer {
             }
         }
         
-        // 重新渲染文件列表
-        if (this.uiManager && this.uiManager.allFiles) {
+        // 重新渲染文件列表 - 外站文档分类由docs-sync模块处理
+        if (this.uiManager && this.uiManager.allFiles && this.uiManager.currentCategory !== 'external-docs') {
             // 强制清空容器并重新渲染
             const fileGrid = document.getElementById('files-grid');
             if (fileGrid) {

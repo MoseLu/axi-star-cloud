@@ -38,7 +38,7 @@ class AppAuthManager {
                 }
             }
         } catch (error) {
-            console.error('设置用户离线状态失败:', error);
+
         }
     }
 
@@ -53,7 +53,6 @@ class AppAuthManager {
             }
             return null;
         } catch (error) {
-            console.error('从存储获取用户信息失败:', error);
             return null;
         }
     }
@@ -75,7 +74,6 @@ class AppAuthManager {
                 return cookieUser;
             }
         } catch (error) {
-            console.error('从cookie获取用户信息失败:', error);
         }
         
         return null;
@@ -92,7 +90,6 @@ class AppAuthManager {
                 tokenValue: token ? token.split('=')[1] : null
             };
         } catch (error) {
-            console.error('获取Cookie状态失败:', error);
             return {
                 hasToken: false,
                 tokenValue: null
@@ -116,7 +113,6 @@ class AppAuthManager {
                 userAvatar.src = this.buildFullAvatarUrl(userData.avatarUrl);
             }
         } catch (error) {
-            console.error('更新用户信息显示失败:', error);
         }
     }
 
@@ -130,7 +126,6 @@ class AppAuthManager {
                 welcomeMessage.textContent = `欢迎回来，${userData.username}`;
             }
         } catch (error) {
-            console.error('更新欢迎显示失败:', error);
         }
     }
 
@@ -144,7 +139,6 @@ class AppAuthManager {
                 fileCountElement.textContent = this.uiManager.allFiles.length;
             }
         } catch (error) {
-            console.error('更新文件计数显示失败:', error);
         }
     }
 
@@ -157,7 +151,6 @@ class AppAuthManager {
         this.setupVisibilityChangeListener();
         // 异步检查登录状态
         this.checkLoginStatus().catch(error => {
-            console.error('检查登录状态失败:', error);
         });
     }
 
@@ -197,7 +190,6 @@ class AppAuthManager {
             // 检查是否已经有模态框存在，避免重复创建
             const existingModals = document.querySelectorAll('.fixed[data-modal="settings"]');
             if (existingModals.length > 0) {
-                console.warn('设置模态框已存在，跳过重复创建');
                 return;
             }
             
@@ -282,10 +274,7 @@ class AppAuthManager {
             
             // 触发退出登录事件
             document.dispatchEvent(new CustomEvent('logout'));
-            
-            console.log('退出登录成功');
         } catch (error) {
-            console.error('退出登录失败:', error);
             // 即使API调用失败，也要清除本地数据并显示登录界面
             this.clearUserData();
             this.showLoginInterface();
@@ -340,12 +329,10 @@ class AppAuthManager {
                 // 检查文件统计是否显示
                 const fileCountElement = document.getElementById('file-count');
                 if (fileCountElement && fileCountElement.textContent === '0' && this.uiManager && this.uiManager.allFiles) {
-                    console.log('检测到文件统计显示异常，正在恢复...');
                     fileCountElement.textContent = this.uiManager.allFiles.length;
                 }
             }
         } catch (error) {
-            console.error('检查并恢复用户信息失败:', error);
         }
     }
 
@@ -369,7 +356,6 @@ class AppAuthManager {
             this.updateFileCountDisplay();
             
         } catch (error) {
-            console.error('恢复用户信息显示失败:', error);
         }
     }
 
@@ -406,7 +392,6 @@ class AppAuthManager {
             
             // 调试信息结束
         } catch (error) {
-            console.error('调试登录状态失败:', error);
         }
     }
 
@@ -441,7 +426,6 @@ class AppAuthManager {
                     // 立即检查并显示管理员菜单
                     if (this.uiManager) {
                         this.uiManager.checkAndShowAdminMenu().catch(error => {
-                            console.error('检查管理员权限失败:', error);
                         });
                     }
                     
@@ -451,7 +435,6 @@ class AppAuthManager {
                     setTimeout(async () => {
                         if (this.uiManager) {
                             await this.uiManager.delayedCheckAndShowAdminMenu().catch(error => {
-                                console.error('延迟检查管理员权限失败:', error);
                             });
                         }
                         // 如果是管理员，强制显示管理存储空间按钮
@@ -489,7 +472,6 @@ class AppAuthManager {
                     // 兼容 id 和 uuid 字段
                     const userId = userData.uuid || userData.id;
                     if (!userId || !userData.username) {
-                        console.error('用户数据不完整，清除登录状态');
                         this.clearUserData();
                         this.showLoginInterface();
                         return false;
@@ -515,7 +497,6 @@ class AppAuthManager {
                     // 立即检查并显示管理员菜单
                     if (this.uiManager) {
                         this.uiManager.checkAndShowAdminMenu().catch(error => {
-                            console.error('检查管理员权限失败:', error);
                         });
                         
                         // 如果是管理员，启动用户管理器的管理员功能
@@ -530,7 +511,6 @@ class AppAuthManager {
                     setTimeout(async () => {
                         if (this.uiManager) {
                             await this.uiManager.delayedCheckAndShowAdminMenu().catch(error => {
-                                console.error('延迟检查管理员权限失败:', error);
                             });
                         }
                         // 如果是管理员，强制显示管理存储空间按钮
@@ -555,7 +535,6 @@ class AppAuthManager {
                     
                     return true;
                 } catch (error) {
-                    console.error('处理本地用户数据失败:', error);
                     this.clearUserData();
                     this.showLoginInterface();
                     return false;
@@ -567,7 +546,6 @@ class AppAuthManager {
             return false;
             
         } catch (error) {
-            console.error('检查登录状态失败:', error);
             this.showLoginInterface();
             return false;
         }
@@ -604,7 +582,6 @@ class AppAuthManager {
                 
                 // 使用专门的恢复方法
                 await this.uiManager.restoreAdminMenuAfterForceRefresh().catch(error => {
-                    console.error('强制刷新后恢复管理员菜单失败:', error);
                 });
                 
                 // 如果是管理员，启动用户管理器的管理员功能
@@ -617,7 +594,6 @@ class AppAuthManager {
             await this.loadUserData(userData);
             return true;
         } catch (error) {
-            console.error('强制刷新后恢复用户信息失败:', error);
             return false;
         }
     }
@@ -638,7 +614,6 @@ class AppAuthManager {
                 this.saveUserInfo(userInfo);
             }
         } catch (error) {
-            console.error('获取用户信息失败:', error);
         }
     }
 
@@ -673,7 +648,6 @@ class AppAuthManager {
                 this.forceShowAdminElements();
             }
         } catch (error) {
-            console.error('保存用户信息失败:', error);
         }
     }
 
@@ -705,7 +679,6 @@ class AppAuthManager {
             }
             
         } catch (error) {
-            console.error('清除用户数据失败:', error);
         }
     }
 
@@ -757,7 +730,6 @@ class AppAuthManager {
             }
             
         } catch (error) {
-            console.error('从缓存加载用户数据失败:', error);
         }
     }
 
@@ -792,7 +764,6 @@ class AppAuthManager {
             if (this.uiManager) {
                 // 先执行权限检查，确保只有真正的管理员才能看到管理员按钮
                 await this.uiManager.checkAndShowAdminMenu().catch(error => {
-                    console.error('检查管理员权限失败:', error);
                 });
                 
                 // 只有在确认是管理员后才显示管理员元素
@@ -825,15 +796,9 @@ class AppAuthManager {
                         
                         // 如果cookie没有正确设置，尝试重新获取
                         if (!cookieStatus.accessToken || !cookieStatus.refreshToken) {
-                            console.warn('登录后cookie未正确设置，尝试重新获取...');
-                            
                             // 等待更长时间后再次检查
                             setTimeout(async () => {
                                 const retryStatus = window.tokenManager.debugTokens();
-                                
-                                if (!retryStatus.accessToken || !retryStatus.refreshToken) {
-                                    console.warn('登录后cookie设置可能有问题，但不影响当前使用');
-                                }
                             }, 3000); // 增加到3秒
                         }
                     }
@@ -843,16 +808,13 @@ class AppAuthManager {
                         try {
                             const isTokenValid = await window.tokenManager.validateTokens();
                             if (!isTokenValid) {
-                                console.warn('登录后token验证失败，但继续使用当前会话');
                                 // 不清除用户数据，让用户继续使用
                             }
                         } catch (error) {
-                            console.warn('Token验证检查失败，但不影响当前使用:', error);
                         }
                     }, 2000); // 延迟2秒验证
                     
                 } catch (error) {
-                    console.warn('调试cookie状态失败:', error);
                 }
             }, 1500); // 增加到1.5秒
             
@@ -887,7 +849,6 @@ class AppAuthManager {
             }
             
         } catch (error) {
-            console.error('登录成功处理失败:', error);
         }
     }
     /**
@@ -912,7 +873,6 @@ class AppAuthManager {
                 // 移除自动展开，保持默认关闭状态
                 // window.envSwitcher.show();
             } catch (error) {
-                console.warn('显示环境切换器失败:', error);
             }
         }
     }
@@ -930,7 +890,6 @@ class AppAuthManager {
             // 只有同时存在管理员访问token和刷新token才认为是管理员
             return !!(adminAccessToken && adminRefreshToken);
         } catch (error) {
-            console.error('检查管理员权限失败:', error);
             return false;
         }
     }
@@ -1084,7 +1043,6 @@ class AppAuthManager {
                     try {
                         user = JSON.parse(userDataStr);
                     } catch (error) {
-                        console.warn('解析用户信息失败:', error);
                     }
                 }
             }
@@ -1152,7 +1110,6 @@ class AppAuthManager {
             }
             
         } catch (error) {
-            console.error('❌ 更新用户信息显示失败:', error);
         }
     }
 
@@ -1211,7 +1168,6 @@ class AppAuthManager {
                             const parsedUserInfo = JSON.parse(userInfo);
                             cachedAvatar = parsedUserInfo.avatarUrl;
                         } catch (error) {
-                            console.warn('解析用户信息失败:', error);
                         }
                     }
                 }
@@ -1261,7 +1217,6 @@ class AppAuthManager {
                             const parsedUserInfo = JSON.parse(userInfo);
                             cachedAvatar = parsedUserInfo.avatarUrl;
                         } catch (error) {
-                            console.warn('解析用户信息失败:', error);
                         }
                     }
                 }
@@ -1293,7 +1248,6 @@ class AppAuthManager {
             }
             
         } catch (error) {
-            console.error('❌ 从缓存更新用户显示失败:', error);
         }
     }
 
@@ -1323,7 +1277,6 @@ class AppAuthManager {
                         const userInfo = JSON.parse(userData);
                         cachedAvatar = userInfo.avatarUrl;
                     } catch (error) {
-                        console.warn('解析用户信息失败:', error);
                     }
                 }
             }
@@ -1369,7 +1322,6 @@ class AppAuthManager {
                         const userInfo = JSON.parse(userData);
                         cachedAvatar = userInfo.avatarUrl;
                     } catch (error) {
-                        console.warn('解析用户信息失败:', error);
                     }
                 }
             }
@@ -1455,7 +1407,6 @@ class AppAuthManager {
     async loadUserData(userData) {
         try {
             if (!this.uiManager || !this.apiManager) {
-                console.warn('UI管理器或API管理器未初始化');
                 return;
             }
 
@@ -1481,10 +1432,6 @@ class AppAuthManager {
             
             // 记录失败的API调用
             results.forEach((result, index) => {
-                if (result.status === 'rejected') {
-                    const apiNames = ['Files', 'UrlFiles', 'Folders', 'StorageInfo', 'Profile', 'TotalFileCount'];
-                    console.warn(`API调用失败: ${apiNames[index]}`, result.reason);
-                }
             });
             
             // 更新UIManager缓存
@@ -1578,7 +1525,6 @@ class AppAuthManager {
                         this.updateUserDisplay(localUserData);
                         this.uiManager.updateProfileDisplay(localUserData);
                     } catch (error) {
-                        console.warn('从localStorage获取用户数据失败:', error);
                     }
                 }
             }
@@ -1595,7 +1541,6 @@ class AppAuthManager {
             }
             
         } catch (error) {
-            console.error('❌ 加载用户数据失败:', error);
         }
     }
 
@@ -1681,7 +1626,6 @@ class AppAuthManager {
                 }
             }
         } catch (error) {
-            console.warn('获取缓存文件列表失败:', error);
         }
         return [];
     }
@@ -1700,7 +1644,6 @@ class AppAuthManager {
                 }
             }
         } catch (error) {
-            console.warn('获取缓存文件夹列表失败:', error);
         }
         return [];
     }
@@ -1720,7 +1663,6 @@ class AppAuthManager {
                 }
             }
         } catch (error) {
-            console.warn('获取缓存存储信息失败:', error);
         }
         return null;
     }
@@ -1742,7 +1684,6 @@ class AppAuthManager {
                 }
             }
         } catch (error) {
-            console.error('检查管理员权限失败:', error);
         }
     }
 
@@ -1771,7 +1712,6 @@ class AppAuthManager {
                 }, 1000);
             }
         } catch (error) {
-            console.error('延迟检查管理员权限失败:', error);
         }
     }
 
@@ -1819,7 +1759,6 @@ class AppAuthManager {
             this.forceShowStorageSettingsButton();
             
         } catch (error) {
-            console.error('强制显示管理员元素失败:', error);
         }
     }
 
@@ -1841,7 +1780,6 @@ class AppAuthManager {
             
             return null;
         } catch (error) {
-            console.error('获取用户信息失败:', error);
             return null;
         }
     }
@@ -1910,7 +1848,6 @@ class AppAuthManager {
             
             // 调试信息
         } catch (error) {
-            console.error('调试管理员权限失败:', error);
         }
     }
     
@@ -1933,10 +1870,8 @@ class AppAuthManager {
         // 强制重新检查管理员权限
         if (window.uiManager && window.uiManager.adminManager) {
             window.uiManager.adminManager.checkAdminPermissions().then(() => {
-                console.log('重新检查管理员权限完成');
                 window.uiManager.adminManager.updateAvatarAdminMenu();
             }).catch(error => {
-                console.error('重新检查管理员权限失败:', error);
             });
         }
         
