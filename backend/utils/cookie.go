@@ -32,10 +32,10 @@ type CookieManager struct {
 func NewCookieManager() *CookieManager {
 	// 根据环境动态设置secure标志
 	secure := false
-	httpOnly := false // 开发环境允许JavaScript访问
+	httpOnly := false // 允许JavaScript访问，用于前端权限检查
 	if os.Getenv("ENV") == "production" || os.Getenv("ENV") == "prod" {
 		secure = true
-		httpOnly = true // 生产环境使用HttpOnly
+		httpOnly = false // 生产环境也允许JavaScript访问，用于管理员权限检查
 	}
 
 	return &CookieManager{

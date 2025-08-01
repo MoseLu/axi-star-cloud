@@ -41,6 +41,7 @@ func SetupAuthRoutes(router *gin.Engine, userRepo interface{}, fileRepo interfac
 		auth.POST("/refresh-admin", authController.RefreshAdminToken)
 		auth.POST("/validate", authController.ValidateToken)
 		auth.POST("/validate-admin", authController.ValidateAdminToken)
+		auth.GET("/verify-admin", authController.VerifyAdmin) // 验证管理员权限（前端权限检查）
 
 		// 需要用户认证的路由
 		userAuth := auth.Group("/user")

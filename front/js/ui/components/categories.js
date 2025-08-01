@@ -508,18 +508,23 @@ class UICategories {
         // 处理外站文档分类的特殊逻辑
         if (type === 'external-docs') {
             // 检查是否为管理员，只有管理员才能访问外站文档分类
-            const isAdmin = this.checkIfAdmin();
-            if (!isAdmin) {
-                console.warn('非管理员用户尝试访问外站文档分类，已阻止');
-                // 阻止非管理员用户访问外站文档分类
+            this.checkIfAdmin().then(isAdmin => {
+                if (!isAdmin) {
+                    console.warn('非管理员用户尝试访问外站文档分类，已阻止');
+                    // 阻止非管理员用户访问外站文档分类
+                    return;
+                }
+                
+                // 设置外站文档分类的CSS类
+                document.body.classList.add('external-docs-category');
+                
+                // 处理外站文档分类
+                this.handleExternalDocsCategory();
+            }).catch(error => {
+                console.error('检查管理员权限失败:', error);
+                // 权限检查失败时，阻止访问
                 return;
-            }
-            
-            // 设置外站文档分类的CSS类
-            document.body.classList.add('external-docs-category');
-            
-            // 处理外站文档分类
-            this.handleExternalDocsCategory();
+            });
             return;
         }
         
@@ -538,15 +543,41 @@ class UICategories {
     }
     
     // 检查是否为管理员
-    checkIfAdmin() {
+    async checkIfAdmin() {
         try {
-            // 检查cookie中是否有管理员token
+            // 方法1：检查cookie中是否有管理员token（适用于非HttpOnly环境）
             const cookies = document.cookie.split(';');
             const adminAccessToken = cookies.find(cookie => cookie.trim().startsWith('admin_access_token='));
             const adminRefreshToken = cookies.find(cookie => cookie.trim().startsWith('admin_refresh_token='));
             
-            // 只有同时存在管理员访问token和刷新token才认为是管理员
-            return !!(adminAccessToken && adminRefreshToken);
+            if (adminAccessToken && adminRefreshToken) {
+                return true;
+            }
+            
+            // 方法2：通过API验证管理员权限（适用于HttpOnly环境）
+            try {
+                const response = await fetch(window.APP_UTILS?.buildApiUrl('/api/auth/verify-admin') || '/api/auth/verify-admin', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.isAdmin === true;
+                }
+            } catch (apiError) {
+                console.warn('API验证管理员权限失败，回退到cookie检查:', apiError);
+            }
+            
+            // 方法3：从localStorage检查（备用方案）
+            if (window.StorageManager && typeof window.StorageManager.getSystemInfo === 'function') {
+                const systemInfo = window.StorageManager.getSystemInfo();
+                if (systemInfo && systemInfo.isAdmin === true) {
+                    return true;
+                }
+            }
+            
+            return false;
         } catch (error) {
             console.error('检查管理员权限失败:', error);
             return false;
@@ -587,15 +618,22 @@ class UICategories {
         // 只有管理员才能显示同步文档按钮
         if (syncDocsBtn) {
             // 检查是否为管理员
-            const isAdmin = this.checkIfAdmin();
-            if (isAdmin) {
-                syncDocsBtn.style.display = 'flex';
-            } else {
-                // 非管理员用户不显示同步文档按钮
+            this.checkIfAdmin().then(isAdmin => {
+                if (isAdmin) {
+                    syncDocsBtn.style.display = 'flex';
+                } else {
+                    // 非管理员用户不显示同步文档按钮
+                    syncDocsBtn.style.display = 'none';
+                    syncDocsBtn.classList.add('hidden');
+                    syncDocsBtn.setAttribute('hidden', '');
+                }
+            }).catch(error => {
+                console.error('检查管理员权限失败:', error);
+                // 权限检查失败时，隐藏同步文档按钮
                 syncDocsBtn.style.display = 'none';
                 syncDocsBtn.classList.add('hidden');
                 syncDocsBtn.setAttribute('hidden', '');
-            }
+            });
         }
         
         // 隐藏默认空状态容器（如果存在）

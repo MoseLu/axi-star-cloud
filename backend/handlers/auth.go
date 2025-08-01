@@ -100,6 +100,11 @@ func (h *AuthHandler) UpdateUserStorage(c *gin.Context) {
 	h.authController.UpdateUserStorage(c)
 }
 
+// VerifyAdmin 验证管理员权限（前端权限检查）
+func (h *AuthHandler) VerifyAdmin(c *gin.Context) {
+	h.authController.VerifyAdmin(c)
+}
+
 // GetUserRepo 获取用户仓库
 func (h *AuthHandler) GetUserRepo() *database.UserRepository {
 	return h.userRepo

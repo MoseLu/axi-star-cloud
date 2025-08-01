@@ -1,6 +1,6 @@
 /**
  * 认证控制器
- * 
+ *
  * 负责处理认证相关的HTTP请求和响应，包括：
  * - 用户注册接口
  * - 用户登录接口
@@ -8,7 +8,7 @@
  * - Token验证接口
  * - Token刷新接口
  * - 管理员功能接口
- * 
+ *
  * 该控制器将HTTP处理与业务逻辑分离，专注于请求处理和响应格式化
  */
 
@@ -17,6 +17,7 @@ package controllers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"backend/models"
 	"backend/services"
@@ -256,4 +257,30 @@ func (ac *AuthController) UpdateUserStorage(c *gin.Context) {
 		"success": true,
 		"message": "存储限制更新成功",
 	})
-} 
+}
+
+// VerifyAdmin 验证管理员权限（前端权限检查）
+func (ac *AuthController) VerifyAdmin(c *gin.Context) {
+	// 从cookie中获取管理员访问token
+	adminAccessToken, err := c.Cookie("admin_access_token")
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"isAdmin": false})
+		return
+	}
+
+	// 验证管理员token
+	tokenManager := utils.NewTokenManager()
+	adminClaims, err := tokenManager.ValidateAdminAccessToken(adminAccessToken)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"isAdmin": false})
+		return
+	}
+
+	// 检查token是否过期
+	if adminClaims.ExpiresAt != nil && adminClaims.ExpiresAt.Time.Before(time.Now()) {
+		c.JSON(http.StatusOK, gin.H{"isAdmin": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"isAdmin": true})
+}
