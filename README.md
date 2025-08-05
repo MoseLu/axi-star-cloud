@@ -625,6 +625,39 @@ chore: 构建过程或辅助工具的变动
 - 👤 用户权限管理
 - 📱 响应式界面设计
 
+## 🔧 运维脚本
+
+### 部署诊断脚本
+- **`deploy-diagnostic.sh`**: 完整的部署状态诊断工具
+  - 检查服务状态、端口监听、健康检查
+  - 检查文件权限、Nginx配置
+  - 提供详细的诊断报告和修复建议
+
+### 部署修复脚本  
+- **`deploy-fix.sh`**: 自动化的部署修复工具
+  - 修复文件权限、重启服务
+  - 创建必要目录、检查配置
+  - 自动测试部署结果
+
+### 系统服务配置
+- **`star-cloud.service`**: systemd服务配置文件
+  - 定义服务启动方式、用户权限
+  - 配置重启策略、日志输出
+  - 生产环境部署的核心组件
+
+### 使用建议
+```bash
+# 部署后诊断
+./deploy-diagnostic.sh
+
+# 自动修复部署问题
+./deploy-fix.sh
+
+# 管理服务
+sudo systemctl status star-cloud.service
+sudo systemctl restart star-cloud.service
+```
+
 ---
 
 **当前版本**: v1.4.0  

@@ -193,7 +193,9 @@ export ENV=production
 go run main.go
 
 # 生产环境
-./deploy_production.sh
+# 使用 GitHub Actions 自动部署，或手动部署：
+# 1. 编译: go build -o star-cloud-linux main.go
+# 2. 启动: ./star-cloud-linux
 ```
 
 ### 🛡️ 保护机制
