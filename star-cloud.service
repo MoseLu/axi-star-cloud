@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/srv/apps/axi-star-cloud
-ExecStart=/srv/apps/axi-star-cloud/star-cloud-linux
+WorkingDirectory=/www/wwwroot/axi-star-cloud
+ExecStart=/www/wwwroot/axi-star-cloud/star-cloud-linux
 Restart=on-failure
 RestartSec=5
 User=root
