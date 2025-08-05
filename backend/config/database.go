@@ -137,7 +137,50 @@ func InitDB(configPath interface{}) (*sql.DB, error) {
 		return nil, err
 	}
 
-	// 连接数据库
+	// 获取配置信息
+	cfg, err := LoadConfig("")
+	if err != nil {
+		return nil, fmt.Errorf("加载配置失败: %v", err)
+	}
+
+	// 构建服务器连接DSN（不包含数据库名）
+	serverDSN := fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8mb4&parseTime=True&loc=Local",
+		cfg.Database.User,
+		cfg.Database.Password,
+		cfg.Database.Host,
+		cfg.Database.Port,
+	)
+
+	// 连接到MySQL服务器
+	serverDB, err := sql.Open("mysql", serverDSN)
+	if err != nil {
+		return nil, fmt.Errorf("连接MySQL服务器失败: %v", err)
+	}
+	defer serverDB.Close()
+
+	// 测试服务器连接
+	if err := serverDB.Ping(); err != nil {
+		return nil, fmt.Errorf("MySQL服务器连接测试失败: %v", err)
+	}
+
+	// 检查数据库是否存在
+	var exists int
+	err = serverDB.QueryRow("SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = ?", cfg.Database.Name).Scan(&exists)
+	if err != nil {
+		return nil, fmt.Errorf("检查数据库存在性失败: %v", err)
+	}
+
+	// 如果数据库不存在，创建它
+	if exists == 0 {
+		fmt.Printf("数据库 %s 不存在，正在创建...\n", cfg.Database.Name)
+		_, err = serverDB.Exec(fmt.Sprintf("CREATE DATABASE `%s` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", cfg.Database.Name))
+		if err != nil {
+			return nil, fmt.Errorf("创建数据库失败: %v", err)
+		}
+		fmt.Printf("数据库 %s 创建成功\n", cfg.Database.Name)
+	}
+
+	// 连接到指定数据库
 	db, err := sql.Open(dbConfig.Driver, dbConfig.DSN)
 	if err != nil {
 		return nil, err

@@ -32,11 +32,11 @@ func NewApp() *App {
 func (app *App) Initialize() error {
 	// 加载配置 - 尝试多个可能的配置文件路径
 	configPaths := []string{
-		"config/config-prod.yaml",  // 优先使用生产环境配置
+		"config/config-prod.yaml", // 优先使用生产环境配置
 		"backend/config/config-prod.yaml",
 		"./config/config-prod.yaml",
 		"./backend/config/config-prod.yaml",
-		"config/config.yaml",        // 备用配置
+		"config/config.yaml", // 备用配置
 		"backend/config/config.yaml",
 		"./config/config.yaml",
 		"./backend/config/config.yaml",
