@@ -56,7 +56,13 @@ type DBConfig struct {
 
 // 可能的配置文件路径
 var configPaths = []string{
-	"config/config.yaml",
+	"config/config-prod.yaml", // 优先使用生产环境配置
+	"backend/config/config-prod.yaml",
+	"./config/config-prod.yaml",
+	"./backend/config/config-prod.yaml",
+	"../config/config-prod.yaml",
+	"../backend/config/config-prod.yaml",
+	"config/config.yaml", // 备用配置
 	"backend/config/config.yaml",
 	"./config/config.yaml",
 	"./backend/config/config.yaml",
@@ -130,24 +136,24 @@ func InitDB(configPath interface{}) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// 连接数据库
 	db, err := sql.Open(dbConfig.Driver, dbConfig.DSN)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// 配置连接池参数
-	db.SetMaxOpenConns(25)        // 最大连接数
-	db.SetMaxIdleConns(10)        // 最大空闲连接数
-	db.SetConnMaxLifetime(5 * time.Minute)  // 连接最大生命周期
-	db.SetConnMaxIdleTime(3 * time.Minute)  // 空闲连接最大生命周期
-	
+	db.SetMaxOpenConns(25)                 // 最大连接数
+	db.SetMaxIdleConns(10)                 // 最大空闲连接数
+	db.SetConnMaxLifetime(5 * time.Minute) // 连接最大生命周期
+	db.SetConnMaxIdleTime(3 * time.Minute) // 空闲连接最大生命周期
+
 	// 测试连接
 	if err := db.Ping(); err != nil {
 		db.Close()
 		return nil, fmt.Errorf("数据库连接测试失败: %v", err)
 	}
-	
+
 	return db, nil
 }
