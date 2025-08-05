@@ -4,12 +4,12 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/www/wwwroot/axi-star-cloud
-ExecStart=/www/wwwroot/axi-star-cloud/star-cloud-linux
+WorkingDirectory=/srv/apps/axi-star-cloud
+ExecStart=/srv/apps/axi-star-cloud/star-cloud-linux
 Restart=on-failure
 RestartSec=5
-User=root
-Group=root
+User=deploy
+Group=deploy
 StandardOutput=journal
 StandardError=journal
 Environment=GIN_MODE=release
