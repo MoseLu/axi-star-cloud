@@ -1,187 +1,146 @@
-# 部署问题排查指南
+# 部署故障排除指南
 
-## 问题分析
+## 服务启动失败问题
 
-根据日志分析，部署流程已经成功完成文件上传和解压，但服务启动失败。主要问题包括：
+### 问题描述
+服务启动时出现 `exit-code` 错误，服务无法正常启动。
 
-1. **配置文件路径不匹配** - 程序无法找到正确的配置文件
-2. **数据库连接问题** - 可能数据库不存在或连接失败
-3. **部署路径与配置不一致** - 配置文件中的路径指向旧环境
+### 常见原因
+1. **配置文件问题**：生产环境配置文件不存在或配置错误
+2. **数据库连接问题**：数据库服务未启动或连接参数错误
+3. **文件权限问题**：二进制文件或目录权限不正确
+4. **依赖问题**：缺少必要的系统依赖
 
-## 解决方案
+### 解决方案
 
-### 1. 立即修复步骤
-
-在服务器上执行以下命令：
-
+#### 1. 使用诊断脚本
 ```bash
-# 进入部署目录
+# 运行诊断脚本
+chmod +x debug-service.sh
+./debug-service.sh
+```
+
+#### 2. 使用修复脚本
+```bash
+# 运行修复脚本
+chmod +x fix-service.sh
+./fix-service.sh
+```
+
+#### 3. 手动检查步骤
+
+##### 检查服务状态
+```bash
+sudo systemctl status star-cloud.service
+```
+
+##### 查看详细日志
+```bash
+sudo journalctl -u star-cloud.service -f
+```
+
+##### 检查配置文件
+```bash
+# 检查配置文件是否存在
+ls -la /srv/apps/axi-star-cloud/backend/config/
+
+# 检查配置文件内容
+cat /srv/apps/axi-star-cloud/backend/config/config-prod.yaml
+```
+
+##### 检查数据库连接
+```bash
+# 测试数据库连接
+mysql -h 127.0.0.1 -P 3306 -u root -p123456 -e "SELECT 1;"
+
+# 检查数据库是否存在
+mysql -h 127.0.0.1 -P 3306 -u root -p123456 -e "SHOW DATABASES;"
+```
+
+##### 检查文件权限
+```bash
+# 检查二进制文件权限
+ls -la /srv/apps/axi-star-cloud/star-cloud-linux
+
+# 修复权限
+sudo chown -R deploy:deploy /srv/apps/axi-star-cloud
+sudo chmod +x /srv/apps/axi-star-cloud/star-cloud-linux
+```
+
+##### 手动测试运行
+```bash
+# 切换到应用目录
 cd /srv/apps/axi-star-cloud
 
-# 复制配置文件到根目录
-cp backend/config/config.yaml ./config.yaml
+# 设置环境变量
+export GIN_MODE=release
 
-# 创建必要的目录
-mkdir -p logs uploads front
-
-# 设置权限
-chown -R deploy:deploy .
-chmod +x star-cloud-linux
-
-# 检查数据库
-mysql -u root -p123456 -e "CREATE DATABASE IF NOT EXISTS docs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-
-# 重启服务
-systemctl restart star-cloud.service
+# 手动运行（观察输出）
+./star-cloud-linux
 ```
 
-### 2. 使用修复脚本
+### 常见错误及解决方案
 
-运行提供的修复脚本：
-
+#### 1. 配置文件找不到
+**错误信息**：`找不到配置文件`
+**解决方案**：
 ```bash
-# 给脚本执行权限
-chmod +x deploy-fix.sh
-
-# 运行修复脚本
-./deploy-fix.sh
+# 确保配置文件存在
+sudo cp /srv/apps/axi-star-cloud/backend/config/config.yaml /srv/apps/axi-star-cloud/backend/config/config-prod.yaml
 ```
 
-### 3. 诊断问题
-
-运行诊断脚本：
-
+#### 2. 数据库连接失败
+**错误信息**：`数据库连接测试失败`
+**解决方案**：
 ```bash
-# 给脚本执行权限
-chmod +x debug-deploy.sh
-
-# 运行诊断脚本
-./debug-deploy.sh
-```
-
-## 常见问题及解决方案
-
-### 问题1: 配置文件找不到
-
-**症状**: 程序启动时立即退出，日志显示配置加载失败
-
-**解决方案**:
-```bash
-# 确保配置文件在正确位置
-ls -la /srv/apps/axi-star-cloud/config.yaml
-ls -la /srv/apps/axi-star-cloud/backend/config/config.yaml
-
-# 如果不存在，复制配置文件
-cp backend/config/config.yaml ./config.yaml
-```
-
-### 问题2: 数据库连接失败
-
-**症状**: 程序启动时数据库连接错误
-
-**解决方案**:
-```bash
-# 检查 MySQL 服务状态
-systemctl status mysql
-
 # 启动 MySQL 服务
-systemctl start mysql
+sudo systemctl start mysql
 
 # 创建数据库
-mysql -u root -p123456 -e "CREATE DATABASE IF NOT EXISTS docs;"
-
-# 检查数据库连接
-mysql -u root -p123456 -e "USE docs; SELECT 1;"
+mysql -h 127.0.0.1 -P 3306 -u root -p123456 -e "CREATE DATABASE IF NOT EXISTS docs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 ```
 
-### 问题3: 端口被占用
-
-**症状**: 程序无法绑定到端口 8080
-
-**解决方案**:
+#### 3. 端口被占用
+**错误信息**：`address already in use`
+**解决方案**：
 ```bash
 # 检查端口占用
 netstat -tlnp | grep :8080
 
-# 停止占用端口的进程
+# 杀死占用进程
 sudo kill -9 <PID>
-
-# 或者修改配置文件中的端口
-sed -i 's/port: .8080./port: .8081./' config.yaml
 ```
 
-### 问题4: 权限问题
-
-**症状**: 程序无法访问文件或目录
-
-**解决方案**:
+#### 4. 权限不足
+**错误信息**：`permission denied`
+**解决方案**：
 ```bash
-# 设置正确的权限
-chown -R deploy:deploy /srv/apps/axi-star-cloud
-chmod -R 755 /srv/apps/axi-star-cloud
-chmod 644 /srv/apps/axi-star-cloud/config.yaml
-chmod +x /srv/apps/axi-star-cloud/star-cloud-linux
+# 修复权限
+sudo chown -R deploy:deploy /srv/apps/axi-star-cloud
+sudo chmod +x /srv/apps/axi-star-cloud/star-cloud-linux
 ```
 
-## 手动测试步骤
+### 预防措施
 
-1. **测试配置文件加载**:
-```bash
-cd /srv/apps/axi-star-cloud
-timeout 5s ./star-cloud-linux
-```
+1. **部署前检查**：
+   - 确保 MySQL 服务正在运行
+   - 确保配置文件存在且正确
+   - 确保目标目录有足够权限
 
-2. **检查服务日志**:
-```bash
-journalctl -u star-cloud.service -f
-```
+2. **监控服务**：
+   - 定期检查服务状态
+   - 监控日志文件
+   - 设置告警机制
 
-3. **测试健康检查**:
-```bash
-curl http://localhost:8080/health
-```
+3. **备份配置**：
+   - 备份重要配置文件
+   - 记录部署步骤
+   - 保存故障排除记录
 
-## 配置文件说明
-
-主要配置文件路径：
-- `/srv/apps/axi-star-cloud/config.yaml` - 根目录配置（推荐）
-- `/srv/apps/axi-star-cloud/backend/config/config.yaml` - 备用配置
-
-关键配置项：
-```yaml
-deployment:
-  type: 'prod'
-  static_path: '/srv/apps/axi-star-cloud/front'
-  upload_path: '/srv/apps/axi-star-cloud/uploads'
-
-database:
-  host: '127.0.0.1'
-  port: '3306'
-  user: 'root'
-  password: '123456'
-  name: 'docs'
-```
-
-## 服务文件配置
-
-确保 `star-cloud.service` 文件包含正确的环境变量：
-
-```ini
-[Service]
-Environment=GIN_MODE=release
-Environment=CONFIG_PATH=/srv/apps/axi-star-cloud/config.yaml
-```
-
-## 成功标志
-
-服务成功启动的标志：
-1. `systemctl is-active star-cloud.service` 返回 `active`
-2. `curl http://localhost:8080/health` 返回成功响应
-3. 服务日志中没有错误信息
-
-## 联系支持
+### 联系支持
 
 如果问题仍然存在，请提供以下信息：
-1. 运行 `debug-deploy.sh` 的完整输出
-2. `journalctl -u star-cloud.service --no-pager` 的完整日志
-3. 服务器环境信息（操作系统、MySQL版本等） 
+1. 完整的错误日志
+2. 系统环境信息
+3. 配置文件内容（脱敏）
+4. 数据库连接测试结果 
