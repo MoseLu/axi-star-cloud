@@ -30,10 +30,26 @@ func NewApp() *App {
 
 // Initialize 初始化应用
 func (app *App) Initialize() error {
-	// 加载配置
-	cfg, err := config.LoadConfig("config/config.yaml")
+	// 加载配置 - 尝试多个可能的配置文件路径
+	configPaths := []string{
+		"config/config.yaml",
+		"backend/config/config.yaml",
+		"./config/config.yaml",
+		"./backend/config/config.yaml",
+	}
+	
+	var cfg *config.Config
+	var err error
+	
+	for _, path := range configPaths {
+		cfg, err = config.LoadConfig(path)
+		if err == nil {
+			break
+		}
+	}
+	
 	if err != nil {
-		return fmt.Errorf("加载配置失败: %v", err)
+		return fmt.Errorf("加载配置失败，尝试了以下路径: %v, 错误: %v", configPaths, err)
 	}
 	app.Config = cfg
 
