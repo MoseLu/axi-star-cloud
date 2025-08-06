@@ -33,6 +33,14 @@ func SetupAuthRoutes(router *gin.Engine, userRepo interface{}, fileRepo interfac
 	// 认证路由组
 	auth := router.Group("/api/auth")
 	{
+		// 测试路由 - 用于验证路由注册
+		auth.GET("/test", func(c *gin.Context) {
+			c.JSON(200, gin.H{
+				"message": "认证路由正常工作",
+				"status":  "ok",
+			})
+		})
+
 		// 公开路由（无需认证）
 		auth.POST("/register", authController.Register)
 		auth.POST("/login", authController.Login)
