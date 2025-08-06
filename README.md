@@ -671,4 +671,5 @@ sudo systemctl restart star-cloud.service
  #   KmÕ‹hQb—Àhåg 
  #   KmÕ‹9eÛ„vH T T P S KmÕ‹ 
  #   KmÕ‹‡eöNÀhåg 
+ #   KmÕ‹n g i n x M‘nÀhåg 
  
