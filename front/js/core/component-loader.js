@@ -35,7 +35,7 @@ class ComponentLoader {
         try {
             const response = await fetch(this.components[componentName]);
             if (!response.ok) {
-                throw new Error(`Failed to load component: ${componentName}`);
+                throw new Error(`Failed to load component: ${componentName}, status: ${response.status}`);
             }
             
             const html = await response.text();
@@ -43,9 +43,9 @@ class ComponentLoader {
             
             // 如果容器不存在，多次重试
             let retryCount = 0;
-            const maxRetries = 10;
+            const maxRetries = 20; // 增加重试次数
             while (!container && retryCount < maxRetries) {
-                await new Promise(resolve => setTimeout(resolve, 200));
+                await new Promise(resolve => setTimeout(resolve, 300)); // 增加等待时间
                 container = document.getElementById(containerId);
                 retryCount++;
             }
@@ -53,18 +53,25 @@ class ComponentLoader {
             if (container) {
                 container.innerHTML = html;
                 this.loadedComponents.add(componentName);
-        
+                console.log(`✅ Component loaded: ${componentName}`);
             } else {
                 console.error(`❌ Container not found after ${maxRetries} retries: ${containerId}`);
                 // 对于help-modal，如果容器不存在，直接添加到body
                 if (componentName === 'help-modal') {
                     document.body.insertAdjacentHTML('beforeend', html);
                     this.loadedComponents.add(componentName);
-            
                 }
             }
         } catch (error) {
             console.error(`❌ Error loading component ${componentName}:`, error);
+            // 如果是网络错误，尝试重新加载
+            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                console.log(`🔄 Retrying component ${componentName} in 2 seconds...`);
+                setTimeout(() => {
+                    this.loadedComponents.delete(componentName);
+                    this.loadComponent(componentName, containerId);
+                }, 2000);
+            }
         }
     }
 
