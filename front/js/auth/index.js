@@ -333,10 +333,13 @@ class SimpleAuthManager {
             console.error('注册失败:', error);
             
             // 特殊处理用户名已存在的错误
-            if (error.message && error.message.includes('用户名已存在')) {
+            if (error.message && (error.message.includes('用户名已存在') || error.message.includes('已被注册'))) {
                 this.showMessage('该用户名已被注册，请选择其他用户名', 'warning');
             } else if (error.message && error.message.includes('用户名')) {
                 this.showMessage(error.message, 'warning');
+            } else if (error.message && error.message.includes('HTTP 400')) {
+                // 处理400错误，尝试提取具体错误信息
+                this.showMessage('注册失败，请检查输入信息', 'error');
             } else {
                 this.showMessage(error.message || '注册失败，请重试', 'error');
             }

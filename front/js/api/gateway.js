@@ -115,6 +115,9 @@ class ApiGateway {
             case window.HTTP_STATUS.CONFLICT:
                 return this.handleConflict(response);
                 
+            case window.HTTP_STATUS.BAD_REQUEST:
+                return this.handleBadRequest(response);
+                
             case window.HTTP_STATUS.TOO_MANY_REQUESTS:
                 throw new window.ApiError(
                     status,
@@ -196,6 +199,29 @@ class ApiGateway {
                 window.HTTP_STATUS.CONFLICT,
                 '操作冲突',
                 window.ERROR_TYPES.CONFLICT_ERROR
+            );
+        }
+    }
+
+    /**
+     * 处理400错误请求
+     */
+    async handleBadRequest(response) {
+        try {
+            const errorData = await response.json();
+            const message = errorData.error || errorData.message || '请求参数错误';
+            throw new window.ApiError(
+                window.HTTP_STATUS.BAD_REQUEST,
+                message,
+                window.ERROR_TYPES.BUSINESS_ERROR,
+                errorData
+            );
+        } catch (parseError) {
+            // 如果无法解析JSON，使用默认错误信息
+            throw new window.ApiError(
+                window.HTTP_STATUS.BAD_REQUEST,
+                '请求参数错误',
+                window.ERROR_TYPES.BUSINESS_ERROR
             );
         }
     }
