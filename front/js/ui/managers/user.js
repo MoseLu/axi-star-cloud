@@ -87,7 +87,6 @@ class UIUserManager {
             // 检查用户是否为管理员
             const currentUser = this.getCurrentUser();
             if (!currentUser || !this.isAdminUser(currentUser)) {
-                console.log('用户未登录或不是管理员，跳过在线状态更新');
                 return;
             }
             
@@ -457,7 +456,6 @@ class UIUserManager {
             // 检查用户是否为管理员
             const currentUser = this.getCurrentUser();
             if (!currentUser || !this.isAdminUser(currentUser)) {
-                console.log('用户未登录或不是管理员，跳过加载用户列表');
                 return;
             }
 
@@ -537,7 +535,6 @@ class UIUserManager {
             setTimeout(() => {
                 const retryContainer = document.getElementById('users-list');
                 if (retryContainer) {
-                    console.log('重新找到用户列表容器，重新渲染...');
                     this.renderUsersList(users, result);
                 } else {
                     console.error('仍然找不到用户列表容器，渲染失败');

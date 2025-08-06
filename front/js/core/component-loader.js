@@ -53,7 +53,6 @@ class ComponentLoader {
             if (container) {
                 container.innerHTML = html;
                 this.loadedComponents.add(componentName);
-                console.log(`✅ Component loaded: ${componentName}`);
             } else {
                 console.error(`❌ Container not found after ${maxRetries} retries: ${containerId}`);
                 // 对于help-modal，如果容器不存在，直接添加到body
@@ -66,7 +65,6 @@ class ComponentLoader {
             console.error(`❌ Error loading component ${componentName}:`, error);
             // 如果是网络错误，尝试重新加载
             if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                console.log(`🔄 Retrying component ${componentName} in 2 seconds...`);
                 setTimeout(() => {
                     this.loadedComponents.delete(componentName);
                     this.loadComponent(componentName, containerId);

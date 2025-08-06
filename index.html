@@ -394,34 +394,26 @@
         // 初始化页面模板
         async function initializeTemplates() {
             try {
-                console.log('🔄 开始加载页面模板...');
-                
                 // 加载登录页面
-                console.log('📄 加载登录页面模板...');
                 const loginTemplate = await loadTemplate('login');
                 if (loginTemplate) {
                     document.getElementById('login-page').innerHTML = loginTemplate;
-                    console.log('✅ 登录页面模板加载完成');
                 } else {
                     console.error('❌ 登录页面模板加载失败');
                 }
 
                 // 加载头部
-                console.log('📄 加载头部模板...');
                 const headerTemplate = await loadTemplate('header');
                 if (headerTemplate) {
                     document.getElementById('header').innerHTML = headerTemplate;
-                    console.log('✅ 头部模板加载完成');
                 } else {
                     console.error('❌ 头部模板加载失败');
                 }
 
                 // 加载主内容
-                console.log('📄 加载主内容模板...');
                 const mainContentTemplate = await loadTemplate('main-content');
                 if (mainContentTemplate) {
                     document.getElementById('main-content').innerHTML = mainContentTemplate;
-                    console.log('✅ 主内容模板加载完成');
                 } else {
                     console.error('❌ 主内容模板加载失败');
                 }
@@ -434,9 +426,7 @@
                 initParticlesImmediately();
 
                 // 模板加载完成后初始化应用
-                console.log('🚀 初始化应用...');
                 window.app = new App();
-                console.log('✅ 应用初始化完成');
                 
                 // 应用初始化完成后，确保AuthManager存在
                 // AuthManager由auth/index.js统一管理，避免重复初始化
@@ -447,9 +437,7 @@
                 console.error('❌ 模板初始化失败:', error);
                 // 即使模板加载失败，也尝试初始化应用
                 try {
-                    console.log('🔄 尝试初始化应用（模板加载失败）...');
                     window.app = new App();
-                    console.log('✅ 应用初始化完成（备用模式）');
                 } catch (appError) {
                     console.error('❌ 应用初始化也失败:', appError);
                 }

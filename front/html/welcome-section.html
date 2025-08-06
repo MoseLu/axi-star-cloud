@@ -61,21 +61,16 @@
                 </div>
                 
                 <script>
-                    console.log('💾 欢迎模块：脚本开始执行');
-                    
                     let isInitialized = false;
                     
                     // 从本地缓存读取存储状态
                     function updateStorageStatusFromCache() {
-                        console.log('💾 欢迎模块：开始从缓存读取存储状态');
-                        
                         // 尝试从新的StorageManager结构读取
                         let storageStatusData = null;
                         
                         // 方法1：从StorageManager读取
                         if (window.StorageManager && typeof window.StorageManager.getStorageStatus === 'function') {
                             storageStatusData = window.StorageManager.getStorageStatus();
-                            console.log('💾 欢迎模块：从StorageManager读取:', storageStatusData);
                         }
                         
                         // 方法2：从systemInfo读取
@@ -85,7 +80,6 @@
                                 try {
                                     const systemInfo = JSON.parse(systemData);
                                     storageStatusData = systemInfo.storageStatus;
-                                    console.log('💾 欢迎模块：从systemInfo读取:', storageStatusData);
                                 } catch (error) {
                                     console.warn('解析systemInfo失败:', error);
                                 }
@@ -98,7 +92,6 @@
                             if (oldData) {
                                 try {
                                     storageStatusData = JSON.parse(oldData);
-                                    console.log('💾 欢迎模块：从旧storageStatus读取:', storageStatusData);
                                 } catch (error) {
                                     console.warn('解析旧storageStatus失败:', error);
                                 }
@@ -107,7 +100,6 @@
                         
                         if (storageStatusData && storageStatusData.status) {
                             try {
-                                console.log('💾 欢迎模块：最终缓存数据:', storageStatusData);
                                 const welcomeStorageStatus = document.getElementById('welcome-storage-status');
                                 if (welcomeStorageStatus) {
                                     // 确保只使用status字段，避免使用percentage字段
@@ -133,16 +125,12 @@
                                     }
                                     
                                     welcomeStorageStatus.textContent = statusText;
-                                    console.log(`💾 欢迎模块：已从缓存读取并更新状态: ${statusText}`);
                                     isInitialized = true;
-                                } else {
-                                    console.log('💾 欢迎模块：DOM元素未找到');
                                 }
                             } catch (error) {
                                 console.error('解析存储状态缓存失败:', error);
                             }
                         } else {
-                            console.log('💾 欢迎模块：本地缓存中没有有效的存储状态数据');
                             // 如果没有缓存数据，等待存储空间概览模块更新
                             if (!isInitialized) {
                                 setTimeout(() => {
@@ -158,14 +146,12 @@
                         // 监听localStorage变化
                         window.addEventListener('storage', function(e) {
                             if (e.key === 'storageStatus' || e.key === 'systemInfo') {
-                                console.log('💾 欢迎模块：检测到存储状态变化');
                                 updateStorageStatusFromCache();
                             }
                         });
                         
                         // 监听自定义事件
                         window.addEventListener('storageStatusUpdated', function(e) {
-                            console.log('💾 欢迎模块：检测到存储状态更新事件');
                             updateStorageStatusFromCache();
                         });
                     }
@@ -186,7 +172,6 @@
                         // 如果还是没有数据，等待更长时间后再次尝试
                         setTimeout(() => {
                             if (!isInitialized) {
-                                console.log('💾 欢迎模块：延迟初始化，再次尝试获取存储状态');
                                 updateStorageStatusFromCache();
                             }
                         }, 3000);
