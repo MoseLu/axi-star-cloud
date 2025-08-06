@@ -77,14 +77,14 @@ func (r *Router) SetupRoutes(
 	// 注册API路由组
 	apiGroup := r.RegisterGroup("api", "/api")
 
-	// 认证相关路由
-	apiGroup.AddRoute("POST", "/login", authHandler.Login, "用户登录")
-	apiGroup.AddRoute("POST", "/register", authHandler.Register, "用户注册")
-	apiGroup.AddRoute("POST", "/logout", authHandler.Logout, "用户退出登录")
-	apiGroup.AddRoute("POST", "/refresh-token", authHandler.RefreshToken, "刷新普通用户token")
-	apiGroup.AddRoute("POST", "/refresh-admin-token", authHandler.RefreshAdminToken, "刷新管理员token")
-	apiGroup.AddRoute("POST", "/validate-token", authHandler.ValidateToken, "验证普通用户token")
-	apiGroup.AddRoute("POST", "/validate-admin-token", authHandler.ValidateAdminToken, "验证管理员token")
+	// 认证相关路由 - 已移至 auth_routes.go 中处理
+	// apiGroup.AddRoute("POST", "/login", authHandler.Login, "用户登录")
+	// apiGroup.AddRoute("POST", "/register", authHandler.Register, "用户注册")
+	// apiGroup.AddRoute("POST", "/logout", authHandler.Logout, "用户退出登录")
+	// apiGroup.AddRoute("POST", "/refresh-token", authHandler.RefreshToken, "刷新普通用户token")
+	// apiGroup.AddRoute("POST", "/refresh-admin-token", authHandler.RefreshAdminToken, "刷新管理员token")
+	// apiGroup.AddRoute("POST", "/validate-token", authHandler.ValidateToken, "验证普通用户token")
+	// apiGroup.AddRoute("POST", "/validate-admin-token", authHandler.ValidateAdminToken, "验证管理员token")
 
 	// 管理员相关路由（需要管理员权限）
 	adminGroup := r.RegisterGroup("admin", "/api/admin", authHandler.CheckAdminPermission())
