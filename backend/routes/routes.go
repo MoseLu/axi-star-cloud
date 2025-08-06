@@ -161,11 +161,11 @@ func (r *Router) SetupRoutes(
 	// 注册文档路由
 	r.registerDocRoutes()
 
-	// 注册静态文件路由
-	r.registerStaticRoutes()
+	// 注册静态文件路由 - 已禁用，由nginx处理
+	// r.registerStaticRoutes()
 
-	// 注册页面路由
-	r.registerPageRoutes()
+	// 注册页面路由 - 已禁用，由nginx处理
+	// r.registerPageRoutes()
 
 	// 注册健康检查路由
 	r.registerHealthRoutes()
