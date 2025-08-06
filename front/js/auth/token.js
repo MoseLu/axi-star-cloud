@@ -193,7 +193,7 @@ class TokenManager {
         }
 
         try {
-            const response = await fetch(this.buildApiUrl('/api/refresh-token'), {
+            const response = await fetch(this.buildApiUrl('/api/auth/refresh'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -243,7 +243,7 @@ class TokenManager {
         }
 
         try {
-            const response = await fetch(this.buildApiUrl('/api/refresh-admin-token'), {
+            const response = await fetch(this.buildApiUrl('/api/auth/refresh-admin'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -292,7 +292,7 @@ class TokenManager {
         }
 
         try {
-            const response = await fetch(this.buildApiUrl('/api/validate-token'), {
+            const response = await fetch(this.buildApiUrl('/api/auth/validate'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -319,7 +319,7 @@ class TokenManager {
         }
 
         try {
-            const response = await fetch(this.buildApiUrl('/api/validate-admin-token'), {
+            const response = await fetch(this.buildApiUrl('/api/auth/validate-admin'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
