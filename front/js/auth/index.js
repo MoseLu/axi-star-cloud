@@ -331,7 +331,15 @@ class SimpleAuthManager {
             }
         } catch (error) {
             console.error('注册失败:', error);
-            this.showMessage(error.message || '注册失败，请重试', 'error');
+            
+            // 特殊处理用户名已存在的错误
+            if (error.message && error.message.includes('用户名已存在')) {
+                this.showMessage('该用户名已被注册，请选择其他用户名', 'warning');
+            } else if (error.message && error.message.includes('用户名')) {
+                this.showMessage(error.message, 'warning');
+            } else {
+                this.showMessage(error.message || '注册失败，请重试', 'error');
+            }
             return false;
         } finally {
             // 隐藏loading状态

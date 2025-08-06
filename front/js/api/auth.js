@@ -24,6 +24,10 @@ class Auth {
             return data;
         } catch (error) {
             console.error('登录失败:', error);
+            // 如果是ApiError，提取错误信息
+            if (error instanceof window.ApiError) {
+                throw new Error(error.message);
+            }
             throw error;
         }
     }
@@ -46,6 +50,10 @@ class Auth {
             return data;
         } catch (error) {
             console.error('注册失败:', error);
+            // 如果是ApiError，提取错误信息
+            if (error instanceof window.ApiError) {
+                throw new Error(error.message);
+            }
             throw error;
         }
     }
