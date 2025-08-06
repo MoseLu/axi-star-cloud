@@ -1561,29 +1561,37 @@ class AppAuthManager {
             return avatarPath;
         }
         
+        // 清理路径，确保没有重复的/uploads/avatars/
+        let cleanPath = avatarPath;
+        
+        // 移除开头的/uploads/avatars/（如果存在）
+        if (cleanPath.startsWith('/uploads/avatars/')) {
+            cleanPath = cleanPath.replace('/uploads/avatars/', '');
+        }
+        
         // 确保路径以/uploads/avatars/开头
-        if (!avatarPath.startsWith('/uploads/avatars/')) {
-            avatarPath = '/uploads/avatars/' + avatarPath;
+        if (!cleanPath.startsWith('/uploads/avatars/')) {
+            cleanPath = '/uploads/avatars/' + cleanPath;
         }
         
         // 尝试多种方式构建完整URL
-        let fullUrl = avatarPath;
+        let fullUrl = cleanPath;
         
         // 方式1: 使用apiGateway
         if (window.apiGateway && typeof window.apiGateway.buildUrl === 'function') {
-            fullUrl = window.apiGateway.buildUrl(avatarPath);
+            fullUrl = window.apiGateway.buildUrl(cleanPath);
             return fullUrl;
         }
         
         // 方式2: 使用ENV_MANAGER
         if (window.ENV_MANAGER && typeof window.ENV_MANAGER.buildResourceUrl === 'function') {
-            fullUrl = window.ENV_MANAGER.buildResourceUrl(avatarPath);
+            fullUrl = window.ENV_MANAGER.buildResourceUrl(cleanPath);
             return fullUrl;
         }
         
         // 方式3: 使用APP_UTILS
         if (window.APP_UTILS && typeof window.APP_UTILS.buildResourceUrl === 'function') {
-            fullUrl = window.APP_UTILS.buildResourceUrl(avatarPath);
+            fullUrl = window.APP_UTILS.buildResourceUrl(cleanPath);
             return fullUrl;
         }
         
@@ -1608,7 +1616,7 @@ class AppAuthManager {
             }
         }
         
-        fullUrl = baseUrl + avatarPath;
+        fullUrl = baseUrl + cleanPath;
         return fullUrl;
     }
 
