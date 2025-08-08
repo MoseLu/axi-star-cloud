@@ -2,7 +2,7 @@
 
 ## 概述
 
-本指南将帮助您在云端正确部署星际云盘系统，确保数据库正确初始化。
+本指南将帮助您在云端正确部署星际云盘系统，使用GORM自动迁移确保数据库正确初始化。
 
 ## 部署前准备
 
@@ -54,21 +54,11 @@ go mod tidy
 go build -o star-cloud
 ```
 
-### 4. 数据库初始化
-**重要**: 在启动应用之前，必须先初始化数据库：
+### 4. 启动应用（自动初始化数据库）
+**GORM会自动处理数据库初始化**，直接启动应用即可：
 
 ```bash
-# 方法1: 使用初始化脚本
-chmod +x scripts/init_database.sh
-./scripts/init_database.sh
-
-# 方法2: 直接运行初始化命令
-./star-cloud --init-db
-```
-
-### 5. 启动应用
-```bash
-# 启动应用
+# 启动应用（GORM会自动创建表）
 ./star-cloud
 
 # 或后台运行
@@ -86,12 +76,12 @@ nohup ./star-cloud > app.log 2>&1 &
 CREATE DATABASE IF NOT EXISTS `docs`;
 ```
 
-2. 运行数据库初始化：
+2. 重新启动应用（GORM会自动创建表）：
 ```bash
-./star-cloud --init-db
+./star-cloud
 ```
 
-3. 检查初始化日志，确保所有表都创建成功
+3. 如果仍有问题，检查数据库连接配置
 
 ### 问题2: 数据库连接失败
 **原因**: 数据库配置错误或服务未启动
@@ -129,7 +119,6 @@ FLUSH PRIVILEGES;
 
 ### 部署后检查
 - [ ] 应用成功启动（监听8080端口）
-- [ ] 数据库初始化完成（所有表存在）
 - [ ] 健康检查通过：`curl http://localhost:8080/health`
 - [ ] 数据库状态正常：`curl http://localhost:8080/db-status`
 
@@ -173,10 +162,9 @@ tail -f app.log
 - 端口被占用
 
 ### 2. 数据库表缺失
-运行完整的数据库重置：
+GORM会自动处理，重新启动应用即可：
 ```bash
-./star-cloud --reset-all
-./star-cloud --init-db
+./star-cloud
 ```
 
 ### 3. 性能问题

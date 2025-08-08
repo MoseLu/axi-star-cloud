@@ -21,13 +21,6 @@ func main() {
 				os.Exit(1)
 			}
 			return
-		case "--init-db":
-			// 专门用于数据库初始化
-			launcher := app.NewLauncher()
-			if err := launcher.InitDatabaseOnly(); err != nil {
-				os.Exit(1)
-			}
-			return
 		}
 	}
 
