@@ -23,12 +23,12 @@ import (
 
 // AuthMiddleware 认证中间件
 type AuthMiddleware struct {
-	userRepo     *database.UserRepository
+	userRepo     database.UserRepositoryInterface
 	tokenManager *utils.TokenManager
 }
 
 // NewAuthMiddleware 创建认证中间件
-func NewAuthMiddleware(userRepo *database.UserRepository) *AuthMiddleware {
+func NewAuthMiddleware(userRepo database.UserRepositoryInterface) *AuthMiddleware {
 	return &AuthMiddleware{
 		userRepo:     userRepo,
 		tokenManager: utils.NewTokenManager(),

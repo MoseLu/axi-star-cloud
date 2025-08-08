@@ -17,11 +17,11 @@ import (
 
 // DocumentHandler 文档处理器
 type DocumentHandler struct {
-	docRepo *database.DocumentRepository
+	docRepo database.DocumentRepositoryInterface
 }
 
 // NewDocumentHandler 创建文档处理器实例
-func NewDocumentHandler(docRepo *database.DocumentRepository) *DocumentHandler {
+func NewDocumentHandler(docRepo database.DocumentRepositoryInterface) *DocumentHandler {
 	return &DocumentHandler{
 		docRepo: docRepo,
 	}
@@ -151,11 +151,12 @@ func (h *DocumentHandler) CreateDocument(c *gin.Context) {
 // GetDocument 获取单个文档
 func (h *DocumentHandler) GetDocument(c *gin.Context) {
 	docIDStr := c.Param("id")
-	docID, err := strconv.Atoi(docIDStr)
+	docIDInt, err := strconv.Atoi(docIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的文档ID"})
 		return
 	}
+	docID := uint(docIDInt)
 
 	doc, err := h.docRepo.GetDocumentByID(docID)
 	if err != nil {
@@ -173,11 +174,12 @@ func (h *DocumentHandler) GetDocument(c *gin.Context) {
 // DeleteDocument 删除文档
 func (h *DocumentHandler) DeleteDocument(c *gin.Context) {
 	docIDStr := c.Param("id")
-	docID, err := strconv.Atoi(docIDStr)
+	docIDInt, err := strconv.Atoi(docIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的文档ID"})
 		return
 	}
+	docID := uint(docIDInt)
 
 	// 获取文档信息
 	doc, err := h.docRepo.GetDocumentByID(docID)

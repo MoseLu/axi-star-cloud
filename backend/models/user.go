@@ -4,17 +4,22 @@ import "time"
 
 // User 结构体表示用户数据
 type User struct {
-	UUID         string     `json:"uuid"`
-	Username     string     `json:"username"`
-	Password     string     `json:"password"`
-	Email        string     `json:"email"`
-	Bio          string     `json:"bio"`
-	Avatar       string     `json:"avatar"`
-	StorageLimit int64      `json:"storage_limit"` // 存储空间限制（字节）
-	LastLoginTime *time.Time `json:"last_login_time,omitempty"` // 最后登录时间
-	IsOnline     bool       `json:"is_online"`    // 在线状态
-	CreatedAt    time.Time  `json:"created_at"`
-	UpdatedAt    time.Time  `json:"updated_at"`
+	UUID          string     `gorm:"primaryKey;type:varchar(36)" json:"uuid"`
+	Username      string     `gorm:"uniqueIndex;type:varchar(50);not null" json:"username"`
+	Password      string     `gorm:"type:varchar(255);not null" json:"password"`
+	Email         string     `gorm:"type:varchar(100)" json:"email"`
+	Bio           string     `gorm:"type:text" json:"bio"`
+	Avatar        string     `gorm:"type:varchar(255)" json:"avatar"`
+	StorageLimit  int64      `gorm:"type:bigint;default:1073741824" json:"storage_limit"`  // 存储空间限制（字节）
+	LastLoginTime *time.Time `gorm:"type:timestamp;null" json:"last_login_time,omitempty"` // 最后登录时间
+	IsOnline      bool       `gorm:"type:boolean;default:false" json:"is_online"`          // 在线状态
+	CreatedAt     time.Time  `gorm:"type:timestamp;default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt     time.Time  `gorm:"type:timestamp;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" json:"updated_at"`
+}
+
+// TableName 指定表名
+func (User) TableName() string {
+	return "user"
 }
 
 // LoginRequest 登录请求结构体
@@ -42,16 +47,16 @@ type LoginResponse struct {
 
 // UserResponse 用户响应结构体
 type UserResponse struct {
-	UUID         string     `json:"uuid"`
-	Username     string     `json:"username"`
-	Email        string     `json:"email"`
-	Bio          string     `json:"bio"`
-	AvatarUrl    string     `json:"avatarUrl"`
-	StorageLimit int64      `json:"storage_limit"` // 存储空间限制（字节）
-	UsedSpace    int64      `json:"used_space"`    // 已使用存储空间（字节）
+	UUID          string     `json:"uuid"`
+	Username      string     `json:"username"`
+	Email         string     `json:"email"`
+	Bio           string     `json:"bio"`
+	AvatarUrl     string     `json:"avatarUrl"`
+	StorageLimit  int64      `json:"storage_limit"`             // 存储空间限制（字节）
+	UsedSpace     int64      `json:"used_space"`                // 已使用存储空间（字节）
 	LastLoginTime *time.Time `json:"last_login_time,omitempty"` // 最后登录时间
-	IsOnline     bool       `json:"is_online"`    // 在线状态
-	CreatedAt    time.Time  `json:"created_at"`   // 创建时间
+	IsOnline      bool       `json:"is_online"`                 // 在线状态
+	CreatedAt     time.Time  `json:"created_at"`                // 创建时间
 }
 
 // RegisterResponse 注册响应结构体

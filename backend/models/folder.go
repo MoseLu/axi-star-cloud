@@ -4,13 +4,18 @@ import "time"
 
 // Folder 结构体表示文件夹数据
 type Folder struct {
-	ID        int       `json:"id"`
-	Name      string    `json:"name"`
-	UserID    string    `json:"user_id"`
-	Category  string    `json:"category"`  // 分类字段
-	ParentID  *int      `json:"parent_id"` // 父文件夹ID
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id"`
+	Name      string    `gorm:"type:varchar(255);not null" json:"name"`
+	UserID    string    `gorm:"type:varchar(50);not null;index" json:"user_id"`
+	Category  string    `gorm:"type:varchar(50);default:'all';index" json:"category"` // 分类字段
+	ParentID  *uint     `gorm:"index" json:"parent_id"`                               // 父文件夹ID
+	CreatedAt time.Time `gorm:"type:timestamp;default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt time.Time `gorm:"type:timestamp;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" json:"updated_at"`
+}
+
+// TableName 指定表名
+func (Folder) TableName() string {
+	return "folders"
 }
 
 // FolderListResponse 文件夹列表响应结构体

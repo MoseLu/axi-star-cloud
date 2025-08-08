@@ -27,15 +27,15 @@ import (
 
 // AuthService 认证服务
 type AuthService struct {
-	userRepo      *database.UserRepository
-	fileRepo      *database.FileRepository
-	urlFileRepo   *database.UrlFileRepository
+	userRepo      database.UserRepositoryInterface
+	fileRepo      database.FileRepositoryInterface
+	urlFileRepo   database.UrlFileRepositoryInterface
 	tokenManager  *utils.TokenManager
 	cookieManager *utils.CookieManager
 }
 
 // NewAuthService 创建认证服务实例
-func NewAuthService(userRepo *database.UserRepository, fileRepo *database.FileRepository, urlFileRepo *database.UrlFileRepository) *AuthService {
+func NewAuthService(userRepo database.UserRepositoryInterface, fileRepo database.FileRepositoryInterface, urlFileRepo database.UrlFileRepositoryInterface) *AuthService {
 	return &AuthService{
 		userRepo:      userRepo,
 		fileRepo:      fileRepo,
@@ -105,23 +105,23 @@ func (s *AuthService) Register(registerData models.RegisterRequest) (*models.Reg
 	return response, nil
 }
 
-    // Login 处理用户登录
-    func (s *AuthService) Login(loginData models.LoginRequest) (*models.LoginResponse, error) {
-        // 获取用户信息
-        user, err := s.userRepo.GetUserByUsername(loginData.Username)
-        if err != nil {
-            return nil, fmt.Errorf("获取用户信息失败: %w", err)
-        }
+// Login 处理用户登录
+func (s *AuthService) Login(loginData models.LoginRequest) (*models.LoginResponse, error) {
+	// 获取用户信息
+	user, err := s.userRepo.GetUserByUsername(loginData.Username)
+	if err != nil {
+		return nil, fmt.Errorf("获取用户信息失败: %w", err)
+	}
 
-        // 明确区分用户不存在与密码错误，便于前端展示对应的提示
-        if user == nil {
-            return nil, fmt.Errorf("用户不存在")
-        }
+	// 明确区分用户不存在与密码错误，便于前端展示对应的提示
+	if user == nil {
+		return nil, fmt.Errorf("用户不存在")
+	}
 
-        // 验证密码（实际应用中应该使用哈希比较）
-        if user.Password != loginData.Password {
-            return nil, fmt.Errorf("密码错误")
-        }
+	// 验证密码（实际应用中应该使用哈希比较）
+	if user.Password != loginData.Password {
+		return nil, fmt.Errorf("密码错误")
+	}
 
 	// 更新最后登录时间和在线状态
 	err = s.userRepo.UpdateLastLoginTime(user.UUID)
@@ -348,16 +348,16 @@ func (s *AuthService) GetAllUsers(page, pageSize int) (*models.UserListResponse,
 		}
 
 		userResponses = append(userResponses, models.UserResponse{
-			UUID:         user.UUID,
-			Username:     user.Username,
-			Email:        user.Email,
-			Bio:          user.Bio,
-			AvatarUrl:    s.buildAvatarUrl(user.Avatar),
-			StorageLimit: user.StorageLimit,
-			UsedSpace:    totalUsedSpace,
+			UUID:          user.UUID,
+			Username:      user.Username,
+			Email:         user.Email,
+			Bio:           user.Bio,
+			AvatarUrl:     s.buildAvatarUrl(user.Avatar),
+			StorageLimit:  user.StorageLimit,
+			UsedSpace:     totalUsedSpace,
 			LastLoginTime: user.LastLoginTime,
-			IsOnline:     user.IsOnline,
-			CreatedAt:    user.CreatedAt,
+			IsOnline:      user.IsOnline,
+			CreatedAt:     user.CreatedAt,
 		})
 	}
 

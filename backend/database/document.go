@@ -46,7 +46,7 @@ func (r *DocumentRepository) CreateDocument(doc *models.Document) error {
 		return err
 	}
 
-	doc.ID = int(id)
+	doc.ID = uint(id)
 	return nil
 }
 
@@ -75,7 +75,7 @@ func (r *DocumentRepository) GetDocuments() ([]models.Document, error) {
 }
 
 // GetDocumentByID 根据ID获取文档
-func (r *DocumentRepository) GetDocumentByID(id int) (*models.Document, error) {
+func (r *DocumentRepository) GetDocumentByID(id uint) (*models.Document, error) {
 	var doc models.Document
 	query := `SELECT id, title, category, ` + "`order`" + `, filename, path, created_at, updated_at 
 			  FROM documents WHERE id = ?`
@@ -89,8 +89,38 @@ func (r *DocumentRepository) GetDocumentByID(id int) (*models.Document, error) {
 }
 
 // DeleteDocument 删除文档
-func (r *DocumentRepository) DeleteDocument(id int) error {
+func (r *DocumentRepository) DeleteDocument(id uint) error {
 	query := `DELETE FROM documents WHERE id = ?`
 	_, err := r.db.Exec(query, id)
+	return err
+}
+
+// GetDocumentsByCategory 根据分类获取文档列表
+func (r *DocumentRepository) GetDocumentsByCategory(category string) ([]models.Document, error) {
+	var docs []models.Document
+	query := `SELECT id, title, category, ` + "`order`" + `, filename, path, created_at, updated_at 
+			  FROM documents WHERE category = ? ORDER BY ` + "`order`" + ` ASC`
+	rows, err := r.db.Query(query, category)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var doc models.Document
+		err := rows.Scan(&doc.ID, &doc.Title, &doc.Category, &doc.Order, &doc.Filename, &doc.Path, &doc.CreatedAt, &doc.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		docs = append(docs, doc)
+	}
+
+	return docs, nil
+}
+
+// UpdateDocument 更新文档
+func (r *DocumentRepository) UpdateDocument(doc *models.Document) error {
+	query := `UPDATE documents SET title = ?, category = ?, ` + "`order`" + ` = ?, filename = ?, path = ?, updated_at = ? WHERE id = ?`
+	_, err := r.db.Exec(query, doc.Title, doc.Category, doc.Order, doc.Filename, doc.Path, time.Now(), doc.ID)
 	return err
 }

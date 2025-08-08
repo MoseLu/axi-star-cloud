@@ -12,13 +12,13 @@ import (
 
 // UrlFileHandler URL文件处理器
 type UrlFileHandler struct {
-	urlFileRepo *database.UrlFileRepository
-	userRepo    *database.UserRepository
-	folderRepo  *database.FolderRepository
+	urlFileRepo database.UrlFileRepositoryInterface
+	userRepo    database.UserRepositoryInterface
+	folderRepo  database.FolderRepositoryInterface
 }
 
 // NewUrlFileHandler 创建URL文件处理器实例
-func NewUrlFileHandler(urlFileRepo *database.UrlFileRepository, userRepo *database.UserRepository, folderRepo *database.FolderRepository) *UrlFileHandler {
+func NewUrlFileHandler(urlFileRepo database.UrlFileRepositoryInterface, userRepo database.UserRepositoryInterface, folderRepo database.FolderRepositoryInterface) *UrlFileHandler {
 	return &UrlFileHandler{
 		urlFileRepo: urlFileRepo,
 		userRepo:    userRepo,
@@ -36,10 +36,11 @@ func (h *UrlFileHandler) GetUrlFiles(c *gin.Context) {
 		return
 	}
 
-	var folderID *int
+	var folderID *uint
 	if folderIDStr != "" {
 		if id, err := strconv.Atoi(folderIDStr); err == nil {
-			folderID = &id
+			folderIDUint := uint(id)
+			folderID = &folderIDUint
 		}
 	}
 
@@ -71,11 +72,12 @@ func (h *UrlFileHandler) GetUrlFile(c *gin.Context) {
 		return
 	}
 
-	fileID, err := strconv.Atoi(fileIDStr)
+	fileIDInt, err := strconv.Atoi(fileIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的文件ID"})
 		return
 	}
+	fileID := uint(fileIDInt)
 
 	file, err := h.urlFileRepo.GetUrlFileByID(fileID, userID)
 	if err != nil {
@@ -133,11 +135,12 @@ func (h *UrlFileHandler) DeleteUrlFile(c *gin.Context) {
 		return
 	}
 
-	fileID, err := strconv.Atoi(fileIDStr)
+	fileIDInt, err := strconv.Atoi(fileIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的文件ID"})
 		return
 	}
+	fileID := uint(fileIDInt)
 
 	if err := h.urlFileRepo.DeleteUrlFile(fileID, userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "删除URL文件失败"})
@@ -160,11 +163,12 @@ func (h *UrlFileHandler) MoveUrlFile(c *gin.Context) {
 		return
 	}
 
-	fileID, err := strconv.Atoi(fileIDStr)
+	fileIDInt, err := strconv.Atoi(fileIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的文件ID"})
 		return
 	}
+	fileID := uint(fileIDInt)
 
 	var request struct {
 		FolderID int `json:"folder_id"`
@@ -174,9 +178,10 @@ func (h *UrlFileHandler) MoveUrlFile(c *gin.Context) {
 		return
 	}
 
-	var folderID *int
+	var folderID *uint
 	if request.FolderID > 0 {
-		folderID = &request.FolderID
+		folderIDUint := uint(request.FolderID)
+		folderID = &folderIDUint
 	}
 
 	if err := h.urlFileRepo.MoveUrlFile(fileID, userID, folderID); err != nil {
@@ -205,11 +210,12 @@ func (h *UrlFileHandler) GetTotalUrlFileCount(c *gin.Context) {
 
 	if folderIDStr != "" {
 		// 如果提供了文件夹ID，则获取该文件夹中的URL文件数量
-		folderID, err := strconv.Atoi(folderIDStr)
+		folderIDInt, err := strconv.Atoi(folderIDStr)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "无效的文件夹ID"})
 			return
 		}
+		folderID := uint(folderIDInt)
 		count, err = h.urlFileRepo.GetFolderUrlFileCount(folderID, userID)
 	} else {
 		// 否则获取用户所有URL文件数量

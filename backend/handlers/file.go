@@ -78,13 +78,13 @@ func (rlr *RateLimitedReader) Read(p []byte) (n int, err error) {
 
 // FileHandler 文件处理器
 type FileHandler struct {
-	fileRepo   *database.FileRepository
-	userRepo   *database.UserRepository
-	folderRepo *database.FolderRepository
+	fileRepo   database.FileRepositoryInterface
+	userRepo   database.UserRepositoryInterface
+	folderRepo database.FolderRepositoryInterface
 }
 
 // NewFileHandler 创建文件处理器实例
-func NewFileHandler(fileRepo *database.FileRepository, userRepo *database.UserRepository, folderRepo *database.FolderRepository) *FileHandler {
+func NewFileHandler(fileRepo database.FileRepositoryInterface, userRepo database.UserRepositoryInterface, folderRepo database.FolderRepositoryInterface) *FileHandler {
 	return &FileHandler{
 		fileRepo:   fileRepo,
 		userRepo:   userRepo,
@@ -102,10 +102,11 @@ func (h *FileHandler) GetFiles(c *gin.Context) {
 		return
 	}
 
-	var folderID *int
+	var folderID *uint
 	if folderIDStr != "" {
 		if id, err := strconv.Atoi(folderIDStr); err == nil {
-			folderID = &id
+			folderIDUint := uint(id)
+			folderID = &folderIDUint
 		}
 	}
 
@@ -137,11 +138,12 @@ func (h *FileHandler) GetFile(c *gin.Context) {
 		return
 	}
 
-	fileID, err := strconv.Atoi(fileIDStr)
+	fileIDInt, err := strconv.Atoi(fileIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的文件ID"})
 		return
 	}
+	fileID := uint(fileIDInt)
 
 	file, err := h.fileRepo.GetFileByID(fileID, userID)
 	if err != nil {
@@ -173,11 +175,12 @@ func (h *FileHandler) DownloadFile(c *gin.Context) {
 		return
 	}
 
-	fileID, err := strconv.Atoi(fileIDStr)
+	fileIDInt, err := strconv.Atoi(fileIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的文件ID"})
 		return
 	}
+	fileID := uint(fileIDInt)
 
 	// 查询文件信息
 	file, err := h.fileRepo.GetFileByID(fileID, userID)
@@ -405,14 +408,14 @@ func (h *FileHandler) UploadFile(c *gin.Context) {
 	}
 
 	// 获取用户存储信息
-	storageInfo, err := h.userRepo.GetUserStorageInfo(userID)
+	usedSpace, storageLimit, err := h.userRepo.GetUserStorageInfo(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取存储信息失败"})
 		return
 	}
 
 	// 检查存储空间
-	if !utils.ValidateFileSize(header.Size, storageInfo.TotalSpace, storageInfo.UsedSpace) {
+	if !utils.ValidateFileSize(header.Size, storageLimit, usedSpace) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "存储空间不足"})
 		return
 	}
@@ -497,15 +500,16 @@ func (h *FileHandler) UploadFile(c *gin.Context) {
 	}
 
 	// 如果是视频文件且有缩略图数据，保存到thumbnail_data字段
-	if fileType == "video" && thumbnailData != "" {
-		newFile.ThumbnailData = &thumbnailData
-	}
+			if fileType == "video" && thumbnailData != "" {
+			newFile.ThumbnailData = thumbnailData
+		}
 
 	// 如果指定了文件夹ID
 	if folderIDStr != "" {
-		if folderID, err := strconv.Atoi(folderIDStr); err == nil {
+		if folderIDInt, err := strconv.Atoi(folderIDStr); err == nil {
 			// 检查文件夹是否存在
-			if exists, _ := h.folderRepo.CheckFolderExists(folderID, userID); exists {
+			if exists, _ := h.folderRepo.CheckFolderExists(uint(folderIDInt), userID); exists {
+				folderID := uint(folderIDInt)
 				newFile.FolderID = &folderID
 			}
 		}
@@ -550,11 +554,12 @@ func (h *FileHandler) DeleteFile(c *gin.Context) {
 		return
 	}
 
-	fileID, err := strconv.Atoi(fileIDStr)
+	fileIDInt, err := strconv.Atoi(fileIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的文件ID"})
 		return
 	}
+	fileID := uint(fileIDInt)
 
 	// 获取文件信息
 	file, err := h.fileRepo.GetFileByID(fileID, userID)
@@ -595,11 +600,12 @@ func (h *FileHandler) MoveFile(c *gin.Context) {
 		return
 	}
 
-	fileID, err := strconv.Atoi(fileIDStr)
+	fileIDInt, err := strconv.Atoi(fileIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的文件ID"})
 		return
 	}
+	fileID := uint(fileIDInt)
 
 	var moveRequest models.MoveFileRequest
 	if err := c.ShouldBindJSON(&moveRequest); err != nil {
@@ -620,7 +626,7 @@ func (h *FileHandler) MoveFile(c *gin.Context) {
 
 	// 检查目标文件夹是否存在
 	if moveRequest.FolderID > 0 {
-		exists, err := h.folderRepo.CheckFolderExists(moveRequest.FolderID, userID)
+		exists, err := h.folderRepo.CheckFolderExists(uint(moveRequest.FolderID), userID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "检查文件夹失败"})
 			return
@@ -632,9 +638,10 @@ func (h *FileHandler) MoveFile(c *gin.Context) {
 	}
 
 	// 移动文件
-	var folderID *int
+	var folderID *uint
 	if moveRequest.FolderID > 0 {
-		folderID = &moveRequest.FolderID
+		folderIDUint := uint(moveRequest.FolderID)
+		folderID = &folderIDUint
 	}
 
 	if err := h.fileRepo.MoveFile(fileID, userID, folderID); err != nil {
@@ -679,11 +686,12 @@ func (h *FileHandler) DownloadFileRedirect(c *gin.Context) {
 		return
 	}
 
-	fileID, err := strconv.Atoi(fileIDStr)
+	fileIDInt, err := strconv.Atoi(fileIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的文件ID"})
 		return
 	}
+	fileID := uint(fileIDInt)
 
 	// 查询文件信息
 	file, err := h.fileRepo.GetFileByID(fileID, userID)
@@ -723,10 +731,11 @@ func (h *FileHandler) SearchFiles(c *gin.Context) {
 		return
 	}
 
-	var folderID *int
+	var folderID *uint
 	if folderIDStr != "" {
 		if id, err := strconv.Atoi(folderIDStr); err == nil {
-			folderID = &id
+			folderIDUint := uint(id)
+			folderID = &folderIDUint
 		}
 	}
 
@@ -800,7 +809,7 @@ func (h *FileHandler) UploadFiles(c *gin.Context) {
 	}
 
 	// 获取用户存储信息
-	storageInfo, err := h.userRepo.GetUserStorageInfo(userID)
+	usedSpace, storageLimit, err := h.userRepo.GetUserStorageInfo(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取存储信息失败"})
 		return
@@ -817,7 +826,7 @@ func (h *FileHandler) UploadFiles(c *gin.Context) {
 	}
 
 	// 检查存储空间
-	if !utils.ValidateFileSize(totalSize, storageInfo.TotalSpace, storageInfo.UsedSpace) {
+	if !utils.ValidateFileSize(totalSize, storageLimit, usedSpace) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "存储空间不足"})
 		return
 	}
@@ -972,9 +981,10 @@ func (h *FileHandler) UploadFiles(c *gin.Context) {
 
 		// 如果指定了文件夹ID
 		if folderIDStr != "" {
-			if folderID, err := strconv.Atoi(folderIDStr); err == nil {
+			if folderIDInt, err := strconv.Atoi(folderIDStr); err == nil {
 				// 检查文件夹是否存在
-				if exists, _ := h.folderRepo.CheckFolderExists(folderID, userID); exists {
+				if exists, _ := h.folderRepo.CheckFolderExists(uint(folderIDInt), userID); exists {
+					folderID := uint(folderIDInt)
 					newFile.FolderID = &folderID
 				}
 			}

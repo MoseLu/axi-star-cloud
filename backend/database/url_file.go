@@ -18,7 +18,7 @@ func NewUrlFileRepository(db *sql.DB) *UrlFileRepository {
 }
 
 // GetUrlFilesByUserID 获取用户的URL文件列表
-func (r *UrlFileRepository) GetUrlFilesByUserID(userID string, folderID *int) ([]models.UrlFile, error) {
+func (r *UrlFileRepository) GetUrlFilesByUserID(userID string, folderID *uint) ([]models.UrlFile, error) {
 	var rows *sql.Rows
 	var err error
 
@@ -56,7 +56,7 @@ func (r *UrlFileRepository) GetUrlFilesByUserID(userID string, folderID *int) ([
 }
 
 // GetUrlFileByID 根据ID获取URL文件
-func (r *UrlFileRepository) GetUrlFileByID(fileID int, userID string) (*models.UrlFile, error) {
+func (r *UrlFileRepository) GetUrlFileByID(fileID uint, userID string) (*models.UrlFile, error) {
 	var file models.UrlFile
 	query := `SELECT id, title, url, description, user_id, folder_id, created_at, updated_at
 			  FROM url_files WHERE id = ? AND user_id = ?`
@@ -88,19 +88,19 @@ func (r *UrlFileRepository) CreateUrlFile(file *models.UrlFile) error {
 		return err
 	}
 
-	file.ID = int(id)
+	file.ID = uint(id)
 	return nil
 }
 
 // DeleteUrlFile 删除URL文件记录
-func (r *UrlFileRepository) DeleteUrlFile(fileID int, userID string) error {
+func (r *UrlFileRepository) DeleteUrlFile(fileID uint, userID string) error {
 	query := `DELETE FROM url_files WHERE id = ? AND user_id = ?`
 	_, err := r.db.Exec(query, fileID, userID)
 	return err
 }
 
 // MoveUrlFile 移动URL文件到指定文件夹
-func (r *UrlFileRepository) MoveUrlFile(fileID int, userID string, folderID *int) error {
+func (r *UrlFileRepository) MoveUrlFile(fileID uint, userID string, folderID *uint) error {
 	query := `UPDATE url_files SET folder_id = ?, updated_at = ? WHERE id = ? AND user_id = ?`
 	_, err := r.db.Exec(query, folderID, time.Now(), fileID, userID)
 	return err
@@ -115,7 +115,7 @@ func (r *UrlFileRepository) GetUserTotalUrlFileCount(userID string) (int, error)
 }
 
 // GetFolderUrlFileCount 获取指定文件夹中的URL文件数量
-func (r *UrlFileRepository) GetFolderUrlFileCount(folderID int, userID string) (int, error) {
+func (r *UrlFileRepository) GetFolderUrlFileCount(folderID uint, userID string) (int, error) {
 	var count int
 	query := `SELECT COUNT(*) FROM url_files WHERE folder_id = ? AND user_id = ?`
 	err := r.db.QueryRow(query, folderID, userID).Scan(&count)

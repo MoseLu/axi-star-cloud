@@ -25,11 +25,11 @@ import (
 type AuthHandler struct {
 	authController *controllers.AuthController
 	authMiddleware *middleware.AuthMiddleware
-	userRepo       *database.UserRepository
+	userRepo       database.UserRepositoryInterface
 }
 
 // NewAuthHandler 创建认证处理器实例
-func NewAuthHandler(userRepo *database.UserRepository, fileRepo *database.FileRepository, urlFileRepo *database.UrlFileRepository) *AuthHandler {
+func NewAuthHandler(userRepo database.UserRepositoryInterface, fileRepo database.FileRepositoryInterface, urlFileRepo database.UrlFileRepositoryInterface) *AuthHandler {
 	// 创建服务层
 	authService := services.NewAuthService(userRepo, fileRepo, urlFileRepo)
 
@@ -106,6 +106,6 @@ func (h *AuthHandler) VerifyAdmin(c *gin.Context) {
 }
 
 // GetUserRepo 获取用户仓库
-func (h *AuthHandler) GetUserRepo() *database.UserRepository {
+func (h *AuthHandler) GetUserRepo() database.UserRepositoryInterface {
 	return h.userRepo
 }

@@ -8,15 +8,20 @@ import (
 
 // UpdateLog 更新日志模型
 type UpdateLog struct {
-	ID          int       `json:"id"`
-	Version     string    `json:"version"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	ReleaseDate time.Time `json:"release_date"`
-	Features    []string  `json:"features"`
-	KnownIssues []string  `json:"known_issues"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id"`
+	Version     string    `gorm:"type:varchar(20);not null;index" json:"version"`
+	Title       string    `gorm:"type:varchar(255);not null" json:"title"`
+	Description string    `gorm:"type:text" json:"description"`
+	ReleaseDate time.Time `gorm:"type:timestamp;default:CURRENT_TIMESTAMP;index" json:"release_date"`
+	Features    string    `gorm:"type:json" json:"features"`
+	KnownIssues string    `gorm:"type:json" json:"known_issues"`
+	CreatedAt   time.Time `gorm:"type:timestamp;default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt   time.Time `gorm:"type:timestamp;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" json:"updated_at"`
+}
+
+// TableName 指定表名
+func (UpdateLog) TableName() string {
+	return "update_logs"
 }
 
 // GetUpdateLogs 获取所有更新日志

@@ -18,7 +18,7 @@ func NewFileRepository(db *sql.DB) *FileRepository {
 }
 
 // GetFilesByUserID 获取用户的文件列表
-func (r *FileRepository) GetFilesByUserID(userID string, folderID *int) ([]models.File, error) {
+func (r *FileRepository) GetFilesByUserID(userID string, folderID *uint) ([]models.File, error) {
 	var rows *sql.Rows
 	var err error
 
@@ -51,9 +51,9 @@ func (r *FileRepository) GetFilesByUserID(userID string, folderID *int) ([]model
 			continue
 		}
 
-		// 转换sql.NullString为*string
+		// 转换sql.NullString为string
 		if thumbnailData.Valid {
-			file.ThumbnailData = &thumbnailData.String
+			file.ThumbnailData = thumbnailData.String
 		}
 
 		files = append(files, file)
@@ -63,7 +63,19 @@ func (r *FileRepository) GetFilesByUserID(userID string, folderID *int) ([]model
 }
 
 // GetFileByID 根据ID获取文件
-func (r *FileRepository) GetFileByID(fileID int, userID string) (*models.File, error) {
+func (r *FileRepository) GetFileByName(fileName, userID string) (*models.File, error) {
+	var file models.File
+	query := `SELECT id, name, size, type, path, user_id, folder_id, thumbnail_data, created_at, updated_at 
+			  FROM files WHERE name = ? AND user_id = ?`
+	err := r.db.QueryRow(query, fileName, userID).Scan(
+		&file.ID, &file.Name, &file.Size, &file.Type, &file.Path, &file.UserID, &file.FolderID, &file.ThumbnailData, &file.CreatedAt, &file.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &file, nil
+}
+
+func (r *FileRepository) GetFileByID(fileID uint, userID string) (*models.File, error) {
 	var file models.File
 	var thumbnailData sql.NullString
 	query := `SELECT id, name, size, type, path, user_id, folder_id, thumbnail_data, created_at, updated_at
@@ -77,9 +89,9 @@ func (r *FileRepository) GetFileByID(fileID int, userID string) (*models.File, e
 		return nil, err
 	}
 
-	// 转换sql.NullString为*string
+	// 转换sql.NullString为string
 	if thumbnailData.Valid {
-		file.ThumbnailData = &thumbnailData.String
+		file.ThumbnailData = thumbnailData.String
 	}
 
 	return &file, nil
@@ -100,9 +112,9 @@ func (r *FileRepository) GetFileByNameAndUser(fileName string, userID string) (*
 		return nil, err
 	}
 
-	// 转换sql.NullString为*string
+	// 转换sql.NullString为string
 	if thumbnailData.Valid {
-		file.ThumbnailData = &thumbnailData.String
+		file.ThumbnailData = thumbnailData.String
 	}
 
 	return &file, nil
@@ -114,8 +126,8 @@ func (r *FileRepository) CreateFile(file *models.File) error {
 			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	var thumbnailData sql.NullString
-	if file.ThumbnailData != nil {
-		thumbnailData.String = *file.ThumbnailData
+	if file.ThumbnailData != "" {
+		thumbnailData.String = file.ThumbnailData
 		thumbnailData.Valid = true
 	}
 
@@ -130,19 +142,19 @@ func (r *FileRepository) CreateFile(file *models.File) error {
 		return err
 	}
 
-	file.ID = int(id)
+	file.ID = uint(id)
 	return nil
 }
 
 // DeleteFile 删除文件记录
-func (r *FileRepository) DeleteFile(fileID int, userID string) error {
+func (r *FileRepository) DeleteFile(fileID uint, userID string) error {
 	query := `DELETE FROM files WHERE id = ? AND user_id = ?`
 	_, err := r.db.Exec(query, fileID, userID)
 	return err
 }
 
 // MoveFile 移动文件到指定文件夹
-func (r *FileRepository) MoveFile(fileID int, userID string, folderID *int) error {
+func (r *FileRepository) MoveFile(fileID uint, userID string, folderID *uint) error {
 	query := `UPDATE files SET folder_id = ?, updated_at = ? WHERE id = ? AND user_id = ?`
 	_, err := r.db.Exec(query, folderID, time.Now(), fileID, userID)
 	return err
@@ -156,11 +168,25 @@ func (r *FileRepository) GetUserTotalStorage(userID string) (int64, error) {
 	return totalSize, err
 }
 
+func (r *FileRepository) GetUserFileCount(userID string) (int, error) {
+	var count int
+	query := `SELECT COUNT(*) FROM files WHERE user_id = ?`
+	err := r.db.QueryRow(query, userID).Scan(&count)
+	return count, err
+}
+
 // GetUserTotalFileCount 获取用户文件总数
 func (r *FileRepository) GetUserTotalFileCount(userID string) (int, error) {
 	var count int
 	query := `SELECT COUNT(*) FROM files WHERE user_id = ?`
 	err := r.db.QueryRow(query, userID).Scan(&count)
+	return count, err
+}
+
+func (r *FileRepository) GetTotalFileCount() (int, error) {
+	var count int
+	query := `SELECT COUNT(*) FROM files`
+	err := r.db.QueryRow(query).Scan(&count)
 	return count, err
 }
 
@@ -172,7 +198,7 @@ func (r *FileRepository) TestDatabaseConnection() (int, error) {
 }
 
 // SearchFilesByUserID 根据关键词搜索用户的文件
-func (r *FileRepository) SearchFilesByUserID(userID string, query string, folderID *int) ([]models.File, error) {
+func (r *FileRepository) SearchFilesByUserID(userID string, query string, folderID *uint) ([]models.File, error) {
 	var rows *sql.Rows
 	var err error
 
@@ -207,9 +233,9 @@ func (r *FileRepository) SearchFilesByUserID(userID string, query string, folder
 			continue
 		}
 
-		// 转换sql.NullString为*string
+		// 转换sql.NullString为string
 		if thumbnailData.Valid {
-			file.ThumbnailData = &thumbnailData.String
+			file.ThumbnailData = thumbnailData.String
 		}
 
 		files = append(files, file)

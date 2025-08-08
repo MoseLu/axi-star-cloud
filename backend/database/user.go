@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"backend/models"
-    "strings"
+	"strings"
 )
 
 // UserRepository 用户数据仓库
@@ -35,38 +35,46 @@ func (r *UserRepository) GetUserByUsername(username string) (*models.User, error
 	var lastLoginTime sql.NullTime
 	var email, bio, avatar sql.NullString
 
-    err := r.db.QueryRow(query, username).Scan(
+	err := r.db.QueryRow(query, username).Scan(
 		&user.UUID, &user.Username, &user.Password, &email, &bio, &avatar,
 		&user.StorageLimit, &lastLoginTime, &user.IsOnline,
 		&user.CreatedAt, &user.UpdatedAt,
 	)
 
 	if err != nil {
-        if err == sql.ErrNoRows {
-            return nil, nil
-        }
-        // 自愈：若 user 表不存在，尝试创建基础表并重试一次
-        if strings.Contains(err.Error(), "Error 1146") || strings.Contains(strings.ToLower(err.Error()), "doesn't exist") {
-            // 尝试创建表结构与初始数据
-            if createErr := CreateTables(r.db); createErr == nil {
-                _ = MigrateDatabase(r.db)
-                _ = InsertInitialData(r.db)
-                // 重试一次
-                retryErr := r.db.QueryRow(query, username).Scan(
-                    &user.UUID, &user.Username, &user.Password, &email, &bio, &avatar,
-                    &user.StorageLimit, &lastLoginTime, &user.IsOnline,
-                    &user.CreatedAt, &user.UpdatedAt,
-                )
-                if retryErr == nil {
-                    if email.Valid { user.Email = email.String }
-                    if bio.Valid { user.Bio = bio.String }
-                    if avatar.Valid { user.Avatar = avatar.String }
-                    if lastLoginTime.Valid { user.LastLoginTime = &lastLoginTime.Time }
-                    return &user, nil
-                }
-            }
-        }
-        return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		// 自愈：若 user 表不存在，尝试创建基础表并重试一次
+		if strings.Contains(err.Error(), "Error 1146") || strings.Contains(strings.ToLower(err.Error()), "doesn't exist") {
+			// 尝试创建表结构与初始数据
+			if createErr := CreateTables(r.db); createErr == nil {
+				_ = MigrateDatabase(r.db)
+				_ = InsertInitialData(r.db)
+				// 重试一次
+				retryErr := r.db.QueryRow(query, username).Scan(
+					&user.UUID, &user.Username, &user.Password, &email, &bio, &avatar,
+					&user.StorageLimit, &lastLoginTime, &user.IsOnline,
+					&user.CreatedAt, &user.UpdatedAt,
+				)
+				if retryErr == nil {
+					if email.Valid {
+						user.Email = email.String
+					}
+					if bio.Valid {
+						user.Bio = bio.String
+					}
+					if avatar.Valid {
+						user.Avatar = avatar.String
+					}
+					if lastLoginTime.Valid {
+						user.LastLoginTime = &lastLoginTime.Time
+					}
+					return &user, nil
+				}
+			}
+		}
+		return nil, err
 	}
 
 	// 处理可能为NULL的字段
@@ -303,21 +311,22 @@ func (r *UserRepository) CheckUsernameExists(username string) (bool, error) {
 }
 
 // GetUserStorageInfo 获取用户存储信息
-func (r *UserRepository) GetUserStorageInfo(userUUID string) (*models.StorageInfo, error) {
+func (r *UserRepository) GetUserStorageInfo(userUUID string) (int64, int64, error) {
 	// 获取用户存储限制
 	var storageLimit int64
 	query := `SELECT storage_limit FROM user WHERE uuid = ?`
 	err := r.db.QueryRow(query, userUUID).Scan(&storageLimit)
 	if err != nil {
-		return nil, err
+		return 0, 0, err
 	}
 
-	// 注意：已使用空间现在由 StorageHandler 通过 FileRepository 计算
-	// 这里只返回存储限制，已使用空间会在 StorageHandler 中更新
-	usedSpace := int64(0)
+	// 获取用户已使用的存储空间
+	var usedSpace int64
+	query = `SELECT COALESCE(SUM(size), 0) FROM files WHERE user_id = ?`
+	err = r.db.QueryRow(query, userUUID).Scan(&usedSpace)
+	if err != nil {
+		return 0, storageLimit, err
+	}
 
-	return &models.StorageInfo{
-		TotalSpace: storageLimit,
-		UsedSpace:  usedSpace,
-	}, nil
+	return usedSpace, storageLimit, nil
 }

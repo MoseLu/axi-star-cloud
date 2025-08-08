@@ -82,8 +82,8 @@ func (ac *AuthController) Login(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": msg})
 			return
 		}
-        // 系统级错误（数据库连接、超时等）：返回友好提示，状态码500
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "服务暂不可用，请稍后再试(ECONN-DB)"})
+		// 系统级错误（数据库连接、超时等）：返回友好提示，状态码500
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "服务暂不可用，请稍后再试(ECONN-DB)"})
 		return
 	}
 

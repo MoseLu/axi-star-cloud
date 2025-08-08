@@ -8,9 +8,13 @@ import (
 	"os"
 	"time"
 
+	"strings"
+
 	_ "github.com/go-sql-driver/mysql"
 	"gopkg.in/yaml.v3"
-    "strings"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 // Config 完整配置结构体
@@ -181,44 +185,93 @@ func InitDB(configPath interface{}) (*sql.DB, error) {
 		fmt.Printf("数据库 %s 创建成功\n", cfg.Database.Name)
 	}
 
-    // 连接到指定数据库
-    db, err := sql.Open(dbConfig.Driver, dbConfig.DSN)
-    if err != nil {
-        return nil, err
-    }
+	// 连接到指定数据库
+	db, err := sql.Open(dbConfig.Driver, dbConfig.DSN)
+	if err != nil {
+		return nil, err
+	}
 
-    // 配置连接池参数
-    db.SetMaxOpenConns(25)                 // 最大连接数
-    db.SetMaxIdleConns(10)                 // 最大空闲连接数
-    db.SetConnMaxLifetime(5 * time.Minute) // 连接最大生命周期
-    db.SetConnMaxIdleTime(3 * time.Minute) // 空闲连接最大生命周期
+	// 配置连接池参数
+	db.SetMaxOpenConns(25)                 // 最大连接数
+	db.SetMaxIdleConns(10)                 // 最大空闲连接数
+	db.SetConnMaxLifetime(5 * time.Minute) // 连接最大生命周期
+	db.SetConnMaxIdleTime(3 * time.Minute) // 空闲连接最大生命周期
 
-    // 测试连接（容错：若报 Unknown database，则尝试创建后重连）
-    if err := db.Ping(); err != nil {
-        db.Close()
-        // 捕获“Unknown database”错误并自愈
-        if strings.Contains(strings.ToLower(err.Error()), "unknown database") {
-            // 使用服务器连接再次尝试创建数据库
-            serverDB2, err2 := sql.Open("mysql", serverDSN)
-            if err2 == nil {
-                defer serverDB2.Close()
-                if pingErr := serverDB2.Ping(); pingErr == nil {
-                    _, _ = serverDB2.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS `%s` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", cfg.Database.Name))
-                }
-            }
-            // 重连数据库
-            db, err = sql.Open(dbConfig.Driver, dbConfig.DSN)
-            if err != nil {
-                return nil, fmt.Errorf("数据库连接测试失败: %v", err)
-            }
-            if ping2 := db.Ping(); ping2 != nil {
-                db.Close()
-                return nil, fmt.Errorf("数据库连接测试失败: %v", ping2)
-            }
-        } else {
-            return nil, fmt.Errorf("数据库连接测试失败: %v", err)
-        }
-    }
+	// 测试连接（容错：若报 Unknown database，则尝试创建后重连）
+	if err := db.Ping(); err != nil {
+		db.Close()
+		// 捕获“Unknown database”错误并自愈
+		if strings.Contains(strings.ToLower(err.Error()), "unknown database") {
+			// 使用服务器连接再次尝试创建数据库
+			serverDB2, err2 := sql.Open("mysql", serverDSN)
+			if err2 == nil {
+				defer serverDB2.Close()
+				if pingErr := serverDB2.Ping(); pingErr == nil {
+					_, _ = serverDB2.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS `%s` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", cfg.Database.Name))
+				}
+			}
+			// 重连数据库
+			db, err = sql.Open(dbConfig.Driver, dbConfig.DSN)
+			if err != nil {
+				return nil, fmt.Errorf("数据库连接测试失败: %v", err)
+			}
+			if ping2 := db.Ping(); ping2 != nil {
+				db.Close()
+				return nil, fmt.Errorf("数据库连接测试失败: %v", ping2)
+			}
+		} else {
+			return nil, fmt.Errorf("数据库连接测试失败: %v", err)
+		}
+	}
 
 	return db, nil
+}
+
+// InitGORM 初始化GORM连接
+func InitGORM(configPath interface{}) (*gorm.DB, error) {
+	var dbConfig *DBConfig
+	var err error
+	if configPath == nil {
+		dbConfig, err = LoadDBConfig("")
+	} else if path, ok := configPath.(string); ok {
+		dbConfig, err = LoadDBConfig(path)
+	} else {
+		return nil, errors.New("无效的数据库配置参数")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	// 配置GORM
+	gormConfig := &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info), // 开发环境显示SQL
+		NowFunc: func() time.Time {
+			return time.Now()
+		},
+	}
+
+	// 连接GORM
+	gormDB, err := gorm.Open(mysql.Open(dbConfig.DSN), gormConfig)
+	if err != nil {
+		return nil, fmt.Errorf("GORM连接失败: %v", err)
+	}
+
+	// 获取底层的sql.DB进行连接池配置
+	sqlDB, err := gormDB.DB()
+	if err != nil {
+		return nil, fmt.Errorf("获取底层数据库连接失败: %v", err)
+	}
+
+	// 配置连接池参数
+	sqlDB.SetMaxOpenConns(25)                 // 最大连接数
+	sqlDB.SetMaxIdleConns(10)                 // 最大空闲连接数
+	sqlDB.SetConnMaxLifetime(5 * time.Minute) // 连接最大生命周期
+	sqlDB.SetConnMaxIdleTime(3 * time.Minute) // 空闲连接最大生命周期
+
+	// 测试连接
+	if err := sqlDB.Ping(); err != nil {
+		return nil, fmt.Errorf("GORM连接测试失败: %v", err)
+	}
+
+	return gormDB, nil
 }

@@ -14,6 +14,7 @@ import (
 	"backend/utils"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // App 应用结构体
@@ -21,6 +22,7 @@ type App struct {
 	Router *gin.Engine
 	Config *config.Config
 	DB     *sql.DB
+	GormDB *gorm.DB
 }
 
 // NewApp 创建新的应用实例
@@ -64,11 +66,18 @@ func (app *App) Initialize() error {
 	}
 	app.DB = db
 
+	// 初始化GORM数据库
+	gormDB, err := app.initializeGORM()
+	if err != nil {
+		return fmt.Errorf("初始化GORM数据库失败: %v", err)
+	}
+	app.GormDB = gormDB
+
 	// 初始化路由
 	app.Router = app.initializeRouter()
 
 	// 初始化处理器
-	handlers, userRepo, fileRepo, urlFileRepo := app.initializeHandlers(db)
+	handlers, userRepo, fileRepo, urlFileRepo := app.initializeHandlers(db, gormDB)
 
 	// 设置路由
 	app.setupRoutes(handlers, userRepo, fileRepo, urlFileRepo)
@@ -83,49 +92,23 @@ func (app *App) initializeDatabase() (*sql.DB, error) {
 		return nil, err
 	}
 
-	// 1) 创建数据库表（幂等）
-	if err := database.CreateTables(db); err != nil {
-		return nil, fmt.Errorf("初始化数据库表失败: %v", err)
+	// 使用新的完整初始化函数
+	if err := database.InitializeDatabase(db); err != nil {
+		return nil, fmt.Errorf("数据库初始化失败: %v", err)
 	}
-
-	// 2) 执行数据库迁移（幂等）
-	if err := database.MigrateDatabase(db); err != nil {
-		return nil, fmt.Errorf("执行数据库迁移失败: %v", err)
-	}
-
-	// 3) URL 文件相关迁移（幂等）
-	if err := database.MigrateUrlFiles(db); err != nil {
-		return nil, fmt.Errorf("执行URL文件迁移失败: %v", err)
-	}
-
-	// 4) 插入初始数据（管理员等，幂等）
-	if err := database.InsertInitialData(db); err != nil {
-		return nil, fmt.Errorf("插入初始数据失败: %v", err)
-	}
-
-    // 5) 最小可用性校验：检查关键表是否存在，不存在则再自愈一次
-    if !tableExists(db, "user") {
-        // 再执行一轮创建与迁移
-        _ = database.CreateTables(db)
-        _ = database.MigrateDatabase(db)
-        _ = database.MigrateUrlFiles(db)
-        _ = database.InsertInitialData(db)
-        if !tableExists(db, "user") {
-            return nil, fmt.Errorf("关键数据表缺失: user")
-        }
-    }
 
 	return db, nil
 }
 
-// tableExists 检查表是否存在
-func tableExists(db *sql.DB, table string) bool {
-	q := `SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?`
-	var c int
-	if err := db.QueryRow(q, table).Scan(&c); err != nil {
-		return false
+// initializeGORM 初始化GORM数据库
+func (app *App) initializeGORM() (*gorm.DB, error) {
+	// 使用GORM初始化数据库
+	gormDB, err := database.InitializeGORM()
+	if err != nil {
+		return nil, fmt.Errorf("GORM数据库初始化失败: %v", err)
 	}
-	return c > 0
+
+	return gormDB, nil
 }
 
 // initializeRouter 初始化路由
@@ -197,13 +180,13 @@ func (app *App) corsMiddleware() gin.HandlerFunc {
 }
 
 // initializeHandlers 初始化处理器
-func (app *App) initializeHandlers(db *sql.DB) (*Handlers, *database.UserRepository, *database.FileRepository, *database.UrlFileRepository) {
-	// 初始化数据访问层
-	userRepo := database.NewUserRepository(db)
-	fileRepo := database.NewFileRepository(db)
-	folderRepo := database.NewFolderRepository(db)
-	docRepo := database.NewDocumentRepository(db)
-	urlFileRepo := database.NewUrlFileRepository(db)
+func (app *App) initializeHandlers(db *sql.DB, gormDB *gorm.DB) (*Handlers, database.UserRepositoryInterface, database.FileRepositoryInterface, database.UrlFileRepositoryInterface) {
+	// 初始化 GORM 数据访问层
+	userRepo := database.NewGORMUserRepository(gormDB)
+	fileRepo := database.NewGORMFileRepository(gormDB)
+	folderRepo := database.NewGORMFolderRepository(gormDB)
+	docRepo := database.NewGORMDocumentRepository(gormDB)
+	urlFileRepo := database.NewGORMUrlFileRepository(gormDB)
 
 	// 初始化上传队列管理器
 	uploadQueueManager := utils.NewUploadQueueManager()
@@ -219,14 +202,14 @@ func (app *App) initializeHandlers(db *sql.DB) (*Handlers, *database.UserReposit
 		UrlFile:        handlers.NewUrlFileHandler(urlFileRepo, userRepo, folderRepo),
 		UploadProgress: handlers.NewUploadProgressHandler(uploadQueueManager),
 		UpdateLog:      handlers.NewUpdateLogHandler(db),
-		Health:         handlers.NewHealthHandler(db),
+		Health:         handlers.NewHealthHandler(db, gormDB),
 	}
 
 	return handlers, userRepo, fileRepo, urlFileRepo
 }
 
 // setupRoutes 设置路由
-func (app *App) setupRoutes(handlers *Handlers, userRepo *database.UserRepository, fileRepo *database.FileRepository, urlFileRepo *database.UrlFileRepository) {
+func (app *App) setupRoutes(handlers *Handlers, userRepo database.UserRepositoryInterface, fileRepo database.FileRepositoryInterface, urlFileRepo database.UrlFileRepositoryInterface) {
 	// 初始化路由器
 	routerManager := routes.NewRouter(app.Router)
 
@@ -250,6 +233,7 @@ func (app *App) setupRoutes(handlers *Handlers, userRepo *database.UserRepositor
 	app.Router.GET("/ready", handlers.Health.ReadinessCheck)
 	app.Router.GET("/live", handlers.Health.LivenessCheck)
 	app.Router.GET("/metrics", handlers.Health.Metrics)
+	app.Router.GET("/db-status", handlers.Health.DatabaseStatus)
 }
 
 // Handlers 处理器集合

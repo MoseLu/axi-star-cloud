@@ -24,11 +24,11 @@ import (
 )
 
 // SetupAuthRoutes 设置认证路由
-func SetupAuthRoutes(router *gin.Engine, userRepo interface{}, fileRepo interface{}, urlFileRepo interface{}) {
+func SetupAuthRoutes(router *gin.Engine, userRepo database.UserRepositoryInterface, fileRepo database.FileRepositoryInterface, urlFileRepo database.UrlFileRepositoryInterface) {
 	// 创建服务层和控制器
-	authService := services.NewAuthService(userRepo.(*database.UserRepository), fileRepo.(*database.FileRepository), urlFileRepo.(*database.UrlFileRepository))
+	authService := services.NewAuthService(userRepo, fileRepo, urlFileRepo)
 	authController := controllers.NewAuthController(authService)
-	authMiddleware := middleware.NewAuthMiddleware(userRepo.(*database.UserRepository))
+	authMiddleware := middleware.NewAuthMiddleware(userRepo)
 
 	// 认证路由组
 	auth := router.Group("/api/auth")

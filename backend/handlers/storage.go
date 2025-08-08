@@ -12,13 +12,13 @@ import (
 
 // StorageHandler 存储处理器
 type StorageHandler struct {
-	userRepo    *database.UserRepository
-	fileRepo    *database.FileRepository
-	urlFileRepo *database.UrlFileRepository
+	userRepo    database.UserRepositoryInterface
+	fileRepo    database.FileRepositoryInterface
+	urlFileRepo database.UrlFileRepositoryInterface
 }
 
 // NewStorageHandler 创建存储处理器实例
-func NewStorageHandler(userRepo *database.UserRepository, fileRepo *database.FileRepository, urlFileRepo *database.UrlFileRepository) *StorageHandler {
+func NewStorageHandler(userRepo database.UserRepositoryInterface, fileRepo database.FileRepositoryInterface, urlFileRepo database.UrlFileRepositoryInterface) *StorageHandler {
 	return &StorageHandler{userRepo: userRepo, fileRepo: fileRepo, urlFileRepo: urlFileRepo}
 }
 
@@ -32,7 +32,7 @@ func (h *StorageHandler) GetStorageInfo(c *gin.Context) {
 	}
 
 	// 获取用户存储限制
-	storageInfo, err := h.userRepo.GetUserStorageInfo(userID)
+	_, storageLimit, err := h.userRepo.GetUserStorageInfo(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取存储信息失败"})
 		return
@@ -57,8 +57,11 @@ func (h *StorageHandler) GetStorageInfo(c *gin.Context) {
 	urlFileSpace := int64(urlFileCount) // 每个URL文件计为1字节
 	totalUsedSpace := fileUsedSpace + urlFileSpace
 
-	// 更新已使用空间
-	storageInfo.UsedSpace = totalUsedSpace
+	// 创建存储信息对象
+	storageInfo := &models.StorageInfo{
+		UsedSpace:  totalUsedSpace,
+		TotalSpace: storageLimit,
+	}
 
 	// 防御性处理，只在真正异常时才重置
 	if storageInfo.UsedSpace < 0 {
@@ -113,14 +116,14 @@ func (h *StorageHandler) UpdateStorageLimit(c *gin.Context) {
 	}
 
 	// 获取当前存储信息
-	currentStorage, err := h.userRepo.GetUserStorageInfo(userID)
+	currentUsedSpace, _, err := h.userRepo.GetUserStorageInfo(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取存储信息失败"})
 		return
 	}
 
 	// 检查新限制是否小于已使用空间
-	if updateRequest.StorageLimit < currentStorage.UsedSpace {
+	if updateRequest.StorageLimit < currentUsedSpace {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "存储限制不能小于已使用空间"})
 		return
 	}

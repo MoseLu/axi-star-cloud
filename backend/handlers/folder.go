@@ -13,11 +13,11 @@ import (
 
 // FolderHandler 文件夹处理器
 type FolderHandler struct {
-	folderRepo *database.FolderRepository
+	folderRepo database.FolderRepositoryInterface
 }
 
 // NewFolderHandler 创建文件夹处理器实例
-func NewFolderHandler(folderRepo *database.FolderRepository) *FolderHandler {
+func NewFolderHandler(folderRepo database.FolderRepositoryInterface) *FolderHandler {
 	return &FolderHandler{folderRepo: folderRepo}
 }
 
@@ -64,7 +64,7 @@ func (h *FolderHandler) CreateFolder(c *gin.Context) {
 	}
 
 	// 检查是否存在同名文件夹
-	exists, err := h.folderRepo.CheckFolderNameExists(userID, createRequest.Name, createRequest.Category)
+	exists, err := h.folderRepo.CheckFolderNameExists(userID, createRequest.Name, createRequest.Category, 0)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "检查文件夹名称失败"})
 		return
@@ -74,12 +74,19 @@ func (h *FolderHandler) CreateFolder(c *gin.Context) {
 		return
 	}
 
+	// 转换 ParentID 类型
+	var parentID *uint
+	if createRequest.ParentID != nil {
+		parentIDUint := uint(*createRequest.ParentID)
+		parentID = &parentIDUint
+	}
+
 	// 创建文件夹记录
 	folder := &models.Folder{
 		Name:     createRequest.Name,
 		UserID:   userID,
 		Category: createRequest.Category,
-		ParentID: createRequest.ParentID,
+		ParentID: parentID,
 	}
 
 	if err := h.folderRepo.CreateFolder(folder); err != nil {
@@ -104,11 +111,12 @@ func (h *FolderHandler) UpdateFolder(c *gin.Context) {
 		return
 	}
 
-	folderID, err := strconv.Atoi(folderIDStr)
+	folderIDInt, err := strconv.Atoi(folderIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的文件夹ID"})
 		return
 	}
+	folderID := uint(folderIDInt)
 
 	var updateRequest models.UpdateFolderRequest
 	if err := c.ShouldBindJSON(&updateRequest); err != nil {
@@ -160,11 +168,12 @@ func (h *FolderHandler) DeleteFolder(c *gin.Context) {
 		return
 	}
 
-	folderID, err := strconv.Atoi(folderIDStr)
+	folderIDInt, err := strconv.Atoi(folderIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的文件夹ID"})
 		return
 	}
+	folderID := uint(folderIDInt)
 
 	// 检查文件夹是否存在
 	_, err = h.folderRepo.GetFolderByID(folderID, userID)
@@ -199,11 +208,12 @@ func (h *FolderHandler) GetFolderFileCount(c *gin.Context) {
 		return
 	}
 
-	folderID, err := strconv.Atoi(folderIDStr)
+	folderIDInt, err := strconv.Atoi(folderIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的文件夹ID"})
 		return
 	}
+	folderID := uint(folderIDInt)
 
 	count, err := h.folderRepo.GetFolderFileCount(folderID, userID)
 	if err != nil {

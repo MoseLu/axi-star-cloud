@@ -17,11 +17,11 @@ import (
 
 // ProfileHandler 个人资料处理器
 type ProfileHandler struct {
-	userRepo *database.UserRepository
+	userRepo database.UserRepositoryInterface
 }
 
 // NewProfileHandler 创建个人资料处理器实例
-func NewProfileHandler(userRepo *database.UserRepository) *ProfileHandler {
+func NewProfileHandler(userRepo database.UserRepositoryInterface) *ProfileHandler {
 	return &ProfileHandler{
 		userRepo: userRepo,
 	}

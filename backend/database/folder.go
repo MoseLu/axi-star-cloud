@@ -43,7 +43,7 @@ func (r *FolderRepository) GetFoldersByUserID(userID string) ([]models.Folder, e
 }
 
 // GetFolderByID 根据ID获取文件夹
-func (r *FolderRepository) GetFolderByID(folderID int, userID string) (*models.Folder, error) {
+func (r *FolderRepository) GetFolderByID(folderID uint, userID string) (*models.Folder, error) {
 	var folder models.Folder
 	query := `SELECT id, name, user_id, category, parent_id, created_at, updated_at 
 			  FROM folders WHERE id = ? AND user_id = ?`
@@ -75,19 +75,19 @@ func (r *FolderRepository) CreateFolder(folder *models.Folder) error {
 		return err
 	}
 
-	folder.ID = int(id)
+	folder.ID = uint(id)
 	return nil
 }
 
 // UpdateFolder 更新文件夹
-func (r *FolderRepository) UpdateFolder(folderID int, userID string, name, category string) error {
+func (r *FolderRepository) UpdateFolder(folderID uint, userID string, name, category string) error {
 	query := `UPDATE folders SET name = ?, category = ?, updated_at = ? WHERE id = ? AND user_id = ?`
 	_, err := r.db.Exec(query, name, category, time.Now(), folderID, userID)
 	return err
 }
 
 // DeleteFolder 删除文件夹
-func (r *FolderRepository) DeleteFolder(folderID int, userID string) error {
+func (r *FolderRepository) DeleteFolder(folderID uint, userID string) error {
 	// 首先删除文件夹中的所有普通文件
 	_, err := r.db.Exec("DELETE FROM files WHERE folder_id = ? AND user_id = ?", folderID, userID)
 	if err != nil {
@@ -107,7 +107,7 @@ func (r *FolderRepository) DeleteFolder(folderID int, userID string) error {
 }
 
 // CheckFolderExists 检查文件夹是否存在
-func (r *FolderRepository) CheckFolderExists(folderID int, userID string) (bool, error) {
+func (r *FolderRepository) CheckFolderExists(folderID uint, userID string) (bool, error) {
 	var exists bool
 	query := `SELECT EXISTS(SELECT 1 FROM folders WHERE id = ? AND user_id = ?)`
 	err := r.db.QueryRow(query, folderID, userID).Scan(&exists)
@@ -115,14 +115,14 @@ func (r *FolderRepository) CheckFolderExists(folderID int, userID string) (bool,
 }
 
 // CheckFolderNameExists 检查同一用户同一分类下是否存在同名文件夹
-func (r *FolderRepository) CheckFolderNameExists(userID, name, category string, excludeID ...int) (bool, error) {
+func (r *FolderRepository) CheckFolderNameExists(userID, name, category string, excludeID uint) (bool, error) {
 	var query string
 	var args []interface{}
 
-	if len(excludeID) > 0 && excludeID[0] > 0 {
+	if excludeID > 0 {
 		// 排除指定ID的文件夹（用于更新时检查）
 		query = `SELECT EXISTS(SELECT 1 FROM folders WHERE user_id = ? AND name = ? AND category = ? AND id != ?)`
-		args = []interface{}{userID, name, category, excludeID[0]}
+		args = []interface{}{userID, name, category, excludeID}
 	} else {
 		// 创建时检查
 		query = `SELECT EXISTS(SELECT 1 FROM folders WHERE user_id = ? AND name = ? AND category = ?)`
@@ -135,7 +135,7 @@ func (r *FolderRepository) CheckFolderNameExists(userID, name, category string, 
 }
 
 // GetFolderFileCount 获取文件夹中的文件数量（包括普通文件和URL文件）
-func (r *FolderRepository) GetFolderFileCount(folderID int, userID string) (int, error) {
+func (r *FolderRepository) GetFolderFileCount(folderID uint, userID string) (int, error) {
 	var filesCount, urlFilesCount int
 
 	// 统计普通文件数量
@@ -153,4 +153,11 @@ func (r *FolderRepository) GetFolderFileCount(folderID int, userID string) (int,
 	}
 
 	return filesCount + urlFilesCount, nil
+}
+
+func (r *FolderRepository) GetFolderUrlFileCount(folderID uint, userID string) (int, error) {
+	var count int
+	query := `SELECT COUNT(*) FROM url_files WHERE folder_id = ? AND user_id = ?`
+	err := r.db.QueryRow(query, folderID, userID).Scan(&count)
+	return count, err
 }
