@@ -83,42 +83,49 @@ func (app *App) initializeDatabase() (*sql.DB, error) {
 		return nil, err
 	}
 
-    // 1) 创建数据库表（幂等）
-    if err := database.CreateTables(db); err != nil {
-        return nil, fmt.Errorf("初始化数据库表失败: %v", err)
-    }
+	// 1) 创建数据库表（幂等）
+	if err := database.CreateTables(db); err != nil {
+		return nil, fmt.Errorf("初始化数据库表失败: %v", err)
+	}
 
-    // 2) 执行数据库迁移（幂等）
-    if err := database.MigrateDatabase(db); err != nil {
-        return nil, fmt.Errorf("执行数据库迁移失败: %v", err)
-    }
+	// 2) 执行数据库迁移（幂等）
+	if err := database.MigrateDatabase(db); err != nil {
+		return nil, fmt.Errorf("执行数据库迁移失败: %v", err)
+	}
 
-    // 3) URL 文件相关迁移（幂等）
-    if err := database.MigrateUrlFiles(db); err != nil {
-        return nil, fmt.Errorf("执行URL文件迁移失败: %v", err)
-    }
+	// 3) URL 文件相关迁移（幂等）
+	if err := database.MigrateUrlFiles(db); err != nil {
+		return nil, fmt.Errorf("执行URL文件迁移失败: %v", err)
+	}
 
-    // 4) 插入初始数据（管理员等，幂等）
-    if err := database.InsertInitialData(db); err != nil {
-        return nil, fmt.Errorf("插入初始数据失败: %v", err)
-    }
+	// 4) 插入初始数据（管理员等，幂等）
+	if err := database.InsertInitialData(db); err != nil {
+		return nil, fmt.Errorf("插入初始数据失败: %v", err)
+	}
 
-    // 5) 最小可用性校验：检查关键表是否存在
+    // 5) 最小可用性校验：检查关键表是否存在，不存在则再自愈一次
     if !tableExists(db, "user") {
-        return nil, fmt.Errorf("关键数据表缺失: user")
+        // 再执行一轮创建与迁移
+        _ = database.CreateTables(db)
+        _ = database.MigrateDatabase(db)
+        _ = database.MigrateUrlFiles(db)
+        _ = database.InsertInitialData(db)
+        if !tableExists(db, "user") {
+            return nil, fmt.Errorf("关键数据表缺失: user")
+        }
     }
 
-    return db, nil
+	return db, nil
 }
 
 // tableExists 检查表是否存在
 func tableExists(db *sql.DB, table string) bool {
-    q := `SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?`
-    var c int
-    if err := db.QueryRow(q, table).Scan(&c); err != nil {
-        return false
-    }
-    return c > 0
+	q := `SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?`
+	var c int
+	if err := db.QueryRow(q, table).Scan(&c); err != nil {
+		return false
+	}
+	return c > 0
 }
 
 // initializeRouter 初始化路由

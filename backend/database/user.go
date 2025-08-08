@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"backend/models"
+    "strings"
 )
 
 // UserRepository 用户数据仓库
@@ -34,17 +35,38 @@ func (r *UserRepository) GetUserByUsername(username string) (*models.User, error
 	var lastLoginTime sql.NullTime
 	var email, bio, avatar sql.NullString
 
-	err := r.db.QueryRow(query, username).Scan(
+    err := r.db.QueryRow(query, username).Scan(
 		&user.UUID, &user.Username, &user.Password, &email, &bio, &avatar,
 		&user.StorageLimit, &lastLoginTime, &user.IsOnline,
 		&user.CreatedAt, &user.UpdatedAt,
 	)
 
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		return nil, err
+        if err == sql.ErrNoRows {
+            return nil, nil
+        }
+        // 自愈：若 user 表不存在，尝试创建基础表并重试一次
+        if strings.Contains(err.Error(), "Error 1146") || strings.Contains(strings.ToLower(err.Error()), "doesn't exist") {
+            // 尝试创建表结构与初始数据
+            if createErr := CreateTables(r.db); createErr == nil {
+                _ = MigrateDatabase(r.db)
+                _ = InsertInitialData(r.db)
+                // 重试一次
+                retryErr := r.db.QueryRow(query, username).Scan(
+                    &user.UUID, &user.Username, &user.Password, &email, &bio, &avatar,
+                    &user.StorageLimit, &lastLoginTime, &user.IsOnline,
+                    &user.CreatedAt, &user.UpdatedAt,
+                )
+                if retryErr == nil {
+                    if email.Valid { user.Email = email.String }
+                    if bio.Valid { user.Bio = bio.String }
+                    if avatar.Valid { user.Avatar = avatar.String }
+                    if lastLoginTime.Valid { user.LastLoginTime = &lastLoginTime.Time }
+                    return &user, nil
+                }
+            }
+        }
+        return nil, err
 	}
 
 	// 处理可能为NULL的字段
