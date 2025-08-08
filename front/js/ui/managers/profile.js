@@ -717,17 +717,35 @@ class UIProfileManager {
 
     /**
      * 强制刷新头像显示 - 防止被其他模块覆盖
-     * @param {string} avatarUrl - 头像URL
+     * @param {string} avatarUrl - 头像URL（应该是完整URL）
      */
     forceRefreshAvatarDisplay(avatarUrl) {
         if (!avatarUrl || avatarUrl === 'null' || avatarUrl === 'undefined') {
             return;
         }
 
+        // 清理可能重复的路径和URL
+        let cleanUrl = avatarUrl;
+        
+        // 清理重复的路径
+        while (cleanUrl.includes('/uploads/avatars//uploads/avatars/')) {
+            cleanUrl = cleanUrl.replace('/uploads/avatars//uploads/avatars/', '/uploads/avatars/');
+        }
+        
+        // 清理重复的域名
+        while (cleanUrl.includes('//uploads/avatars/')) {
+            cleanUrl = cleanUrl.replace('//uploads/avatars/', '/uploads/avatars/');
+        }
+        
+        // 清理可能的三重斜杠
+        while (cleanUrl.includes('///')) {
+            cleanUrl = cleanUrl.replace('///', '/');
+        }
+
         // 强制更新顶栏头像
         const topbarAvatar = document.getElementById('user-avatar');
         if (topbarAvatar) {
-            topbarAvatar.src = avatarUrl;
+            topbarAvatar.src = cleanUrl;
             topbarAvatar.style.display = 'block';
             topbarAvatar.style.visibility = 'visible';
             topbarAvatar.style.opacity = '1';
@@ -738,7 +756,7 @@ class UIProfileManager {
         const welcomeAvatarImage = document.getElementById('avatar-image');
         const welcomeAvatarIcon = document.getElementById('avatar-icon');
         if (welcomeAvatarImage && welcomeAvatarIcon) {
-            welcomeAvatarImage.src = avatarUrl;
+            welcomeAvatarImage.src = cleanUrl;
             welcomeAvatarImage.classList.remove('hidden');
             welcomeAvatarIcon.classList.add('hidden');
             welcomeAvatarImage.style.display = 'block';
@@ -753,7 +771,7 @@ class UIProfileManager {
             const avatarImage = profileAvatar.querySelector('#avatar-image');
             const avatarIcon = profileAvatar.querySelector('#avatar-icon');
             if (avatarImage && avatarIcon) {
-                avatarImage.src = avatarUrl;
+                avatarImage.src = cleanUrl;
                 avatarImage.classList.remove('hidden');
                 avatarIcon.classList.add('hidden');
                 avatarImage.style.display = 'block';
@@ -767,7 +785,7 @@ class UIProfileManager {
         const allAvatarElements = document.querySelectorAll('.user-avatar, .avatar-img, img[alt*="头像"], img[alt*="avatar"]');
         allAvatarElements.forEach(element => {
             if (element.tagName === 'IMG') {
-                element.src = avatarUrl;
+                element.src = cleanUrl;
                 element.style.display = 'block';
                 element.style.visibility = 'visible';
                 element.style.opacity = '1';
@@ -777,17 +795,22 @@ class UIProfileManager {
 
         // 更新缓存，确保下次加载时使用最新头像
         if (window.StorageManager && typeof window.StorageManager.setAvatar === 'function') {
-            window.StorageManager.setAvatar(avatarUrl);
+            window.StorageManager.setAvatar(cleanUrl);
         } else {
-            localStorage.setItem('cachedAvatar', avatarUrl);
+            localStorage.setItem('cachedAvatar', cleanUrl);
         }
 
-        // 同步更新用户信息中的头像URL
+        // 同步更新用户信息中的头像URL - 只保存文件名
         const userInfo = localStorage.getItem('userInfo');
         if (userInfo) {
             try {
                 const userData = JSON.parse(userInfo);
-                userData.avatarUrl = avatarUrl;
+                // 从完整URL中提取文件名
+                let fileName = cleanUrl;
+                if (fileName.includes('/uploads/avatars/')) {
+                    fileName = fileName.split('/uploads/avatars/').pop();
+                }
+                userData.avatarUrl = fileName;
                 localStorage.setItem('userInfo', JSON.stringify(userData));
             } catch (error) {
                 console.warn('更新用户信息中的头像URL失败:', error);
@@ -1150,42 +1173,43 @@ class UIProfileManager {
         
         // 构建完整的头像URL并更新缓存
         if (avatarFileName) {
-            const fullAvatarUrl = window.apiGateway?.buildUrl('/uploads/avatars/' + avatarFileName) || ('/uploads/avatars/' + avatarFileName);
+            let fullAvatarUrl;
+            let cleanFileName;
             
-            // 更新本地缓存到用户信息中
+            // 检查后端返回的是什么格式
+            if (avatarFileName.startsWith('http://') || avatarFileName.startsWith('https://')) {
+                // 如果后端返回完整URL，直接使用
+                fullAvatarUrl = avatarFileName;
+                // 从URL中提取文件名
+                cleanFileName = avatarFileName.split('/').pop();
+            } else if (avatarFileName.startsWith('/uploads/avatars/')) {
+                // 如果后端返回相对路径，构建完整URL
+                cleanFileName = avatarFileName.replace('/uploads/avatars/', '');
+                fullAvatarUrl = window.apiGateway?.buildUrl(avatarFileName) || avatarFileName;
+            } else {
+                // 如果后端只返回文件名，构建完整URL
+                cleanFileName = avatarFileName;
+                fullAvatarUrl = window.apiGateway?.buildUrl('/uploads/avatars/' + cleanFileName) || ('/uploads/avatars/' + cleanFileName);
+            }
+            
+            // 更新缓存 - 缓存完整URL
             if (window.StorageManager && typeof window.StorageManager.setAvatar === 'function') {
                 window.StorageManager.setAvatar(fullAvatarUrl);
             } else {
-                // 如果 StorageManager 未加载，直接更新 userInfo 中的头像URL
-                const userData = localStorage.getItem('userInfo');
-                if (userData) {
-                    try {
-                        const userInfo = JSON.parse(userData);
-                        userInfo.avatarUrl = fullAvatarUrl;
-                        localStorage.setItem('userInfo', JSON.stringify(userInfo));
-                    } catch (error) {
-                        console.warn('更新头像URL失败:', error);
-                    }
-                }
+                localStorage.setItem('cachedAvatar', fullAvatarUrl);
             }
             
-                    // 更新用户数据
-        const userDataStr = localStorage.getItem('userInfo');
-        if (userDataStr) {
-            try {
-                const userData = JSON.parse(userDataStr);
-                // 修正：只保存文件名，不包含路径
-                // 从avatarFileName中提取纯文件名
-                let fileName = avatarFileName;
-                if (fileName.startsWith('/uploads/avatars/')) {
-                    fileName = fileName.replace('/uploads/avatars/', '');
+            // 更新用户数据 - 只保存文件名
+            const userDataStr = localStorage.getItem('userInfo');
+            if (userDataStr) {
+                try {
+                    const userData = JSON.parse(userDataStr);
+                    userData.avatarUrl = cleanFileName; // 只保存文件名
+                    localStorage.setItem('userInfo', JSON.stringify(userData));
+                } catch (error) {
+                    console.error('更新用户数据失败:', error);
                 }
-                userData.avatarUrl = fileName;
-                localStorage.setItem('userInfo', JSON.stringify(userData));
-            } catch (error) {
-                console.error('更新用户数据失败:', error);
             }
-        }
             
             return fullAvatarUrl;
         }
