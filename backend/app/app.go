@@ -83,27 +83,42 @@ func (app *App) initializeDatabase() (*sql.DB, error) {
 		return nil, err
 	}
 
-	// 创建数据库表
-	if err := database.CreateTables(db); err != nil {
-		return nil, err
-	}
+    // 1) 创建数据库表（幂等）
+    if err := database.CreateTables(db); err != nil {
+        return nil, fmt.Errorf("初始化数据库表失败: %v", err)
+    }
 
-	// 执行数据库迁移
-	if err := database.MigrateDatabase(db); err != nil {
-		return nil, err
-	}
+    // 2) 执行数据库迁移（幂等）
+    if err := database.MigrateDatabase(db); err != nil {
+        return nil, fmt.Errorf("执行数据库迁移失败: %v", err)
+    }
 
-	// 创建URL文件表
-	if err := database.MigrateUrlFiles(db); err != nil {
-		return nil, err
-	}
+    // 3) URL 文件相关迁移（幂等）
+    if err := database.MigrateUrlFiles(db); err != nil {
+        return nil, fmt.Errorf("执行URL文件迁移失败: %v", err)
+    }
 
-	// 插入初始数据
-	if err := database.InsertInitialData(db); err != nil {
-		return nil, err
-	}
+    // 4) 插入初始数据（管理员等，幂等）
+    if err := database.InsertInitialData(db); err != nil {
+        return nil, fmt.Errorf("插入初始数据失败: %v", err)
+    }
 
-	return db, nil
+    // 5) 最小可用性校验：检查关键表是否存在
+    if !tableExists(db, "user") {
+        return nil, fmt.Errorf("关键数据表缺失: user")
+    }
+
+    return db, nil
+}
+
+// tableExists 检查表是否存在
+func tableExists(db *sql.DB, table string) bool {
+    q := `SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?`
+    var c int
+    if err := db.QueryRow(q, table).Scan(&c); err != nil {
+        return false
+    }
+    return c > 0
 }
 
 // initializeRouter 初始化路由
