@@ -125,15 +125,6 @@ class UIFileRenderer {
         // 清空容器内容
         fileGrid.innerHTML = '';
         
-        // 确保文件网格可见，隐藏空状态
-        fileGrid.classList.remove('hidden');
-        fileGrid.style.opacity = '1';
-        
-        // 隐藏空状态，避免闪烁
-        if (emptyState) {
-            emptyState.classList.add('hidden');
-        }
-        
         // 根据当前分类过滤文件
         let filteredFiles = files;
         if (this.uiManager && this.uiManager.currentCategory && this.uiManager.currentCategory !== 'all') {
@@ -186,12 +177,10 @@ class UIFileRenderer {
         this.updateFileCount(filteredFiles.length);
         
         // 处理空状态 - 外站文档分类由docs-sync模块处理
-        // 使用requestAnimationFrame确保DOM更新完成后再处理空状态
-        requestAnimationFrame(() => {
-            if (this.uiManager && this.uiManager.toggleEmptyState && this.uiManager.currentCategory !== 'external-docs') {
-                this.uiManager.toggleEmptyState(filteredFiles.length);
-            }
-        });
+        // 立即处理空状态，避免闪烁
+        if (this.uiManager && this.uiManager.toggleEmptyState && this.uiManager.currentCategory !== 'external-docs') {
+            this.uiManager.toggleEmptyState(filteredFiles.length);
+        }
     }
 
     // 渲染文件列表模式（类似Windows资源管理器的列表视图）
@@ -831,14 +820,22 @@ class UIFileRenderer {
         const uploadArea = document.getElementById('upload-area');
 
         if (!fileGrid || !emptyState) {
+            console.log('toggleEmptyState: DOM元素不存在', { fileGrid: !!fileGrid, emptyState: !!emptyState });
             return;
         }
 
         // 防止重复调用
         if (this._lastEmptyStateCount === visibleCount) {
+            console.log('toggleEmptyState: 重复调用，跳过', visibleCount);
             return;
         }
         this._lastEmptyStateCount = visibleCount;
+        
+        console.log('toggleEmptyState: 开始处理', { 
+            visibleCount, 
+            currentCategory: this.uiManager?.currentCategory,
+            fileGridContent: fileGrid.innerHTML.length 
+        });
         
         // 如果文件网格正在显示加载状态，不处理空状态
         if (fileGrid.innerHTML.includes('正在加载文件') || fileGrid.innerHTML.includes('fa-spinner')) {
@@ -852,7 +849,7 @@ class UIFileRenderer {
         }
 
         if (visibleCount === 0) {
-            // 没有可见文件，显示空状态，隐藏文件网格和上传区域
+            // 没有可见文件，显示空状态，隐藏文件网格
             fileGrid.classList.add('hidden');
             fileGrid.style.opacity = '0';
             
