@@ -16,6 +16,17 @@ func NewLauncher() *Launcher {
 	}
 }
 
+// InitDatabaseOnly 只初始化数据库
+func (l *Launcher) InitDatabaseOnly() error {
+	// 只初始化数据库部分
+	db, err := l.app.InitializeDatabase()
+	if err != nil {
+		return err
+	}
+	l.app.DB = db
+	return nil
+}
+
 // StartWithErrorHandling 启动应用并处理错误
 func (l *Launcher) StartWithErrorHandling() {
 	// 初始化应用

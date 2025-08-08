@@ -60,7 +60,7 @@ func (app *App) Initialize() error {
 	app.Config = cfg
 
 	// 初始化数据库
-	db, err := app.initializeDatabase()
+	db, err := app.InitializeDatabase()
 	if err != nil {
 		return fmt.Errorf("初始化数据库失败: %v", err)
 	}
@@ -85,8 +85,8 @@ func (app *App) Initialize() error {
 	return nil
 }
 
-// initializeDatabase 初始化数据库
-func (app *App) initializeDatabase() (*sql.DB, error) {
+// InitializeDatabase 初始化数据库
+func (app *App) InitializeDatabase() (*sql.DB, error) {
 	db, err := config.InitDB(nil)
 	if err != nil {
 		return nil, err

@@ -144,7 +144,7 @@ var tableDefinitions = []TableDefinition{
 	},
 }
 
-// InitializeDatabase 完整的数据库初始化函数
+// InitializeDatabase 初始化数据库
 func InitializeDatabase(db *sql.DB) error {
 	log.Println("开始初始化数据库...")
 
@@ -154,14 +154,14 @@ func InitializeDatabase(db *sql.DB) error {
 	}
 	log.Println("✓ 数据库连接正常")
 
-	// 2. 获取所有现有表
+	// 2. 获取现有表
 	existingTables, err := getExistingTables(db)
 	if err != nil {
 		return fmt.Errorf("获取现有表失败: %v", err)
 	}
 	log.Printf("发现现有表: %v", existingTables)
 
-	// 3. 检查是否所有必需的表都存在
+	// 3. 检查所有必需的表
 	requiredTables := []string{"user", "files", "folders", "documents", "update_logs", "url_files"}
 	missingTables := []string{}
 
@@ -171,34 +171,30 @@ func InitializeDatabase(db *sql.DB) error {
 		}
 	}
 
-	// 4. 如果有缺失的表，才创建它们
 	if len(missingTables) > 0 {
 		log.Printf("发现缺失的表: %v", missingTables)
+		// 创建缺失的表
 		if err := createMissingTables(db, existingTables); err != nil {
-			return fmt.Errorf("创建表失败: %v", err)
+			return fmt.Errorf("创建缺失表失败: %v", err)
 		}
+		log.Println("✓ 缺失的表已创建")
 	} else {
 		log.Println("✓ 所有必需的表都已存在")
 	}
 
-	// 5. 执行数据库迁移（只在必要时）
-	if err := MigrateDatabase(db); err != nil {
-		return fmt.Errorf("数据库迁移失败: %v", err)
-	}
-
-	// 6. 执行URL文件迁移（只在必要时）
-	if err := MigrateUrlFiles(db); err != nil {
-		return fmt.Errorf("URL文件迁移失败: %v", err)
-	}
-
-	// 7. 插入初始数据（只在user表为空时）
-	if err := insertInitialDataIfNeeded(db); err != nil {
-		return fmt.Errorf("插入初始数据失败: %v", err)
-	}
-
-	// 8. 最终验证所有必需的表都存在
+	// 4. 验证所有表都可以正常查询
 	if err := validateAllTables(db); err != nil {
 		return fmt.Errorf("表验证失败: %v", err)
+	}
+
+	// 5. 检查并添加必要的字段
+	if err := checkAndAddFields(db); err != nil {
+		return fmt.Errorf("字段检查失败: %v", err)
+	}
+
+	// 6. 插入初始数据（如果需要）
+	if err := insertInitialDataIfNeeded(db); err != nil {
+		return fmt.Errorf("初始数据插入失败: %v", err)
 	}
 
 	log.Println("✓ 数据库初始化完成")
@@ -329,3 +325,51 @@ func insertInitialDataIfNeeded(db *sql.DB) error {
 		return nil
 	}
 }
+
+// checkAndAddFields 检查并添加必要的字段
+func checkAndAddFields(db *sql.DB) error {
+	log.Println("检查并添加必要的字段...")
+
+	// 检查user表的thumbnail_data字段
+	if !columnExists(db, "user", "thumbnail_data") {
+		log.Println("添加thumbnail_data字段到user表...")
+		_, err := db.Exec("ALTER TABLE user ADD COLUMN thumbnail_data LONGTEXT")
+		if err != nil {
+			log.Printf("添加thumbnail_data字段失败: %v", err)
+		} else {
+			log.Println("✓ thumbnail_data字段已添加")
+		}
+	} else {
+		log.Println("thumbnail_data字段已存在且类型正确")
+	}
+
+	// 检查user表的last_login_time字段
+	if !columnExists(db, "user", "last_login_time") {
+		log.Println("添加last_login_time字段到user表...")
+		_, err := db.Exec("ALTER TABLE user ADD COLUMN last_login_time TIMESTAMP NULL")
+		if err != nil {
+			log.Printf("添加last_login_time字段失败: %v", err)
+		} else {
+			log.Println("✓ last_login_time字段已添加")
+		}
+	} else {
+		log.Println("last_login_time字段已存在")
+	}
+
+	// 检查user表的is_online字段
+	if !columnExists(db, "user", "is_online") {
+		log.Println("添加is_online字段到user表...")
+		_, err := db.Exec("ALTER TABLE user ADD COLUMN is_online BOOLEAN DEFAULT FALSE")
+		if err != nil {
+			log.Printf("添加is_online字段失败: %v", err)
+		} else {
+			log.Println("✓ is_online字段已添加")
+		}
+	} else {
+		log.Println("is_online字段已存在")
+	}
+
+	return nil
+}
+
+

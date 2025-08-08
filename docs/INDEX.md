@@ -25,6 +25,7 @@ title: 通行证
 
 ### 🚀 部署配置
 - **[部署和配置完整指南](DEPLOYMENT_AND_CONFIG_GUIDE.md)** - 环境配置、上传限制、系统优化
+- **[云端部署指南](CLOUD_DEPLOYMENT_GUIDE.md)** - 云端部署步骤、数据库初始化、故障排除
 
 ### 🔐 登录认证
 - **[登录调试指南](LOGIN_DEBUG_GUIDE.md)** - 开发环境登录问题调试、调试工具、常见问题排查
