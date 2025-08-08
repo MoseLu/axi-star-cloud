@@ -716,6 +716,86 @@ class UIProfileManager {
     }
 
     /**
+     * 强制刷新头像显示 - 防止被其他模块覆盖
+     * @param {string} avatarUrl - 头像URL
+     */
+    forceRefreshAvatarDisplay(avatarUrl) {
+        if (!avatarUrl || avatarUrl === 'null' || avatarUrl === 'undefined') {
+            return;
+        }
+
+        // 强制更新顶栏头像
+        const topbarAvatar = document.getElementById('user-avatar');
+        if (topbarAvatar) {
+            topbarAvatar.src = avatarUrl;
+            topbarAvatar.style.display = 'block';
+            topbarAvatar.style.visibility = 'visible';
+            topbarAvatar.style.opacity = '1';
+            topbarAvatar.classList.remove('hidden');
+        }
+
+        // 强制更新欢迎页面头像
+        const welcomeAvatarImage = document.getElementById('avatar-image');
+        const welcomeAvatarIcon = document.getElementById('avatar-icon');
+        if (welcomeAvatarImage && welcomeAvatarIcon) {
+            welcomeAvatarImage.src = avatarUrl;
+            welcomeAvatarImage.classList.remove('hidden');
+            welcomeAvatarIcon.classList.add('hidden');
+            welcomeAvatarImage.style.display = 'block';
+            welcomeAvatarImage.style.visibility = 'visible';
+            welcomeAvatarImage.style.opacity = '1';
+            welcomeAvatarIcon.style.display = 'none';
+        }
+
+        // 强制更新profile-avatar容器中的头像
+        const profileAvatar = document.getElementById('profile-avatar');
+        if (profileAvatar) {
+            const avatarImage = profileAvatar.querySelector('#avatar-image');
+            const avatarIcon = profileAvatar.querySelector('#avatar-icon');
+            if (avatarImage && avatarIcon) {
+                avatarImage.src = avatarUrl;
+                avatarImage.classList.remove('hidden');
+                avatarIcon.classList.add('hidden');
+                avatarImage.style.display = 'block';
+                avatarImage.style.visibility = 'visible';
+                avatarImage.style.opacity = '1';
+                avatarIcon.style.display = 'none';
+            }
+        }
+
+        // 强制更新所有可能的头像元素
+        const allAvatarElements = document.querySelectorAll('.user-avatar, .avatar-img, img[alt*="头像"], img[alt*="avatar"]');
+        allAvatarElements.forEach(element => {
+            if (element.tagName === 'IMG') {
+                element.src = avatarUrl;
+                element.style.display = 'block';
+                element.style.visibility = 'visible';
+                element.style.opacity = '1';
+                element.classList.remove('hidden');
+            }
+        });
+
+        // 更新缓存，确保下次加载时使用最新头像
+        if (window.StorageManager && typeof window.StorageManager.setAvatar === 'function') {
+            window.StorageManager.setAvatar(avatarUrl);
+        } else {
+            localStorage.setItem('cachedAvatar', avatarUrl);
+        }
+
+        // 同步更新用户信息中的头像URL
+        const userInfo = localStorage.getItem('userInfo');
+        if (userInfo) {
+            try {
+                const userData = JSON.parse(userInfo);
+                userData.avatarUrl = avatarUrl;
+                localStorage.setItem('userInfo', JSON.stringify(userData));
+            } catch (error) {
+                console.warn('更新用户信息中的头像URL失败:', error);
+            }
+        }
+    }
+
+    /**
      * 更新用户信息显示
      * @param {Object} userData - 用户数据
      */
@@ -846,8 +926,18 @@ class UIProfileManager {
             // 上传头像
             const avatarUrl = await this.uploadAvatar(file);
 
-            // 更新显示
+            // 立即更新显示 - 确保所有UI元素都被更新
             this.updateAvatar(avatarUrl);
+
+            // 强制刷新所有头像相关的UI元素，防止被其他模块覆盖
+            setTimeout(() => {
+                this.forceRefreshAvatarDisplay(avatarUrl);
+            }, 100);
+
+            // 再次延迟确保更新生效
+            setTimeout(() => {
+                this.forceRefreshAvatarDisplay(avatarUrl);
+            }, 500);
 
             // 显示成功消息
             if (window.MessageBox && window.MessageBox.show) {
