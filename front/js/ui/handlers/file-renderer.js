@@ -134,6 +134,17 @@ class UIFileRenderer {
             emptyState.classList.add('hidden');
         }
         
+        // 根据当前分类过滤文件
+        let filteredFiles = files;
+        if (this.uiManager && this.uiManager.currentCategory && this.uiManager.currentCategory !== 'all') {
+            if (this.uiManager.currentCategory === 'document') {
+                // 文档分类包含多个子类型
+                filteredFiles = files.filter(file => ['document', 'word', 'excel', 'powerpoint', 'pdf'].includes(file.type));
+            } else {
+                filteredFiles = files.filter(file => file.type === this.uiManager.currentCategory);
+            }
+        }
+        
         if (layoutMode === 'list') {
             // 列表模式 - 对所有文件类型都可用
             // 设置容器为列表布局样式，使用更具体的选择器覆盖CSS
@@ -149,47 +160,12 @@ class UIFileRenderer {
                 justify-content: flex-start !important;
             `;
             
-            // 根据当前分类过滤文件
-            let filteredFiles = files;
-            if (this.uiManager && this.uiManager.currentCategory && this.uiManager.currentCategory !== 'all') {
-                if (this.uiManager.currentCategory === 'document') {
-                    // 文档分类包含多个子类型
-                    filteredFiles = files.filter(file => ['document', 'word', 'excel', 'powerpoint', 'pdf'].includes(file.type));
-                } else {
-                    filteredFiles = files.filter(file => file.type === this.uiManager.currentCategory);
-                }
-            }
-            
-            // 更新文件计数
-            if (this.uiManager && this.uiManager.updateFileCount) {
-                this.uiManager.updateFileCount(filteredFiles.length, files.length);
-            }
-            
-            // 处理空状态 - 外站文档分类由docs-sync模块处理
-            // 延迟调用toggleEmptyState，确保DOM更新完成
-            setTimeout(() => {
-                if (this.uiManager && this.uiManager.toggleEmptyState && this.uiManager.currentCategory !== 'external-docs') {
-                    this.uiManager.toggleEmptyState(filteredFiles.length);
-                }
-            }, 50);
-            
             fileGrid.appendChild(this.renderFileListTable(filteredFiles));
         } else {
             // 卡片模式
             // 恢复卡片布局样式
             fileGrid.className = 'files-grid';
             fileGrid.style.cssText = '';
-            
-            // 根据当前分类过滤文件
-            let filteredFiles = files;
-            if (this.uiManager && this.uiManager.currentCategory && this.uiManager.currentCategory !== 'all') {
-                if (this.uiManager.currentCategory === 'document') {
-                    // 文档分类包含多个子类型
-                    filteredFiles = files.filter(file => ['document', 'word', 'excel', 'powerpoint', 'pdf'].includes(file.type));
-                } else {
-                    filteredFiles = files.filter(file => file.type === this.uiManager.currentCategory);
-                }
-            }
             
             // 使用文档片段优化渲染性能
             const fragment = document.createDocumentFragment();
@@ -199,45 +175,23 @@ class UIFileRenderer {
                 if (fileCard) fragment.appendChild(fileCard);
             }
             fileGrid.appendChild(fragment);
-            
-            // 更新文件计数
-            if (this.uiManager && this.uiManager.updateFileCount) {
-                this.uiManager.updateFileCount(filteredFiles.length, files.length);
-            }
-            
-            // 处理空状态 - 外站文档分类由docs-sync模块处理
-            // 延迟调用toggleEmptyState，确保DOM更新完成
-            setTimeout(() => {
-                if (this.uiManager && this.uiManager.toggleEmptyState && this.uiManager.currentCategory !== 'external-docs') {
-                    this.uiManager.toggleEmptyState(filteredFiles.length);
-                }
-            }, 50);
         }
         
-        // 更新文件数量显示 - 使用过滤后的文件数量
-        if (layoutMode === 'list') {
-            // 列表模式：使用过滤后的文件数量
-            let filteredFiles = files;
-            if (this.uiManager && this.uiManager.currentCategory && this.uiManager.currentCategory !== 'all') {
-                if (this.uiManager.currentCategory === 'document') {
-                    filteredFiles = files.filter(file => ['document', 'word', 'excel', 'powerpoint', 'pdf'].includes(file.type));
-                } else {
-                    filteredFiles = files.filter(file => file.type === this.uiManager.currentCategory);
-                }
-            }
-            this.updateFileCount(filteredFiles.length);
-        } else {
-            // 卡片模式：使用过滤后的文件数量
-            let filteredFiles = files;
-            if (this.uiManager && this.uiManager.currentCategory && this.uiManager.currentCategory !== 'all') {
-                if (this.uiManager.currentCategory === 'document') {
-                    filteredFiles = files.filter(file => ['document', 'word', 'excel', 'powerpoint', 'pdf'].includes(file.type));
-                } else {
-                    filteredFiles = files.filter(file => file.type === this.uiManager.currentCategory);
-                }
-            }
-            this.updateFileCount(filteredFiles.length);
+        // 更新文件计数
+        if (this.uiManager && this.uiManager.updateFileCount) {
+            this.uiManager.updateFileCount(filteredFiles.length, files.length);
         }
+        
+        // 更新文件数量显示
+        this.updateFileCount(filteredFiles.length);
+        
+        // 处理空状态 - 外站文档分类由docs-sync模块处理
+        // 使用requestAnimationFrame确保DOM更新完成后再处理空状态
+        requestAnimationFrame(() => {
+            if (this.uiManager && this.uiManager.toggleEmptyState && this.uiManager.currentCategory !== 'external-docs') {
+                this.uiManager.toggleEmptyState(filteredFiles.length);
+            }
+        });
     }
 
     // 渲染文件列表模式（类似Windows资源管理器的列表视图）
@@ -903,14 +857,14 @@ class UIFileRenderer {
             fileGrid.style.opacity = '0';
             
             // 外站文档分类特殊处理：外站文档的空状态由docs-sync模块处理，这里只隐藏默认空状态
-            if (this.uiManager.currentCategory === 'external-docs') {
+            if (this.uiManager && this.uiManager.currentCategory === 'external-docs') {
                 // 隐藏默认空状态，外站文档的空状态由docs-sync模块处理
                 emptyState.classList.add('hidden');
                 return;
             }
             
             // URL类型特殊处理：只更新提示文本
-            if (this.uiManager.currentCategory === 'url') {
+            if (this.uiManager && this.uiManager.currentCategory === 'url') {
                 // 更新图标
                 const emptyStateIcon = emptyState.querySelector('.fa');
                 if (emptyStateIcon) {
@@ -958,6 +912,11 @@ class UIFileRenderer {
             emptyState.classList.add('hidden');
             fileGrid.classList.remove('hidden');
             fileGrid.style.opacity = '1';
+            
+            // 显示上传区域
+            if (uploadArea) {
+                uploadArea.classList.remove('hidden');
+            }
         }
     }
 
