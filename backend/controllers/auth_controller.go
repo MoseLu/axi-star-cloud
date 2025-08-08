@@ -24,6 +24,7 @@ import (
 	"backend/utils"
 
 	"github.com/gin-gonic/gin"
+    "strings"
 )
 
 // AuthController 认证控制器
@@ -70,12 +71,20 @@ func (ac *AuthController) Login(c *gin.Context) {
 		return
 	}
 
-	// 调用服务层处理登录
-	response, err := ac.authService.Login(loginData)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return
-	}
+    // 调用服务层处理登录
+    response, err := ac.authService.Login(loginData)
+    if err != nil {
+        // 明确区分业务错误与系统错误
+        msg := err.Error()
+        if strings.Contains(msg, "用户不存在") || strings.Contains(msg, "密码错误") {
+            // 认证失败：保持401并返回可读信息，供前端展示具体文案
+            c.JSON(http.StatusUnauthorized, gin.H{"error": msg})
+            return
+        }
+        // 系统级错误（数据库连接、超时等）：返回友好提示，状态码500
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "服务暂不可用，请稍后再试"})
+        return
+    }
 
 	// 设置用户token cookie
 	ac.cookieManager.SetUserTokens(c.Writer, response.Tokens)
