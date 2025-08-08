@@ -820,22 +820,14 @@ class UIFileRenderer {
         const uploadArea = document.getElementById('upload-area');
 
         if (!fileGrid || !emptyState) {
-            console.log('toggleEmptyState: DOM元素不存在', { fileGrid: !!fileGrid, emptyState: !!emptyState });
             return;
         }
 
         // 防止重复调用
         if (this._lastEmptyStateCount === visibleCount) {
-            console.log('toggleEmptyState: 重复调用，跳过', visibleCount);
             return;
         }
         this._lastEmptyStateCount = visibleCount;
-        
-        console.log('toggleEmptyState: 开始处理', { 
-            visibleCount, 
-            currentCategory: this.uiManager?.currentCategory,
-            fileGridContent: fileGrid.innerHTML.length 
-        });
         
         // 如果文件网格正在显示加载状态，不处理空状态
         if (fileGrid.innerHTML.includes('正在加载文件') || fileGrid.innerHTML.includes('fa-spinner')) {
