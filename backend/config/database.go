@@ -10,6 +10,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"gopkg.in/yaml.v3"
+    "strings"
 )
 
 // Config 完整配置结构体
@@ -180,23 +181,44 @@ func InitDB(configPath interface{}) (*sql.DB, error) {
 		fmt.Printf("数据库 %s 创建成功\n", cfg.Database.Name)
 	}
 
-	// 连接到指定数据库
-	db, err := sql.Open(dbConfig.Driver, dbConfig.DSN)
-	if err != nil {
-		return nil, err
-	}
+    // 连接到指定数据库
+    db, err := sql.Open(dbConfig.Driver, dbConfig.DSN)
+    if err != nil {
+        return nil, err
+    }
 
-	// 配置连接池参数
-	db.SetMaxOpenConns(25)                 // 最大连接数
-	db.SetMaxIdleConns(10)                 // 最大空闲连接数
-	db.SetConnMaxLifetime(5 * time.Minute) // 连接最大生命周期
-	db.SetConnMaxIdleTime(3 * time.Minute) // 空闲连接最大生命周期
+    // 配置连接池参数
+    db.SetMaxOpenConns(25)                 // 最大连接数
+    db.SetMaxIdleConns(10)                 // 最大空闲连接数
+    db.SetConnMaxLifetime(5 * time.Minute) // 连接最大生命周期
+    db.SetConnMaxIdleTime(3 * time.Minute) // 空闲连接最大生命周期
 
-	// 测试连接
-	if err := db.Ping(); err != nil {
-		db.Close()
-		return nil, fmt.Errorf("数据库连接测试失败: %v", err)
-	}
+    // 测试连接（容错：若报 Unknown database，则尝试创建后重连）
+    if err := db.Ping(); err != nil {
+        db.Close()
+        // 捕获“Unknown database”错误并自愈
+        if strings.Contains(strings.ToLower(err.Error()), "unknown database") {
+            // 使用服务器连接再次尝试创建数据库
+            serverDB2, err2 := sql.Open("mysql", serverDSN)
+            if err2 == nil {
+                defer serverDB2.Close()
+                if pingErr := serverDB2.Ping(); pingErr == nil {
+                    _, _ = serverDB2.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS `%s` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", cfg.Database.Name))
+                }
+            }
+            // 重连数据库
+            db, err = sql.Open(dbConfig.Driver, dbConfig.DSN)
+            if err != nil {
+                return nil, fmt.Errorf("数据库连接测试失败: %v", err)
+            }
+            if ping2 := db.Ping(); ping2 != nil {
+                db.Close()
+                return nil, fmt.Errorf("数据库连接测试失败: %v", ping2)
+            }
+        } else {
+            return nil, fmt.Errorf("数据库连接测试失败: %v", err)
+        }
+    }
 
 	return db, nil
 }
