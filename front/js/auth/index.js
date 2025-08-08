@@ -277,12 +277,28 @@ class SimpleAuthManager {
                 
                 return true;
             } else {
-                this.showMessage(loginResult?.message || '登录失败', 'error');
+                // 按照业务需求给出更清晰的提示
+                const msg = (loginResult && (loginResult.message || loginResult.error)) || '';
+                if (msg.includes('用户不存在')) {
+                    this.showMessage('当前你还没有注册哦，请先进行注册', 'warning');
+                } else if (msg.includes('密码错误')) {
+                    this.showMessage('密码可能不正确哦！', 'warning');
+                } else {
+                    this.showMessage(msg || '登录失败', 'error');
+                }
                 return false;
             }
         } catch (error) {
             console.error('登录失败:', error);
-            this.showMessage(error.message || '登录失败，请重试', 'error');
+            // 捕获401且信息可识别时，给出更友好的提示
+            const errMsg = error && error.message ? String(error.message) : '';
+            if (errMsg.includes('用户不存在')) {
+                this.showMessage('当前你还没有注册哦，请先进行注册', 'warning');
+            } else if (errMsg.includes('密码错误')) {
+                this.showMessage('密码可能不正确哦！', 'warning');
+            } else {
+                this.showMessage(errMsg || '登录失败，请重试', 'error');
+            }
             return false;
         } finally {
             // 隐藏loading状态

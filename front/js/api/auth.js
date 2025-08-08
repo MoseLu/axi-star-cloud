@@ -16,8 +16,13 @@ class Auth {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || '登录失败');
+                // 不把401包装成通用错误，让上层显示后端具体信息
+                let message = '登录失败';
+                try {
+                    const errorData = await response.json();
+                    message = errorData.error || errorData.message || message;
+                } catch (_) {}
+                throw new Error(message);
             }
 
             const data = await response.json();

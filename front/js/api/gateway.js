@@ -103,6 +103,10 @@ class ApiGateway {
         // 特殊状态码处理
         switch (status) {
             case window.HTTP_STATUS.UNAUTHORIZED:
+                // 登录端点的401不应触发刷新token逻辑，直接返回给上层处理
+                if (endpoint && (endpoint.endsWith('/api/auth/login') || endpoint.includes('/api/auth/login'))) {
+                    return response;
+                }
                 return this.handleUnauthorized(response, endpoint);
                 
             case window.HTTP_STATUS.NOT_FOUND:
