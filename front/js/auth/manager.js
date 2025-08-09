@@ -1564,15 +1564,13 @@ class AppAuthManager {
         // 清理路径，确保没有重复的/uploads/avatars/
         let cleanPath = avatarPath;
         
-        // 移除开头的/uploads/avatars/（如果存在）
+        // 移除开头的/uploads/avatars/（如果存在），得到纯文件名
         if (cleanPath.startsWith('/uploads/avatars/')) {
             cleanPath = cleanPath.replace('/uploads/avatars/', '');
         }
         
-        // 确保路径以/uploads/avatars/开头
-        if (!cleanPath.startsWith('/uploads/avatars/')) {
-            cleanPath = '/uploads/avatars/' + cleanPath;
-        }
+        // 重新添加正确的路径前缀
+        cleanPath = '/uploads/avatars/' + cleanPath;
         
         // 尝试多种方式构建完整URL
         let fullUrl = cleanPath;

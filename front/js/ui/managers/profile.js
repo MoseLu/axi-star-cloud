@@ -22,6 +22,8 @@ class UIProfileManager {
             return;
         }
         
+        // 初始化时清理可能存在的错误缓存
+        this.cleanupCorruptedAvatarCache();
 
         
         this.setupAvatarUpload();
@@ -716,6 +718,66 @@ class UIProfileManager {
     }
 
     /**
+     * 清理已损坏的头像缓存
+     */
+    cleanupCorruptedAvatarCache() {
+        try {
+            // 清理localStorage中的错误缓存
+            const cachedAvatar = localStorage.getItem('cachedAvatar');
+            if (cachedAvatar && (
+                cachedAvatar.includes('/uploads/avatars//uploads/avatars/') ||
+                cachedAvatar.includes('//uploads/avatars/') ||
+                cachedAvatar.includes('///') ||
+                cachedAvatar === 'null' ||
+                cachedAvatar === 'undefined'
+            )) {
+                localStorage.removeItem('cachedAvatar');
+            }
+            
+            // 清理StorageManager中的错误缓存
+            if (window.StorageManager && typeof window.StorageManager.getAvatar === 'function') {
+                const storedAvatar = window.StorageManager.getAvatar();
+                if (storedAvatar && (
+                    storedAvatar.includes('/uploads/avatars//uploads/avatars/') ||
+                    storedAvatar.includes('//uploads/avatars/') ||
+                    storedAvatar.includes('///') ||
+                    storedAvatar === 'null' ||
+                    storedAvatar === 'undefined'
+                )) {
+                    window.StorageManager.setAvatar(null);
+                }
+            }
+            
+            // 清理userInfo中的错误avatarUrl
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                try {
+                    const userData = JSON.parse(userInfo);
+                    if (userData.avatarUrl && (
+                        userData.avatarUrl.includes('/uploads/avatars//uploads/avatars/') ||
+                        userData.avatarUrl.includes('//uploads/avatars/') ||
+                        userData.avatarUrl.includes('///') ||
+                        userData.avatarUrl === 'null' ||
+                        userData.avatarUrl === 'undefined'
+                    )) {
+                        // 尝试从错误URL中提取正确的文件名
+                        let cleanFileName = userData.avatarUrl;
+                        if (cleanFileName.includes('/uploads/avatars/')) {
+                            cleanFileName = cleanFileName.split('/uploads/avatars/').pop();
+                        }
+                        userData.avatarUrl = cleanFileName;
+                        localStorage.setItem('userInfo', JSON.stringify(userData));
+                    }
+                } catch (error) {
+                    console.warn('清理userInfo头像URL失败:', error);
+                }
+            }
+        } catch (error) {
+            console.warn('清理头像缓存失败:', error);
+        }
+    }
+
+    /**
      * 强制刷新头像显示 - 防止被其他模块覆盖
      * @param {string} avatarUrl - 头像URL（应该是完整URL）
      */
@@ -1191,6 +1253,9 @@ class UIProfileManager {
                 cleanFileName = avatarFileName;
                 fullAvatarUrl = window.apiGateway?.buildUrl('/uploads/avatars/' + cleanFileName) || ('/uploads/avatars/' + cleanFileName);
             }
+            
+            // 清理已经错误的缓存
+            this.cleanupCorruptedAvatarCache();
             
             // 更新缓存 - 缓存完整URL
             if (window.StorageManager && typeof window.StorageManager.setAvatar === 'function') {
