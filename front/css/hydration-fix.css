@@ -1,0 +1,60 @@
+/* 水合问题修复样式 */
+
+/* 在JavaScript加载完成前，确保页面有正确的主题样式 */
+html:not([data-hydrated="true"]) {
+    /* 默认使用暗色主题，避免闪烁 */
+    background-color: #0F172A !important;
+    color: #ffffff !important;
+}
+
+html:not([data-hydrated="true"]) body {
+    background-color: #0F172A !important;
+    color: #ffffff !important;
+}
+
+/* 确保在主题管理器初始化前，页面不会出现两种主题共生的情况 */
+html:not([data-theme]) {
+    background-color: #0F172A !important;
+    color: #ffffff !important;
+}
+
+html:not([data-theme]) body {
+    background-color: #0F172A !important;
+    color: #ffffff !important;
+}
+
+/* 水合完成后的过渡效果 */
+html[data-hydrated="true"] {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html[data-hydrated="true"] body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 确保主题切换按钮在水合期间不会显示错误状态 */
+html:not([data-hydrated="true"]) .theme-toggle-btn {
+    opacity: 0.7;
+}
+
+/* 防止页面加载时的闪烁 */
+html:not([data-hydrated="true"]) * {
+    transition: none !important;
+}
+
+/* 确保登录页面在水合期间也有正确的样式 */
+html:not([data-hydrated="true"]) #login-page {
+    background-color: #0F172A !important;
+    color: #ffffff !important;
+}
+
+/* 确保主应用在水合期间也有正确的样式 */
+html:not([data-hydrated="true"]) #app {
+    background-color: #0F172A !important;
+    color: #ffffff !important;
+}
+
+/* 水合完成后的样式恢复 */
+html[data-hydrated="true"] * {
+    transition: all 0.3s ease;
+}
