@@ -21,17 +21,20 @@ func InitializeGORM() (*gorm.DB, error) {
 	}
 	log.Println("✓ GORM连接正常")
 
-	// 2. 自动迁移表结构
-	if err := autoMigrateTables(gormDB); err != nil {
-		return nil, err
+	// 2. 严格的只读检测
+	if err := performGORMReadOnlyCheck(gormDB); err != nil {
+		log.Printf("⚠️ GORM检测到异常: %v", err)
+		log.Println("🔧 开始执行GORM增量更新...")
+
+		// 只有在检测到异常时才执行增量更新
+		if err := performGORMIncrementalUpdate(gormDB); err != nil {
+			return nil, err
+		}
+	} else {
+		log.Println("✅ GORM数据库状态正常，无需进行任何修改")
 	}
 
-	// 3. 插入初始数据
-	if err := insertInitialDataGORM(gormDB); err != nil {
-		return nil, err
-	}
-
-	// 4. 验证表结构
+	// 3. 最终验证表结构
 	if err := validateTablesGORM(gormDB); err != nil {
 		return nil, err
 	}
@@ -40,25 +43,109 @@ func InitializeGORM() (*gorm.DB, error) {
 	return gormDB, nil
 }
 
-// autoMigrateTables 自动迁移表结构
-func autoMigrateTables(db *gorm.DB) error {
-	log.Println("执行GORM自动迁移...")
+// performGORMReadOnlyCheck 执行GORM严格的只读检测
+func performGORMReadOnlyCheck(db *gorm.DB) error {
+	log.Println("🔍 执行GORM严格的只读检测...")
 
-	// 自动迁移所有模型
-	err := db.AutoMigrate(
-		&models.User{},
-		&models.File{},
-		&models.Folder{},
-		&models.Document{},
-		&models.UpdateLog{},
-		&models.UrlFile{},
-	)
+	// 1. 检测必需的表是否存在
+	tables := []string{"user", "files", "folders", "documents", "update_logs", "url_files"}
 
-	if err != nil {
+	missingTables := []string{}
+	for _, tableName := range tables {
+		if !db.Migrator().HasTable(tableName) {
+			missingTables = append(missingTables, tableName)
+		}
+	}
+
+	if len(missingTables) > 0 {
+		return fmt.Errorf("检测到缺失的表: %v", missingTables)
+	}
+
+	// 2. 检测表是否可以正常查询（只读测试）
+	for _, tableName := range tables {
+		var count int64
+		if err := db.Table(tableName).Count(&count).Error; err != nil {
+			return fmt.Errorf("表 %s 无法正常查询: %v", tableName, err)
+		}
+		log.Printf("✅ GORM表 %s 查询正常", tableName)
+	}
+
+	// 3. 检测是否有管理员用户
+	var userCount int64
+	if err := db.Model(&models.User{}).Count(&userCount).Error; err != nil {
+		return fmt.Errorf("无法检查用户表数据: %v", err)
+	}
+
+	if userCount == 0 {
+		return fmt.Errorf("用户表为空，需要初始化管理员用户")
+	}
+
+	log.Println("✅ 所有GORM只读检测通过，数据库状态正常")
+	return nil
+}
+
+// performGORMIncrementalUpdate 执行GORM增量更新（仅在检测到异常时调用）
+func performGORMIncrementalUpdate(db *gorm.DB) error {
+	log.Println("🔧 开始执行GORM增量更新...")
+
+	// 1. 自动迁移表结构
+	if err := autoMigrateTables(db); err != nil {
 		return err
 	}
 
-	log.Println("✓ 表结构迁移完成")
+	// 2. 插入初始数据
+	if err := insertInitialDataGORM(db); err != nil {
+		return err
+	}
+
+	log.Println("✅ GORM增量更新完成")
+	return nil
+}
+
+// autoMigrateTables 自动迁移表结构（安全版本）
+func autoMigrateTables(db *gorm.DB) error {
+	log.Println("执行GORM安全自动迁移...")
+
+	// 检查表是否存在，只对不存在的表进行迁移
+	tables := []string{"user", "files", "folders", "documents", "update_logs", "url_files"}
+
+	for _, tableName := range tables {
+		if !db.Migrator().HasTable(tableName) {
+			log.Printf("🔧 迁移表: %s", tableName)
+
+			// 只对不存在的表进行迁移
+			switch tableName {
+			case "user":
+				if err := db.AutoMigrate(&models.User{}); err != nil {
+					log.Printf("⚠️ 迁移user表失败: %v", err)
+				}
+			case "files":
+				if err := db.AutoMigrate(&models.File{}); err != nil {
+					log.Printf("⚠️ 迁移files表失败: %v", err)
+				}
+			case "folders":
+				if err := db.AutoMigrate(&models.Folder{}); err != nil {
+					log.Printf("⚠️ 迁移folders表失败: %v", err)
+				}
+			case "documents":
+				if err := db.AutoMigrate(&models.Document{}); err != nil {
+					log.Printf("⚠️ 迁移documents表失败: %v", err)
+				}
+			case "update_logs":
+				if err := db.AutoMigrate(&models.UpdateLog{}); err != nil {
+					log.Printf("⚠️ 迁移update_logs表失败: %v", err)
+				}
+			case "url_files":
+				if err := db.AutoMigrate(&models.UrlFile{}); err != nil {
+					log.Printf("⚠️ 迁移url_files表失败: %v", err)
+				}
+			}
+		} else {
+			log.Printf("✅ 表 %s 已存在，跳过迁移", tableName)
+		}
+	}
+
+	log.Println("✓ 安全表结构迁移完成")
 	return nil
 }
 

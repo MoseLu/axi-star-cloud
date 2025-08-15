@@ -59,25 +59,16 @@ func (app *App) Initialize() error {
 	}
 	app.Config = cfg
 
-	// 连接数据库（不进行初始化，初始化在部署时完成）
-	db, err := app.ConnectDatabase()
-	if err != nil {
-		return fmt.Errorf("连接数据库失败: %v", err)
+	// 使用安全的数据库初始化器
+	if err := app.safeInitializeDatabase(); err != nil {
+		return fmt.Errorf("安全数据库初始化失败: %v", err)
 	}
-	app.DB = db
-
-	// 初始化GORM数据库
-	gormDB, err := app.initializeGORM()
-	if err != nil {
-		return fmt.Errorf("初始化GORM数据库失败: %v", err)
-	}
-	app.GormDB = gormDB
 
 	// 初始化路由
 	app.Router = app.initializeRouter()
 
 	// 初始化处理器
-	handlers, userRepo, fileRepo, urlFileRepo := app.initializeHandlers(db, gormDB)
+	handlers, userRepo, fileRepo, urlFileRepo := app.initializeHandlers(app.DB, app.GormDB)
 
 	// 设置路由
 	app.setupRoutes(handlers, userRepo, fileRepo, urlFileRepo)
@@ -130,7 +121,25 @@ func (app *App) InitializeDatabase() (*sql.DB, error) {
 	return db, nil
 }
 
-// initializeGORM 初始化GORM数据库
+// safeInitializeDatabase 安全初始化数据库
+func (app *App) safeInitializeDatabase() error {
+	fmt.Println("🔒 开始安全数据库初始化...")
+	
+	// 使用安全的数据库初始化器
+	initializer := database.NewSafeDatabaseInitializer()
+	if err := initializer.Initialize(); err != nil {
+		return fmt.Errorf("安全数据库初始化失败: %v", err)
+	}
+	
+	// 获取数据库连接
+	app.DB = initializer.GetDB()
+	app.GormDB = initializer.GetGormDB()
+	
+	fmt.Println("✅ 安全数据库初始化完成")
+	return nil
+}
+
+// initializeGORM 初始化GORM数据库（保留用于兼容性）
 func (app *App) initializeGORM() (*gorm.DB, error) {
 	fmt.Println("🔧 开始初始化GORM数据库...")
 	

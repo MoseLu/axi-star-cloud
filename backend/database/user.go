@@ -2,10 +2,11 @@ package database
 
 import (
 	"database/sql"
+	"log"
+	"strings"
 	"time"
 
 	"backend/models"
-	"strings"
 )
 
 // UserRepository 用户数据仓库
@@ -45,13 +46,31 @@ func (r *UserRepository) GetUserByUsername(username string) (*models.User, error
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		// 自愈：若 user 表不存在，尝试创建基础表并重试一次
+		// 自愈：先进行严格的只读检测，只有在确实异常时才进行初始化
 		if strings.Contains(err.Error(), "Error 1146") || strings.Contains(strings.ToLower(err.Error()), "doesn't exist") {
-			// 尝试创建表结构与初始数据
-			if createErr := CreateTables(r.db); createErr == nil {
-				_ = MigrateDatabase(r.db)
-				_ = InsertInitialData(r.db)
-				// 重试一次
+			log.Printf("⚠️ 检测到可能的表不存在错误，进行严格的只读检测...")
+
+			// 使用安全的数据库初始化器进行只读检测
+			initializer := NewSafeDatabaseInitializer()
+
+			// 先连接数据库
+			if connectErr := initializer.ConnectDatabase(); connectErr != nil {
+				log.Printf("❌ 数据库连接失败: %v", connectErr)
+				return nil, err
+			}
+
+			// 执行严格的只读检测
+			if checkErr := initializer.PerformReadOnlyCheck(); checkErr != nil {
+				log.Printf("⚠️ 只读检测发现异常: %v", checkErr)
+				log.Println("🔧 开始执行安全初始化...")
+
+				// 只有在检测到异常时才执行初始化
+				if initErr := initializer.PerformIncrementalUpdate(); initErr != nil {
+					log.Printf("❌ 安全初始化失败: %v", initErr)
+					return nil, err
+				}
+
+				// 重试一次查询
 				retryErr := r.db.QueryRow(query, username).Scan(
 					&user.UUID, &user.Username, &user.Password, &email, &bio, &avatar,
 					&user.StorageLimit, &lastLoginTime, &user.IsOnline,
@@ -70,8 +89,13 @@ func (r *UserRepository) GetUserByUsername(username string) (*models.User, error
 					if lastLoginTime.Valid {
 						user.LastLoginTime = &lastLoginTime.Time
 					}
+					log.Printf("✅ 数据库安全初始化成功，用户查询重试成功")
 					return &user, nil
+				} else {
+					log.Printf("⚠️ 数据库初始化后重试查询仍然失败: %v", retryErr)
 				}
+			} else {
+				log.Printf("✅ 只读检测通过，数据库状态正常，原始错误可能是其他原因")
 			}
 		}
 		return nil, err
