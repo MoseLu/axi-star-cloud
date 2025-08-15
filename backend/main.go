@@ -21,6 +21,11 @@ func main() {
 				os.Exit(1)
 			}
 			return
+		case "--init-db":
+			if err := utils.InitDatabase(); err != nil {
+				os.Exit(1)
+			}
+			return
 		}
 	}
 

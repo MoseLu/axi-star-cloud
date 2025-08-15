@@ -123,3 +123,23 @@ func ResetUpdateLogsTable() error {
 	log.Println("✓ 更新日志表重置完成")
 	return nil
 }
+
+// InitDatabase 初始化数据库（用于部署时）
+func InitDatabase() error {
+	log.Println("🔧 开始初始化数据库...")
+
+	// 1. 连接数据库
+	db, err := config.InitDB(nil)
+	if err != nil {
+		return fmt.Errorf("连接数据库失败: %v", err)
+	}
+	defer db.Close()
+
+	// 2. 初始化数据库
+	if err := database.InitializeDatabase(db); err != nil {
+		return fmt.Errorf("初始化数据库失败: %v", err)
+	}
+
+	log.Println("✅ 数据库初始化完成")
+	return nil
+}

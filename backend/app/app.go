@@ -59,10 +59,10 @@ func (app *App) Initialize() error {
 	}
 	app.Config = cfg
 
-	// 初始化数据库
-	db, err := app.InitializeDatabase()
+	// 连接数据库（不进行初始化，初始化在部署时完成）
+	db, err := app.ConnectDatabase()
 	if err != nil {
-		return fmt.Errorf("初始化数据库失败: %v", err)
+		return fmt.Errorf("连接数据库失败: %v", err)
 	}
 	app.DB = db
 
@@ -85,7 +85,26 @@ func (app *App) Initialize() error {
 	return nil
 }
 
-// InitializeDatabase 初始化数据库
+// ConnectDatabase 连接数据库（不进行初始化）
+func (app *App) ConnectDatabase() (*sql.DB, error) {
+	fmt.Println("🔧 连接数据库...")
+	
+	db, err := config.InitDB(nil)
+	if err != nil {
+		return nil, fmt.Errorf("数据库连接失败: %v", err)
+	}
+	fmt.Println("✅ 数据库连接成功")
+
+	// 测试数据库连接
+	if err := db.Ping(); err != nil {
+		return nil, fmt.Errorf("数据库连接测试失败: %v", err)
+	}
+	fmt.Println("✅ 数据库连接测试通过")
+
+	return db, nil
+}
+
+// InitializeDatabase 初始化数据库（保留用于兼容性）
 func (app *App) InitializeDatabase() (*sql.DB, error) {
 	fmt.Println("🔧 开始初始化数据库...")
 	
