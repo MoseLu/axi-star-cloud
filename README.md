@@ -664,12 +664,4 @@ sudo systemctl restart star-cloud.service
 **最后更新**: 2024-12-19  
 **维护状态**: 活跃维护中
 
-> 💡 **提示**: 本项目采用现代化的CI/CD流程，通过GitHub Actions实现自动化构建、测试和部署。每次提交到main分支都会触发自动构建工作流。#   ��S;NM�n͑�^ 
- #   KmՋH T T P / H T T P S ��� 
- #   KmՋ g�~�OY 
- #   KmՋ��~M�n�h�g 
- #   KmՋhQb��h�g 
- #   KmՋ9eۏ�vH T T P S KmՋ 
- #   KmՋ�e�N�h�g 
- #   KmՋn g i n x M�n�h�g 
- 
+> 💡 **提示**: 本项目采用现代化的CI/CD流程，通过GitHub Actions实现自动化构建、测试和部署。每次提交到main分支都会触发自动构建工作流。

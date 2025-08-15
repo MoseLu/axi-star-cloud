@@ -26,6 +26,11 @@ class ThemeTransitionManager {
         setTimeout(() => {
             this.updateButtonState();
         }, 200);
+        
+        // 确保与主题管理器同步
+        if (window.themeManager) {
+            this.currentTheme = window.themeManager.getCurrentTheme();
+        }
     }
 
     createOverlay() {
@@ -249,35 +254,36 @@ class ThemeTransitionManager {
 
     // 公共方法：手动切换主题
     switchToTheme(theme) {
-        // 移除旧主题类
-        document.documentElement.classList.remove('light', 'dark');
-        
-        // 添加新主题类
-        document.documentElement.classList.add(theme);
-        
-        // 更新body类
-        document.body.className = document.body.className.replace(/theme-\w+/g, '');
-        document.body.classList.add(`theme-${theme}`);
-        
-        // 更新背景色类
-        if (theme === 'dark') {
-            document.body.classList.remove('bg-white', 'text-gray-900');
-            document.body.classList.add('bg-dark', 'text-white');
+        // 使用主题管理器来切换主题，确保一致性
+        if (window.themeManager && typeof window.themeManager.setTheme === 'function') {
+            window.themeManager.setTheme(theme);
         } else {
-            document.body.classList.remove('bg-dark', 'text-white');
-            document.body.classList.add('bg-white', 'text-gray-900');
-        }
-        
-        // 更新当前主题
-        this.currentTheme = theme;
-        
-        // 保存到本地存储
-        const THEME_KEY = 'axi-star-cloud-theme';
-        localStorage.setItem(THEME_KEY, theme);
-        
-        // 触发主题管理器的CSS重新加载
-        if (window.themeManager && typeof window.themeManager.applyTheme === 'function') {
-            window.themeManager.applyTheme(theme);
+            // 备用方案：直接操作DOM
+            // 移除旧主题类
+            document.documentElement.classList.remove('light', 'dark');
+            
+            // 添加新主题类
+            document.documentElement.classList.add(theme);
+            
+            // 更新body类
+            document.body.className = document.body.className.replace(/theme-\w+/g, '');
+            document.body.classList.add(`theme-${theme}`);
+            
+            // 更新背景色类
+            if (theme === 'dark') {
+                document.body.classList.remove('bg-white', 'text-gray-900');
+                document.body.classList.add('bg-dark', 'text-white');
+            } else {
+                document.body.classList.remove('bg-dark', 'text-white');
+                document.body.classList.add('bg-white', 'text-gray-900');
+            }
+            
+            // 更新当前主题
+            this.currentTheme = theme;
+            
+            // 保存到本地存储
+            const THEME_KEY = 'axi-star-cloud-theme';
+            localStorage.setItem(THEME_KEY, theme);
         }
     }
 

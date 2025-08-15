@@ -87,26 +87,40 @@ func (app *App) Initialize() error {
 
 // InitializeDatabase 初始化数据库
 func (app *App) InitializeDatabase() (*sql.DB, error) {
+	fmt.Println("🔧 开始初始化数据库...")
+	
 	db, err := config.InitDB(nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("数据库连接失败: %v", err)
 	}
+	fmt.Println("✅ 数据库连接成功")
+
+	// 测试数据库连接
+	if err := db.Ping(); err != nil {
+		return nil, fmt.Errorf("数据库连接测试失败: %v", err)
+	}
+	fmt.Println("✅ 数据库连接测试通过")
 
 	// 使用新的完整初始化函数
+	fmt.Println("🔧 开始执行数据库初始化...")
 	if err := database.InitializeDatabase(db); err != nil {
 		return nil, fmt.Errorf("数据库初始化失败: %v", err)
 	}
+	fmt.Println("✅ 数据库初始化完成")
 
 	return db, nil
 }
 
 // initializeGORM 初始化GORM数据库
 func (app *App) initializeGORM() (*gorm.DB, error) {
+	fmt.Println("🔧 开始初始化GORM数据库...")
+	
 	// 使用GORM初始化数据库
 	gormDB, err := database.InitializeGORM()
 	if err != nil {
 		return nil, fmt.Errorf("GORM数据库初始化失败: %v", err)
 	}
+	fmt.Println("✅ GORM数据库初始化完成")
 
 	return gormDB, nil
 }

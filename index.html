@@ -96,6 +96,24 @@
     <!-- Google Fonts - 添加备用方案 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- 立即设置主题状态，避免水合问题 -->
+    <script>
+        // 立即设置主题状态，避免水合问题
+        (function() {
+            // 立即设置html元素的data属性
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.setAttribute('data-hydrated', 'false');
+            
+            // 确保body有正确的类名
+            document.body.classList.add('theme-dark', 'bg-dark', 'text-white');
+            document.documentElement.classList.add('dark');
+            
+            // 移除可能的冲突类名
+            document.body.classList.remove('theme-light', 'bg-white', 'text-gray-900');
+            document.documentElement.classList.remove('light');
+        })();
+    </script>
+    
     <!-- 立即隐藏管理员按钮，避免页面刷新时短暂显示 -->
     <script>
         // 在DOM加载时立即隐藏管理员按钮
@@ -173,6 +191,7 @@
     <link rel="stylesheet" href="/static/css/font-optimization.css">
     <link rel="stylesheet" href="/static/css/theme-toggle.css">
     <link rel="stylesheet" href="/static/css/theme-transition.css">
+    <link rel="stylesheet" href="/static/css/hydration-fix.css">
     
     <!-- 主题样式由主题管理器动态加载 -->
     <!-- 暗色主题: /static/css/dark/ -->
@@ -211,7 +230,7 @@
     <!-- 注意：app.js在body部分加载，避免重复 -->
 
 </head>
-<body class="bg-dark text-white font-inter">
+<body class="bg-dark text-white font-inter" data-theme="dark" data-hydrated="false">
     <!-- 登录页面 -->
     <div id="login-page" class="hidden">
         <!-- 登录页面内容将通过JavaScript动态加载 -->

@@ -6,6 +6,7 @@ class ThemeManager {
     constructor() {
         this.currentTheme = 'dark'; // 默认暗色主题
         this.themeKey = 'axi-star-cloud-theme';
+        this.isHydrated = false; // 水合状态标记
         this.init();
     }
 
@@ -14,16 +15,44 @@ class ThemeManager {
      */
     init() {
         try {
+            // 立即应用默认主题，避免水合问题
+            this.applyInitialTheme();
+            
             // 从本地存储加载主题设置
             this.loadThemeFromStorage();
             
             // 应用当前主题
             this.applyTheme(this.currentTheme);
             
+            // 标记为已水合
+            this.isHydrated = true;
+            document.documentElement.setAttribute('data-hydrated', 'true');
+            
             // 设置全局主题切换事件
             this.setupGlobalThemeToggle();
         } catch (error) {
             console.error('主题管理器初始化失败:', error);
+        }
+    }
+
+    /**
+     * 立即应用初始主题，避免水合问题
+     */
+    applyInitialTheme() {
+        try {
+            // 立即移除所有可能的主题类，避免冲突
+            document.documentElement.classList.remove('light', 'dark', 'theme-light', 'theme-dark');
+            document.body.classList.remove('theme-light', 'theme-dark', 'bg-white', 'bg-dark', 'text-gray-900', 'text-white');
+            
+            // 应用默认暗色主题
+            document.documentElement.classList.add('dark');
+            document.body.classList.add('theme-dark', 'bg-dark', 'text-white');
+            
+            // 设置data属性
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.setAttribute('data-hydrated', 'false');
+        } catch (error) {
+            console.warn('应用初始主题失败:', error);
         }
     }
 
@@ -163,6 +192,11 @@ class ThemeManager {
         
         // 更新主题切换按钮状态
         this.updateThemeToggleButton(theme);
+        
+        // 确保水合状态正确
+        if (this.isHydrated) {
+            document.documentElement.setAttribute('data-hydrated', 'true');
+        }
     }
 
     /**
@@ -267,25 +301,31 @@ class ThemeManager {
     updateBodyClass(theme) {
         try {
             const body = document.body;
+            const html = document.documentElement;
+            
             if (!body) {
                 console.warn('body元素不存在');
                 return;
             }
             
-            // 移除现有的主题类
-            body.classList.remove('theme-dark', 'theme-light');
+            // 移除所有可能的主题类，确保没有冲突
+            body.classList.remove('theme-dark', 'theme-light', 'bg-white', 'bg-dark', 'text-gray-900', 'text-white');
+            html.classList.remove('light', 'dark', 'theme-light', 'theme-dark');
             
             // 添加新主题类
             body.classList.add(`theme-${theme}`);
             
             // 更新背景色 - 保持Tailwind类完整
             if (theme === 'dark') {
-                body.classList.remove('bg-white', 'text-gray-900');
                 body.classList.add('bg-dark', 'text-white');
+                html.classList.add('dark');
             } else {
-                body.classList.remove('bg-dark', 'text-white');
                 body.classList.add('bg-white', 'text-gray-900');
+                html.classList.add('light');
             }
+            
+            // 更新data属性
+            html.setAttribute('data-theme', theme);
         } catch (error) {
             console.warn('更新body类名失败:', error);
         }

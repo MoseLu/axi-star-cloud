@@ -146,20 +146,20 @@ var tableDefinitions = []TableDefinition{
 
 // InitializeDatabase 初始化数据库
 func InitializeDatabase(db *sql.DB) error {
-	log.Println("开始初始化数据库...")
+	log.Println("🔧 开始初始化数据库...")
 
 	// 1. 检查数据库连接
 	if err := db.Ping(); err != nil {
 		return fmt.Errorf("数据库连接失败: %v", err)
 	}
-	log.Println("✓ 数据库连接正常")
+	log.Println("✅ 数据库连接正常")
 
 	// 2. 获取现有表
 	existingTables, err := getExistingTables(db)
 	if err != nil {
 		return fmt.Errorf("获取现有表失败: %v", err)
 	}
-	log.Printf("发现现有表: %v", existingTables)
+	log.Printf("📋 发现现有表: %v", existingTables)
 
 	// 3. 检查所有必需的表
 	requiredTables := []string{"user", "files", "folders", "documents", "update_logs", "url_files"}
@@ -172,14 +172,21 @@ func InitializeDatabase(db *sql.DB) error {
 	}
 
 	if len(missingTables) > 0 {
-		log.Printf("发现缺失的表: %v", missingTables)
+		log.Printf("⚠️ 发现缺失的表: %v", missingTables)
 		// 创建缺失的表
 		if err := createMissingTables(db, existingTables); err != nil {
 			return fmt.Errorf("创建缺失表失败: %v", err)
 		}
-		log.Println("✓ 缺失的表已创建")
+		log.Println("✅ 缺失的表已创建")
+		
+		// 重新获取表列表以验证创建结果
+		existingTables, err = getExistingTables(db)
+		if err != nil {
+			return fmt.Errorf("重新获取表列表失败: %v", err)
+		}
+		log.Printf("📋 重新获取现有表: %v", existingTables)
 	} else {
-		log.Println("✓ 所有必需的表都已存在")
+		log.Println("✅ 所有必需的表都已存在")
 	}
 
 	// 4. 验证所有表都可以正常查询
@@ -197,7 +204,7 @@ func InitializeDatabase(db *sql.DB) error {
 		return fmt.Errorf("初始数据插入失败: %v", err)
 	}
 
-	log.Println("✓ 数据库初始化完成")
+	log.Println("✅ 数据库初始化完成")
 	return nil
 }
 
@@ -231,22 +238,23 @@ func getExistingTables(db *sql.DB) (map[string]bool, error) {
 func createMissingTables(db *sql.DB, existingTables map[string]bool) error {
 	for _, tableDef := range tableDefinitions {
 		if !existingTables[tableDef.Name] {
-			log.Printf("创建表: %s", tableDef.Name)
+			log.Printf("🔧 创建表: %s", tableDef.Name)
 
 			// 创建表
 			if _, err := db.Exec(tableDef.SQL); err != nil {
 				return fmt.Errorf("创建表 %s 失败: %v", tableDef.Name, err)
 			}
+			log.Printf("✅ 表 %s 创建成功", tableDef.Name)
 
 			// 创建索引
 			for _, indexSQL := range tableDef.Indexes {
 				if _, err := db.Exec(indexSQL); err != nil {
 					// 索引创建失败通常是已存在，记录但不中断
-					log.Printf("警告: 创建索引失败 (可能已存在): %s", indexSQL)
+					log.Printf("⚠️ 创建索引失败 (可能已存在): %s", indexSQL)
+				} else {
+					log.Printf("✅ 索引创建成功: %s", indexSQL)
 				}
 			}
-
-			log.Printf("✓ 表 %s 创建成功", tableDef.Name)
 		}
 	}
 
@@ -261,7 +269,7 @@ func validateAllTables(db *sql.DB) error {
 		if !tableExists(db, tableName) {
 			return fmt.Errorf("必需的表 %s 不存在", tableName)
 		}
-		log.Printf("✓ 表 %s 验证通过", tableName)
+		log.Printf("✅ 表 %s 验证通过", tableName)
 	}
 
 	return nil
@@ -318,10 +326,14 @@ func insertInitialDataIfNeeded(db *sql.DB) error {
 	}
 
 	if count == 0 {
-		log.Println("user表为空，插入初始数据...")
-		return InsertInitialData(db)
+		log.Println("🔧 user表为空，插入初始数据...")
+		if err := InsertInitialData(db); err != nil {
+			return fmt.Errorf("插入初始数据失败: %v", err)
+		}
+		log.Println("✅ 初始数据插入完成")
+		return nil
 	} else {
-		log.Printf("user表已有 %d 条数据，跳过初始数据插入", count)
+		log.Printf("✅ user表已有 %d 条数据，跳过初始数据插入", count)
 		return nil
 	}
 }
