@@ -665,10 +665,20 @@ sudo systemctl restart star-cloud.service
 **维护状态**: 活跃维护中
 
 > 💡 **提示**: 本项目采用现代化的CI/CD流程，通过GitHub Actions实现自动化构建、测试和部署。每次提交到main分支都会触发自动构建工作流。
-#   KmՋ�R`�z�SRM��R�� 
- #   KmՋ�OYT�v�R`�z�SRM��R�� 
- #   KmՋ�OYT�v�z�S�h�g�R�� 
- #   KmՋ�OYT�v�z�S���Q�R�� 
- #   KmՋ�R`M�n�e�N�f�e�R�� 
- #   KmՋ  s y s t e m d   g�R�e�N�R`�f�e�R�� 
+#   KmՋ�R`�z�SRM��R��
+ 
+ #   KmՋ�O
+YT�v�R`�z�SRM��R��
+ 
+ #   KmՋ�O
+YT�v�z�S�h�g�R��
+ 
+ #   KmՋ�O
+YT�v�z�S���Q�R��
+ 
+ #   KmՋ�R`M�n�e�N�f�e�R��
+ 
+ #   KmՋ  s y s t e m d   
+g�R�e�N�R`�f�e�R��
+ 
  
