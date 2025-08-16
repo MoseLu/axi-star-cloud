@@ -102,7 +102,47 @@ func LoadConfig(path string) (*Config, error) {
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, err
 	}
+	
+	// 尝试从动态端口配置文件读取端口
+	if dynamicPort := getDynamicPort(); dynamicPort != "" {
+		cfg.Server.Port = dynamicPort
+		fmt.Printf("🔧 使用动态分配的端口: %s\n", dynamicPort)
+	}
+	
 	return &cfg, nil
+}
+
+// getDynamicPort 从动态端口配置文件读取端口
+func getDynamicPort() string {
+	// 首先检查环境变量
+	if envPort := os.Getenv("SERVICE_PORT"); envPort != "" {
+		return envPort
+	}
+	
+	// 检查动态端口配置文件
+	configFile := "/srv/port-config.yml"
+	if _, err := os.Stat(configFile); err == nil {
+		data, err := ioutil.ReadFile(configFile)
+		if err == nil {
+			var portConfig struct {
+				Projects map[string]struct {
+					Port string `yaml:"port"`
+				} `yaml:"projects"`
+			}
+			if err := yaml.Unmarshal(data, &portConfig); err == nil {
+				// 查找当前项目的端口（通过项目名称或默认）
+				for projectName, project := range portConfig.Projects {
+					if projectName == "axi-star-cloud" || projectName == "star-cloud" {
+						if project.Port != "" {
+							return project.Port
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	return ""
 }
 
 // LoadDBConfig 读取数据库配置（保持向后兼容）
