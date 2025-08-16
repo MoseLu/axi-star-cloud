@@ -104,13 +104,25 @@
             document.documentElement.setAttribute('data-theme', 'dark');
             document.documentElement.setAttribute('data-hydrated', 'false');
             
-            // 确保body有正确的类名
-            document.body.classList.add('theme-dark', 'bg-dark', 'text-white');
-            document.documentElement.classList.add('dark');
+            // 确保body有正确的类名 - 添加安全检查
+            if (document.body) {
+                document.body.classList.add('theme-dark', 'bg-dark', 'text-white');
+                // 移除可能的冲突类名
+                document.body.classList.remove('theme-light', 'bg-white', 'text-gray-900');
+            }
             
-            // 移除可能的冲突类名
-            document.body.classList.remove('theme-light', 'bg-white', 'text-gray-900');
+            document.documentElement.classList.add('dark');
             document.documentElement.classList.remove('light');
+            
+            // 如果body还没有准备好，等待DOM加载完成
+            if (!document.body) {
+                document.addEventListener('DOMContentLoaded', function() {
+                    if (document.body) {
+                        document.body.classList.add('theme-dark', 'bg-dark', 'text-white');
+                        document.body.classList.remove('theme-light', 'bg-white', 'text-gray-900');
+                    }
+                });
+            }
         })();
     </script>
     
