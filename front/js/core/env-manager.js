@@ -173,7 +173,7 @@ class AppEnvironmentManager {
             hostname === '127.0.0.1' ||
             hostname.startsWith('192.168.') ||
             hostname.startsWith('10.') ||
-            (hostname === 'localhost' && (port === '8080' || port === '8081' || port === '' || port === '3000')) ||
+            (hostname === 'localhost' && (port === '8124' || port === '8080' || port === '8081' || port === '' || port === '3000')) ||
             protocol === 'file:' ||
             hostname.includes('localhost')) {
             return 'local';

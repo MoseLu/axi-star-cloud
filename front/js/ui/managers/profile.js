@@ -1804,7 +1804,7 @@ class UIProfileManager {
             // 根据当前域名判断环境
             const hostname = window.location.hostname;
             if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('localhost')) {
-                baseUrl = 'http://localhost:8080';
+                baseUrl = 'http://localhost:8124';
             } else if (hostname.includes('redamancy.com.cn')) {
                 baseUrl = 'https://redamancy.com.cn';
             } else {
@@ -2244,7 +2244,7 @@ class UIProfileManager {
                     avatarUrl.startsWith('/uploads/avatars/') || avatarUrl.includes('/uploads/avatars/')) {
                     // 如果已经是完整URL或包含完整路径，直接使用
                     fullAvatarUrl = avatarUrl;
-                } else if (avatarUrl.includes('http://') || avatarUrl.includes('https://') || avatarUrl.includes('localhost:8080')) {
+                } else if (avatarUrl.includes('http://') || avatarUrl.includes('https://') || avatarUrl.includes('localhost:8124')) {
                     // 如果URL中包含协议或localhost，说明已经是完整URL，直接使用
                     fullAvatarUrl = avatarUrl;
                 } else {
@@ -2505,8 +2505,8 @@ class UIProfileManager {
                 avatarUrl = avatarUrl.replace('/uploads/avatars/uploads/avatars/', '/uploads/avatars/');
             }
             // 如果URL包含重复的域名，清理掉重复部分
-            if (avatarUrl.includes('http://localhost:8080/http://localhost:8080/')) {
-                avatarUrl = avatarUrl.replace('http://localhost:8080/http://localhost:8080/', 'http://localhost:8080/');
+                    if (avatarUrl.includes('http://localhost:8124/http://localhost:8124/')) {
+            avatarUrl = avatarUrl.replace('http://localhost:8124/http://localhost:8124/', 'http://localhost:8124/');
             }
         }
 

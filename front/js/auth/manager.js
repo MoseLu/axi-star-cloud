@@ -1605,7 +1605,7 @@ class AppAuthManager {
             // 根据当前域名判断环境
             const hostname = window.location.hostname;
             if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('localhost')) {
-                baseUrl = 'http://localhost:8080';
+                baseUrl = 'http://localhost:8124';
             } else if (hostname.includes('redamancy.com.cn')) {
                 baseUrl = 'https://redamancy.com.cn';
             } else {
@@ -1801,7 +1801,7 @@ class AppAuthManager {
         const testPaths = [
             '550e8400-e29b-41d4-a716-446655440000_xxx.jpg',
             '/uploads/avatars/550e8400-e29b-41d4-a716-446655440000_xxx.jpg',
-            'http://localhost:8080/uploads/avatars/550e8400-e29b-41d4-a716-446655440000_xxx.jpg',
+            'http://localhost:8124/uploads/avatars/550e8400-e29b-41d4-a716-446655440000_xxx.jpg',
             'https://redamancy.com.cn/uploads/avatars/550e8400-e29b-41d4-a716-446655440000_xxx.jpg'
         ];
         

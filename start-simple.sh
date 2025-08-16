@@ -55,12 +55,12 @@ elif [ -f "/srv/port-config.yml" ]; then
         echo "✅ 使用动态分配端口: $DYNAMIC_PORT"
         export PORT="$DYNAMIC_PORT"
     else
-        echo "⚠️ 未找到动态端口，使用默认端口 8080"
-        export PORT="8080"
+        echo "⚠️ 未找到动态端口，使用默认端口 8124"
+        export PORT="8124"
     fi
 else
-    echo "⚠️ 动态端口配置文件不存在，使用默认端口 8080"
-    export PORT="8080"
+    echo "⚠️ 动态端口配置文件不存在，使用默认端口 8124"
+    export PORT="8124"
 fi
 
 # 数据库配置

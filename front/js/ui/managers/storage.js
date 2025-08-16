@@ -179,7 +179,7 @@ class StorageManager {
             // 根据当前域名判断环境
             const hostname = window.location.hostname;
             if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('localhost')) {
-                baseUrl = 'http://localhost:8080';
+                baseUrl = 'http://localhost:8124';
             } else if (hostname.includes('redamancy.com.cn')) {
                 baseUrl = 'https://redamancy.com.cn';
             } else {

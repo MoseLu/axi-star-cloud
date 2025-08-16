@@ -37,7 +37,7 @@ class ApiGateway {
                 this.updateBaseUrl();
                 if (!this.baseUrl) {
                     console.warn('⚠️ API网关baseUrl仍然为空，使用默认配置');
-                    this.baseUrl = 'http://localhost:8080'; // 默认开发环境
+                    this.baseUrl = 'http://localhost:8124'; // 默认开发环境
                 }
                 this.isInitialized = true;
             }, 1000);
@@ -58,11 +58,11 @@ class ApiGateway {
             const port = window.location.port;
             
             if (hostname === 'localhost' || hostname === '127.0.0.1') {
-                this.baseUrl = `http://localhost:${port || '8080'}`;
+                this.baseUrl = `http://localhost:${port || '8124'}`;
             } else if (hostname.includes('redamancy.com.cn')) {
                 this.baseUrl = 'https://redamancy.com.cn';
             } else {
-                this.baseUrl = `http://${hostname}:${port || '8080'}`;
+                this.baseUrl = `http://${hostname}:${port || '8124'}`;
             }
         }
         

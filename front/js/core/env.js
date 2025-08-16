@@ -10,7 +10,7 @@ window.ENV_MANAGER = (function() {
         // 开发环境
         local: {
             name: '开发环境',
-            apiBaseUrl: 'http://localhost:8080',
+            apiBaseUrl: 'http://localhost:8124',
             debug: true,
             features: {
                 hotReload: true,
@@ -46,7 +46,7 @@ window.ENV_MANAGER = (function() {
             hostname === '127.0.0.1' ||
             hostname.startsWith('192.168.') ||
             hostname.startsWith('10.') ||
-            (hostname === 'localhost' && (port === '8080' || port === '8081' || port === '' || port === '3000')) ||
+            (hostname === 'localhost' && (port === '8124' || port === '8080' || port === '8081' || port === '' || port === '3000')) ||
             protocol === 'file:' ||
             hostname.includes('localhost')) {
             return 'local';

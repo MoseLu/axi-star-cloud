@@ -119,7 +119,7 @@ class EnvSwitcher {
                     <div class="env-option" data-env="local" title="开发环境API">
                         <span class="env-option-icon">🛠️</span>
                         <span class="env-option-label">开发API</span>
-                        <span class="env-option-url">localhost:8080</span>
+                        <span class="env-option-url">localhost:8124</span>
                     </div>
                     <div class="env-option" data-env="prod" title="生产环境API">
                         <span class="env-option-icon">🚀</span>

@@ -79,7 +79,7 @@ func (app *App) Initialize() error {
 // ConnectDatabase 连接数据库（不进行初始化）
 func (app *App) ConnectDatabase() (*sql.DB, error) {
 	fmt.Println("🔧 连接数据库...")
-	
+
 	db, err := config.InitDB(nil)
 	if err != nil {
 		return nil, fmt.Errorf("数据库连接失败: %v", err)
@@ -98,7 +98,7 @@ func (app *App) ConnectDatabase() (*sql.DB, error) {
 // InitializeDatabase 初始化数据库（保留用于兼容性）
 func (app *App) InitializeDatabase() (*sql.DB, error) {
 	fmt.Println("🔧 开始初始化数据库...")
-	
+
 	db, err := config.InitDB(nil)
 	if err != nil {
 		return nil, fmt.Errorf("数据库连接失败: %v", err)
@@ -124,17 +124,17 @@ func (app *App) InitializeDatabase() (*sql.DB, error) {
 // safeInitializeDatabase 安全初始化数据库
 func (app *App) safeInitializeDatabase() error {
 	fmt.Println("🔒 开始安全数据库初始化...")
-	
+
 	// 使用安全的数据库初始化器
 	initializer := database.NewSafeDatabaseInitializer()
 	if err := initializer.Initialize(); err != nil {
 		return fmt.Errorf("安全数据库初始化失败: %v", err)
 	}
-	
+
 	// 获取数据库连接
 	app.DB = initializer.GetDB()
 	app.GormDB = initializer.GetGormDB()
-	
+
 	fmt.Println("✅ 安全数据库初始化完成")
 	return nil
 }
@@ -142,7 +142,7 @@ func (app *App) safeInitializeDatabase() error {
 // initializeGORM 初始化GORM数据库（保留用于兼容性）
 func (app *App) initializeGORM() (*gorm.DB, error) {
 	fmt.Println("🔧 开始初始化GORM数据库...")
-	
+
 	// 使用GORM初始化数据库
 	gormDB, err := database.InitializeGORM()
 	if err != nil {
@@ -179,8 +179,10 @@ func (app *App) corsMiddleware() gin.HandlerFunc {
 
 		// 允许的域名列表
 		allowedOrigins := []string{
+			"http://localhost:8124",
 			"http://localhost:8080",
 			"http://localhost:8081",
+			"http://127.0.0.1:8124",
 			"http://127.0.0.1:8080",
 			"http://127.0.0.1:8081",
 			"https://redamancy.com.cn",

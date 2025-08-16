@@ -1,9 +1,11 @@
 server:
-  port: '8080'
+  port: '8124'
   host: '0.0.0.0'  # 允许外部访问
   cors_origins: 
     - 'http://localhost:3000'
+    - 'http://localhost:8124'
     - 'http://localhost:8080'
+    - 'http://127.0.0.1:8124'
     - 'http://127.0.0.1:8080'
 
 database:
