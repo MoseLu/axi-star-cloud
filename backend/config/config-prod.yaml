@@ -1,10 +1,11 @@
 server:
-  port: '8080'
+  port: '8124'
   # 生产环境部署时的配置
   host: '0.0.0.0'  # 允许外部访问
   cors_origins: 
     - 'http://localhost:3000'
     - 'http://localhost:8080'
+    - 'http://localhost:8124'
     - 'https://redamancy.com.cn'
     - 'http://redamancy.com.cn'
   
